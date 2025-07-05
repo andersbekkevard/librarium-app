@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Sun, Moon, Bell, User, Book } from "lucide-react"
+import { Search, Sun, Moon, Bell, Book } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import UserProfileDropdown from "@/components/UserProfileDropdown"
 
 interface HeaderProps {
   onSearch?: (query: string) => void
@@ -91,23 +92,10 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* User Profile */}
-          <div className="flex items-center space-x-3 h-full">
-            <div className="text-right flex flex-col justify-center h-full">
-              <p className="text-sm font-medium text-foreground leading-tight">
-                {userName}
-              </p>
-              <p className="text-xs text-muted-foreground leading-tight">
-                Reader since {userSince}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 p-0"
-            >
-              <User className="h-4 w-4" />
-            </Button>
-          </div>
+          <UserProfileDropdown 
+            userName={userName}
+            userSince={userSince}
+          />
         </div>
       </div>
     </header>
