@@ -515,7 +515,7 @@ export const AddBooksPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Add Books</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Add Books</h1>
           <p className="text-muted-foreground">
             Search for books online or add them manually to your library.
           </p>

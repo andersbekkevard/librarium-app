@@ -124,7 +124,7 @@ interface BookListItemProps {
   onUpdateProgress: (book: Book) => void
 }
 
-const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpdateProgress }) => {
+export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpdateProgress }) => {
   const getProgressPercentage = () => {
     if (book.readingState === 'finished') return 100
     if (book.readingState === 'in_progress' && book.currentPage) {
@@ -390,7 +390,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">My Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">My Library</h1>
           <p className="text-muted-foreground">
             Manage and organize your book collection
           </p>

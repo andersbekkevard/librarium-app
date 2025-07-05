@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Sun, Moon, Bell, User } from "lucide-react"
+import { Search, Sun, Moon, Bell, User, Book } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface HeaderProps {
@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Logo Section */}
         <div className="flex items-center space-x-2 h-full">
           <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">L</span>
+            <Book className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-xl font-bold text-foreground">
             Librarium
