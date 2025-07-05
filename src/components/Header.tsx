@@ -32,24 +32,34 @@ export const Header: React.FC<HeaderProps> = ({
   }
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="bg-background border-b border-border px-6 py-4">
+      <div className="flex items-center justify-between h-10">
+        {/* Logo Section */}
+        <div className="flex items-center space-x-2 h-full">
+          <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">L</span>
+          </div>
+          <h1 className="text-xl font-bold text-foreground">
+            Librarium
+          </h1>
+        </div>
+
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-8">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="flex-1 max-w-2xl mx-8 h-full flex items-center">
+          <form onSubmit={handleSearch} className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search books, authors, or genres..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500"
+              className="w-full h-10 pl-10 pr-4 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-foreground placeholder-muted-foreground"
             />
           </form>
         </div>
 
         {/* Right Side - Theme Toggle & User Profile */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 h-full">
           {/* Theme Toggle */}
           <Button
             onClick={toggleTheme}
@@ -81,19 +91,19 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* User Profile */}
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex items-center space-x-3 h-full">
+            <div className="text-right flex flex-col justify-center h-full">
+              <p className="text-sm font-medium text-foreground leading-tight">
                 {userName}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground leading-tight">
                 Reader since {userSince}
               </p>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="w-9 h-9 p-0"
+              className="w-10 h-10 p-0"
             >
               <User className="h-4 w-4" />
             </Button>

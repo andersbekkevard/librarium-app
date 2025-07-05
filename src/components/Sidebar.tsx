@@ -39,21 +39,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-full flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-            <BookOpen className="h-5 w-5 text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Librarium
-          </h1>
-        </div>
-      </div>
-
+    <div className="w-64 bg-background border-r border-border h-full flex flex-col">
       {/* Add Book Button */}
-      <div className="p-4">
+      <div className="p-4 border-b border-border">
         <Button 
           onClick={handleAddBook}
           className="w-full bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black border-0"
@@ -78,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
                       ? 'bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary dark:text-brand-primary border-l-4 border-brand-primary'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      : 'text-foreground hover:bg-muted'
                   }`}
                 >
                   <Icon className="h-4 w-4 mr-3" />
@@ -91,9 +79,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Settings */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-        <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
-          <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center mr-3">
+      <div className="p-4 border-t border-border">
+        <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors">
+          <div className="w-6 h-6 bg-muted-foreground rounded-full flex items-center justify-center mr-3">
             <span className="text-xs text-white font-medium">N</span>
           </div>
           Settings

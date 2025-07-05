@@ -117,30 +117,30 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
-      {/* Sidebar */}
-      <Sidebar 
-        activeItem={activeSection}
-        onItemClick={handleSidebarItemClick}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header - Full Width */}
+      <Header 
+        onSearch={handleSearch}
+        userName="John Doe"
+        userSince="2023"
+        notificationCount={3}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header 
-          onSearch={handleSearch}
-          userName="John Doe"
-          userSince="2023"
-          notificationCount={3}
+      {/* Content Area - Sidebar + Main */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <Sidebar 
+          activeItem={activeSection}
+          onItemClick={handleSidebarItemClick}
         />
 
-        {/* Dashboard Content */}
+        {/* Main Content */}
         <main className="flex-1 p-6">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Dashboard
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground">
               Welcome back! Here's your reading overview.
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function Home() {
           {/* Empty State */}
           {filteredBooks.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 No books found. Try adjusting your search.
               </p>
             </div>

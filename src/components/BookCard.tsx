@@ -50,7 +50,7 @@ const renderStars = (rating: number) => {
       className={`h-3 w-3 ${
         i < rating 
           ? 'fill-status-warning text-status-warning' 
-          : 'fill-gray-200 text-gray-200'
+          : 'fill-muted text-muted'
       }`}
     />
   ))
@@ -78,7 +78,7 @@ export const BookCard: React.FC<BookCardProps> = ({
     <Card className="w-full max-w-xs mx-auto">
       <CardHeader className="pb-2">
         {/* Cover Image or Fallback */}
-        <div className="relative aspect-[2/3] w-full mb-2 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
+        <div className="relative aspect-[2/3] w-full mb-2 rounded-md overflow-hidden bg-muted">
           {book.coverUrl ? (
             <img
               src={book.coverUrl}
@@ -87,11 +87,11 @@ export const BookCard: React.FC<BookCardProps> = ({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center">
-              <BookOpen className="h-10 w-10 text-gray-400 mb-1" />
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-300 line-clamp-2">
+              <BookOpen className="h-10 w-10 text-muted-foreground mb-1" />
+              <p className="text-xs font-medium text-foreground line-clamp-2">
                 {book.title}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 by {book.author}
               </p>
             </div>
@@ -116,7 +116,7 @@ export const BookCard: React.FC<BookCardProps> = ({
         <CardTitle className="text-base font-semibold mb-1 line-clamp-2">
           {book.title}
         </CardTitle>
-        <CardDescription className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+        <CardDescription className="text-xs text-muted-foreground mb-2">
           by {book.author}
         </CardDescription>
 
@@ -125,11 +125,11 @@ export const BookCard: React.FC<BookCardProps> = ({
           <div className="mb-2">
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-medium">{progress}% complete</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {book.currentPage} / {book.pages} pages
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div 
                 className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -142,7 +142,7 @@ export const BookCard: React.FC<BookCardProps> = ({
         {book.readingState === 'finished' && book.rating && (
           <div className="flex items-center gap-1 mb-2">
             {renderStars(book.rating)}
-            <span className="text-xs text-gray-600 dark:text-gray-300 ml-1">
+            <span className="text-xs text-muted-foreground ml-1">
               ({book.rating}/5)
             </span>
           </div>
