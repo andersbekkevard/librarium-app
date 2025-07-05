@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { 
   Plus, 
@@ -15,6 +14,7 @@ import {
 interface SidebarProps {
   activeItem?: string
   onItemClick?: (item: string) => void
+  onAddBookClick?: () => void
 }
 
 const sidebarItems = [
@@ -28,16 +28,15 @@ const sidebarItems = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   activeItem = 'dashboard', 
-  onItemClick 
+  onItemClick,
+  onAddBookClick
 }) => {
-  const router = useRouter()
-  
   const handleItemClick = (itemId: string) => {
     onItemClick?.(itemId)
   }
 
   const handleAddBook = () => {
-    router.push('/add-books')
+    onAddBookClick?.()
   }
 
   return (

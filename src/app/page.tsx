@@ -4,6 +4,7 @@ import { useState } from "react"
 import BookCard, { Book } from "@/components/BookCard"
 import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
+import AddBooksPage from "@/components/AddBooksPage"
 
 // Sample book data for demonstration
 const sampleBooks: Book[] = [
@@ -116,6 +117,10 @@ export default function Home() {
     console.log('Sidebar item clicked:', itemId)
   }
 
+  const handleAddBookClick = () => {
+    setActiveSection('add-books')
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header - Full Width */}
@@ -132,37 +137,44 @@ export default function Home() {
         <Sidebar 
           activeItem={activeSection}
           onItemClick={handleSidebarItemClick}
+          onAddBookClick={handleAddBookClick}
         />
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground mb-2">
-              Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Welcome back! Here's your reading overview.
-            </p>
-          </div>
+        <main className="flex-1">
+          {activeSection === 'add-books' ? (
+            <AddBooksPage />
+          ) : (
+            <div className="p-6">
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-foreground mb-2">
+                  Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                  Welcome back! Here&apos;s your reading overview.
+                </p>
+              </div>
 
-          {/* Book Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {filteredBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onEdit={handleEdit}
-                onUpdateProgress={handleUpdateProgress}
-              />
-            ))}
-          </div>
+              {/* Book Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                {filteredBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    book={book}
+                    onEdit={handleEdit}
+                    onUpdateProgress={handleUpdateProgress}
+                  />
+                ))}
+              </div>
 
-          {/* Empty State */}
-          {filteredBooks.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No books found. Try adjusting your search.
-              </p>
+              {/* Empty State */}
+              {filteredBooks.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    No books found. Try adjusting your search.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </main>
