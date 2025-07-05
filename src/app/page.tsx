@@ -5,6 +5,7 @@ import BookCard, { Book } from "@/components/BookCard"
 import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
 import AddBooksPage from "@/components/AddBooksPage"
+import MyLibraryPage from "@/components/MyLibraryPage"
 
 // Sample book data for demonstration
 const sampleBooks: Book[] = [
@@ -86,6 +87,7 @@ const sampleBooks: Book[] = [
 export default function Home() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [filteredBooks, setFilteredBooks] = useState(sampleBooks)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleEdit = (book: Book) => {
     console.log('Edit book:', book.title)
@@ -99,7 +101,9 @@ export default function Home() {
 
   const handleSearch = (query: string) => {
     console.log('Search query:', query)
-    // Filter books based on search query
+    setSearchQuery(query)
+    
+    // Filter books based on search query for dashboard
     if (query.trim() === '') {
       setFilteredBooks(sampleBooks)
     } else {
@@ -122,8 +126,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header - Full Width */}
+    <div className="min-h-screen bg-background">
+      {/* Header - Fixed at top */}
       <Header 
         onSearch={handleSearch}
         userName="John Doe"
@@ -131,19 +135,19 @@ export default function Home() {
         notificationCount={3}
       />
 
-      {/* Content Area - Sidebar + Main */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <Sidebar 
-          activeItem={activeSection}
-          onItemClick={handleSidebarItemClick}
-          onAddBookClick={handleAddBookClick}
-        />
+      {/* Sidebar - Fixed Position under header */}
+      <Sidebar 
+        activeItem={activeSection}
+        onItemClick={handleSidebarItemClick}
+        onAddBookClick={handleAddBookClick}
+      />
 
-        {/* Main Content */}
-        <main className="flex-1">
+      {/* Main Content - Adjusted for both fixed header and sidebar */}
+      <main className="ml-64 pt-[72px]">
           {activeSection === 'add-books' ? (
             <AddBooksPage />
+          ) : activeSection === 'library' ? (
+            <MyLibraryPage searchQuery={searchQuery} />
           ) : (
             <div className="p-6">
               <div className="mb-6">
@@ -178,7 +182,6 @@ export default function Home() {
             </div>
           )}
         </main>
-      </div>
     </div>
   )
 }

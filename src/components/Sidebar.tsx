@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <div className="w-64 bg-background border-r border-border h-full flex flex-col">
+    <div className="fixed left-0 top-[72px] w-64 h-[calc(100vh-72px)] bg-background border-r border-border flex flex-col z-40">
       {/* Add Book Button */}
       <div className="p-4 border-b border-border">
         <Button 
@@ -54,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 px-4 pb-4">
+      <nav className="flex-1 px-4 py-4 overflow-y-auto">
         <ul className="space-y-1">
           {sidebarItems.map((item) => {
             const Icon = item.icon
@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Settings */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border mt-auto">
         <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors">
           <div className="w-6 h-6 bg-muted-foreground rounded-full flex items-center justify-center mr-3">
             <span className="text-xs text-white font-medium">N</span>
