@@ -37,6 +37,16 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-hover: var(--brand-secondary-hover);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-hover: var(--brand-accent-hover);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--status-info);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -76,22 +86,36 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Brand Colors - Easily replaceable */
+  --brand-primary: oklch(0.55 0.25 240); /* Vibrant blue */
+  --brand-primary-hover: oklch(0.45 0.22 240); /* Darker vibrant blue */
+  --brand-secondary: oklch(0.4 0.05 220); /* Dark blue-grey */
+  --brand-secondary-hover: oklch(0.35 0.04 220); /* Darker blue-grey */
+  --brand-accent: oklch(0.7 0.2 240); /* Light vibrant blue accent */
+  --brand-accent-hover: oklch(0.6 0.18 240); /* Darker light blue */
+  
+  /* Status Colors */
+  --status-success: oklch(0.7 0.15 142.5); /* Green */
+  --status-warning: oklch(0.8 0.15 85); /* Yellow */
+  --status-error: oklch(0.65 0.2 25); /* Red */
+  --status-info: oklch(0.7 0.15 220); /* Blue */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --primary-foreground: oklch(0 0 0);
+  --secondary: oklch(0.15 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.15 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.15 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -102,14 +126,28 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.15 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  
+  /* Brand Colors - Dark mode variants */
+  --brand-primary: oklch(0.7 0.25 240); /* Brighter vibrant blue for dark mode */
+  --brand-primary-hover: oklch(0.6 0.22 240); /* Darker blue */
+  --brand-secondary: oklch(0.6 0.05 220); /* Lighter blue-grey for dark mode */
+  --brand-secondary-hover: oklch(0.55 0.04 220); /* Darker blue-grey */
+  --brand-accent: oklch(0.8 0.2 240); /* Brighter light blue for dark mode */
+  --brand-accent-hover: oklch(0.75 0.18 240); /* Darker light blue */
+  
+  /* Status Colors - Dark mode variants */
+  --status-success: oklch(0.8 0.15 142.5); /* Brighter green */
+  --status-warning: oklch(0.85 0.15 85); /* Brighter yellow */
+  --status-error: oklch(0.75 0.2 25); /* Brighter red */
+  --status-info: oklch(0.8 0.15 220); /* Brighter blue */
 }
 
 @layer base {

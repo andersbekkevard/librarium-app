@@ -49,7 +49,7 @@ const renderStars = (rating: number) => {
       key={i}
       className={`h-3 w-3 ${
         i < rating 
-          ? 'fill-yellow-400 text-yellow-400' 
+          ? 'fill-status-warning text-status-warning' 
           : 'fill-gray-200 text-gray-200'
       }`}
     />
@@ -131,7 +131,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
               <div 
-                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
