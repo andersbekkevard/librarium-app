@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { 
   Plus, 
@@ -29,13 +30,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeItem = 'dashboard', 
   onItemClick 
 }) => {
+  const router = useRouter()
+  
   const handleItemClick = (itemId: string) => {
     onItemClick?.(itemId)
   }
 
   const handleAddBook = () => {
-    console.log('Add book clicked')
-    // Handle add book functionality
+    router.push('/add-books')
   }
 
   return (
@@ -44,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4 border-b border-border">
         <Button 
           onClick={handleAddBook}
-          className="w-full bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black border-0"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground border-0"
           size="sm"
         >
           <Plus className="h-4 w-4 mr-2" />
