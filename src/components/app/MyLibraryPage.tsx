@@ -16,7 +16,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import BookCard, { Book } from '@/components/BookCard'
+import BookCard, { Book } from '@/components/app/BookCard'
 
 // Sample extended book data for the library
 const libraryBooks: Book[] = [

@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import BookCard, { Book } from "@/components/BookCard"
-import Sidebar from "@/components/Sidebar"
-import Header from "@/components/Header"
-import AddBooksPage from "@/components/AddBooksPage"
-import MyLibraryPage from "@/components/MyLibraryPage"
-import GoogleAuth from "@/components/GoogleAuth"
+import BookCard, { Book } from "@/components/app/BookCard"
+import Sidebar from "@/components/app/Sidebar"
+import Header from "@/components/app/Header"
+import AddBooksPage from "@/components/app/AddBooksPage"
+import MyLibraryPage from "@/components/app/MyLibraryPage"
+import GoogleAuth from "@/components/app/GoogleAuth"
 import { BookOpen, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

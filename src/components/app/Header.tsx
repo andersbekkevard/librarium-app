@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Search, Sun, Moon, Bell, Book } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import UserProfileDropdown from "@/components/UserProfileDropdown"
+import UserProfileDropdown from "@/components/app/UserProfileDropdown"
 
 interface HeaderProps {
   onSearch?: (query: string) => void

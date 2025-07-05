@@ -1,4 +1,4 @@
-import GoogleAuth from '@/components/GoogleAuth';
+import GoogleAuth from '@/components/app/GoogleAuth';
 
 const AuthDemoPage = () => {
   return (
