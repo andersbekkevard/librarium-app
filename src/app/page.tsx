@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
 import AddBooksPage from "@/components/AddBooksPage"
 import MyLibraryPage from "@/components/MyLibraryPage"
+import GoogleAuth from "@/components/GoogleAuth"
 import { BookOpen, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -150,6 +151,18 @@ export default function Home() {
             <AddBooksPage />
           ) : activeSection === 'library' ? (
             <MyLibraryPage searchQuery={searchQuery} />
+          ) : activeSection === 'auth-demo' ? (
+            <div className="p-6">
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-foreground mb-2">
+                  Firebase Authentication Demo
+                </h1>
+                <p className="text-muted-foreground">
+                  Test Google authentication with Firebase popup.
+                </p>
+              </div>
+              <GoogleAuth />
+            </div>
           ) : (
             <div className="p-6">
               <div className="mb-6">

@@ -8,7 +8,8 @@ import {
   TrendingUp, 
   BarChart3, 
   Heart, 
-  Users 
+  Users,
+  Shield 
 } from "lucide-react"
 
 interface SidebarProps {
@@ -24,6 +25,7 @@ const sidebarItems = [
   { id: 'statistics', label: 'Statistics', icon: BarChart3 },
   { id: 'wishlist', label: 'Wishlist', icon: Heart },
   { id: 'shared', label: 'Shared Books', icon: Users },
+  { id: 'auth-demo', label: 'Auth Demo', icon: Shield },
 ]
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
