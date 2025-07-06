@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -56,6 +57,7 @@ export const BookCard: React.FC<BookCardProps> = ({
   onEdit,
   onUpdateProgress,
 }) => {
+  const router = useRouter();
   const badgeInfo = getReadingStateBadge(book.state);
   const progress =
     book.state === "in_progress" &&
@@ -64,16 +66,34 @@ export const BookCard: React.FC<BookCardProps> = ({
       ? calculateProgress(book.progress.currentPage, book.progress.totalPages)
       : book.progress.percentage || 0;
 
-  const handleEdit = () => {
+  const handleCardClick = () => {
+    router.push(`/book/${book.id}`);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onEdit?.(book);
   };
 
-  const handleUpdateProgress = () => {
+  const handleUpdateProgress = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onUpdateProgress?.(book);
   };
 
   return (
-    <Card className="w-full max-w-xs mx-auto">
+    <Card 
+      className="w-full max-w-xs mx-auto cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-brand-primary/20"
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      aria-label={`View details for ${book.title} by ${book.author}`}
+    >
       <CardHeader className="pb-2">
         {/* Cover Image or Fallback */}
         <div className="relative aspect-[2/3] w-full mb-2 rounded-md overflow-hidden bg-muted">
