@@ -31,12 +31,14 @@ interface BookListItemProps {
   book: Book;
   onEdit: (book: Book) => void;
   onUpdateProgress: (book: Book) => void;
+  onBookClick?: (bookId: string) => void;
 }
 
 export const BookListItem: React.FC<BookListItemProps> = ({
   book,
   onEdit,
   onUpdateProgress,
+  onBookClick,
 }) => {
   const getProgressPercentage = () => {
     if (book.state === "finished") return 100;
@@ -70,8 +72,22 @@ export const BookListItem: React.FC<BookListItemProps> = ({
     ));
   };
 
+  const handleCardClick = () => {
+    if (onBookClick) {
+      onBookClick(book.id);
+    }
+  };
+
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    action();
+  };
+
   return (
-    <Card className="w-full">
+    <Card 
+      className="w-full cursor-pointer transition-all duration-200 hover:shadow-md hover:border-brand-primary/20"
+      onClick={handleCardClick}
+    >
       <CardContent className="p-2">
         <div className="flex gap-2 items-center">
           {/* Cover Image */}
@@ -150,7 +166,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onEdit(book)}
+                  onClick={(e) => handleButtonClick(e, () => onEdit(book))}
                   className="h-8 w-8 p-0"
                 >
                   <span className="sr-only">Edit</span>
@@ -160,7 +176,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onUpdateProgress(book)}
+                    onClick={(e) => handleButtonClick(e, () => onUpdateProgress(book))}
                     className="h-8 w-8 p-0"
                   >
                     <span className="sr-only">Update Progress</span>
@@ -178,10 +194,12 @@ export const BookListItem: React.FC<BookListItemProps> = ({
 
 interface MyLibraryPageProps {
   searchQuery?: string;
+  onBookClick?: (bookId: string) => void;
 }
 
 export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   searchQuery = "",
+  onBookClick,
 }) => {
   const { user, loading: authLoading } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
@@ -500,6 +518,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
                   book={book}
                   onEdit={handleEdit}
                   onUpdateProgress={handleUpdateProgress}
+                  onBookClick={onBookClick}
                 />
               ))}
             </div>
@@ -511,6 +530,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
                   book={book}
                   onEdit={handleEdit}
                   onUpdateProgress={handleUpdateProgress}
+                  onBookClick={onBookClick}
                 />
               ))}
             </div>

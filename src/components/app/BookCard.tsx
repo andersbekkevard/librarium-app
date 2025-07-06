@@ -19,6 +19,7 @@ interface BookCardProps {
   book: Book;
   onEdit?: (book: Book) => void;
   onUpdateProgress?: (book: Book) => void;
+  onBookClick?: (bookId: string) => void;
 }
 
 // Helper functions
@@ -56,6 +57,7 @@ export const BookCard: React.FC<BookCardProps> = ({
   book,
   onEdit,
   onUpdateProgress,
+  onBookClick,
 }) => {
   const router = useRouter();
   const badgeInfo = getReadingStateBadge(book.state);
@@ -67,7 +69,11 @@ export const BookCard: React.FC<BookCardProps> = ({
       : book.progress.percentage || 0;
 
   const handleCardClick = () => {
-    router.push(`/book/${book.id}`);
+    if (onBookClick) {
+      onBookClick(book.id);
+    } else {
+      router.push(`/book/${book.id}`);
+    }
   };
 
   const handleEdit = (e: React.MouseEvent) => {

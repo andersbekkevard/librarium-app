@@ -7,6 +7,7 @@ import { Book } from "@/lib/models";
 import Sidebar from "@/components/app/Sidebar";
 import AddBooksPage from "@/components/app/AddBooksPage";
 import MyLibraryPage from "@/components/app/MyLibraryPage";
+import BookDetailPage from "@/components/app/BookDetailPage";
 import GoogleAuth from "@/components/app/GoogleAuth";
 import { BookOpen, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { bookOperations } from "@/lib/firebase-utils";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [stats, setStats] = useState({
     totalBooks: 0,
@@ -95,13 +97,25 @@ export default function Dashboard() {
     // TODO: Implement update progress functionality
   };
 
+  const handleBookClick = (bookId: string) => {
+    setSelectedBookId(bookId);
+    setActiveSection("book-detail");
+  };
+
+  const handleBackFromBookDetail = () => {
+    setSelectedBookId(null);
+    setActiveSection("dashboard");
+  };
+
   const handleSidebarItemClick = (itemId: string) => {
     setActiveSection(itemId);
+    setSelectedBookId(null);
     console.log("Sidebar item clicked:", itemId);
   };
 
   const handleAddBookClick = () => {
     setActiveSection("add-books");
+    setSelectedBookId(null);
   };
 
   return (
@@ -118,7 +132,18 @@ export default function Dashboard() {
         {activeSection === "add-books" ? (
           <AddBooksPage />
         ) : activeSection === "library" ? (
-          <MyLibraryPage searchQuery={searchQuery} />
+          <MyLibraryPage searchQuery={searchQuery} onBookClick={handleBookClick} />
+        ) : activeSection === "book-detail" && selectedBookId ? (
+          (() => {
+            const selectedBook = books.find(book => book.id === selectedBookId);
+            return selectedBook ? (
+              <BookDetailPage book={selectedBook} onBack={handleBackFromBookDetail} />
+            ) : (
+              <div className="p-6">
+                <p>Book not found</p>
+              </div>
+            );
+          })()
         ) : activeSection === "auth-demo" ? (
           <div className="p-6">
             <div className="mb-6">
@@ -244,6 +269,7 @@ export default function Dashboard() {
                           book={book}
                           onEdit={handleEdit}
                           onUpdateProgress={handleUpdateProgress}
+                          onBookClick={handleBookClick}
                         />
                       ))}
                   </div>
@@ -368,6 +394,7 @@ export default function Dashboard() {
                         book={book}
                         onEdit={handleEdit}
                         onUpdateProgress={handleUpdateProgress}
+                        onBookClick={handleBookClick}
                       />
                     ))}
                 </div>

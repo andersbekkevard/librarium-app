@@ -5,12 +5,7 @@ import { useState } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { Book } from "@/lib/models";
 import { bookOperations } from "@/lib/firebase-utils";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,11 +46,23 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const getReadingStateBadge = (state: Book["state"]) => {
     switch (state) {
       case "not_started":
-        return { label: "Not Started", variant: "secondary" as const, icon: Clock };
+        return {
+          label: "Not Started",
+          variant: "secondary" as const,
+          icon: Clock,
+        };
       case "in_progress":
-        return { label: "Currently Reading", variant: "default" as const, icon: Play };
+        return {
+          label: "Currently Reading",
+          variant: "default" as const,
+          icon: Play,
+        };
       case "finished":
-        return { label: "Finished", variant: "outline" as const, icon: CheckCircle };
+        return {
+          label: "Finished",
+          variant: "outline" as const,
+          icon: CheckCircle,
+        };
       default:
         return { label: "Unknown", variant: "secondary" as const, icon: Clock };
     }
@@ -64,10 +71,11 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const calculateProgress = (): number => {
     if (book.state === "finished") return 100;
     if (book.state === "not_started") return 0;
-    
-    const current = parseInt(currentPageInput) || book.progress.currentPage || 0;
+
+    const current =
+      parseInt(currentPageInput) || book.progress.currentPage || 0;
     const total = book.progress.totalPages || 0;
-    
+
     if (total === 0) return book.progress.percentage || 0;
     return Math.round((current / total) * 100);
   };
@@ -79,11 +87,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     try {
       const newPage = parseInt(currentPageInput) || 0;
       const totalPages = book.progress.totalPages || 0;
-      
+
       let newState = book.state;
       if (newPage > 0 && book.state === "not_started") {
         newState = "in_progress";
-      } else if (totalPages > 0 && newPage >= totalPages && book.state === "in_progress") {
+      } else if (
+        totalPages > 0 &&
+        newPage >= totalPages &&
+        book.state === "in_progress"
+      ) {
         newState = "finished";
       }
 
@@ -95,11 +107,12 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
           percentage: calculateProgress(),
         },
         ...(newState === "finished" && { finishedAt: new Date() as any }),
-        ...(newState === "in_progress" && !book.startedAt && { startedAt: new Date() as any }),
+        ...(newState === "in_progress" &&
+          !book.startedAt && { startedAt: new Date() as any }),
       };
 
       await bookOperations.updateBook(user.uid, book.id, updatedBook);
-      
+
       // Refresh the page to show updated data
       window.location.reload();
     } catch (error) {
@@ -129,7 +142,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         state: "finished",
         progress: {
           ...book.progress,
-          currentPage: book.progress.totalPages || book.progress.currentPage || 0,
+          currentPage:
+            book.progress.totalPages || book.progress.currentPage || 0,
           percentage: 100,
         },
         finishedAt: new Date() as any,
@@ -149,8 +163,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const progress = calculateProgress();
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="p-6">
+      <div className="max-w-6xl mx-auto">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <Button
@@ -193,7 +207,10 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
                 {/* Reading status badge */}
                 <div className="flex items-center gap-2 mb-4">
-                  <Badge variant={badgeInfo.variant} className="flex items-center gap-1">
+                  <Badge
+                    variant={badgeInfo.variant}
+                    className="flex items-center gap-1"
+                  >
                     <BadgeIcon className="h-3 w-3" />
                     {badgeInfo.label}
                   </Badge>
@@ -208,9 +225,12 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                 {book.state === "in_progress" && (
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">{progress}% complete</span>
+                      <span className="text-sm font-medium">
+                        {progress}% complete
+                      </span>
                       <span className="text-xs text-muted-foreground">
-                        {book.progress.currentPage || 0} / {book.progress.totalPages || "?"} pages
+                        {book.progress.currentPage || 0} /{" "}
+                        {book.progress.totalPages || "?"} pages
                       </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
@@ -225,7 +245,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                 {/* Star rating for finished books */}
                 {book.state === "finished" && (
                   <div className="mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Your Rating</Label>
+                    <Label className="text-sm font-medium mb-2 block">
+                      Your Rating
+                    </Label>
                     <div className="flex items-center gap-1">
                       {Array.from({ length: 5 }, (_, i) => (
                         <Star
@@ -262,7 +284,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                       Start Reading
                     </Button>
                   )}
-                  
+
                   {book.state === "in_progress" && (
                     <Button
                       onClick={handleMarkAsFinished}
@@ -273,7 +295,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                       Mark as Finished
                     </Button>
                   )}
-                  
+
                   <Button variant="outline" className="w-full">
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Book
@@ -289,7 +311,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl">{book.title}</CardTitle>
-                <p className="text-lg text-muted-foreground">by {book.author}</p>
+                <p className="text-lg text-muted-foreground">
+                  by {book.author}
+                </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Book metadata */}
@@ -298,7 +322,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Published:</span>
-                      <span className="text-muted-foreground">{book.publishedDate}</span>
+                      <span className="text-muted-foreground">
+                        {book.publishedDate}
+                      </span>
                     </div>
                   )}
                   {book.isbn && (
@@ -312,7 +338,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                     <div className="flex items-center gap-2 text-sm">
                       <BookOpen className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Pages:</span>
-                      <span className="text-muted-foreground">{book.progress.totalPages}</span>
+                      <span className="text-muted-foreground">
+                        {book.progress.totalPages}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -371,7 +399,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                       Update
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Progress</span>
@@ -400,30 +428,33 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                     <div>
                       <p className="text-sm font-medium">Added to library</p>
                       <p className="text-xs text-muted-foreground">
-                        {book.addedAt?.toDate?.()?.toLocaleDateString() || "Unknown"}
+                        {book.addedAt?.toDate?.()?.toLocaleDateString() ||
+                          "Unknown"}
                       </p>
                     </div>
                   </div>
-                  
+
                   {book.startedAt && (
                     <div className="flex items-start gap-3">
                       <div className="h-2 w-2 bg-status-info rounded-full mt-2"></div>
                       <div>
                         <p className="text-sm font-medium">Started reading</p>
                         <p className="text-xs text-muted-foreground">
-                          {book.startedAt?.toDate?.()?.toLocaleDateString() || "Unknown"}
+                          {book.startedAt?.toDate?.()?.toLocaleDateString() ||
+                            "Unknown"}
                         </p>
                       </div>
                     </div>
                   )}
-                  
+
                   {book.finishedAt && (
                     <div className="flex items-start gap-3">
                       <div className="h-2 w-2 bg-status-success rounded-full mt-2"></div>
                       <div>
                         <p className="text-sm font-medium">Finished reading</p>
                         <p className="text-xs text-muted-foreground">
-                          {book.finishedAt?.toDate?.()?.toLocaleDateString() || "Unknown"}
+                          {book.finishedAt?.toDate?.()?.toLocaleDateString() ||
+                            "Unknown"}
                         </p>
                       </div>
                     </div>
