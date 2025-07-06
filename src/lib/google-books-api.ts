@@ -18,6 +18,7 @@ export interface GoogleBooksVolumeInfo {
     large?: string;
     extraLarge?: string;
   };
+
   categories?: string[];
   averageRating?: number;
   ratingsCount?: number;
@@ -137,7 +138,7 @@ class GoogleBooksApiService {
     this.apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY || "";
     if (!this.apiKey) {
       console.warn(
-        "Google Books API key not found. Please set NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY in your environment variables.",
+        "Google Books API key not found. Please set NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY in your environment variables."
       );
     }
   }
@@ -176,7 +177,7 @@ class GoogleBooksApiService {
           throw new Error("Invalid search query.");
         } else {
           throw new Error(
-            `API error: ${response.status} ${response.statusText}`,
+            `API error: ${response.status} ${response.statusText}`
           );
         }
       }
@@ -188,7 +189,7 @@ class GoogleBooksApiService {
         throw error;
       }
       throw new Error(
-        "Network error. Please check your connection and try again.",
+        "Network error. Please check your connection and try again."
       );
     }
   }
@@ -233,7 +234,7 @@ class GoogleBooksApiService {
    */
   async search(
     query: string,
-    maxResults: number = 10,
+    maxResults: number = 10
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({ query, maxResults });
   }
@@ -260,7 +261,7 @@ class GoogleBooksApiService {
    */
   async searchByISBN(
     isbn: string,
-    maxResults: number = 5,
+    maxResults: number = 5
   ): Promise<GoogleBooksVolume[]> {
     const cleanIsbn = isbn.replace(/[-\s]/g, "");
     return this.searchBooks({
@@ -277,7 +278,7 @@ class GoogleBooksApiService {
    */
   async searchByTitle(
     title: string,
-    maxResults: number = 10,
+    maxResults: number = 10
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query: `intitle:"${title}"`,
@@ -293,7 +294,7 @@ class GoogleBooksApiService {
    */
   async searchByAuthor(
     author: string,
-    maxResults: number = 10,
+    maxResults: number = 10
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query: `inauthor:"${author}"`,
@@ -307,7 +308,7 @@ class GoogleBooksApiService {
    * @returns Promise<GoogleBooksVolume[]>
    */
   async advancedSearch(
-    params: AdvancedSearchParams,
+    params: AdvancedSearchParams
   ): Promise<GoogleBooksVolume[]> {
     const queryParts: string[] = [];
 
@@ -342,7 +343,7 @@ class GoogleBooksApiService {
    */
   async searchFreeEbooks(
     query: string,
-    maxResults: number = 10,
+    maxResults: number = 10
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query,
@@ -394,7 +395,9 @@ class GoogleBooksApiService {
     if (!authors || authors.length === 0) return "Unknown Author";
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return authors.join(" and ");
-    return `${authors.slice(0, -1).join(", ")} and ${authors[authors.length - 1]}`;
+    return `${authors.slice(0, -1).join(", ")} and ${
+      authors[authors.length - 1]
+    }`;
   }
 }
 

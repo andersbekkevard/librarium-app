@@ -33,7 +33,7 @@ export const bookOperations = {
    */
   async addBook(
     userId: string,
-    book: Omit<Book, "id" | "addedAt" | "updatedAt">,
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
   ): Promise<string> {
     const booksRef = collection(db, `users/${userId}/books`);
     const bookData: Omit<Book, "id"> = {
@@ -52,7 +52,7 @@ export const bookOperations = {
   async updateBook(
     userId: string,
     bookId: string,
-    updates: Partial<Book>,
+    updates: Partial<Book>
   ): Promise<void> {
     const bookRef = doc(db, `users/${userId}/books/${bookId}`);
     const updateData = {
@@ -97,7 +97,7 @@ export const bookOperations = {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as Book,
+        } as Book)
     );
   },
 
@@ -109,7 +109,7 @@ export const bookOperations = {
     const booksQuery = query(
       booksRef,
       where("state", "==", state),
-      orderBy("updatedAt", "desc"),
+      orderBy("updatedAt", "desc")
     );
     const snapshot = await getDocs(booksQuery);
 
@@ -118,7 +118,7 @@ export const bookOperations = {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as Book,
+        } as Book)
     );
   },
 
@@ -127,7 +127,7 @@ export const bookOperations = {
    */
   subscribeToUserBooks(
     userId: string,
-    callback: (books: Book[]) => void,
+    callback: (books: Book[]) => void
   ): Unsubscribe {
     const booksRef = collection(db, `users/${userId}/books`);
     const booksQuery = query(booksRef, orderBy("addedAt", "desc"));
@@ -138,7 +138,7 @@ export const bookOperations = {
           ({
             id: doc.id,
             ...doc.data(),
-          }) as Book,
+          } as Book)
       );
       callback(books);
     });
@@ -151,7 +151,7 @@ export const bookOperations = {
     userId: string,
     bookId: string,
     newState: Book["state"],
-    currentState?: Book["state"],
+    currentState?: Book["state"]
   ): Promise<void> {
     const batch = writeBatch(db);
 
@@ -200,7 +200,7 @@ export const eventOperations = {
    */
   async logEvent(
     userId: string,
-    event: Omit<BookEvent, "id" | "userId" | "timestamp">,
+    event: Omit<BookEvent, "id" | "userId" | "timestamp">
   ): Promise<string> {
     const eventsRef = collection(db, `users/${userId}/events`);
     const eventData: Omit<BookEvent, "id"> = {
@@ -221,7 +221,7 @@ export const eventOperations = {
     const eventsQuery = query(
       eventsRef,
       where("bookId", "==", bookId),
-      orderBy("timestamp", "desc"),
+      orderBy("timestamp", "desc")
     );
     const snapshot = await getDocs(eventsQuery);
 
@@ -230,7 +230,7 @@ export const eventOperations = {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as BookEvent,
+        } as BookEvent)
     );
   },
 
@@ -239,7 +239,7 @@ export const eventOperations = {
    */
   async getRecentEvents(
     userId: string,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<BookEvent[]> {
     const eventsRef = collection(db, `users/${userId}/events`);
     const eventsQuery = query(eventsRef, orderBy("timestamp", "desc"));
@@ -250,7 +250,7 @@ export const eventOperations = {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as BookEvent,
+        } as BookEvent)
     );
   },
 };
@@ -294,7 +294,7 @@ export const statsOperations = {
     const finishedBooks = books.filter((book) => book.state === "finished");
     const totalPagesRead = finishedBooks.reduce(
       (total, book) => total + (book.progress.totalPages || 0),
-      0,
+      0
     );
     const booksWithRatings = finishedBooks.filter((book) => book.rating);
     const averageRating =
@@ -323,7 +323,7 @@ export const batchOperations = {
    */
   async importBooks(
     userId: string,
-    books: Omit<Book, "id" | "addedAt" | "updatedAt">[],
+    books: Omit<Book, "id" | "addedAt" | "updatedAt">[]
   ): Promise<string[]> {
     const batch = writeBatch(db);
     const bookIds: string[] = [];
@@ -350,7 +350,7 @@ export const batchOperations = {
    */
   async updateMultipleBooks(
     userId: string,
-    updates: { bookId: string; data: Partial<Book> }[],
+    updates: { bookId: string; data: Partial<Book> }[]
   ): Promise<void> {
     const batch = writeBatch(db);
 

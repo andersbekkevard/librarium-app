@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const router = useRouter();
 
   const createOrUpdateUserProfile = async (
-    firebaseUser: User,
+    firebaseUser: User
   ): Promise<UserProfile> => {
     const profileRef = doc(db, `users/${firebaseUser.uid}/profile/main`);
 
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateUserProfile = async (
-    updates: Partial<UserProfile>,
+    updates: Partial<UserProfile>
   ): Promise<void> => {
     if (!user || !userProfile) return;
 

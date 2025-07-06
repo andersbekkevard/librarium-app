@@ -59,13 +59,11 @@ export const FeaturesSection = () => {
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
         Everything You Need for Reading
       </h2>
-
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
         From tracking your progress to discovering your next favorite book,
         Librarium provides all the tools you need for an enriched reading
         experience.
       </h3>
-
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {featureList.map(({ icon, title, description }) => (
           <div key={title}>

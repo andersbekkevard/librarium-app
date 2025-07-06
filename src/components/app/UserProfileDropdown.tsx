@@ -121,8 +121,8 @@ export const UserProfileDropdown: React.FC = () => {
   const memberSince = userProfile?.createdAt
     ? userProfile.createdAt.toDate().getFullYear().toString()
     : user?.metadata?.creationTime
-      ? new Date(user.metadata.creationTime).getFullYear().toString()
-      : "2024";
+    ? new Date(user.metadata.creationTime).getFullYear().toString()
+    : "2024";
 
   // User statistics from profile
   const booksRead = userProfile?.totalBooksRead || 0;
@@ -150,7 +150,9 @@ export const UserProfileDropdown: React.FC = () => {
             }
           }}
           className="w-10 h-10 rounded-lg hover:bg-muted transition-colors duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
-          aria-label={`User menu for ${displayName}. ${isOpen ? "Close menu" : "Open menu"}`}
+          aria-label={`User menu for ${displayName}. ${
+            isOpen ? "Close menu" : "Open menu"
+          }`}
           aria-expanded={isOpen}
           aria-haspopup="true"
         >

@@ -32,7 +32,7 @@ export default function RootLayout({
           "min-h-screen bg-background",
           geistSans.variable,
           geistMono.variable,
-          "antialiased",
+          "antialiased"
         )}
       >
         <ThemeProvider

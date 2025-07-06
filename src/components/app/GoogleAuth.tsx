@@ -122,7 +122,7 @@ const GoogleAuth = () => {
                         },
                       },
                       null,
-                      2,
+                      2
                     )
                   : "null"}
               </code>

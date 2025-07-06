@@ -150,9 +150,9 @@ export const READING_STATE_TRANSITIONS = {
 
 export const canTransitionTo = (
   currentState: ReadingState,
-  newState: ReadingState,
+  newState: ReadingState
 ): boolean => {
   return READING_STATE_TRANSITIONS[currentState].includes(
-    newState as ReadingState,
+    newState as ReadingState
   );
 };

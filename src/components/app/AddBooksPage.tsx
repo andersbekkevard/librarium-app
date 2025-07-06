@@ -99,7 +99,7 @@ const SearchResults = ({
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(
-                            book.volumeInfo.publishedDate,
+                            book.volumeInfo.publishedDate
                           ).getFullYear()}
                         </span>
                       )}
@@ -460,7 +460,7 @@ export const AddBooksPage = () => {
     } catch (err) {
       console.error("Error searching books:", err);
       setError(
-        "Failed to search books. Please check your internet connection and try again.",
+        "Failed to search books. Please check your internet connection and try again."
       );
       setSearchResults([]);
     } finally {
@@ -637,7 +637,7 @@ export const AddBooksPage = () => {
                   size="sm"
                   onClick={() =>
                     setSearchQuery((prev) =>
-                      prev.includes("intitle:") ? prev : `intitle:"${prev}"`,
+                      prev.includes("intitle:") ? prev : `intitle:"${prev}"`
                     )
                   }
                   disabled={isSearching}
@@ -649,7 +649,7 @@ export const AddBooksPage = () => {
                   size="sm"
                   onClick={() =>
                     setSearchQuery((prev) =>
-                      prev.includes("inauthor:") ? prev : `inauthor:"${prev}"`,
+                      prev.includes("inauthor:") ? prev : `inauthor:"${prev}"`
                     )
                   }
                   disabled={isSearching}
@@ -663,7 +663,7 @@ export const AddBooksPage = () => {
                     setSearchQuery((prev) =>
                       prev.includes("isbn:")
                         ? prev
-                        : `isbn:${prev.replace(/[-\s]/g, "")}`,
+                        : `isbn:${prev.replace(/[-\s]/g, "")}`
                     )
                   }
                   disabled={isSearching}

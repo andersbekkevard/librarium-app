@@ -36,7 +36,6 @@ export const FooterSection = () => {
               </Link>
             </div>
           </div>
-
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">Community</h3>
             <div>
@@ -57,7 +56,6 @@ export const FooterSection = () => {
               </Link>
             </div>
           </div>
-
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">Support</h3>
             <div>
@@ -78,7 +76,6 @@ export const FooterSection = () => {
               </Link>
             </div>
           </div>
-
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">Company</h3>
             <div>
