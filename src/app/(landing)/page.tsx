@@ -20,7 +20,7 @@ export default function LandingPage() {
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [loading, isAuthenticated, router]);
 
@@ -32,7 +32,7 @@ export default function LandingPage() {
   return (
     <>
       <HeroSection />
-      <SponsorsSection />
+      {/* <SponsorsSection /> */}
       <BenefitsSection />
       <FeaturesSection />
       <ServicesSection />

@@ -1,22 +1,4 @@
 /**
- * Centralized color constants for the Librarium application
- * These colors correspond to the CSS variables defined in globals.css
- */
-
-export const BRAND_COLORS = {
-  primary: 'rgb(55, 48, 242)',        // Vibrant blue
-  secondary: 'rgb(75, 85, 99)',       // Dark blue-grey
-  accent: 'rgb(129, 140, 248)',       // Light vibrant blue
-} as const
-
-export const STATUS_COLORS = {
-  success: 'rgb(34, 197, 94)',        // Green
-  warning: 'rgb(251, 191, 36)',       // Yellow
-  error: 'rgb(239, 68, 68)',          // Red
-  info: 'rgb(59, 130, 246)',          // Blue
-} as const
-
-/**
  * Tailwind CSS class names for brand colors
  * Use these for consistent styling across components
  */
@@ -85,31 +67,9 @@ export const getCSSVariable = (variableName: string): string => {
   return `var(--${variableName})`
 }
 
-/**
- * Utility function to get brand color as CSS variable
- * @param colorName - The brand color name (primary, secondary, accent)
- * @returns The CSS variable for the brand color
- */
-export const getBrandColor = (colorName: keyof typeof BRAND_COLORS): string => {
-  return getCSSVariable(`brand-${colorName}`)
-}
-
-/**
- * Utility function to get status color as CSS variable
- * @param colorName - The status color name (success, warning, error, info)
- * @returns The CSS variable for the status color
- */
-export const getStatusColor = (colorName: keyof typeof STATUS_COLORS): string => {
-  return getCSSVariable(`status-${colorName}`)
-}
-
 export default {
-  BRAND_COLORS,
-  STATUS_COLORS,
   BRAND_CLASSES,
   STATUS_CLASSES,
   READING_STATE_COLORS,
   getCSSVariable,
-  getBrandColor,
-  getStatusColor,
 } 

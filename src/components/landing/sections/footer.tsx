@@ -4,12 +4,14 @@ import { BRAND_CLASSES } from "@/lib/colors";
 
 export const FooterSection = () => {
   return (
-    <footer id="footer" className="container py-24 sm:py-32">
+    <footer id="footer" className="container pt-24 sm:pt-32">
       <div className="p-10 bg-card border border-secondary rounded-2xl">
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-x-12 gap-y-8">
           <div className="col-span-full xl:col-span-2">
             <Link href="#" className="flex font-bold items-center">
-              <BookOpen className={`${BRAND_CLASSES.primary.bg} w-9 h-9 mr-2 rounded-lg border border-secondary text-white p-2`} />
+              <BookOpen
+                className={`${BRAND_CLASSES.primary.bg} w-9 h-9 mr-2 rounded-lg border border-secondary text-white p-2`}
+              />
               <h3 className="text-2xl">Librarium</h3>
             </Link>
           </div>
@@ -102,7 +104,7 @@ export const FooterSection = () => {
         <div className="border-t border-secondary pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-muted-foreground">
-              © 2024 Librarium. All rights reserved.
+              © 2025 Librarium. All rights reserved.
             </div>
             <div className="text-sm text-muted-foreground">
               Made with ❤️ for book lovers everywhere
