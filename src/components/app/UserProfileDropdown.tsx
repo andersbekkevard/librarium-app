@@ -19,7 +19,7 @@ import {
 export const UserProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const { user } = useAuthContext()
+  const { user, userProfile } = useAuthContext()
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -110,13 +110,20 @@ export const UserProfileDropdown: React.FC = () => {
     },
   ]
 
-  // Use Firebase user data
-  const displayName = user?.displayName || 'Anonymous User'
-  const displayEmail = user?.email || 'No email'
-  const photoURL = user?.photoURL
-  const memberSince = user?.metadata?.creationTime ? 
-    new Date(user.metadata.creationTime).getFullYear().toString() : 
-    '2024'
+  // Use UserProfile data with Firebase user as fallback
+  const displayName = userProfile?.displayName || user?.displayName || 'Anonymous User'
+  const displayEmail = userProfile?.email || user?.email || 'No email'
+  const photoURL = userProfile?.photoURL || user?.photoURL
+  const memberSince = userProfile?.createdAt ? 
+    userProfile.createdAt.toDate().getFullYear().toString() :
+    (user?.metadata?.creationTime ? 
+      new Date(user.metadata.creationTime).getFullYear().toString() : 
+      '2024')
+  
+  // User statistics from profile
+  const booksRead = userProfile?.totalBooksRead || 0
+  const currentlyReading = userProfile?.currentlyReading || 0
+  const booksInLibrary = userProfile?.booksInLibrary || 0
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -179,6 +186,13 @@ export const UserProfileDropdown: React.FC = () => {
                 <p className="text-xs text-muted-foreground truncate">
                   {displayEmail}
                 </p>
+                <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+                  <span>{booksRead} read</span>
+                  <span>•</span>
+                  <span>{currentlyReading} reading</span>
+                  <span>•</span>
+                  <span>{booksInLibrary} total</span>
+                </div>
               </div>
             </div>
           </div>

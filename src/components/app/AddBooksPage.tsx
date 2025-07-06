@@ -24,6 +24,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Book } from '@/lib/models'
+import { Timestamp } from 'firebase/firestore'
 
 // Mock Google Books API response structure
 interface GoogleBook {
@@ -257,47 +259,76 @@ const SearchResults = ({
   )
 }
 
-interface ManualBook {
-  id: string
-  title: string
-  author: string
-  isbn?: string
-  pages?: number
-  publishedYear?: number
-  genre?: string
-  description?: string
-  publisher?: string
-  readingState: 'not_started'
+// Convert GoogleBook to our Book model
+const convertGoogleBookToBook = (googleBook: GoogleBook): Book => {
+  const isbn = googleBook.volumeInfo.industryIdentifiers?.find(
+    id => id.type === 'ISBN_13' || id.type === 'ISBN_10'
+  )?.identifier
+  
+  return {
+    id: googleBook.id,
+    title: googleBook.volumeInfo.title,
+    author: googleBook.volumeInfo.authors?.[0] || 'Unknown Author',
+    state: 'not_started',
+    progress: {
+      currentPage: 0,
+      totalPages: googleBook.volumeInfo.pageCount,
+      percentage: 0
+    },
+    isOwned: false, // Default to wishlist
+    isbn,
+    coverImage: googleBook.volumeInfo.imageLinks?.thumbnail,
+    publishedDate: googleBook.volumeInfo.publishedDate,
+    description: googleBook.volumeInfo.description,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
+  }
 }
 
-const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: ManualBook) => void }) => {
+// Convert manual entry to our Book model
+const convertManualEntryToBook = (formData: {
+  title: string;
+  author: string;
+  isbn: string;
+  pages: string;
+  publishedYear: string;
+  ownership: string;
+  description: string;
+}): Book => {
+  return {
+    id: `manual-${Date.now()}`,
+    title: formData.title,
+    author: formData.author,
+    state: 'not_started',
+    progress: {
+      currentPage: 0,
+      totalPages: formData.pages ? parseInt(formData.pages) : undefined,
+      percentage: 0
+    },
+    isOwned: formData.ownership === 'owned',
+    isbn: formData.isbn || undefined,
+    publishedDate: formData.publishedYear ? `${formData.publishedYear}-01-01` : undefined,
+    description: formData.description || undefined,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
+  }
+}
+
+const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
     isbn: '',
     pages: '',
     publishedYear: '',
-    genre: '',
-    description: '',
-    publisher: ''
+    ownership: 'wishlist',
+    description: ''
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    const book: ManualBook = {
-      id: `manual-${Date.now()}`,
-      title: formData.title,
-      author: formData.author,
-      isbn: formData.isbn || undefined,
-      pages: formData.pages ? parseInt(formData.pages) : undefined,
-      publishedYear: formData.publishedYear ? parseInt(formData.publishedYear) : undefined,
-      genre: formData.genre || undefined,
-      description: formData.description || undefined,
-      publisher: formData.publisher || undefined,
-      readingState: 'not_started' as const
-    }
-    
+    const book = convertManualEntryToBook(formData)
     onAddBook(book)
     
     // Reset form
@@ -307,9 +338,8 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: ManualBook) => void 
       isbn: '',
       pages: '',
       publishedYear: '',
-      genre: '',
-      description: '',
-      publisher: ''
+      ownership: 'wishlist',
+      description: ''
     })
   }
 
@@ -385,23 +415,16 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: ManualBook) => void 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="genre">Genre</Label>
-              <Input
-                id="genre"
-                value={formData.genre}
-                onChange={(e) => updateField('genre', e.target.value)}
-                placeholder="Book genre"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="publisher">Publisher</Label>
-              <Input
-                id="publisher"
-                value={formData.publisher}
-                onChange={(e) => updateField('publisher', e.target.value)}
-                placeholder="Publisher name"
-              />
+              <Label htmlFor="ownership">Ownership Status</Label>
+              <select
+                id="ownership"
+                value={formData.ownership || 'wishlist'}
+                onChange={(e) => updateField('ownership', e.target.value)}
+                className="bg-background border border-input rounded-md px-3 py-2 text-sm w-full"
+              >
+                <option value="wishlist">Wishlist</option>
+                <option value="owned">Owned</option>
+              </select>
             </div>
           </div>
           
@@ -430,9 +453,8 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: ManualBook) => void 
                 isbn: '',
                 pages: '',
                 publishedYear: '',
-                genre: '',
-                description: '',
-                publisher: ''
+                ownership: 'wishlist',
+                description: ''
               })}
             >
               <X className="h-4 w-4 mr-2" />
@@ -474,32 +496,33 @@ export const AddBooksPage = () => {
   }
 
   const handleAddGoogleBook = (googleBook: GoogleBook) => {
+    const book = convertGoogleBookToBook(googleBook)
     setAddedBooks(prev => new Set([...prev, googleBook.id]))
     setRecentlyAdded(prev => [
       {
-        id: googleBook.id,
-        title: googleBook.volumeInfo.title,
-        author: googleBook.volumeInfo.authors?.[0] || 'Unknown Author'
+        id: book.id,
+        title: book.title,
+        author: book.author
       },
       ...prev.slice(0, 4)
     ])
 
     // Here you would typically add to your backend/state management
-    console.log('Added Google book:', googleBook)
+    console.log('Added Google book as Book model:', book)
   }
 
-  const handleAddManualBook = (book: ManualBook) => {
+  const handleAddManualBook = (book: Book) => {
     setRecentlyAdded(prev => [
       {
         id: book.id,
-        title: book.title || 'Untitled',
-        author: book.author || 'Unknown Author'
+        title: book.title,
+        author: book.author
       },
       ...prev.slice(0, 4)
     ])
 
     // Here you would typically add to your backend/state management
-    console.log('Added manual book:', book)
+    console.log('Added manual book as Book model:', book)
   }
 
   React.useEffect(() => {

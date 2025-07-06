@@ -16,105 +16,131 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import BookCard, { Book } from '@/components/app/BookCard'
+import BookCard from '@/components/app/BookCard'
+import { Book } from '@/lib/models'
+import { Timestamp } from 'firebase/firestore'
 
-// Sample extended book data for the library
+// Sample extended book data for the library - converted to use centralized Book model
 const libraryBooks: Book[] = [
   {
     id: "1",
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
-    pages: 180,
-    readingState: "finished",
-    genre: "Classic Fiction",
+    state: "finished",
+    progress: { currentPage: 180, totalPages: 180, percentage: 100 },
+    isOwned: true,
     rating: 4,
-    coverUrl: "https://covers.openlibrary.org/b/id/8225261-M.jpg"
+    coverImage: "https://covers.openlibrary.org/b/id/8225261-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "2", 
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
-    pages: 376,
-    currentPage: 156,
-    readingState: "in_progress",
-    genre: "Literary Fiction"
+    state: "in_progress",
+    progress: { currentPage: 156, totalPages: 376, percentage: 41 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "3",
     title: "1984",
     author: "George Orwell", 
-    pages: 328,
-    readingState: "not_started",
-    genre: "Dystopian Fiction",
-    coverUrl: "https://covers.openlibrary.org/b/id/7222246-M.jpg"
+    state: "not_started",
+    progress: { currentPage: 0, totalPages: 328, percentage: 0 },
+    isOwned: true,
+    coverImage: "https://covers.openlibrary.org/b/id/7222246-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
   },
   {
     id: "4",
     title: "The Catcher in the Rye",
     author: "J.D. Salinger",
-    pages: 277,
-    currentPage: 89,
-    readingState: "in_progress",
-    genre: "Coming-of-age"
+    state: "in_progress",
+    progress: { currentPage: 89, totalPages: 277, percentage: 32 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "5",
     title: "Pride and Prejudice",
     author: "Jane Austen",
-    pages: 432,
-    readingState: "finished",
-    genre: "Romance",
+    state: "finished",
+    progress: { currentPage: 432, totalPages: 432, percentage: 100 },
+    isOwned: true,
     rating: 5,
-    coverUrl: "https://covers.openlibrary.org/b/id/8134973-M.jpg"
+    coverImage: "https://covers.openlibrary.org/b/id/8134973-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "6",
     title: "The Lord of the Rings",
     author: "J.R.R. Tolkien",
-    pages: 1216,
-    readingState: "not_started",
-    genre: "Fantasy"
+    state: "not_started",
+    progress: { currentPage: 0, totalPages: 1216, percentage: 0 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
   },
   {
     id: "7",
     title: "The Hobbit",
     author: "J.R.R. Tolkien",
-    pages: 310,
-    currentPage: 123,
-    readingState: "in_progress",
-    genre: "Fantasy"
+    state: "in_progress",
+    progress: { currentPage: 123, totalPages: 310, percentage: 40 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "8",
     title: "Dune",
     author: "Frank Herbert",
-    pages: 688,
-    readingState: "finished",
-    genre: "Science Fiction",
-    rating: 5
+    state: "finished",
+    progress: { currentPage: 688, totalPages: 688, percentage: 100 },
+    isOwned: true,
+    rating: 5,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "9",
     title: "The Midnight Library",
     author: "Matt Haig",
-    pages: 288,
-    readingState: "finished",
-    genre: "Fiction",
-    rating: 4
+    state: "finished",
+    progress: { currentPage: 288, totalPages: 288, percentage: 100 },
+    isOwned: true,
+    rating: 4,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "10",
     title: "Atomic Habits",
     author: "James Clear",
-    pages: 320,
-    currentPage: 89,
-    readingState: "in_progress",
-    genre: "Self-Help"
+    state: "in_progress",
+    progress: { currentPage: 89, totalPages: 320, percentage: 28 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   }
 ]
 
 type ViewMode = 'grid' | 'list'
-type SortOption = 'title' | 'author' | 'pages' | 'genre' | 'rating' | 'progress'
+type SortOption = 'title' | 'author' | 'pages' | 'rating' | 'progress'
 type SortDirection = 'asc' | 'desc'
 type FilterStatus = 'all' | 'not_started' | 'in_progress' | 'finished'
 
@@ -126,15 +152,15 @@ interface BookListItemProps {
 
 export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpdateProgress }) => {
   const getProgressPercentage = () => {
-    if (book.readingState === 'finished') return 100
-    if (book.readingState === 'in_progress' && book.currentPage) {
-      return Math.round((book.currentPage / book.pages) * 100)
+    if (book.state === 'finished') return 100
+    if (book.state === 'in_progress') {
+      return book.progress.percentage || 0
     }
     return 0
   }
 
   const getStatusBadge = () => {
-    switch (book.readingState) {
+    switch (book.state) {
       case 'not_started':
         return <Badge variant="secondary">Not Started</Badge>
       case 'in_progress':
@@ -164,9 +190,9 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
           {/* Cover Image */}
           <div className="flex-shrink-0">
             <div className="w-8 h-11 bg-muted rounded flex items-center justify-center">
-              {book.coverUrl ? (
+              {book.coverImage ? (
                 <img
-                  src={book.coverUrl}
+                  src={book.coverImage}
                   alt={`${book.title} cover`}
                   className="w-full h-full object-cover rounded"
                 />
@@ -191,14 +217,18 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
             <div className="text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <BookOpen className="h-3 w-3" />
-                {book.pages} pages
+                {book.progress.totalPages || '?'} pages
               </span>
             </div>
 
             <div>
-              {book.genre && (
+              {book.isOwned ? (
                 <Badge variant="outline" className="text-xs">
-                  {book.genre}
+                  Owned
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-xs">
+                  Wishlist
                 </Badge>
               )}
             </div>
@@ -210,14 +240,14 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
             <div className="flex items-center justify-between">
               {/* Rating or Progress */}
               <div className="flex items-center gap-1">
-                {book.readingState === 'finished' && book.rating ? (
+                {book.state === 'finished' && book.rating ? (
                   <div className="flex items-center gap-1">
                     {renderStars(book.rating)}
                     <span className="text-xs text-muted-foreground ml-1">
                       ({book.rating}/5)
                     </span>
                   </div>
-                ) : book.readingState === 'in_progress' ? (
+                ) : book.state === 'in_progress' ? (
                   <div className="text-xs text-muted-foreground">
                     {getProgressPercentage()}% complete
                   </div>
@@ -239,7 +269,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
                   <span className="sr-only">Edit</span>
                   ✏️
                 </Button>
-                {book.readingState === 'in_progress' && (
+                {book.state === 'in_progress' && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -268,15 +298,8 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
   const [sortBy, setSortBy] = useState<SortOption>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
-  const [filterGenre, setFilterGenre] = useState<string>('all')
+  const [filterOwnership, setFilterOwnership] = useState<string>('all')
 
-  // Get unique genres for filter dropdown
-  const availableGenres = useMemo(() => {
-    const genres = libraryBooks
-      .map(book => book.genre)
-      .filter((genre): genre is string => !!genre)
-    return [...new Set(genres)].sort()
-  }, [])
 
   // Filter and sort books
   const filteredAndSortedBooks = useMemo(() => {
@@ -287,18 +310,20 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
       filtered = filtered.filter(book => 
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.genre?.toLowerCase().includes(searchQuery.toLowerCase())
+        book.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
     // Apply status filter
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(book => book.readingState === filterStatus)
+      filtered = filtered.filter(book => book.state === filterStatus)
     }
 
-    // Apply genre filter
-    if (filterGenre !== 'all') {
-      filtered = filtered.filter(book => book.genre === filterGenre)
+    // Apply ownership filter
+    if (filterOwnership !== 'all') {
+      filtered = filtered.filter(book => 
+        filterOwnership === 'owned' ? book.isOwned : !book.isOwned
+      )
     }
 
     // Apply sorting
@@ -316,24 +341,16 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
           bValue = b.author.toLowerCase()
           break
         case 'pages':
-          aValue = a.pages
-          bValue = b.pages
-          break
-        case 'genre':
-          aValue = a.genre?.toLowerCase() || ''
-          bValue = b.genre?.toLowerCase() || ''
+          aValue = a.progress.totalPages || 0
+          bValue = b.progress.totalPages || 0
           break
         case 'rating':
           aValue = a.rating || 0
           bValue = b.rating || 0
           break
         case 'progress':
-          const aProgress = a.readingState === 'finished' ? 100 : 
-                          a.readingState === 'in_progress' && a.currentPage ? 
-                          (a.currentPage / a.pages) * 100 : 0
-          const bProgress = b.readingState === 'finished' ? 100 : 
-                          b.readingState === 'in_progress' && b.currentPage ? 
-                          (b.currentPage / b.pages) * 100 : 0
+          const aProgress = a.state === 'finished' ? 100 : a.progress.percentage || 0
+          const bProgress = b.state === 'finished' ? 100 : b.progress.percentage || 0
           aValue = aProgress
           bValue = bProgress
           break
@@ -354,7 +371,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
     })
 
     return sorted
-  }, [searchQuery, filterStatus, filterGenre, sortBy, sortDirection])
+  }, [searchQuery, filterStatus, filterOwnership, sortBy, sortDirection])
 
   const handleEdit = (book: Book) => {
     console.log('Edit book:', book.title)
@@ -375,14 +392,14 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
 
   const clearFilters = () => {
     setFilterStatus('all')
-    setFilterGenre('all')
+    setFilterOwnership('all')
     setSortBy('title')
     setSortDirection('asc')
   }
 
   const activeFiltersCount = [
     filterStatus !== 'all',
-    filterGenre !== 'all'
+    filterOwnership !== 'all'
   ].filter(Boolean).length
 
   return (
@@ -444,18 +461,17 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
               </select>
             </div>
 
-            {/* Genre Filter */}
+            {/* Ownership Filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Genre:</span>
+              <span className="text-sm font-medium">Ownership:</span>
               <select
-                value={filterGenre}
-                onChange={(e) => setFilterGenre(e.target.value)}
+                value={filterOwnership}
+                onChange={(e) => setFilterOwnership(e.target.value)}
                 className="bg-background border border-input rounded-md px-3 py-1 text-sm"
               >
-                <option value="all">All Genres</option>
-                {availableGenres.map(genre => (
-                  <option key={genre} value={genre}>{genre}</option>
-                ))}
+                <option value="all">All Books</option>
+                <option value="owned">Owned</option>
+                <option value="wishlist">Wishlist</option>
               </select>
             </div>
 
@@ -467,7 +483,6 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
                   { key: 'title' as const, label: 'Title' },
                   { key: 'author' as const, label: 'Author' },
                   { key: 'pages' as const, label: 'Pages' },
-                  { key: 'genre' as const, label: 'Genre' },
                   { key: 'rating' as const, label: 'Rating' },
                   { key: 'progress' as const, label: 'Progress' }
                 ].map(({ key, label }) => (

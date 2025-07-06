@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import BookCard, { Book } from "@/components/app/BookCard"
+import BookCard from "@/components/app/BookCard"
+import { Book } from "@/lib/models"
+import { Timestamp } from "firebase/firestore"
 import Sidebar from "@/components/app/Sidebar"
 import AddBooksPage from "@/components/app/AddBooksPage"
 import MyLibraryPage from "@/components/app/MyLibraryPage"
@@ -11,80 +13,99 @@ import { BookOpen, Star, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuthContext } from "@/components/auth/AuthProvider"
 
-// Sample book data for demonstration
+// Sample book data for demonstration - converted to use centralized Book model
 const sampleBooks: Book[] = [
   {
     id: "1",
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
-    pages: 180,
-    readingState: "finished",
-    genre: "Classic Fiction",
+    state: "finished",
+    progress: { currentPage: 180, totalPages: 180, percentage: 100 },
+    isOwned: true,
     rating: 4,
-    coverUrl: "https://covers.openlibrary.org/b/id/8225261-M.jpg"
+    coverImage: "https://covers.openlibrary.org/b/id/8225261-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "2", 
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
-    pages: 376,
-    currentPage: 156,
-    readingState: "in_progress",
-    genre: "Literary Fiction"
+    state: "in_progress",
+    progress: { currentPage: 156, totalPages: 376, percentage: 41 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "3",
     title: "1984",
     author: "George Orwell", 
-    pages: 328,
-    readingState: "not_started",
-    genre: "Dystopian Fiction",
-    coverUrl: "https://covers.openlibrary.org/b/id/7222246-M.jpg"
+    state: "not_started",
+    progress: { currentPage: 0, totalPages: 328, percentage: 0 },
+    isOwned: true,
+    coverImage: "https://covers.openlibrary.org/b/id/7222246-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
   },
   {
     id: "4",
     title: "The Catcher in the Rye",
     author: "J.D. Salinger",
-    pages: 277,
-    currentPage: 89,
-    readingState: "in_progress",
-    genre: "Coming-of-age"
+    state: "in_progress",
+    progress: { currentPage: 89, totalPages: 277, percentage: 32 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "5",
     title: "Pride and Prejudice",
     author: "Jane Austen",
-    pages: 432,
-    readingState: "finished",
-    genre: "Romance",
+    state: "finished",
+    progress: { currentPage: 432, totalPages: 432, percentage: 100 },
+    isOwned: true,
     rating: 5,
-    coverUrl: "https://covers.openlibrary.org/b/id/8134973-M.jpg"
+    coverImage: "https://covers.openlibrary.org/b/id/8134973-M.jpg",
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   },
   {
     id: "6",
     title: "The Lord of the Rings",
     author: "J.R.R. Tolkien",
-    pages: 1216,
-    readingState: "not_started",
-    genre: "Fantasy"
+    state: "not_started",
+    progress: { currentPage: 0, totalPages: 1216, percentage: 0 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
   },
   {
     id: "7",
     title: "The Hobbit",
     author: "J.R.R. Tolkien",
-    pages: 310,
-    currentPage: 123,
-    readingState: "in_progress",
-    genre: "Fantasy"
+    state: "in_progress",
+    progress: { currentPage: 123, totalPages: 310, percentage: 40 },
+    isOwned: true,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    startedAt: Timestamp.now()
   },
   {
     id: "8",
     title: "Dune",
     author: "Frank Herbert",
-    pages: 688,
-    readingState: "finished",
-    genre: "Science Fiction",
-    rating: 5
+    state: "finished",
+    progress: { currentPage: 688, totalPages: 688, percentage: 100 },
+    isOwned: true,
+    rating: 5,
+    addedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    finishedAt: Timestamp.now()
   }
 ]
 
@@ -92,7 +113,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [, setFilteredBooks] = useState(sampleBooks)
   const [searchQuery, setSearchQuery] = useState('')
-  const { user, loading, isAuthenticated } = useAuthContext()
+  const { loading, isAuthenticated } = useAuthContext()
   const router = useRouter()
 
   // Route protection - redirect to landing if not authenticated
@@ -129,22 +150,6 @@ export default function Dashboard() {
     // Handle update progress functionality
   }
 
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query)
-    setSearchQuery(query)
-    
-    // Filter books based on search query for dashboard
-    if (query.trim() === '') {
-      setFilteredBooks(sampleBooks)
-    } else {
-      const filtered = sampleBooks.filter(book => 
-        book.title.toLowerCase().includes(query.toLowerCase()) ||
-        book.author.toLowerCase().includes(query.toLowerCase()) ||
-        book.genre?.toLowerCase().includes(query.toLowerCase())
-      )
-      setFilteredBooks(filtered)
-    }
-  }
 
   const handleSidebarItemClick = (itemId: string) => {
     setActiveSection(itemId)
@@ -215,7 +220,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Read This Year</p>
-                        <p className="text-2xl font-bold text-foreground">{sampleBooks.filter(book => book.readingState === 'finished').length}</p>
+                        <p className="text-2xl font-bold text-foreground">{sampleBooks.filter(book => book.state === 'finished').length}</p>
                       </div>
                       <div className="h-8 w-8 bg-status-success/10 rounded-full flex items-center justify-center">
                         <Star className="h-4 w-4 text-status-success fill-current" />
@@ -267,7 +272,7 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {sampleBooks
-                        .filter(book => book.readingState === 'in_progress')
+                        .filter(book => book.state === 'in_progress')
                         .slice(0, 6)
                         .map((book) => (
                           <BookCard
@@ -342,7 +347,7 @@ export default function Dashboard() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {sampleBooks
-                      .filter(book => book.readingState === 'finished')
+                      .filter(book => book.state === 'finished')
                       .map((book) => (
                         <BookCard
                           key={book.id}
