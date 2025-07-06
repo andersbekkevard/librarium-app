@@ -8,3 +8,5 @@
 - [ ] Create profile pages, settings etc etc
 - [ ] Improve search (fzf, etc)
 - [ ] Add shelf/collection functionality
+- [ ] Clean the codebase, extract components where possible
+- [ ] Force rating on "finish"
