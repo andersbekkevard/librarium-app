@@ -86,7 +86,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
+
   /* Brand Colors - Easily replaceable */
   --brand-primary: oklch(0.55 0.25 240); /* Vibrant blue */
   --brand-primary-hover: oklch(0.45 0.22 240); /* Darker vibrant blue */
@@ -94,7 +94,7 @@
   --brand-secondary-hover: oklch(0.35 0.04 220); /* Darker blue-grey */
   --brand-accent: oklch(0.7 0.2 240); /* Light vibrant blue accent */
   --brand-accent-hover: oklch(0.6 0.18 240); /* Darker light blue */
-  
+
   /* Status Colors */
   --status-success: oklch(0.7 0.15 142.5); /* Green */
   --status-warning: oklch(0.8 0.15 85); /* Yellow */
@@ -134,15 +134,17 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  
+
   /* Brand Colors - Dark mode variants */
-  --brand-primary: oklch(0.7 0.25 240); /* Brighter vibrant blue for dark mode */
+  --brand-primary: oklch(
+    0.7 0.25 240
+  ); /* Brighter vibrant blue for dark mode */
   --brand-primary-hover: oklch(0.6 0.22 240); /* Darker blue */
   --brand-secondary: oklch(0.6 0.05 220); /* Lighter blue-grey for dark mode */
   --brand-secondary-hover: oklch(0.55 0.04 220); /* Darker blue-grey */
   --brand-accent: oklch(0.8 0.2 240); /* Brighter light blue for dark mode */
   --brand-accent-hover: oklch(0.75 0.18 240); /* Darker light blue */
-  
+
   /* Status Colors - Dark mode variants */
   --status-success: oklch(0.8 0.15 142.5); /* Brighter green */
   --status-warning: oklch(0.85 0.15 85); /* Brighter yellow */
@@ -166,21 +168,21 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
   }
-  
+
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  
+
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
-  
+
   /* Container utilities for centering */
   .container {
     width: 100%;
@@ -189,7 +191,7 @@
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-  
+
   @media (min-width: 1536px) {
     .container {
       max-width: 1400px;

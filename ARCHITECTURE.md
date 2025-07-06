@@ -7,18 +7,21 @@ BookKeep is built as a modern web application using **Firebase-native** patterns
 ## Design Principles
 
 ### 1. Firebase-Native Approach
+
 - **Direct Integration**: Use Firebase SDK directly in React components via hooks
 - **Real-time First**: Leverage Firestore listeners for live data synchronization
 - **Serverless Functions**: Use Cloud Functions for external API integration and background tasks
 - **Security by Rules**: Implement access control via Firestore security rules
 
 ### 2. TypeScript-First Development
+
 - **Compile-time Safety**: Catch errors during development, not runtime
 - **Interface-Driven Design**: Define clear contracts between components
 - **Utility Functions**: Pure functions for business logic instead of class methods
 - **Type Inference**: Leverage TypeScript's inference to reduce boilerplate
 
 ### 3. React Patterns
+
 - **Hooks Over Classes**: Functional components with custom hooks for logic
 - **Context for Global State**: React Context for user data and authentication
 - **Component Composition**: Build complex UI from simple, reusable components
@@ -79,6 +82,7 @@ BookKeep is built as a modern web application using **Firebase-native** patterns
 ## Database Design (Firestore)
 
 ### Schema Principles
+
 - **User-Centric Partitioning**: Data organized under user documents for security and performance
 - **Flexible Structure**: NoSQL design that can evolve with requirements
 - **Real-time Optimized**: Structure supports efficient real-time queries
@@ -103,176 +107,181 @@ sharedShelves/{shelfId}                  # Top-level shared shelves
 ### Data Models
 
 #### User Profile
+
 ```typescript
 interface UserProfile {
-  id: string
-  email: string
-  displayName: string
-  photoURL?: string
+  id: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
   preferences: {
-    theme: 'light' | 'dark' | 'system'
-    defaultShelf: string
-    privacyLevel: 'private' | 'friends' | 'public'
-  }
-  createdAt: Date
-  lastActiveAt: Date
+    theme: "light" | "dark" | "system";
+    defaultShelf: string;
+    privacyLevel: "private" | "friends" | "public";
+  };
+  createdAt: Date;
+  lastActiveAt: Date;
 }
 ```
 
 #### Book Entity
+
 ```typescript
 interface Book {
-  id: string
-  title: string
-  author: string
-  isbn?: string
-  state: 'not_started' | 'in_progress' | 'finished'
-  progress?: number // Current page for in-progress books
-  isOwned: boolean // true = owned, false = wishlist
-  
+  id: string;
+  title: string;
+  author: string;
+  isbn?: string;
+  state: "not_started" | "in_progress" | "finished";
+  progress?: number; // Current page for in-progress books
+  isOwned: boolean; // true = owned, false = wishlist
+
   // Collaboration
-  ownerId: string
-  collaborators?: string[] // User IDs with access
-  sharedIn?: string[] // Shelf IDs where this book appears
-  
+  ownerId: string;
+  collaborators?: string[]; // User IDs with access
+  sharedIn?: string[]; // Shelf IDs where this book appears
+
   // Metadata
   metadata: {
-    pages?: number
-    genre?: string[]
-    publishedYear?: number
-    coverUrl?: string
-    description?: string
-    rating?: number // User's personal rating
-  }
-  
-  // Timestamps  
-  createdAt: Date
-  updatedAt: Date
-  startedAt?: Date
-  finishedAt?: Date
+    pages?: number;
+    genre?: string[];
+    publishedYear?: number;
+    coverUrl?: string;
+    description?: string;
+    rating?: number; // User's personal rating
+  };
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+  startedAt?: Date;
+  finishedAt?: Date;
 }
 ```
 
 #### Book Event
+
 ```typescript
 interface BookEvent {
-  id: string
-  bookId: string
-  userId: string
-  type: 'state_change' | 'progress_update' | 'comment' | 'quote' | 'review'
-  timestamp: Date
-  
+  id: string;
+  bookId: string;
+  userId: string;
+  type: "state_change" | "progress_update" | "comment" | "quote" | "review";
+  timestamp: Date;
+
   // Event-specific data
   data: {
     // State changes
     stateChange?: {
-      from: BookState
-      to: BookState
-    }
-    
+      from: BookState;
+      to: BookState;
+    };
+
     // Progress updates
     progressUpdate?: {
-      from: number
-      to: number
-      pagesRead?: number
-    }
-    
+      from: number;
+      to: number;
+      pagesRead?: number;
+    };
+
     // User content
     comment?: {
-      text: string
-      page?: number
-    }
-    
+      text: string;
+      page?: number;
+    };
+
     quote?: {
-      text: string
-      page?: number
-      chapter?: string
-    }
-    
+      text: string;
+      page?: number;
+      chapter?: string;
+    };
+
     review?: {
-      rating: number
-      text: string
-      spoilerFree: boolean
-    }
-  }
+      rating: number;
+      text: string;
+      spoilerFree: boolean;
+    };
+  };
 }
 ```
 
 #### Shelf Organization
+
 ```typescript
 interface Shelf {
-  id: string
-  name: string
-  description?: string
-  bookIds: string[] // References to books
-  
+  id: string;
+  name: string;
+  description?: string;
+  bookIds: string[]; // References to books
+
   // Ownership & Sharing
-  ownerId: string
+  ownerId: string;
   collaborators: {
-    userId: string
-    permission: 'read' | 'write' | 'admin'
-    addedAt: Date
-  }[]
-  
+    userId: string;
+    permission: "read" | "write" | "admin";
+    addedAt: Date;
+  }[];
+
   // Visibility
-  isPublic: boolean
-  isDefault: boolean // e.g., "Currently Reading", "Wishlist"
-  
+  isPublic: boolean;
+  isDefault: boolean; // e.g., "Currently Reading", "Wishlist"
+
   // Organization
-  sortOrder: 'manual' | 'title' | 'author' | 'dateAdded' | 'dateRead'
-  color?: string
-  icon?: string
-  
-  createdAt: Date
-  updatedAt: Date
+  sortOrder: "manual" | "title" | "author" | "dateAdded" | "dateRead";
+  color?: string;
+  icon?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
 #### User Statistics
+
 ```typescript
 interface UserStatistics {
-  userId: string
-  
+  userId: string;
+
   // Reading Stats
   totalBooks: {
-    owned: number
-    wishlist: number
-    finished: number
-    inProgress: number
-  }
-  
-  totalPages: number
-  averageRating: number
-  
+    owned: number;
+    wishlist: number;
+    finished: number;
+    inProgress: number;
+  };
+
+  totalPages: number;
+  averageRating: number;
+
   // Time-based stats
   readingStreaks: {
-    current: number
-    longest: number
-    lastActivityDate: Date
-  }
-  
+    current: number;
+    longest: number;
+    lastActivityDate: Date;
+  };
+
   // Goals
   yearlyGoals: {
     [year: string]: {
-      target: number
-      completed: number
-      targetPages?: number
-      pagesRead?: number
-    }
-  }
-  
+      target: number;
+      completed: number;
+      targetPages?: number;
+      pagesRead?: number;
+    };
+  };
+
   // Insights
-  genreBreakdown: Record<string, number>
+  genreBreakdown: Record<string, number>;
   readingSpeed: {
-    averagePagesPerDay: number
-    averageDaysPerBook: number
-  }
-  
+    averagePagesPerDay: number;
+    averageDaysPerBook: number;
+  };
+
   // Social
-  collaborativeBooks: number
-  sharedShelves: number
-  
-  lastUpdated: Date
+  collaborativeBooks: number;
+  sharedShelves: number;
+
+  lastUpdated: Date;
 }
 ```
 
@@ -281,15 +290,16 @@ interface UserStatistics {
 ## Testing Strategy
 
 ### Unit Testing
+
 ```typescript
 // Example test for validation function
-describe('Book State Transitions', () => {
-  test('should allow transition from not_started to in_progress', () => {
-    expect(canTransitionTo('not_started', 'in_progress')).toBe(true)
-  })
-  
-  test('should not allow transition from finished to not_started', () => {
-    expect(canTransitionTo('finished', 'not_started')).toBe(false)
-  })
-})
+describe("Book State Transitions", () => {
+  test("should allow transition from not_started to in_progress", () => {
+    expect(canTransitionTo("not_started", "in_progress")).toBe(true);
+  });
+
+  test("should not allow transition from finished to not_started", () => {
+    expect(canTransitionTo("finished", "not_started")).toBe(false);
+  });
+});
 ```

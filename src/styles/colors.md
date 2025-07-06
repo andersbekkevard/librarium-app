@@ -5,13 +5,15 @@ This document describes the centralized color system used throughout the Librari
 ## 🎨 Brand Colors
 
 ### Primary Brand Colors
+
 These are the main brand colors used throughout the application:
 
 - **`brand-primary`**: Vibrant blue - Used for primary actions, links, and highlights
-- **`brand-secondary`**: Dark blue-grey - Used for secondary actions and accents  
+- **`brand-secondary`**: Dark blue-grey - Used for secondary actions and accents
 - **`brand-accent`**: Light vibrant blue - Used for additional accents and highlights
 
 ### Usage Examples
+
 ```css
 /* In Tailwind classes */
 bg-brand-primary         /* Primary background */
@@ -33,9 +35,9 @@ To modify the brand colors across the entire application:
 ```css
 :root {
   /* Change these values to your desired colors */
-  --brand-primary: oklch(0.55 0.25 240);        /* Vibrant blue primary color */
-  --brand-secondary: oklch(0.4 0.05 220);       /* Dark blue-grey secondary */
-  --brand-accent: oklch(0.7 0.2 240);           /* Light vibrant blue accent */
+  --brand-primary: oklch(0.55 0.25 240); /* Vibrant blue primary color */
+  --brand-secondary: oklch(0.4 0.05 220); /* Dark blue-grey secondary */
+  --brand-accent: oklch(0.7 0.2 240); /* Light vibrant blue accent */
 }
 ```
 
@@ -53,12 +55,14 @@ To modify the brand colors across the entire application:
 ## 🎯 Component Usage
 
 ### Current Usage
+
 - **Sidebar**: Add Book button uses pure black (light mode) / white (dark mode), active states use `brand-primary`
 - **Header**: Search focus ring uses `brand-primary`
 - **BookCard**: Progress bars use `brand-primary`
 - **Notifications**: Error notifications use `status-error`
 
 ### Available Color Classes
+
 ```css
 /* Backgrounds */
 bg-brand-primary
@@ -97,12 +101,15 @@ All brand colors automatically adapt to dark mode with brighter variants that ma
 ## 🛠️ Technical Details
 
 ### Color Format
+
 We use **OKLCH** color format for better color manipulation and consistency:
+
 - **L**: Lightness (0-1)
 - **C**: Chroma (saturation, 0-0.4)
 - **H**: Hue (0-360 degrees)
 
 ### Benefits
+
 1. **Perceptually uniform** - Changes in values correspond to visual changes
 2. **Better gradients** - Smooth transitions between colors
 3. **Consistent brightness** - Easy to create hover states and variants
@@ -111,27 +118,30 @@ We use **OKLCH** color format for better color manipulation and consistency:
 ## 📝 Examples
 
 ### Changing to Green/Emerald Brand
+
 ```css
 :root {
-  --brand-primary: oklch(0.65 0.15 140);     /* Green */
-  --brand-secondary: oklch(0.45 0.1 140);    /* Dark green */
+  --brand-primary: oklch(0.65 0.15 140); /* Green */
+  --brand-secondary: oklch(0.45 0.1 140); /* Dark green */
 }
 ```
 
 ### Changing to Purple/Violet Brand
+
 ```css
 :root {
-  --brand-primary: oklch(0.65 0.2 280);      /* Purple */
-  --brand-secondary: oklch(0.45 0.15 280);   /* Dark purple */
+  --brand-primary: oklch(0.65 0.2 280); /* Purple */
+  --brand-secondary: oklch(0.45 0.15 280); /* Dark purple */
 }
 ```
 
 ### Changing to Orange/Amber Brand
+
 ```css
 :root {
-  --brand-primary: oklch(0.7 0.15 50);       /* Orange */
-  --brand-secondary: oklch(0.5 0.1 50);      /* Dark orange */
+  --brand-primary: oklch(0.7 0.15 50); /* Orange */
+  --brand-secondary: oklch(0.5 0.1 50); /* Dark orange */
 }
 ```
 
-All components will automatically use the new colors without any additional changes! 
+All components will automatically use the new colors without any additional changes!

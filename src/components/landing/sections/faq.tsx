@@ -15,7 +15,8 @@ interface FAQProps {
 const FAQList: FAQProps[] = [
   {
     question: "Is Librarium free to use?",
-    answer: "Yes! Librarium offers a generous free tier that allows you to track up to 50 books with basic features. You can upgrade to Reader Pro for unlimited books and advanced analytics.",
+    answer:
+      "Yes! Librarium offers a generous free tier that allows you to track up to 50 books with basic features. You can upgrade to Reader Pro for unlimited books and advanced analytics.",
     value: "item-1",
   },
   {
@@ -32,7 +33,8 @@ const FAQList: FAQProps[] = [
   },
   {
     question: "Is my reading data private and secure?",
-    answer: "Your privacy is our priority. All your reading data is securely stored and encrypted. You control who can see your reading activity and can make your profile private at any time.",
+    answer:
+      "Your privacy is our priority. All your reading data is securely stored and encrypted. You control who can see your reading activity and can make your profile private at any time.",
     value: "item-4",
   },
   {
@@ -47,7 +49,9 @@ export const FAQSection = () => {
   return (
     <section id="faq" className="container mx-auto md:w-[700px] py-24 sm:py-32">
       <div className="text-center mb-8">
-        <h2 className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}>
+        <h2
+          className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        >
           FAQS
         </h2>
 

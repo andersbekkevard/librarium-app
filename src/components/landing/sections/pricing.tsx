@@ -80,7 +80,9 @@ const plans: PlanProps[] = [
 export const PricingSection = () => {
   return (
     <section id="pricing" className="container py-24 sm:py-32">
-      <h2 className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}>
+      <h2
+        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+      >
         Pricing
       </h2>
 
@@ -89,7 +91,8 @@ export const PricingSection = () => {
       </h2>
 
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground pb-14">
-        Start free and upgrade when you&apos;re ready for more advanced reading features.
+        Start free and upgrade when you&apos;re ready for more advanced reading
+        features.
       </h3>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-4">
@@ -139,13 +142,11 @@ export const PricingSection = () => {
                       : ""
                   }`}
                 >
-                  <Link href="/dashboard">
-                    {buttonText}
-                  </Link>
+                  <Link href="/dashboard">{buttonText}</Link>
                 </Button>
               </CardFooter>
             </Card>
-          )
+          ),
         )}
       </div>
     </section>

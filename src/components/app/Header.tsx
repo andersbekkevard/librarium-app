@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search, Bell, Book, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ToggleTheme } from "@/components/toggle-theme"
-import UserProfileDropdown from "@/components/app/UserProfileDropdown"
-import { useAuthContext } from "@/components/auth/AuthProvider"
+import { useState } from "react";
+import { Search, Bell, Book, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ToggleTheme } from "@/components/toggle-theme";
+import UserProfileDropdown from "@/components/app/UserProfileDropdown";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 
 interface HeaderProps {
-  onSearch?: (query: string) => void
-  notificationCount?: number
+  onSearch?: (query: string) => void;
+  notificationCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onSearch,
-  notificationCount = 3
+  notificationCount = 3,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const { user, loading } = useAuthContext()
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user, loading } = useAuthContext();
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSearch?.(searchQuery)
-  }
+    e.preventDefault();
+    onSearch?.(searchQuery);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-background border-b border-border px-6 py-4 z-50">
@@ -32,9 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
             <Book className="h-4 w-4 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">
-            Librarium
-          </h1>
+          <h1 className="text-xl font-bold text-foreground">Librarium</h1>
         </div>
 
         {/* Search Bar */}
@@ -58,11 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Notifications */}
           <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-9 h-9 p-0"
-            >
+            <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
               <Bell className="size-5" />
             </Button>
             {notificationCount > 0 && (
@@ -83,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header 
+export default Header;

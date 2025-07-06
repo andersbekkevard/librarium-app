@@ -1,66 +1,76 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Star, BookOpen, Edit, RotateCcw } from "lucide-react"
-import { Book } from "@/lib/models"
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Star, BookOpen, Edit, RotateCcw } from "lucide-react";
+import { Book } from "@/lib/models";
 
 interface BookCardProps {
-  book: Book
-  onEdit?: (book: Book) => void
-  onUpdateProgress?: (book: Book) => void
+  book: Book;
+  onEdit?: (book: Book) => void;
+  onUpdateProgress?: (book: Book) => void;
 }
 
 // Helper functions
-const getReadingStateBadge = (state: Book['state']) => {
+const getReadingStateBadge = (state: Book["state"]) => {
   switch (state) {
-    case 'not_started':
-      return { label: 'Not Started', variant: 'secondary' as const }
-    case 'in_progress':
-      return { label: 'Reading', variant: 'default' as const }
-    case 'finished':
-      return { label: 'Finished', variant: 'outline' as const }
+    case "not_started":
+      return { label: "Not Started", variant: "secondary" as const };
+    case "in_progress":
+      return { label: "Reading", variant: "default" as const };
+    case "finished":
+      return { label: "Finished", variant: "outline" as const };
     default:
-      return { label: 'Unknown', variant: 'secondary' as const }
+      return { label: "Unknown", variant: "secondary" as const };
   }
-}
+};
 
 const calculateProgress = (currentPage: number, totalPages: number): number => {
-  return Math.round((currentPage / totalPages) * 100)
-}
+  return Math.round((currentPage / totalPages) * 100);
+};
 
 const renderStars = (rating: number) => {
   return Array.from({ length: 5 }, (_, i) => (
     <Star
       key={i}
       className={`h-3 w-3 ${
-        i < rating 
-          ? 'fill-status-warning text-status-warning' 
-          : 'fill-muted text-muted'
+        i < rating
+          ? "fill-status-warning text-status-warning"
+          : "fill-muted text-muted"
       }`}
     />
-  ))
-}
+  ));
+};
 
-export const BookCard: React.FC<BookCardProps> = ({ 
-  book, 
-  onEdit, 
-  onUpdateProgress 
+export const BookCard: React.FC<BookCardProps> = ({
+  book,
+  onEdit,
+  onUpdateProgress,
 }) => {
-  const badgeInfo = getReadingStateBadge(book.state)
-  const progress = book.state === 'in_progress' && book.progress.currentPage && book.progress.totalPages
-    ? calculateProgress(book.progress.currentPage, book.progress.totalPages)
-    : book.progress.percentage || 0
+  const badgeInfo = getReadingStateBadge(book.state);
+  const progress =
+    book.state === "in_progress" &&
+    book.progress.currentPage &&
+    book.progress.totalPages
+      ? calculateProgress(book.progress.currentPage, book.progress.totalPages)
+      : book.progress.percentage || 0;
 
   const handleEdit = () => {
-    onEdit?.(book)
-  }
+    onEdit?.(book);
+  };
 
   const handleUpdateProgress = () => {
-    onUpdateProgress?.(book)
-  }
+    onUpdateProgress?.(book);
+  };
 
   return (
     <Card className="w-full max-w-xs mx-auto">
@@ -104,16 +114,17 @@ export const BookCard: React.FC<BookCardProps> = ({
         </CardDescription>
 
         {/* Progress for In Progress Books */}
-        {book.state === 'in_progress' && book.progress.currentPage && (
+        {book.state === "in_progress" && book.progress.currentPage && (
           <div className="mb-2">
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-medium">{progress}% complete</span>
               <span className="text-xs text-muted-foreground">
-                {book.progress.currentPage} / {book.progress.totalPages || '?'} pages
+                {book.progress.currentPage} / {book.progress.totalPages || "?"}{" "}
+                pages
               </span>
             </div>
             <div className="w-full bg-muted rounded-full h-1.5">
-              <div 
+              <div
                 className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
@@ -122,7 +133,7 @@ export const BookCard: React.FC<BookCardProps> = ({
         )}
 
         {/* Star Rating for Finished Books */}
-        {book.state === 'finished' && book.rating && (
+        {book.state === "finished" && book.rating && (
           <div className="flex items-center gap-1 mb-2">
             {renderStars(book.rating)}
             <span className="text-xs text-muted-foreground ml-1">
@@ -134,9 +145,9 @@ export const BookCard: React.FC<BookCardProps> = ({
 
       <CardFooter className="pt-2 flex gap-2">
         {/* Edit Button - Always Visible */}
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleEdit}
           className="flex-1 text-xs px-2 py-1"
         >
@@ -145,10 +156,10 @@ export const BookCard: React.FC<BookCardProps> = ({
         </Button>
 
         {/* Update Button - Only for In Progress Books */}
-        {book.state === 'in_progress' && (
-          <Button 
-            variant="default" 
-            size="sm" 
+        {book.state === "in_progress" && (
+          <Button
+            variant="default"
+            size="sm"
             onClick={handleUpdateProgress}
             className="flex-1 text-xs px-2 py-1"
           >
@@ -158,7 +169,7 @@ export const BookCard: React.FC<BookCardProps> = ({
         )}
       </CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default BookCard 
+export default BookCard;

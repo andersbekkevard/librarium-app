@@ -43,7 +43,9 @@ const serviceList: ServiceProps[] = [
 export const ServicesSection = () => {
   return (
     <section id="services" className="container py-24 sm:py-32">
-      <h2 className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}>
+      <h2
+        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+      >
         Integrations
       </h2>
 
@@ -66,8 +68,8 @@ export const ServicesSection = () => {
               <div className="flex justify-between">
                 <CardTitle className="mb-2">{title}</CardTitle>
                 {pro === ProService.YES && (
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`${BRAND_CLASSES.primary.bg} text-primary-foreground`}
                   >
                     PRO

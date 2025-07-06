@@ -1,129 +1,133 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuthContext } from "@/components/auth/AuthProvider"
-import { signOut as authSignOut } from "@/lib/auth"
-import { 
-  User, 
-  Settings, 
-  Target, 
-  Shield, 
-  Activity, 
-  Download, 
-  HelpCircle, 
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/components/auth/AuthProvider";
+import { signOut as authSignOut } from "@/lib/auth";
+import {
+  User,
+  Settings,
+  Target,
+  Shield,
+  Activity,
+  Download,
+  HelpCircle,
   LogOut,
-  ChevronRight 
-} from "lucide-react"
+  ChevronRight,
+} from "lucide-react";
 
 export const UserProfileDropdown: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isSigningOut, setIsSigningOut] = useState(false)
-  const { user, userProfile } = useAuthContext()
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { user, userProfile } = useAuthContext();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSignOut = async () => {
-    setIsSigningOut(true)
-    
+    setIsSigningOut(true);
+
     try {
-      const result = await authSignOut()
-      
+      const result = await authSignOut();
+
       if (result.success) {
-        setIsOpen(false)
+        setIsOpen(false);
         // Redirect to landing page after successful logout
-        router.push('/')
+        router.push("/");
       } else {
         // Handle sign out error
-        console.error('Sign out failed:', result.error?.message)
+        console.error("Sign out failed:", result.error?.message);
         // You could show a toast notification here
-        alert(`Failed to sign out: ${result.error?.message}`)
+        alert(`Failed to sign out: ${result.error?.message}`);
       }
     } catch (error) {
-      console.error('Error signing out:', error)
-      alert('An unexpected error occurred while signing out')
+      console.error("Error signing out:", error);
+      alert("An unexpected error occurred while signing out");
     } finally {
-      setIsSigningOut(false)
+      setIsSigningOut(false);
     }
-  }
+  };
 
   const handleMenuItemClick = (action: string) => {
-    console.log('Menu item clicked:', action)
-    setIsOpen(false)
+    console.log("Menu item clicked:", action);
+    setIsOpen(false);
     // TODO: Implement navigation to respective pages
-  }
+  };
 
   const menuItems = [
-    { 
-      id: 'profile', 
-      label: 'Profile Settings', 
-      icon: User, 
-      action: () => handleMenuItemClick('profile') 
+    {
+      id: "profile",
+      label: "Profile Settings",
+      icon: User,
+      action: () => handleMenuItemClick("profile"),
     },
-    { 
-      id: 'account', 
-      label: 'Account Settings', 
-      icon: Settings, 
-      action: () => handleMenuItemClick('account') 
+    {
+      id: "account",
+      label: "Account Settings",
+      icon: Settings,
+      action: () => handleMenuItemClick("account"),
     },
-    { 
-      id: 'goals', 
-      label: 'Reading Goals', 
-      icon: Target, 
-      action: () => handleMenuItemClick('goals') 
+    {
+      id: "goals",
+      label: "Reading Goals",
+      icon: Target,
+      action: () => handleMenuItemClick("goals"),
     },
-    { 
-      id: 'privacy', 
-      label: 'Privacy Settings', 
-      icon: Shield, 
-      action: () => handleMenuItemClick('privacy') 
+    {
+      id: "privacy",
+      label: "Privacy Settings",
+      icon: Shield,
+      action: () => handleMenuItemClick("privacy"),
     },
-    { 
-      id: 'activity', 
-      label: 'Activity History', 
-      icon: Activity, 
-      action: () => handleMenuItemClick('activity') 
+    {
+      id: "activity",
+      label: "Activity History",
+      icon: Activity,
+      action: () => handleMenuItemClick("activity"),
     },
-    { 
-      id: 'export', 
-      label: 'Export Data', 
-      icon: Download, 
-      action: () => handleMenuItemClick('export') 
+    {
+      id: "export",
+      label: "Export Data",
+      icon: Download,
+      action: () => handleMenuItemClick("export"),
     },
-    { 
-      id: 'help', 
-      label: 'Help & Support', 
-      icon: HelpCircle, 
-      action: () => handleMenuItemClick('help') 
+    {
+      id: "help",
+      label: "Help & Support",
+      icon: HelpCircle,
+      action: () => handleMenuItemClick("help"),
     },
-  ]
+  ];
 
   // Use UserProfile data with Firebase user as fallback
-  const displayName = userProfile?.displayName || user?.displayName || 'Anonymous User'
-  const displayEmail = userProfile?.email || user?.email || 'No email'
-  const photoURL = userProfile?.photoURL || user?.photoURL
-  const memberSince = userProfile?.createdAt ? 
-    userProfile.createdAt.toDate().getFullYear().toString() :
-    (user?.metadata?.creationTime ? 
-      new Date(user.metadata.creationTime).getFullYear().toString() : 
-      '2024')
-  
+  const displayName =
+    userProfile?.displayName || user?.displayName || "Anonymous User";
+  const displayEmail = userProfile?.email || user?.email || "No email";
+  const photoURL = userProfile?.photoURL || user?.photoURL;
+  const memberSince = userProfile?.createdAt
+    ? userProfile.createdAt.toDate().getFullYear().toString()
+    : user?.metadata?.creationTime
+      ? new Date(user.metadata.creationTime).getFullYear().toString()
+      : "2024";
+
   // User statistics from profile
-  const booksRead = userProfile?.totalBooksRead || 0
-  const currentlyReading = userProfile?.currentlyReading || 0
-  const booksInLibrary = userProfile?.booksInLibrary || 0
+  const booksRead = userProfile?.totalBooksRead || 0;
+  const currentlyReading = userProfile?.currentlyReading || 0;
+  const booksInLibrary = userProfile?.booksInLibrary || 0;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -140,20 +144,20 @@ export const UserProfileDropdown: React.FC = () => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setIsOpen(!isOpen)
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsOpen(!isOpen);
             }
           }}
           className="w-10 h-10 rounded-lg hover:bg-muted transition-colors duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
-          aria-label={`User menu for ${displayName}. ${isOpen ? 'Close menu' : 'Open menu'}`}
+          aria-label={`User menu for ${displayName}. ${isOpen ? "Close menu" : "Open menu"}`}
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
           {photoURL ? (
-            <img 
-              src={photoURL} 
-              alt="Profile" 
+            <img
+              src={photoURL}
+              alt="Profile"
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
@@ -169,9 +173,9 @@ export const UserProfileDropdown: React.FC = () => {
           <div className="px-4 py-3 border-b border-border bg-muted/20">
             <div className="flex items-center space-x-3">
               {photoURL ? (
-                <img 
-                  src={photoURL} 
-                  alt="Profile" 
+                <img
+                  src={photoURL}
+                  alt="Profile"
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
@@ -200,7 +204,7 @@ export const UserProfileDropdown: React.FC = () => {
           {/* Menu Items */}
           <div className="py-2">
             {menuItems.map((item) => {
-              const Icon = item.icon
+              const Icon = item.icon;
               return (
                 <button
                   key={item.id}
@@ -215,7 +219,7 @@ export const UserProfileDropdown: React.FC = () => {
                   </div>
                   <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100" />
                 </button>
-              )
+              );
             })}
           </div>
 
@@ -249,7 +253,7 @@ export const UserProfileDropdown: React.FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default UserProfileDropdown 
+export default UserProfileDropdown;

@@ -55,11 +55,13 @@ const routeList: RouteProps[] = [
 const featureList: FeatureProps[] = [
   {
     title: "Track Your Reading",
-    description: "Monitor your reading progress and maintain your personal library.",
+    description:
+      "Monitor your reading progress and maintain your personal library.",
   },
   {
     title: "Discover Books",
-    description: "Find new books with intelligent recommendations and social features.",
+    description:
+      "Find new books with intelligent recommendations and social features.",
   },
   {
     title: "Reading Analytics",
@@ -72,7 +74,9 @@ export const Navbar = () => {
   return (
     <header className="shadow-inner bg-opacity-15 w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border border-secondary z-40 rounded-2xl flex justify-between items-center p-2 bg-card">
       <Link href="/" className="font-bold text-lg flex items-center">
-        <Book className={`${BRAND_CLASSES.primary.bg} ${BRAND_CLASSES.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`} />
+        <Book
+          className={`${BRAND_CLASSES.primary.bg} ${BRAND_CLASSES.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
+        />
         Librarium
       </Link>
       {/* <!-- Mobile --> */}
@@ -93,7 +97,9 @@ export const Navbar = () => {
               <SheetHeader className="mb-4 ml-4">
                 <SheetTitle className="flex items-center">
                   <Link href="/" className="flex items-center">
-                    <Book className={`${BRAND_CLASSES.primary.bg} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-9 h-9 mr-2 border text-white`} />
+                    <Book
+                      className={`${BRAND_CLASSES.primary.bg} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-9 h-9 mr-2 border text-white`}
+                    />
                     Librarium
                   </Link>
                 </SheetTitle>

@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Librarium - Your Personal Book Collection",
-  description: "Track your reading progress and organize your personal library with Librarium",
+  description:
+    "Track your reading progress and organize your personal library with Librarium",
 };
 
 export default function RootLayout({
@@ -27,7 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={cn("min-h-screen bg-background", geistSans.variable, geistMono.variable, "antialiased")}
+        className={cn(
+          "min-h-screen bg-background",
+          geistSans.variable,
+          geistMono.variable,
+          "antialiased",
+        )}
       >
         <ThemeProvider
           attribute="class"

@@ -2,13 +2,13 @@
 
 A web application for managing personal book collections and tracking reading progress.
 
-
 ### Landing page
+
 ![Landing Page](public/images/landing-page.png "Landing Page")
 
 ### Dashboard
-![Dashboard](public/images/dashboard.png "Dashboard")
 
+![Dashboard](public/images/dashboard.png "Dashboard")
 
 ## Overview
 
@@ -29,6 +29,7 @@ The application is in active development with the following functionality implem
 ## Technology Stack
 
 ### Frontend
+
 - **Next.js 15**: React framework with App Router
 - **React 19**: UI library with TypeScript support
 - **TypeScript**: Type-safe development
@@ -37,12 +38,14 @@ The application is in active development with the following functionality implem
 - **Lucide React**: Icon library
 
 ### Backend & Database
+
 - **Firebase Authentication**: User management with Google OAuth
 - **Firebase Firestore**: Real-time NoSQL database
 
 - **Google Books API**: Book metadata and cover images
 
 ### Development Tools
+
 - **ESLint**: Code linting with Next.js configuration
 - **PostCSS**: CSS processing with Tailwind CSS
 - **Turbopack**: Fast development bundler (Next.js 15)
@@ -50,6 +53,7 @@ The application is in active development with the following functionality implem
 ## Architecture
 
 The application follows a Firebase-native approach with:
+
 - Direct Firebase SDK integration in React components
 - Real-time data synchronization via Firestore listeners
 - Type-safe data models with TypeScript interfaces
@@ -59,6 +63,7 @@ The application follows a Firebase-native approach with:
 ## Getting Started
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -70,6 +75,7 @@ npm install
    - Add your Firebase configuration to environment variables
 
 3. Run the development server:
+
 ```bash
 npm run dev
 ```

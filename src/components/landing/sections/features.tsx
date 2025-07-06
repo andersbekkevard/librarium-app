@@ -50,7 +50,9 @@ const featureList: FeaturesProps[] = [
 export const FeaturesSection = () => {
   return (
     <section id="features" className="container py-24 sm:py-32">
-      <h2 className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}>
+      <h2
+        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+      >
         Features
       </h2>
 
@@ -59,8 +61,9 @@ export const FeaturesSection = () => {
       </h2>
 
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        From tracking your progress to discovering your next favorite book, 
-        Librarium provides all the tools you need for an enriched reading experience.
+        From tracking your progress to discovering your next favorite book,
+        Librarium provides all the tools you need for an enriched reading
+        experience.
       </h3>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -68,10 +71,10 @@ export const FeaturesSection = () => {
           <div key={title}>
             <Card className="h-full bg-background border-0 shadow-none">
               <CardHeader className="flex flex-col justify-center items-center">
-                <div className={`${BRAND_CLASSES.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}>
-                  <div className={BRAND_CLASSES.primary.text}>
-                    {icon}
-                  </div>
+                <div
+                  className={`${BRAND_CLASSES.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
+                >
+                  <div className={BRAND_CLASSES.primary.text}>{icon}</div>
                 </div>
 
                 <CardTitle className="text-center">{title}</CardTitle>

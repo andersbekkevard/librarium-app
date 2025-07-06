@@ -1,7 +1,11 @@
-'use client';
+"use client";
 
-import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export interface AuthError {
   code: string;
@@ -21,35 +25,36 @@ export const signInWithGoogle = async (): Promise<AuthResult> => {
   try {
     const provider = new GoogleAuthProvider();
     // Add scopes for user profile information
-    provider.addScope('email');
-    provider.addScope('profile');
-    
+    provider.addScope("email");
+    provider.addScope("profile");
+
     const result = await signInWithPopup(auth, provider);
-    
+
     return {
       success: true,
       user: result.user,
     };
   } catch (error: any) {
-    console.error('Google sign-in error:', error);
-    
+    console.error("Google sign-in error:", error);
+
     // Handle specific error cases
-    let message = 'Failed to sign in with Google';
-    
-    if (error.code === 'auth/popup-blocked') {
-      message = 'Popup was blocked by your browser. Please allow popups and try again.';
-    } else if (error.code === 'auth/popup-closed-by-user') {
-      message = 'Sign-in was cancelled. Please try again.';
-    } else if (error.code === 'auth/network-request-failed') {
-      message = 'Network error. Please check your connection and try again.';
+    let message = "Failed to sign in with Google";
+
+    if (error.code === "auth/popup-blocked") {
+      message =
+        "Popup was blocked by your browser. Please allow popups and try again.";
+    } else if (error.code === "auth/popup-closed-by-user") {
+      message = "Sign-in was cancelled. Please try again.";
+    } else if (error.code === "auth/network-request-failed") {
+      message = "Network error. Please check your connection and try again.";
     } else if (error.message) {
       message = error.message;
     }
-    
+
     return {
       success: false,
       error: {
-        code: error.code || 'unknown',
+        code: error.code || "unknown",
         message,
       },
     };
@@ -66,12 +71,12 @@ export const signOut = async (): Promise<AuthResult> => {
       success: true,
     };
   } catch (error: any) {
-    console.error('Sign-out error:', error);
+    console.error("Sign-out error:", error);
     return {
       success: false,
       error: {
-        code: error.code || 'unknown',
-        message: error.message || 'Failed to sign out',
+        code: error.code || "unknown",
+        message: error.message || "Failed to sign out",
       },
     };
   }
@@ -89,4 +94,4 @@ export const isAuthenticated = (): boolean => {
  */
 export const getCurrentUser = () => {
   return auth.currentUser;
-}; 
+};

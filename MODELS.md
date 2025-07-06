@@ -10,21 +10,21 @@ The `UserProfile` represents basic user information and preferences stored in Fi
 
 ```typescript
 interface UserProfile {
-  id: string;                    // Firebase Auth UID
-  displayName: string;           // User's display name from Google
-  email: string;                 // User's email address from Google
-  photoURL?: string;             // Profile picture URL from Google
-  createdAt: Timestamp;          // Account creation timestamp
-  updatedAt: Timestamp;          // Last profile update timestamp
-  
+  id: string; // Firebase Auth UID
+  displayName: string; // User's display name from Google
+  email: string; // User's email address from Google
+  photoURL?: string; // Profile picture URL from Google
+  createdAt: Timestamp; // Account creation timestamp
+  updatedAt: Timestamp; // Last profile update timestamp
+
   // Google Auth metadata
-  emailVerified: boolean;        // Email verification status from Google
-  lastSignInTime: string;        // Last sign-in timestamp from Firebase Auth
-  
+  emailVerified: boolean; // Email verification status from Google
+  lastSignInTime: string; // Last sign-in timestamp from Firebase Auth
+
   // MVP-specific fields
-  totalBooksRead: number;        // Count of finished books
-  currentlyReading: number;      // Count of books in progress
-  booksInLibrary: number;        // Total books in collection
+  totalBooksRead: number; // Count of finished books
+  currentlyReading: number; // Count of books in progress
+  booksInLibrary: number; // Total books in collection
 }
 ```
 
@@ -36,33 +36,33 @@ The `Book` represents a book in the user's personal library with reading state t
 
 ```typescript
 interface Book {
-  id: string;                    // Unique book identifier
-  title: string;                 // Book title
-  author: string;                // Primary author
-  
+  id: string; // Unique book identifier
+  title: string; // Book title
+  author: string; // Primary author
+
   // Reading state management
-  state: 'not_started' | 'in_progress' | 'finished';
+  state: "not_started" | "in_progress" | "finished";
   progress: {
-    currentPage: number;         // Current reading position
-    totalPages?: number;         // Total pages (if known)
-    percentage?: number;         // Reading percentage (0-100)
+    currentPage: number; // Current reading position
+    totalPages?: number; // Total pages (if known)
+    percentage?: number; // Reading percentage (0-100)
   };
-  
+
   // Ownership and rating
-  isOwned: boolean;              // true = owned, false = wishlist
-  rating?: number;               // User rating (1-5 stars)
-  
+  isOwned: boolean; // true = owned, false = wishlist
+  rating?: number; // User rating (1-5 stars)
+
   // Metadata (populated from Google Books API or user input)
-  isbn?: string;                 // ISBN identifier
-  coverImage?: string;           // Cover image URL
-  publishedDate?: string;        // Publication date
-  description?: string;          // Book description
-  
+  isbn?: string; // ISBN identifier
+  coverImage?: string; // Cover image URL
+  publishedDate?: string; // Publication date
+  description?: string; // Book description
+
   // Timestamps
-  addedAt: Timestamp;            // When book was added to library
-  updatedAt: Timestamp;          // Last update timestamp
-  startedAt?: Timestamp;         // When user started reading
-  finishedAt?: Timestamp;        // When user finished reading
+  addedAt: Timestamp; // When book was added to library
+  updatedAt: Timestamp; // Last update timestamp
+  startedAt?: Timestamp; // When user started reading
+  finishedAt?: Timestamp; // When user finished reading
 }
 ```
 
@@ -74,27 +74,27 @@ The `BookEvent` logs reading activities and state changes for future timeline fe
 
 ```typescript
 interface BookEvent {
-  id: string;                    // Unique event identifier
-  bookId: string;                // Reference to the book
-  userId: string;                // Reference to the user
-  
+  id: string; // Unique event identifier
+  bookId: string; // Reference to the book
+  userId: string; // Reference to the user
+
   // Event details
-  type: 'state_change' | 'progress_update' | 'rating_added' | 'note_added';
-  timestamp: Timestamp;          // When the event occurred
-  
+  type: "state_change" | "progress_update" | "rating_added" | "note_added";
+  timestamp: Timestamp; // When the event occurred
+
   // Event-specific data
   data: {
     // For state_change events
-    previousState?: Book['state'];
-    newState?: Book['state'];
-    
+    previousState?: Book["state"];
+    newState?: Book["state"];
+
     // For progress_update events
     previousPage?: number;
     newPage?: number;
-    
+
     // For rating_added events
     rating?: number;
-    
+
     // For note_added events (future expansion)
     note?: string;
   };
@@ -126,6 +126,7 @@ users/{userId}/
 ### Reading State Machine
 
 Books follow a strict state progression:
+
 - `not_started` → `in_progress` → `finished`
 - State changes are logged as BookEvents
 - Progress tracking is only active for `in_progress` books
@@ -147,6 +148,7 @@ Books follow a strict state progression:
 ### Security Rules
 
 Firestore security rules ensure users can only access their own data:
+
 - Read/write access limited to authenticated users
 - Documents scoped to user ID
 - No cross-user data access
@@ -163,6 +165,7 @@ Firestore security rules ensure users can only access their own data:
 ### Future Expansion
 
 This MVP structure supports future features:
+
 - Book sharing and collaboration
 - Reading goals and statistics
 - Social features and recommendations

@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { useState, useMemo, useEffect } from 'react'
-import { 
+import * as React from "react";
+import { useState, useMemo, useEffect } from "react";
+import {
   Grid,
   List,
   SortAsc,
@@ -11,61 +11,64 @@ import {
   BookOpen,
   Star,
   User,
-  Loader2
-} from 'lucide-react'
+  Loader2,
+} from "lucide-react";
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import BookCard from '@/components/app/BookCard'
-import { Book } from '@/lib/models'
-import { bookOperations } from '@/lib/firebase-utils'
-import { useAuth } from '@/lib/useAuth'
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import BookCard from "@/components/app/BookCard";
+import { Book } from "@/lib/models";
+import { bookOperations } from "@/lib/firebase-utils";
+import { useAuth } from "@/lib/useAuth";
 
-
-type ViewMode = 'grid' | 'list'
-type SortOption = 'title' | 'author' | 'pages' | 'rating' | 'progress'
-type SortDirection = 'asc' | 'desc'
-type FilterStatus = 'all' | 'not_started' | 'in_progress' | 'finished'
+type ViewMode = "grid" | "list";
+type SortOption = "title" | "author" | "pages" | "rating" | "progress";
+type SortDirection = "asc" | "desc";
+type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
 
 interface BookListItemProps {
-  book: Book
-  onEdit: (book: Book) => void
-  onUpdateProgress: (book: Book) => void
+  book: Book;
+  onEdit: (book: Book) => void;
+  onUpdateProgress: (book: Book) => void;
 }
 
-export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpdateProgress }) => {
+export const BookListItem: React.FC<BookListItemProps> = ({
+  book,
+  onEdit,
+  onUpdateProgress,
+}) => {
   const getProgressPercentage = () => {
-    if (book.state === 'finished') return 100
-    if (book.state === 'in_progress') {
-      return book.progress.percentage || 0
+    if (book.state === "finished") return 100;
+    if (book.state === "in_progress") {
+      return book.progress.percentage || 0;
     }
-    return 0
-  }
+    return 0;
+  };
 
   const getStatusBadge = () => {
     switch (book.state) {
-      case 'not_started':
-        return <Badge variant="secondary">Not Started</Badge>
-      case 'in_progress':
-        return <Badge variant="default">Reading</Badge>
-      case 'finished':
-        return <Badge variant="outline">Finished</Badge>
+      case "not_started":
+        return <Badge variant="secondary">Not Started</Badge>;
+      case "in_progress":
+        return <Badge variant="default">Reading</Badge>;
+      case "finished":
+        return <Badge variant="outline">Finished</Badge>;
     }
-  }
+  };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
         className={`h-3 w-3 ${
-          i < rating 
-            ? 'fill-status-warning text-status-warning' 
-            : 'fill-muted text-muted'
+          i < rating
+            ? "fill-status-warning text-status-warning"
+            : "fill-muted text-muted"
         }`}
       />
-    ))
-  }
+    ));
+  };
 
   return (
     <Card className="w-full">
@@ -101,7 +104,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
             <div className="text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <BookOpen className="h-3 w-3" />
-                {book.progress.totalPages || '?'} pages
+                {book.progress.totalPages || "?"} pages
               </span>
             </div>
 
@@ -124,14 +127,14 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
             <div className="flex items-center justify-between">
               {/* Rating or Progress */}
               <div className="flex items-center gap-1">
-                {book.state === 'finished' && book.rating ? (
+                {book.state === "finished" && book.rating ? (
                   <div className="flex items-center gap-1">
                     {renderStars(book.rating)}
                     <span className="text-xs text-muted-foreground ml-1">
                       ({book.rating}/5)
                     </span>
                   </div>
-                ) : book.state === 'in_progress' ? (
+                ) : book.state === "in_progress" ? (
                   <div className="text-xs text-muted-foreground">
                     {getProgressPercentage()}% complete
                   </div>
@@ -153,7 +156,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
                   <span className="sr-only">Edit</span>
                   ✏️
                 </Button>
-                {book.state === 'in_progress' && (
+                {book.state === "in_progress" && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -170,173 +173,189 @@ export const BookListItem: React.FC<BookListItemProps> = ({ book, onEdit, onUpda
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 interface MyLibraryPageProps {
-  searchQuery?: string
+  searchQuery?: string;
 }
 
-export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }) => {
-  const { user, loading: authLoading } = useAuth()
-  const [books, setBooks] = useState<Book[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
-  const [sortBy, setSortBy] = useState<SortOption>('title')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
-  const [filterOwnership, setFilterOwnership] = useState<string>('all')
+export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
+  searchQuery = "",
+}) => {
+  const { user, loading: authLoading } = useAuth();
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortBy, setSortBy] = useState<SortOption>("title");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [filterOwnership, setFilterOwnership] = useState<string>("all");
 
   // Load user's books from Firestore
   useEffect(() => {
     if (authLoading || !user) {
-      setLoading(authLoading)
-      return
+      setLoading(authLoading);
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     // Subscribe to real-time updates of user's books
-    const unsubscribe = bookOperations.subscribeToUserBooks(user.uid, (userBooks) => {
-      setBooks(userBooks)
-      setLoading(false)
-    })
+    const unsubscribe = bookOperations.subscribeToUserBooks(
+      user.uid,
+      (userBooks) => {
+        setBooks(userBooks);
+        setLoading(false);
+      },
+    );
 
-    return unsubscribe
-  }, [user, authLoading])
-
+    return unsubscribe;
+  }, [user, authLoading]);
 
   // Filter and sort books
   const filteredAndSortedBooks = useMemo(() => {
-    let filtered = books
+    let filtered = books;
 
     // Apply search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(book => 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      filtered = filtered.filter(
+        (book) =>
+          book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          book.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
     }
 
     // Apply status filter
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(book => book.state === filterStatus)
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((book) => book.state === filterStatus);
     }
 
     // Apply ownership filter
-    if (filterOwnership !== 'all') {
-      filtered = filtered.filter(book => 
-        filterOwnership === 'owned' ? book.isOwned : !book.isOwned
-      )
+    if (filterOwnership !== "all") {
+      filtered = filtered.filter((book) =>
+        filterOwnership === "owned" ? book.isOwned : !book.isOwned,
+      );
     }
 
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
-      let aValue: string | number
-      let bValue: string | number
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (sortBy) {
-        case 'title':
-          aValue = a.title.toLowerCase()
-          bValue = b.title.toLowerCase()
-          break
-        case 'author':
-          aValue = a.author.toLowerCase()
-          bValue = b.author.toLowerCase()
-          break
-        case 'pages':
-          aValue = a.progress.totalPages || 0
-          bValue = b.progress.totalPages || 0
-          break
-        case 'rating':
-          aValue = a.rating || 0
-          bValue = b.rating || 0
-          break
-        case 'progress':
-          const aProgress = a.state === 'finished' ? 100 : a.progress.percentage || 0
-          const bProgress = b.state === 'finished' ? 100 : b.progress.percentage || 0
-          aValue = aProgress
-          bValue = bProgress
-          break
+        case "title":
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case "author":
+          aValue = a.author.toLowerCase();
+          bValue = b.author.toLowerCase();
+          break;
+        case "pages":
+          aValue = a.progress.totalPages || 0;
+          bValue = b.progress.totalPages || 0;
+          break;
+        case "rating":
+          aValue = a.rating || 0;
+          bValue = b.rating || 0;
+          break;
+        case "progress":
+          const aProgress =
+            a.state === "finished" ? 100 : a.progress.percentage || 0;
+          const bProgress =
+            b.state === "finished" ? 100 : b.progress.percentage || 0;
+          aValue = aProgress;
+          bValue = bProgress;
+          break;
         default:
-          aValue = a.title.toLowerCase()
-          bValue = b.title.toLowerCase()
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
       }
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
           ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue)
+          : bValue.localeCompare(aValue);
       } else {
-        return sortDirection === 'asc' 
+        return sortDirection === "asc"
           ? (aValue as number) - (bValue as number)
-          : (bValue as number) - (aValue as number)
+          : (bValue as number) - (aValue as number);
       }
-    })
+    });
 
-    return sorted
-  }, [books, searchQuery, filterStatus, filterOwnership, sortBy, sortDirection])
+    return sorted;
+  }, [
+    books,
+    searchQuery,
+    filterStatus,
+    filterOwnership,
+    sortBy,
+    sortDirection,
+  ]);
 
   const handleEdit = async (book: Book) => {
-    if (!user) return
+    if (!user) return;
     // TODO: Implement edit dialog/modal
-    console.log('Edit book:', book.title)
-  }
+    console.log("Edit book:", book.title);
+  };
 
   const handleUpdateProgress = async (book: Book) => {
-    if (!user) return
+    if (!user) return;
     // TODO: Implement progress update dialog/modal
-    console.log('Update progress for:', book.title)
-  }
+    console.log("Update progress for:", book.title);
+  };
 
   const toggleSort = (option: SortOption) => {
     if (sortBy === option) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(option)
-      setSortDirection('asc')
+      setSortBy(option);
+      setSortDirection("asc");
     }
-  }
+  };
 
   const clearFilters = () => {
-    setFilterStatus('all')
-    setFilterOwnership('all')
-    setSortBy('title')
-    setSortDirection('asc')
-  }
+    setFilterStatus("all");
+    setFilterOwnership("all");
+    setSortBy("title");
+    setSortDirection("asc");
+  };
 
   const activeFiltersCount = [
-    filterStatus !== 'all',
-    filterOwnership !== 'all'
-  ].filter(Boolean).length
+    filterStatus !== "all",
+    filterOwnership !== "all",
+  ].filter(Boolean).length;
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">My Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+            My Library
+          </h1>
           <p className="text-muted-foreground">
             Manage and organize your book collection
           </p>
         </div>
-        
+
         {/* View Toggle */}
         <div className="flex items-center gap-2">
           <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            variant={viewMode === "grid" ? "default" : "outline"}
             size="sm"
-            onClick={() => setViewMode('grid')}
+            onClick={() => setViewMode("grid")}
           >
             <Grid className="h-4 w-4" />
           </Button>
           <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
+            variant={viewMode === "list" ? "default" : "outline"}
             size="sm"
-            onClick={() => setViewMode('list')}
+            onClick={() => setViewMode("list")}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -350,7 +369,10 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
           {searchQuery.trim() && (
             <div className="bg-muted/50 p-3 rounded-md">
               <p className="text-sm text-muted-foreground">
-                Searching for: <span className="font-medium text-foreground">&quot;{searchQuery}&quot;</span>
+                Searching for:{" "}
+                <span className="font-medium text-foreground">
+                  &quot;{searchQuery}&quot;
+                </span>
               </p>
             </div>
           )}
@@ -362,7 +384,9 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
               <span className="text-sm font-medium">Status:</span>
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+                onChange={(e) =>
+                  setFilterStatus(e.target.value as FilterStatus)
+                }
                 className="bg-background border border-input rounded-md px-3 py-1 text-sm"
               >
                 <option value="all">All</option>
@@ -391,25 +415,26 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
               <span className="text-sm font-medium">Sort by:</span>
               <div className="flex gap-1">
                 {[
-                  { key: 'title' as const, label: 'Title' },
-                  { key: 'author' as const, label: 'Author' },
-                  { key: 'pages' as const, label: 'Pages' },
-                  { key: 'rating' as const, label: 'Rating' },
-                  { key: 'progress' as const, label: 'Progress' }
+                  { key: "title" as const, label: "Title" },
+                  { key: "author" as const, label: "Author" },
+                  { key: "pages" as const, label: "Pages" },
+                  { key: "rating" as const, label: "Rating" },
+                  { key: "progress" as const, label: "Progress" },
                 ].map(({ key, label }) => (
                   <Button
                     key={key}
-                    variant={sortBy === key ? 'default' : 'outline'}
+                    variant={sortBy === key ? "default" : "outline"}
                     size="sm"
                     onClick={() => toggleSort(key)}
                     className="flex items-center gap-1"
                   >
                     {label}
-                    {sortBy === key && (
-                      sortDirection === 'asc' ? 
-                        <SortAsc className="h-3 w-3" /> : 
+                    {sortBy === key &&
+                      (sortDirection === "asc" ? (
+                        <SortAsc className="h-3 w-3" />
+                      ) : (
                         <SortDesc className="h-3 w-3" />
-                    )}
+                      ))}
                   </Button>
                 ))}
               </div>
@@ -453,7 +478,9 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
         <Card>
           <CardContent className="p-12 text-center">
             <div className="text-destructive mb-4">⚠️</div>
-            <h3 className="text-lg font-medium text-foreground mb-2">Error loading books</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              Error loading books
+            </h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={() => window.location.reload()} variant="outline">
               Try again
@@ -465,7 +492,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
       {/* Books Display */}
       {!loading && !error && (
         <>
-          {viewMode === 'grid' ? (
+          {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {filteredAndSortedBooks.map((book) => (
                 <BookCard
@@ -496,19 +523,16 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
         <Card>
           <CardContent className="p-12 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-medium text-foreground mb-2">No books found</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              No books found
+            </h3>
             <p className="text-muted-foreground">
-              {activeFiltersCount > 0 
+              {activeFiltersCount > 0
                 ? "Try adjusting your filters or search terms"
-                : "Your library is empty. Start by adding some books!"
-              }
+                : "Your library is empty. Start by adding some books!"}
             </p>
             {activeFiltersCount > 0 && (
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="mt-4"
-              >
+              <Button variant="outline" onClick={clearFilters} className="mt-4">
                 Clear all filters
               </Button>
             )}
@@ -516,7 +540,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
         </Card>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MyLibraryPage 
+export default MyLibraryPage;

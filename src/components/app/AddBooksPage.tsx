@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { useState } from 'react'
-import { 
-  Search, 
-  Plus, 
+import * as React from "react";
+import { useState } from "react";
+import {
+  Search,
+  Plus,
   BookOpen,
   ExternalLink,
   Camera,
@@ -16,40 +16,40 @@ import {
   User,
   Building,
   Loader2,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Book } from '@/lib/models'
-import { bookOperations } from '@/lib/firebase-utils'
-import { useAuthContext } from '@/components/auth/AuthProvider'
-import { Timestamp } from 'firebase/firestore'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Book } from "@/lib/models";
+import { bookOperations } from "@/lib/firebase-utils";
+import { useAuthContext } from "@/components/auth/AuthProvider";
+import { Timestamp } from "firebase/firestore";
 
 // Google Books API integration
-import { 
-  googleBooksApi, 
-  GoogleBooksVolume, 
-  getBestThumbnail, 
-  getBestISBN, 
-  formatAuthors 
-} from '@/lib/google-books-api'
+import {
+  googleBooksApi,
+  GoogleBooksVolume,
+  getBestThumbnail,
+  getBestISBN,
+  formatAuthors,
+} from "@/lib/google-books-api";
 
-const SearchResults = ({ 
-  books, 
-  onAddBook, 
+const SearchResults = ({
+  books,
+  onAddBook,
   addedBooks,
-  isAdding 
-}: { 
-  books: GoogleBooksVolume[]
-  onAddBook: (book: GoogleBooksVolume) => void
-  addedBooks: Set<string>
-  isAdding: boolean
+  isAdding,
+}: {
+  books: GoogleBooksVolume[];
+  onAddBook: (book: GoogleBooksVolume) => void;
+  addedBooks: Set<string>;
+  isAdding: boolean;
 }) => {
   if (books.length === 0) {
     return (
@@ -57,7 +57,7 @@ const SearchResults = ({
         <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
         <p>Search for books to add to your library</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -70,8 +70,8 @@ const SearchResults = ({
               <div className="flex-shrink-0">
                 <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
                   {getBestThumbnail(book) ? (
-                    <img 
-                      src={getBestThumbnail(book)} 
+                    <img
+                      src={getBestThumbnail(book)}
                       alt={book.volumeInfo.title}
                       className="w-full h-full object-cover rounded"
                     />
@@ -88,7 +88,7 @@ const SearchResults = ({
                     <h3 className="font-semibold text-lg truncate text-foreground">
                       {book.volumeInfo.title}
                     </h3>
-                    
+
                     <p className="text-muted-foreground flex items-center gap-1 mt-1">
                       <User className="h-3 w-3" />
                       {formatAuthors(book.volumeInfo.authors)}
@@ -98,14 +98,16 @@ const SearchResults = ({
                       {book.volumeInfo.publishedDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {new Date(book.volumeInfo.publishedDate).getFullYear()}
+                          {new Date(
+                            book.volumeInfo.publishedDate,
+                          ).getFullYear()}
                         </span>
                       )}
-                      
+
                       {book.volumeInfo.pageCount && (
                         <span>{book.volumeInfo.pageCount} pages</span>
                       )}
-                      
+
                       {book.volumeInfo.publisher && (
                         <span className="flex items-center gap-1">
                           <Building className="h-3 w-3" />
@@ -118,25 +120,32 @@ const SearchResults = ({
                       <div className="flex items-center gap-1 mt-2">
                         <Star className="h-4 w-4 fill-status-warning text-status-warning" />
                         <span className="text-sm">
-                          {book.volumeInfo.averageRating} 
+                          {book.volumeInfo.averageRating}
                           {book.volumeInfo.ratingsCount && (
                             <span className="text-muted-foreground ml-1">
-                              ({book.volumeInfo.ratingsCount.toLocaleString()} reviews)
+                              ({book.volumeInfo.ratingsCount.toLocaleString()}{" "}
+                              reviews)
                             </span>
                           )}
                         </span>
                       </div>
                     )}
 
-                                          {book.volumeInfo.categories && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {book.volumeInfo.categories.slice(0, 3).map((category: string) => (
-                            <Badge key={category} variant="secondary" className="text-xs">
+                    {book.volumeInfo.categories && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {book.volumeInfo.categories
+                          .slice(0, 3)
+                          .map((category: string) => (
+                            <Badge
+                              key={category}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {category}
                             </Badge>
                           ))}
-                        </div>
-                      )}
+                      </div>
+                    )}
 
                     {book.volumeInfo.description && (
                       <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
@@ -169,7 +178,7 @@ const SearchResults = ({
                         </>
                       )}
                     </Button>
-                    
+
                     <Button variant="outline" size="sm">
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Preview
@@ -182,36 +191,39 @@ const SearchResults = ({
         </Card>
       ))}
     </div>
-  )
-}
+  );
+};
 
 // Convert GoogleBooksVolume to our Book model
 const convertGoogleBookToBook = (googleBook: GoogleBooksVolume): Book => {
-  const isbn = getBestISBN(googleBook)
-  
+  const isbn = getBestISBN(googleBook);
+
   const book: Book = {
     id: googleBook.id,
     title: googleBook.volumeInfo.title,
     author: formatAuthors(googleBook.volumeInfo.authors),
-    state: 'not_started',
+    state: "not_started",
     progress: {
       currentPage: 0,
       totalPages: googleBook.volumeInfo.pageCount || 0,
-      percentage: 0
+      percentage: 0,
     },
     isOwned: false, // Default to wishlist
     addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  }
+    updatedAt: Timestamp.now(),
+  };
 
   // Only add optional fields if they have values
-  if (isbn) book.isbn = isbn
-  if (getBestThumbnail(googleBook)) book.coverImage = getBestThumbnail(googleBook)
-  if (googleBook.volumeInfo.publishedDate) book.publishedDate = googleBook.volumeInfo.publishedDate
-  if (googleBook.volumeInfo.description) book.description = googleBook.volumeInfo.description
+  if (isbn) book.isbn = isbn;
+  if (getBestThumbnail(googleBook))
+    book.coverImage = getBestThumbnail(googleBook);
+  if (googleBook.volumeInfo.publishedDate)
+    book.publishedDate = googleBook.volumeInfo.publishedDate;
+  if (googleBook.volumeInfo.description)
+    book.description = googleBook.volumeInfo.description;
 
-  return book
-}
+  return book;
+};
 
 // Convert manual entry to our Book model
 const convertManualEntryToBook = (formData: {
@@ -227,61 +239,67 @@ const convertManualEntryToBook = (formData: {
     id: `manual-${Date.now()}`,
     title: formData.title.trim(),
     author: formData.author.trim(),
-    state: 'not_started',
+    state: "not_started",
     progress: {
       currentPage: 0,
       totalPages: formData.pages ? parseInt(formData.pages) : 0,
-      percentage: 0
+      percentage: 0,
     },
-    isOwned: formData.ownership === 'owned',
+    isOwned: formData.ownership === "owned",
     addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  }
+    updatedAt: Timestamp.now(),
+  };
 
   // Only add optional fields if they have values
-  if (formData.isbn && formData.isbn.trim()) book.isbn = formData.isbn.trim()
+  if (formData.isbn && formData.isbn.trim()) book.isbn = formData.isbn.trim();
   if (formData.publishedYear && formData.publishedYear.trim()) {
-    book.publishedDate = `${formData.publishedYear.trim()}-01-01`
+    book.publishedDate = `${formData.publishedYear.trim()}-01-01`;
   }
   if (formData.description && formData.description.trim()) {
-    book.description = formData.description.trim()
+    book.description = formData.description.trim();
   }
 
-  return book
-}
+  return book;
+};
 
-const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => void, isAdding: boolean }) => {
+const ManualEntryForm = ({
+  onAddBook,
+  isAdding,
+}: {
+  onAddBook: (book: Book) => void;
+  isAdding: boolean;
+}) => {
   const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    isbn: '',
-    pages: '',
-    publishedYear: '',
-    ownership: 'wishlist',
-    description: ''
-  })
+    title: "",
+    author: "",
+    isbn: "",
+    pages: "",
+    publishedYear: "",
+    ownership: "wishlist",
+    description: "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const book = convertManualEntryToBook(formData)
-    await onAddBook(book)
-    
+    e.preventDefault();
+
+    const book = convertManualEntryToBook(formData);
+    await onAddBook(book);
+
     // Reset form
     setFormData({
-      title: '',
-      author: '',
-      isbn: '',
-      pages: '',
-      publishedYear: '',
-      ownership: 'wishlist',
-      description: ''
-    })
-  }
+      title: "",
+      author: "",
+      isbn: "",
+      pages: "",
+      publishedYear: "",
+      ownership: "wishlist",
+      description: "",
+    });
+  };
 
   const updateField = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <Card>
@@ -299,63 +317,63 @@ const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => v
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => updateField('title', e.target.value)}
+                onChange={(e) => updateField("title", e.target.value)}
                 placeholder="Enter book title"
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="author">Author *</Label>
               <Input
                 id="author"
                 value={formData.author}
-                onChange={(e) => updateField('author', e.target.value)}
+                onChange={(e) => updateField("author", e.target.value)}
                 placeholder="Enter author name"
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="isbn">ISBN (optional)</Label>
               <Input
                 id="isbn"
                 value={formData.isbn}
-                onChange={(e) => updateField('isbn', e.target.value)}
+                onChange={(e) => updateField("isbn", e.target.value)}
                 placeholder="Enter ISBN (optional)"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="pages">Pages</Label>
               <Input
                 id="pages"
                 type="number"
                 value={formData.pages}
-                onChange={(e) => updateField('pages', e.target.value)}
+                onChange={(e) => updateField("pages", e.target.value)}
                 placeholder="Number of pages"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="publishedYear">Published Year</Label>
               <Input
                 id="publishedYear"
                 type="number"
                 value={formData.publishedYear}
-                onChange={(e) => updateField('publishedYear', e.target.value)}
+                onChange={(e) => updateField("publishedYear", e.target.value)}
                 placeholder="Year published"
                 min="1000"
                 max={new Date().getFullYear()}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="ownership">Ownership Status</Label>
               <select
                 id="ownership"
-                value={formData.ownership || 'wishlist'}
-                onChange={(e) => updateField('ownership', e.target.value)}
+                value={formData.ownership || "wishlist"}
+                onChange={(e) => updateField("ownership", e.target.value)}
                 className="bg-background border border-input rounded-md px-3 py-2 text-sm w-full"
               >
                 <option value="wishlist">Wishlist</option>
@@ -363,18 +381,18 @@ const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => v
               </select>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               placeholder="Book description (optional)"
               rows={3}
             />
           </div>
-          
+
           <div className="flex gap-2 pt-4">
             <Button type="submit" disabled={isAdding}>
               {isAdding ? (
@@ -393,15 +411,17 @@ const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => v
               type="button"
               variant="outline"
               disabled={isAdding}
-              onClick={() => setFormData({
-                title: '',
-                author: '',
-                isbn: '',
-                pages: '',
-                publishedYear: '',
-                ownership: 'wishlist',
-                description: ''
-              })}
+              onClick={() =>
+                setFormData({
+                  title: "",
+                  author: "",
+                  isbn: "",
+                  pages: "",
+                  publishedYear: "",
+                  ownership: "wishlist",
+                  description: "",
+                })
+              }
             >
               <X className="h-4 w-4 mr-2" />
               Clear Form
@@ -410,129 +430,135 @@ const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => v
         </form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 export const AddBooksPage = () => {
-  const { user } = useAuthContext()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set())
-  const [recentlyAdded, setRecentlyAdded] = useState<Array<{ id: string, title: string, author: string }>>([])
-  const [isAdding, setIsAdding] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { user } = useAuthContext();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
+  const [recentlyAdded, setRecentlyAdded] = useState<
+    Array<{ id: string; title: string; author: string }>
+  >([]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults([])
-      return
+      setSearchResults([]);
+      return;
     }
 
-    setIsSearching(true)
-    setError(null)
-    
+    setIsSearching(true);
+    setError(null);
+
     try {
-      const results = await googleBooksApi.search(query, 20)
-      setSearchResults(results)
+      const results = await googleBooksApi.search(query, 20);
+      setSearchResults(results);
     } catch (err) {
-      console.error('Error searching books:', err)
-      setError('Failed to search books. Please check your internet connection and try again.')
-      setSearchResults([])
+      console.error("Error searching books:", err);
+      setError(
+        "Failed to search books. Please check your internet connection and try again.",
+      );
+      setSearchResults([]);
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  };
 
   const handleAddGoogleBook = async (googleBook: GoogleBooksVolume) => {
     if (!user) {
-      setError('You must be logged in to add books')
-      return
+      setError("You must be logged in to add books");
+      return;
     }
 
-    setIsAdding(true)
-    setError(null)
+    setIsAdding(true);
+    setError(null);
 
     try {
-      const book = convertGoogleBookToBook(googleBook)
+      const book = convertGoogleBookToBook(googleBook);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...bookData } = book
-      
-      const bookId = await bookOperations.addBook(user.uid, bookData)
-      
-      setAddedBooks(prev => new Set([...prev, googleBook.id]))
-      setRecentlyAdded(prev => [
+      const { id, ...bookData } = book;
+
+      const bookId = await bookOperations.addBook(user.uid, bookData);
+
+      setAddedBooks((prev) => new Set([...prev, googleBook.id]));
+      setRecentlyAdded((prev) => [
         {
           id: bookId,
           title: book.title,
-          author: book.author
+          author: book.author,
         },
-        ...prev.slice(0, 4)
-      ])
+        ...prev.slice(0, 4),
+      ]);
     } catch (err) {
-      console.error('Error adding book:', err)
-      setError('Failed to add book. Please try again.')
+      console.error("Error adding book:", err);
+      setError("Failed to add book. Please try again.");
     } finally {
-      setIsAdding(false)
+      setIsAdding(false);
     }
-  }
+  };
 
   const handleAddManualBook = async (book: Book) => {
     if (!user) {
-      setError('You must be logged in to add books')
-      return
+      setError("You must be logged in to add books");
+      return;
     }
 
-    setIsAdding(true)
-    setError(null)
+    setIsAdding(true);
+    setError(null);
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...bookData } = book
-      const bookId = await bookOperations.addBook(user.uid, bookData)
-      
-      setRecentlyAdded(prev => [
+      const { id, ...bookData } = book;
+      const bookId = await bookOperations.addBook(user.uid, bookData);
+
+      setRecentlyAdded((prev) => [
         {
           id: bookId,
           title: book.title,
-          author: book.author
+          author: book.author,
         },
-        ...prev.slice(0, 4)
-      ])
+        ...prev.slice(0, 4),
+      ]);
     } catch (err) {
-      console.error('Error adding book:', err)
-      setError('Failed to add book. Please try again.')
+      console.error("Error adding book:", err);
+      setError("Failed to add book. Please try again.");
     } finally {
-      setIsAdding(false)
+      setIsAdding(false);
     }
-  }
+  };
 
   // Debounced search effect
   React.useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchQuery.trim()) {
-        handleSearch(searchQuery)
+        handleSearch(searchQuery);
       } else {
-        setSearchResults([])
+        setSearchResults([]);
       }
-    }, 500) // Increased debounce time for API calls
+    }, 500); // Increased debounce time for API calls
 
-    return () => clearTimeout(debounceTimer)
-  }, [searchQuery])
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   // Clear error when user starts typing
   React.useEffect(() => {
     if (searchQuery.trim() && error) {
-      setError(null)
+      setError(null);
     }
-  }, [searchQuery, error])
+  }, [searchQuery, error]);
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Add Books</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+            Add Books
+          </h1>
           <p className="text-muted-foreground">
             Search for books online or add them manually to your library.
           </p>
@@ -603,13 +629,17 @@ export const AddBooksPage = () => {
                   className="pl-10"
                 />
               </div>
-              
+
               {/* Advanced Search Options */}
               <div className="flex flex-wrap gap-2 pt-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSearchQuery(prev => prev.includes('intitle:') ? prev : `intitle:"${prev}"`)}
+                  onClick={() =>
+                    setSearchQuery((prev) =>
+                      prev.includes("intitle:") ? prev : `intitle:"${prev}"`,
+                    )
+                  }
                   disabled={isSearching}
                 >
                   Search Titles Only
@@ -617,7 +647,11 @@ export const AddBooksPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSearchQuery(prev => prev.includes('inauthor:') ? prev : `inauthor:"${prev}"`)}
+                  onClick={() =>
+                    setSearchQuery((prev) =>
+                      prev.includes("inauthor:") ? prev : `inauthor:"${prev}"`,
+                    )
+                  }
                   disabled={isSearching}
                 >
                   Search Authors Only
@@ -625,13 +659,19 @@ export const AddBooksPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSearchQuery(prev => prev.includes('isbn:') ? prev : `isbn:${prev.replace(/[-\s]/g, '')}`)}
+                  onClick={() =>
+                    setSearchQuery((prev) =>
+                      prev.includes("isbn:")
+                        ? prev
+                        : `isbn:${prev.replace(/[-\s]/g, "")}`,
+                    )
+                  }
                   disabled={isSearching}
                 >
                   Search by ISBN
                 </Button>
               </div>
-              
+
               {isSearching && (
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -642,7 +682,7 @@ export const AddBooksPage = () => {
           </Card>
 
           {/* Search Results */}
-          <SearchResults 
+          <SearchResults
             books={searchResults}
             onAddBook={handleAddGoogleBook}
             addedBooks={addedBooks}
@@ -651,7 +691,10 @@ export const AddBooksPage = () => {
         </TabsContent>
 
         <TabsContent value="manual">
-          <ManualEntryForm onAddBook={handleAddManualBook} isAdding={isAdding} />
+          <ManualEntryForm
+            onAddBook={handleAddManualBook}
+            isAdding={isAdding}
+          />
         </TabsContent>
 
         <TabsContent value="scan">
@@ -666,9 +709,12 @@ export const AddBooksPage = () => {
               <div className="text-center py-12 space-y-4">
                 <Camera className="h-16 w-16 mx-auto text-muted-foreground" />
                 <div>
-                  <h3 className="text-lg font-medium text-foreground">ISBN Scanner Coming Soon</h3>
+                  <h3 className="text-lg font-medium text-foreground">
+                    ISBN Scanner Coming Soon
+                  </h3>
                   <p className="text-muted-foreground">
-                    Use your device&apos;s camera to scan book barcodes and automatically add them to your library.
+                    Use your device&apos;s camera to scan book barcodes and
+                    automatically add them to your library.
                   </p>
                 </div>
                 <Button disabled>
@@ -681,7 +727,7 @@ export const AddBooksPage = () => {
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
+  );
+};
 
-export default AddBooksPage 
+export default AddBooksPage;

@@ -22,23 +22,23 @@ export const HeroSection = () => {
   const handleGetStarted = async () => {
     if (isAuthenticated) {
       // User is already authenticated, redirect to dashboard
-      router.push('/dashboard');
+      router.push("/dashboard");
       return;
     }
 
     setIsSigningIn(true);
     setAuthError(null);
-    
+
     const result = await signInWithGoogle();
-    
+
     if (result.success) {
       // Show success message briefly before redirecting
       setShowSuccess(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }, 1000);
     } else {
-      setAuthError(result.error?.message || 'Failed to sign in');
+      setAuthError(result.error?.message || "Failed to sign in");
       setIsSigningIn(false);
     }
   };
@@ -78,21 +78,24 @@ export const HeroSection = () => {
           </div>
 
           <p className="max-w-screen-sm mx-auto text-xl text-muted-foreground">
-            Build your personal library, track reading progress, discover new books, 
-            and connect with fellow readers. Your books, your pace, your way.
+            Build your personal library, track reading progress, discover new
+            books, and connect with fellow readers. Your books, your pace, your
+            way.
           </p>
 
           <div className="space-y-4 md:space-y-0 md:space-x-4">
-            <Button 
+            <Button
               onClick={handleGetStarted}
               disabled={isSigningIn}
-              aria-label={isAuthenticated ? "Go to your dashboard" : "Sign in with Google to start reading"}
+              aria-label={
+                isAuthenticated
+                  ? "Go to your dashboard"
+                  : "Sign in with Google to start reading"
+              }
               className={`w-5/6 md:w-1/4 font-bold group/arrow ${BRAND_CLASSES.primary.bg} hover:${BRAND_CLASSES.primary.bgHover}`}
             >
               {showSuccess ? (
-                <>
-                  ✓ Welcome! Redirecting...
-                </>
+                <>✓ Welcome! Redirecting...</>
               ) : isSigningIn ? (
                 <>
                   <Loader2 className="size-4 mr-2 animate-spin" />
@@ -116,23 +119,31 @@ export const HeroSection = () => {
               variant="secondary"
               className="w-5/6 md:w-1/4 font-bold"
             >
-              <Link href="/dashboard">
-                Explore Features
-              </Link>
+              <Link href="/dashboard">Explore Features</Link>
             </Button>
           </div>
 
           {/* Error Message */}
           {authError && (
-            <div className="mt-4 p-3 bg-status-error/10 border border-status-error/20 rounded-lg" role="alert">
-              <p className="text-sm text-status-error text-center">{authError}</p>
+            <div
+              className="mt-4 p-3 bg-status-error/10 border border-status-error/20 rounded-lg"
+              role="alert"
+            >
+              <p className="text-sm text-status-error text-center">
+                {authError}
+              </p>
             </div>
           )}
 
           {/* Success Message */}
           {showSuccess && (
-            <div className="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg" role="status">
-              <p className="text-sm text-green-800 text-center">✓ Successfully signed in! Welcome to Librarium.</p>
+            <div
+              className="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg"
+              role="status"
+            >
+              <p className="text-sm text-green-800 text-center">
+                ✓ Successfully signed in! Welcome to Librarium.
+              </p>
             </div>
           )}
         </div>

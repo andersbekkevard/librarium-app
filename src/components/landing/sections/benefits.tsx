@@ -40,15 +40,18 @@ export const BenefitsSection = () => {
     <section id="benefits" className="container py-24 sm:py-32">
       <div className="grid lg:grid-cols-2 place-items-center lg:gap-24">
         <div>
-          <h2 className={`text-lg ${BRAND_CLASSES.primary.text} mb-2 tracking-wider`}>
+          <h2
+            className={`text-lg ${BRAND_CLASSES.primary.text} mb-2 tracking-wider`}
+          >
             Benefits
           </h2>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Why Choose Librarium?
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Transform your reading experience with tools designed for serious book lovers.
-            From casual readers to voracious bibliophiles, Librarium adapts to your reading style.
+            Transform your reading experience with tools designed for serious
+            book lovers. From casual readers to voracious bibliophiles,
+            Librarium adapts to your reading style.
           </p>
         </div>
 
