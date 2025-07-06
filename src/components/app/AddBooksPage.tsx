@@ -31,97 +31,14 @@ import { bookOperations } from '@/lib/firebase-utils'
 import { useAuthContext } from '@/components/auth/AuthProvider'
 import { Timestamp } from 'firebase/firestore'
 
-// Mock Google Books API response structure
-interface GoogleBook {
-  id: string
-  volumeInfo: {
-    title: string
-    authors?: string[]
-    description?: string
-    pageCount?: number
-    publishedDate?: string
-    imageLinks?: {
-      thumbnail?: string
-      smallThumbnail?: string
-    }
-    categories?: string[]
-    averageRating?: number
-    ratingsCount?: number
-    industryIdentifiers?: Array<{
-      type: string
-      identifier: string
-    }>
-    publisher?: string
-    language?: string
-  }
-}
-
-// Mock search results
-const mockGoogleBooks: GoogleBook[] = [
-  {
-    id: 'book1',
-    volumeInfo: {
-      title: 'The Midnight Library',
-      authors: ['Matt Haig'],
-      description: 'Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived.',
-      pageCount: 288,
-      publishedDate: '2020-08-13',
-      imageLinks: {
-        thumbnail: 'https://books.google.com/books/content/images/frontcover/placeholder.jpg'
-      },
-      categories: ['Fiction', 'Philosophy'],
-      averageRating: 4.2,
-      ratingsCount: 12847,
-      industryIdentifiers: [
-        { type: 'ISBN_13', identifier: '9780525559474' }
-      ],
-      publisher: 'Viking',
-      language: 'en'
-    }
-  },
-  {
-    id: 'book2',
-    volumeInfo: {
-      title: 'Atomic Habits',
-      authors: ['James Clear'],
-      description: 'An Easy & Proven Way to Build Good Habits & Break Bad Ones',
-      pageCount: 320,
-      publishedDate: '2018-10-16',
-      imageLinks: {
-        thumbnail: 'https://books.google.com/books/content/images/frontcover/placeholder2.jpg'
-      },
-      categories: ['Self-Help', 'Psychology'],
-      averageRating: 4.6,
-      ratingsCount: 8234,
-      industryIdentifiers: [
-        { type: 'ISBN_13', identifier: '9780735211292' }
-      ],
-      publisher: 'Avery',
-      language: 'en'
-    }
-  },
-  {
-    id: 'book3',
-    volumeInfo: {
-      title: 'Dune',
-      authors: ['Frank Herbert'],
-      description: 'Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world.',
-      pageCount: 688,
-      publishedDate: '1965-08-01',
-      imageLinks: {
-        thumbnail: 'https://books.google.com/books/content/images/frontcover/placeholder3.jpg'
-      },
-      categories: ['Fiction', 'Science Fiction'],
-      averageRating: 4.3,
-      ratingsCount: 15632,
-      industryIdentifiers: [
-        { type: 'ISBN_13', identifier: '9780441172719' }
-      ],
-      publisher: 'Ace',
-      language: 'en'
-    }
-  }
-]
+// Google Books API integration
+import { 
+  googleBooksApi, 
+  GoogleBooksVolume, 
+  getBestThumbnail, 
+  getBestISBN, 
+  formatAuthors 
+} from '@/lib/google-books-api'
 
 const SearchResults = ({ 
   books, 
@@ -129,8 +46,8 @@ const SearchResults = ({
   addedBooks,
   isAdding 
 }: { 
-  books: GoogleBook[]
-  onAddBook: (book: GoogleBook) => void
+  books: GoogleBooksVolume[]
+  onAddBook: (book: GoogleBooksVolume) => void
   addedBooks: Set<string>
   isAdding: boolean
 }) => {
@@ -152,9 +69,9 @@ const SearchResults = ({
               {/* Book Cover */}
               <div className="flex-shrink-0">
                 <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                  {book.volumeInfo.imageLinks?.thumbnail ? (
+                  {getBestThumbnail(book) ? (
                     <img 
-                      src={book.volumeInfo.imageLinks.thumbnail} 
+                      src={getBestThumbnail(book)} 
                       alt={book.volumeInfo.title}
                       className="w-full h-full object-cover rounded"
                     />
@@ -172,12 +89,10 @@ const SearchResults = ({
                       {book.volumeInfo.title}
                     </h3>
                     
-                    {book.volumeInfo.authors && (
-                      <p className="text-muted-foreground flex items-center gap-1 mt-1">
-                        <User className="h-3 w-3" />
-                        {book.volumeInfo.authors.join(', ')}
-                      </p>
-                    )}
+                    <p className="text-muted-foreground flex items-center gap-1 mt-1">
+                      <User className="h-3 w-3" />
+                      {formatAuthors(book.volumeInfo.authors)}
+                    </p>
 
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       {book.volumeInfo.publishedDate && (
@@ -213,15 +128,15 @@ const SearchResults = ({
                       </div>
                     )}
 
-                    {book.volumeInfo.categories && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {book.volumeInfo.categories.slice(0, 3).map((category) => (
-                          <Badge key={category} variant="secondary" className="text-xs">
-                            {category}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+                                          {book.volumeInfo.categories && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {book.volumeInfo.categories.slice(0, 3).map((category: string) => (
+                            <Badge key={category} variant="secondary" className="text-xs">
+                              {category}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
 
                     {book.volumeInfo.description && (
                       <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
@@ -270,16 +185,14 @@ const SearchResults = ({
   )
 }
 
-// Convert GoogleBook to our Book model
-const convertGoogleBookToBook = (googleBook: GoogleBook): Book => {
-  const isbn = googleBook.volumeInfo.industryIdentifiers?.find(
-    id => id.type === 'ISBN_13' || id.type === 'ISBN_10'
-  )?.identifier
+// Convert GoogleBooksVolume to our Book model
+const convertGoogleBookToBook = (googleBook: GoogleBooksVolume): Book => {
+  const isbn = getBestISBN(googleBook)
   
   const book: Book = {
     id: googleBook.id,
     title: googleBook.volumeInfo.title,
-    author: googleBook.volumeInfo.authors?.[0] || 'Unknown Author',
+    author: formatAuthors(googleBook.volumeInfo.authors),
     state: 'not_started',
     progress: {
       currentPage: 0,
@@ -293,7 +206,7 @@ const convertGoogleBookToBook = (googleBook: GoogleBook): Book => {
 
   // Only add optional fields if they have values
   if (isbn) book.isbn = isbn
-  if (googleBook.volumeInfo.imageLinks?.thumbnail) book.coverImage = googleBook.volumeInfo.imageLinks.thumbnail
+  if (getBestThumbnail(googleBook)) book.coverImage = getBestThumbnail(googleBook)
   if (googleBook.volumeInfo.publishedDate) book.publishedDate = googleBook.volumeInfo.publishedDate
   if (googleBook.volumeInfo.description) book.description = googleBook.volumeInfo.description
 
@@ -503,7 +416,7 @@ const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => v
 export const AddBooksPage = () => {
   const { user } = useAuthContext()
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<GoogleBook[]>([])
+  const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set())
   const [recentlyAdded, setRecentlyAdded] = useState<Array<{ id: string, title: string, author: string }>>([])
@@ -517,21 +430,21 @@ export const AddBooksPage = () => {
     }
 
     setIsSearching(true)
+    setError(null)
     
-    // Simulate API call
-    setTimeout(() => {
-      const filtered = mockGoogleBooks.filter(book => 
-        book.volumeInfo.title.toLowerCase().includes(query.toLowerCase()) ||
-        book.volumeInfo.authors?.some(author => 
-          author.toLowerCase().includes(query.toLowerCase())
-        )
-      )
-      setSearchResults(filtered)
+    try {
+      const results = await googleBooksApi.search(query, 20)
+      setSearchResults(results)
+    } catch (err) {
+      console.error('Error searching books:', err)
+      setError('Failed to search books. Please check your internet connection and try again.')
+      setSearchResults([])
+    } finally {
       setIsSearching(false)
-    }, 500)
+    }
   }
 
-  const handleAddGoogleBook = async (googleBook: GoogleBook) => {
+  const handleAddGoogleBook = async (googleBook: GoogleBooksVolume) => {
     if (!user) {
       setError('You must be logged in to add books')
       return
@@ -594,13 +507,25 @@ export const AddBooksPage = () => {
     }
   }
 
+  // Debounced search effect
   React.useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      handleSearch(searchQuery)
-    }, 300)
+      if (searchQuery.trim()) {
+        handleSearch(searchQuery)
+      } else {
+        setSearchResults([])
+      }
+    }, 500) // Increased debounce time for API calls
 
     return () => clearTimeout(debounceTimer)
   }, [searchQuery])
+
+  // Clear error when user starts typing
+  React.useEffect(() => {
+    if (searchQuery.trim() && error) {
+      setError(null)
+    }
+  }, [searchQuery, error])
 
   return (
     <div className="p-6 space-y-6">
@@ -665,7 +590,10 @@ export const AddBooksPage = () => {
         <TabsContent value="search" className="space-y-6">
           {/* Search Input */}
           <Card>
-            <CardContent className="p-4">
+            <CardHeader>
+              <CardTitle className="text-lg">Search Google Books</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -675,8 +603,40 @@ export const AddBooksPage = () => {
                   className="pl-10"
                 />
               </div>
+              
+              {/* Advanced Search Options */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery(prev => prev.includes('intitle:') ? prev : `intitle:"${prev}"`)}
+                  disabled={isSearching}
+                >
+                  Search Titles Only
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery(prev => prev.includes('inauthor:') ? prev : `inauthor:"${prev}"`)}
+                  disabled={isSearching}
+                >
+                  Search Authors Only
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery(prev => prev.includes('isbn:') ? prev : `isbn:${prev.replace(/[-\s]/g, '')}`)}
+                  disabled={isSearching}
+                >
+                  Search by ISBN
+                </Button>
+              </div>
+              
               {isSearching && (
-                <p className="text-sm text-muted-foreground mt-2">Searching...</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching Google Books...
+                </p>
               )}
             </CardContent>
           </Card>

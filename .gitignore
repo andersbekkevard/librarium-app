@@ -172,6 +172,10 @@ CLAUDE.md
 
 
 # ===========================
-# Firebase
+# Environment Variables
 # ===========================
-src/lib/firebase.ts
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
