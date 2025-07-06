@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Sun, Moon, Bell, Book, Loader2 } from "lucide-react"
+import { Search, Bell, Book, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ToggleTheme } from "@/components/toggle-theme"
 import UserProfileDropdown from "@/components/app/UserProfileDropdown"
 import { useAuthContext } from "@/components/auth/AuthProvider"
 
@@ -16,18 +17,11 @@ export const Header: React.FC<HeaderProps> = ({
   notificationCount = 3
 }) => {
   const [searchQuery, setSearchQuery] = useState("")
-  const [isDarkMode, setIsDarkMode] = useState(false)
   const { user, loading } = useAuthContext()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     onSearch?.(searchQuery)
-  }
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-    // Toggle dark mode class on document
-    document.documentElement.classList.toggle('dark')
   }
 
   return (
@@ -60,18 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right Side - Theme Toggle & User Profile */}
         <div className="flex items-center space-x-4 h-full">
           {/* Theme Toggle */}
-          <Button
-            onClick={toggleTheme}
-            variant="ghost"
-            size="sm"
-            className="w-9 h-9 p-0"
-          >
-            {isDarkMode ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </Button>
+          <ToggleTheme />
 
           {/* Notifications */}
           <div className="relative">
@@ -80,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
               size="sm"
               className="w-9 h-9 p-0"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="size-5" />
             </Button>
             {notificationCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-status-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
