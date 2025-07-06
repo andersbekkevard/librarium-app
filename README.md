@@ -3,8 +3,10 @@
 A web application for managing personal book collections and tracking reading progress.
 
 
-
+### Landing page
 ![Landing Page](public/images/landing-page.png "Landing Page")
+
+### Dashboard
 ![Dashboard](public/images/dashboard.png "Dashboard")
 
 
