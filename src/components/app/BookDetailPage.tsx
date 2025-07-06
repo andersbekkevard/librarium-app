@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { Book } from "@/lib/models";
-import { bookOperations } from "@/lib/firebase-utils";
+import { bookOperations, eventOperations } from "@/lib/firebase-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,11 @@ import {
   ArrowLeft,
   Calendar,
   Hash,
-  User,
   CheckCircle,
   Play,
   Clock,
   TrendingUp,
 } from "lucide-react";
-import { READING_STATE_COLORS } from "@/lib/colors";
 
 interface BookDetailPageProps {
   book: Book;
@@ -99,19 +97,32 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         newState = "finished";
       }
 
+      // If state is changing, use updateBookState for proper event logging
+      if (newState !== book.state) {
+        await bookOperations.updateBookState(user.uid, book.id, newState, book.state);
+      }
+
+      // Update progress and log progress event
       const updatedBook: Partial<Book> = {
-        state: newState,
         progress: {
           ...book.progress,
           currentPage: newPage,
           percentage: calculateProgress(),
         },
-        ...(newState === "finished" && { finishedAt: new Date() as any }),
-        ...(newState === "in_progress" &&
-          !book.startedAt && { startedAt: new Date() as any }),
       };
 
       await bookOperations.updateBook(user.uid, book.id, updatedBook);
+
+      // Log progress update event
+      await eventOperations.logEvent(user.uid, {
+        type: "progress_update",
+        bookId: book.id,
+        data: {
+          currentPage: newPage,
+          totalPages: totalPages,
+          percentage: calculateProgress(),
+        },
+      });
 
       // Refresh the page to show updated data
       window.location.reload();
@@ -128,6 +139,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     setRating(newRating);
     try {
       await bookOperations.updateBook(user.uid, book.id, { rating: newRating });
+      
+      // Log rating event
+      await eventOperations.logEvent(user.uid, {
+        type: "rating_added",
+        bookId: book.id,
+        data: {
+          rating: newRating,
+        },
+      });
     } catch (error) {
       console.error("Error updating rating:", error);
     }
@@ -138,15 +158,17 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
     setIsUpdating(true);
     try {
+      // Use updateBookState for proper event logging
+      await bookOperations.updateBookState(user.uid, book.id, "finished", book.state);
+      
+      // Update progress to 100%
       const updatedBook: Partial<Book> = {
-        state: "finished",
         progress: {
           ...book.progress,
           currentPage:
             book.progress.totalPages || book.progress.currentPage || 0,
           percentage: 100,
         },
-        finishedAt: new Date() as any,
       };
 
       await bookOperations.updateBook(user.uid, book.id, updatedBook);
@@ -273,9 +295,32 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                 <div className="space-y-2">
                   {book.state === "not_started" && (
                     <Button
-                      onClick={() => {
-                        setCurrentPageInput("1");
-                        handleUpdateProgress();
+                      onClick={async () => {
+                        if (!user) return;
+                        setIsUpdating(true);
+                        try {
+                          // Use updateBookState for proper event logging
+                          await bookOperations.updateBookState(user.uid, book.id, "in_progress", book.state);
+                          
+                          // Update progress to page 1
+                          const updatedBook: Partial<Book> = {
+                            progress: {
+                              ...book.progress,
+                              currentPage: 1,
+                              percentage: calculateProgress(),
+                            },
+                          };
+                          
+                          await bookOperations.updateBook(user.uid, book.id, updatedBook);
+                          setCurrentPageInput("1");
+                          
+                          // Refresh the page to show updated data
+                          window.location.reload();
+                        } catch (error) {
+                          console.error("Error starting reading:", error);
+                        } finally {
+                          setIsUpdating(false);
+                        }
                       }}
                       disabled={isUpdating}
                       className="w-full"
