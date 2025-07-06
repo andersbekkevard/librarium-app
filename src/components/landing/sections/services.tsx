@@ -48,16 +48,13 @@ export const ServicesSection = () => {
       >
         Integrations
       </h2>
-
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
         Powerful Reading Tools
       </h2>
-
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-16">
         Connect with your favorite book platforms and unlock advanced features
         to enhance your reading journey.
       </h3>
-
       <div className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20">
         {serviceList.map(({ title, description, pro }) => (
           <Card
