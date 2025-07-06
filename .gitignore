@@ -169,3 +169,9 @@ styleguide/
 .claude
 .cursor
 CLAUDE.md
+
+
+# ===========================
+# Firebase
+# ===========================
+src/lib/firebase.ts

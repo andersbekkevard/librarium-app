@@ -1,4 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { Header } from "@/components/app/Header";
 
 export default function AppLayout({
   children,
@@ -12,7 +14,14 @@ export default function AppLayout({
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <AuthProvider>
+        <div className="min-h-screen bg-background">
+          <Header />
+          <main className="pt-20">
+            {children}
+          </main>
+        </div>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

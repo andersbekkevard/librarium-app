@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useAuth } from "@/lib/useAuth"
-import { signOut } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { useRouter } from "next/navigation"
+import { useAuthContext } from "@/components/auth/AuthProvider"
+import { signOut as authSignOut } from "@/lib/auth"
 import { 
   User, 
   Settings, 
@@ -16,18 +16,12 @@ import {
   ChevronRight 
 } from "lucide-react"
 
-interface UserProfileDropdownProps {
-  userName?: string
-  userSince?: string
-}
-
-export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
-  userName = "John Doe",
-  userSince = "2023"
-}) => {
+export const UserProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const { user } = useAuth()
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const { user } = useAuthContext()
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,11 +36,26 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   }, [])
 
   const handleSignOut = async () => {
+    setIsSigningOut(true)
+    
     try {
-      await signOut(auth)
-      setIsOpen(false)
+      const result = await authSignOut()
+      
+      if (result.success) {
+        setIsOpen(false)
+        // Redirect to landing page after successful logout
+        router.push('/')
+      } else {
+        // Handle sign out error
+        console.error('Sign out failed:', result.error?.message)
+        // You could show a toast notification here
+        alert(`Failed to sign out: ${result.error?.message}`)
+      }
     } catch (error) {
       console.error('Error signing out:', error)
+      alert('An unexpected error occurred while signing out')
+    } finally {
+      setIsSigningOut(false)
     }
   }
 
@@ -101,10 +110,13 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
     },
   ]
 
-  // Use Firebase user data if available, otherwise fallback to props
-  const displayName = user?.displayName || userName
-  const displayEmail = user?.email || `Member since ${userSince}`
+  // Use Firebase user data
+  const displayName = user?.displayName || 'Anonymous User'
+  const displayEmail = user?.email || 'No email'
   const photoURL = user?.photoURL
+  const memberSince = user?.metadata?.creationTime ? 
+    new Date(user.metadata.creationTime).getFullYear().toString() : 
+    '2024'
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -115,13 +127,21 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
             {displayName}
           </p>
           <p className="text-xs text-muted-foreground leading-tight">
-            {user?.email ? user.email : `Reader since ${userSince}`}
+            {user?.email ? user.email : `Reader since ${memberSince}`}
           </p>
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setIsOpen(!isOpen)
+            }
+          }}
           className="w-10 h-10 rounded-lg hover:bg-muted transition-colors duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
-          aria-label="User menu"
+          aria-label={`User menu for ${displayName}. ${isOpen ? 'Close menu' : 'Open menu'}`}
+          aria-expanded={isOpen}
+          aria-haspopup="true"
         >
           {photoURL ? (
             <img 
@@ -192,12 +212,24 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
           <div className="py-2">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center space-x-3 px-4 py-2.5 text-left hover:bg-status-error/5 transition-colors duration-150 group"
+              disabled={isSigningOut}
+              className="w-full flex items-center space-x-3 px-4 py-2.5 text-left hover:bg-status-error/5 transition-colors duration-150 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LogOut className="h-4 w-4 text-status-error" />
-              <span className="text-sm font-medium text-status-error">
-                Sign Out
-              </span>
+              {isSigningOut ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-status-error border-t-transparent" />
+                  <span className="text-sm font-medium text-status-error">
+                    Signing Out...
+                  </span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-4 w-4 text-status-error" />
+                  <span className="text-sm font-medium text-status-error">
+                    Sign Out
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import BookCard, { Book } from "@/components/app/BookCard"
 import Sidebar from "@/components/app/Sidebar"
-import Header from "@/components/app/Header"
 import AddBooksPage from "@/components/app/AddBooksPage"
 import MyLibraryPage from "@/components/app/MyLibraryPage"
 import GoogleAuth from "@/components/app/GoogleAuth"
-import { BookOpen, Star } from "lucide-react"
+import { BookOpen, Star, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuthContext } from "@/components/auth/AuthProvider"
 
 // Sample book data for demonstration
 const sampleBooks: Book[] = [
@@ -91,6 +92,32 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [, setFilteredBooks] = useState(sampleBooks)
   const [searchQuery, setSearchQuery] = useState('')
+  const { user, loading, isAuthenticated } = useAuthContext()
+  const router = useRouter()
+
+  // Route protection - redirect to landing if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/')
+    }
+  }, [loading, isAuthenticated, router])
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render anything if not authenticated (redirect will happen)
+  if (!isAuthenticated) {
+    return null
+  }
 
   const handleEdit = (book: Book) => {
     console.log('Edit book:', book.title)
@@ -130,14 +157,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Fixed at top */}
-      <Header 
-        onSearch={handleSearch}
-        userName="John Doe"
-        userSince="2023"
-        notificationCount={3}
-      />
-
       {/* Sidebar - Fixed Position under header */}
       <Sidebar 
         activeItem={activeSection}
@@ -146,7 +165,7 @@ export default function Dashboard() {
       />
 
       {/* Main Content - Adjusted for both fixed header and sidebar */}
-      <main className="ml-64 pt-[72px]">
+      <main className="ml-64">
           {activeSection === 'add-books' ? (
             <AddBooksPage />
           ) : activeSection === 'library' ? (

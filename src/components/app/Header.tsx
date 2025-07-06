@@ -1,25 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Sun, Moon, Bell, Book } from "lucide-react"
+import { Search, Sun, Moon, Bell, Book, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import UserProfileDropdown from "@/components/app/UserProfileDropdown"
+import { useAuthContext } from "@/components/auth/AuthProvider"
 
 interface HeaderProps {
   onSearch?: (query: string) => void
-  userName?: string
-  userSince?: string
   notificationCount?: number
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onSearch,
-  userName = "John Doe",
-  userSince = "2023",
   notificationCount = 3
 }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const { user, loading } = useAuthContext()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,10 +90,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* User Profile */}
-          <UserProfileDropdown 
-            userName={userName}
-            userSince={userSince}
-          />
+          {loading ? (
+            <div className="w-9 h-9 flex items-center justify-center">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <UserProfileDropdown />
+          )}
         </div>
       </div>
     </header>
