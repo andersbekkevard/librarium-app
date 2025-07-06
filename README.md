@@ -2,6 +2,12 @@
 
 A web application for managing personal book collections and tracking reading progress.
 
+
+
+![Landing Page](public/images/landing-page.png "Landing Page")
+![Dashboard](public/images/dashboard.png "Dashboard")
+
+
 ## Overview
 
 Librarium is a personal library management system that allows users to organize their book collections, track reading progress, and maintain reading statistics. The application supports both owned books and wishlist items, with features for progress tracking and book rating.

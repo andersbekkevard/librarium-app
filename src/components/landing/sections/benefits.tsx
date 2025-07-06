@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookMarked, TrendingUp, Users2, Sparkles } from "lucide-react";
+import { Book, TrendingUp, Users2, Sparkles } from "lucide-react";
 import { BRAND_CLASSES } from "@/lib/colors";
 
 interface BenefitsProps {
@@ -10,7 +10,7 @@ interface BenefitsProps {
 
 const benefitList: BenefitsProps[] = [
   {
-    icon: <BookMarked className="w-8 h-8" />,
+    icon: <Book className="w-8 h-8" />,
     title: "Never Lose Track",
     description:
       "Keep all your books organized in one place. Know exactly what you've read, what you're reading, and what's on your wishlist.",

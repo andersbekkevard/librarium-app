@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, BookMarked, Users, BarChart3, Search, Target } from "lucide-react";
+import { Book, Users, BarChart3, Search, Target } from "lucide-react";
 import { BRAND_CLASSES } from "@/lib/colors";
 
 interface FeaturesProps {
@@ -10,13 +10,13 @@ interface FeaturesProps {
 
 const featureList: FeaturesProps[] = [
   {
-    icon: <BookOpen className="w-6 h-6" />,
+    icon: <Book className="w-6 h-6" />,
     title: "Reading Progress",
     description:
       "Track your reading progress page by page, set reading goals, and maintain detailed reading history for every book.",
   },
   {
-    icon: <BookMarked className="w-6 h-6" />,
+    icon: <Book className="w-6 h-6" />,
     title: "Personal Library",
     description:
       "Organize your book collection with custom shelves, tags, and categories. Never lose track of what you own or want to read.",
