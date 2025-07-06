@@ -1,0 +1,10 @@
+- [ ] Land on coloring for BookDetailsPage (states, genres etc), and extract to globals.css
+- [ ] Align search bar properly, and integrate it with actual functionality
+- [ ] Remove progress percentage hard coded in book?
+- [ ] Start fetching genres when adding books, and add to books data model
+- [ ] Start logging user events in database. Link with Recent activity in dashboard
+- [ ] Implement statistics page
+- [ ] Add commenting on books
+- [ ] Create profile pages, settings etc etc
+- [ ] Improve search (fzf, etc)
+- [ ] Add shelf/collection functionality

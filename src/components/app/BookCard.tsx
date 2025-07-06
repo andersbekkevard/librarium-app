@@ -17,18 +17,6 @@ interface BookCardProps {
 }
 // Helper functions
 
-// Example color configurations for badges using brand colors from globals.css:
-// 1. Brand Primary: "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
-// 2. Brand Secondary: "bg-brand-secondary/10 text-brand-secondary border-brand-secondary/20"
-// 3. Brand Accent: "bg-brand-accent/10 text-brand-accent border-brand-accent/20"
-// 4. Status Success: "bg-status-success/10 text-status-success border-status-success/20"
-// 5. Status Warning: "bg-status-warning/10 text-status-warning border-status-warning/20"
-// 6. Status Error: "bg-status-error/10 text-status-error border-status-error/20"
-// 7. Status Info: "bg-status-info/10 text-status-info border-status-info/20"
-// 8. Primary: "bg-primary/10 text-primary border-primary/20"
-// 9. Secondary: "bg-secondary/10 text-secondary border-secondary/20"
-// 10. Muted: "bg-muted/50 text-muted-foreground border-muted/40"
-
 const getReadingStateBadge = (state: Book["state"]) => {
   switch (state) {
     case "not_started":
