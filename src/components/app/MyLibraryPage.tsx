@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   Grid,
   List,
@@ -10,7 +10,8 @@ import {
   X,
   BookOpen,
   Star,
-  User
+  User,
+  Loader2
 } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -18,126 +19,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import BookCard from '@/components/app/BookCard'
 import { Book } from '@/lib/models'
-import { Timestamp } from 'firebase/firestore'
+import { bookOperations } from '@/lib/firebase-utils'
+import { useAuth } from '@/lib/useAuth'
 
-// Sample extended book data for the library - converted to use centralized Book model
-const libraryBooks: Book[] = [
-  {
-    id: "1",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    state: "finished",
-    progress: { currentPage: 180, totalPages: 180, percentage: 100 },
-    isOwned: true,
-    rating: 4,
-    coverImage: "https://covers.openlibrary.org/b/id/8225261-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "2", 
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    state: "in_progress",
-    progress: { currentPage: 156, totalPages: 376, percentage: 41 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "3",
-    title: "1984",
-    author: "George Orwell", 
-    state: "not_started",
-    progress: { currentPage: 0, totalPages: 328, percentage: 0 },
-    isOwned: true,
-    coverImage: "https://covers.openlibrary.org/b/id/7222246-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  },
-  {
-    id: "4",
-    title: "The Catcher in the Rye",
-    author: "J.D. Salinger",
-    state: "in_progress",
-    progress: { currentPage: 89, totalPages: 277, percentage: 32 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "5",
-    title: "Pride and Prejudice",
-    author: "Jane Austen",
-    state: "finished",
-    progress: { currentPage: 432, totalPages: 432, percentage: 100 },
-    isOwned: true,
-    rating: 5,
-    coverImage: "https://covers.openlibrary.org/b/id/8134973-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "6",
-    title: "The Lord of the Rings",
-    author: "J.R.R. Tolkien",
-    state: "not_started",
-    progress: { currentPage: 0, totalPages: 1216, percentage: 0 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  },
-  {
-    id: "7",
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    state: "in_progress",
-    progress: { currentPage: 123, totalPages: 310, percentage: 40 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "8",
-    title: "Dune",
-    author: "Frank Herbert",
-    state: "finished",
-    progress: { currentPage: 688, totalPages: 688, percentage: 100 },
-    isOwned: true,
-    rating: 5,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "9",
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    state: "finished",
-    progress: { currentPage: 288, totalPages: 288, percentage: 100 },
-    isOwned: true,
-    rating: 4,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "10",
-    title: "Atomic Habits",
-    author: "James Clear",
-    state: "in_progress",
-    progress: { currentPage: 89, totalPages: 320, percentage: 28 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  }
-]
 
 type ViewMode = 'grid' | 'list'
 type SortOption = 'title' | 'author' | 'pages' | 'rating' | 'progress'
@@ -294,16 +178,39 @@ interface MyLibraryPageProps {
 }
 
 export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }) => {
+  const { user, loading: authLoading } = useAuth()
+  const [books, setBooks] = useState<Book[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [sortBy, setSortBy] = useState<SortOption>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [filterOwnership, setFilterOwnership] = useState<string>('all')
 
+  // Load user's books from Firestore
+  useEffect(() => {
+    if (authLoading || !user) {
+      setLoading(authLoading)
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    // Subscribe to real-time updates of user's books
+    const unsubscribe = bookOperations.subscribeToUserBooks(user.uid, (userBooks) => {
+      setBooks(userBooks)
+      setLoading(false)
+    })
+
+    return unsubscribe
+  }, [user, authLoading])
+
 
   // Filter and sort books
   const filteredAndSortedBooks = useMemo(() => {
-    let filtered = libraryBooks
+    let filtered = books
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -371,13 +278,17 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
     })
 
     return sorted
-  }, [searchQuery, filterStatus, filterOwnership, sortBy, sortDirection])
+  }, [books, searchQuery, filterStatus, filterOwnership, sortBy, sortDirection])
 
-  const handleEdit = (book: Book) => {
+  const handleEdit = async (book: Book) => {
+    if (!user) return
+    // TODO: Implement edit dialog/modal
     console.log('Edit book:', book.title)
   }
 
-  const handleUpdateProgress = (book: Book) => {
+  const handleUpdateProgress = async (book: Book) => {
+    if (!user) return
+    // TODO: Implement progress update dialog/modal
     console.log('Update progress for:', book.title)
   }
 
@@ -523,37 +434,65 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({ searchQuery = '' }
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredAndSortedBooks.length} of {libraryBooks.length} books
+          Showing {filteredAndSortedBooks.length} of {books.length} books
         </p>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">Loading your library...</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <div className="text-destructive mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-foreground mb-2">Error loading books</h3>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Books Display */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-          {filteredAndSortedBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onEdit={handleEdit}
-              onUpdateProgress={handleUpdateProgress}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-1">
-          {filteredAndSortedBooks.map((book) => (
-            <BookListItem
-              key={book.id}
-              book={book}
-              onEdit={handleEdit}
-              onUpdateProgress={handleUpdateProgress}
-            />
-          ))}
-        </div>
+      {!loading && !error && (
+        <>
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              {filteredAndSortedBooks.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  onEdit={handleEdit}
+                  onUpdateProgress={handleUpdateProgress}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filteredAndSortedBooks.map((book) => (
+                <BookListItem
+                  key={book.id}
+                  book={book}
+                  onEdit={handleEdit}
+                  onUpdateProgress={handleUpdateProgress}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Empty State */}
-      {filteredAndSortedBooks.length === 0 && (
+      {!loading && !error && filteredAndSortedBooks.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />

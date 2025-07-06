@@ -14,7 +14,9 @@ import {
   Star,
   Calendar,
   User,
-  Building
+  Building,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,6 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Book } from '@/lib/models'
+import { bookOperations } from '@/lib/firebase-utils'
+import { useAuthContext } from '@/components/auth/AuthProvider'
 import { Timestamp } from 'firebase/firestore'
 
 // Mock Google Books API response structure
@@ -122,11 +126,13 @@ const mockGoogleBooks: GoogleBook[] = [
 const SearchResults = ({ 
   books, 
   onAddBook, 
-  addedBooks 
+  addedBooks,
+  isAdding 
 }: { 
   books: GoogleBook[]
   onAddBook: (book: GoogleBook) => void
   addedBooks: Set<string>
+  isAdding: boolean
 }) => {
   if (books.length === 0) {
     return (
@@ -228,13 +234,18 @@ const SearchResults = ({
                     <Button
                       size="sm"
                       onClick={() => onAddBook(book)}
-                      disabled={addedBooks.has(book.id)}
+                      disabled={addedBooks.has(book.id) || isAdding}
                       className="whitespace-nowrap"
                     >
                       {addedBooks.has(book.id) ? (
                         <>
                           <Check className="h-4 w-4 mr-1" />
                           Added
+                        </>
+                      ) : isAdding ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Adding...
                         </>
                       ) : (
                         <>
@@ -265,24 +276,28 @@ const convertGoogleBookToBook = (googleBook: GoogleBook): Book => {
     id => id.type === 'ISBN_13' || id.type === 'ISBN_10'
   )?.identifier
   
-  return {
+  const book: Book = {
     id: googleBook.id,
     title: googleBook.volumeInfo.title,
     author: googleBook.volumeInfo.authors?.[0] || 'Unknown Author',
     state: 'not_started',
     progress: {
       currentPage: 0,
-      totalPages: googleBook.volumeInfo.pageCount,
+      totalPages: googleBook.volumeInfo.pageCount || 0,
       percentage: 0
     },
     isOwned: false, // Default to wishlist
-    isbn,
-    coverImage: googleBook.volumeInfo.imageLinks?.thumbnail,
-    publishedDate: googleBook.volumeInfo.publishedDate,
-    description: googleBook.volumeInfo.description,
     addedAt: Timestamp.now(),
     updatedAt: Timestamp.now()
   }
+
+  // Only add optional fields if they have values
+  if (isbn) book.isbn = isbn
+  if (googleBook.volumeInfo.imageLinks?.thumbnail) book.coverImage = googleBook.volumeInfo.imageLinks.thumbnail
+  if (googleBook.volumeInfo.publishedDate) book.publishedDate = googleBook.volumeInfo.publishedDate
+  if (googleBook.volumeInfo.description) book.description = googleBook.volumeInfo.description
+
+  return book
 }
 
 // Convert manual entry to our Book model
@@ -295,26 +310,34 @@ const convertManualEntryToBook = (formData: {
   ownership: string;
   description: string;
 }): Book => {
-  return {
+  const book: Book = {
     id: `manual-${Date.now()}`,
-    title: formData.title,
-    author: formData.author,
+    title: formData.title.trim(),
+    author: formData.author.trim(),
     state: 'not_started',
     progress: {
       currentPage: 0,
-      totalPages: formData.pages ? parseInt(formData.pages) : undefined,
+      totalPages: formData.pages ? parseInt(formData.pages) : 0,
       percentage: 0
     },
     isOwned: formData.ownership === 'owned',
-    isbn: formData.isbn || undefined,
-    publishedDate: formData.publishedYear ? `${formData.publishedYear}-01-01` : undefined,
-    description: formData.description || undefined,
     addedAt: Timestamp.now(),
     updatedAt: Timestamp.now()
   }
+
+  // Only add optional fields if they have values
+  if (formData.isbn && formData.isbn.trim()) book.isbn = formData.isbn.trim()
+  if (formData.publishedYear && formData.publishedYear.trim()) {
+    book.publishedDate = `${formData.publishedYear.trim()}-01-01`
+  }
+  if (formData.description && formData.description.trim()) {
+    book.description = formData.description.trim()
+  }
+
+  return book
 }
 
-const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => {
+const ManualEntryForm = ({ onAddBook, isAdding }: { onAddBook: (book: Book) => void, isAdding: boolean }) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -325,11 +348,11 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => 
     description: ''
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     const book = convertManualEntryToBook(formData)
-    onAddBook(book)
+    await onAddBook(book)
     
     // Reset form
     setFormData({
@@ -381,12 +404,12 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="isbn">ISBN</Label>
+              <Label htmlFor="isbn">ISBN (optional)</Label>
               <Input
                 id="isbn"
                 value={formData.isbn}
                 onChange={(e) => updateField('isbn', e.target.value)}
-                placeholder="Enter ISBN"
+                placeholder="Enter ISBN (optional)"
               />
             </div>
             
@@ -440,13 +463,23 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => 
           </div>
           
           <div className="flex gap-2 pt-4">
-            <Button type="submit">
-              <Plus className="h-4 w-4 mr-2" />
-              Add to Library
+            <Button type="submit" disabled={isAdding}>
+              {isAdding ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add to Library
+                </>
+              )}
             </Button>
             <Button
               type="button"
               variant="outline"
+              disabled={isAdding}
               onClick={() => setFormData({
                 title: '',
                 author: '',
@@ -468,11 +501,14 @@ const ManualEntryForm = ({ onAddBook }: { onAddBook: (book: Book) => void }) => 
 }
 
 export const AddBooksPage = () => {
+  const { user } = useAuthContext()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<GoogleBook[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set())
   const [recentlyAdded, setRecentlyAdded] = useState<Array<{ id: string, title: string, author: string }>>([])
+  const [isAdding, setIsAdding] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -495,34 +531,67 @@ export const AddBooksPage = () => {
     }, 500)
   }
 
-  const handleAddGoogleBook = (googleBook: GoogleBook) => {
-    const book = convertGoogleBookToBook(googleBook)
-    setAddedBooks(prev => new Set([...prev, googleBook.id]))
-    setRecentlyAdded(prev => [
-      {
-        id: book.id,
-        title: book.title,
-        author: book.author
-      },
-      ...prev.slice(0, 4)
-    ])
+  const handleAddGoogleBook = async (googleBook: GoogleBook) => {
+    if (!user) {
+      setError('You must be logged in to add books')
+      return
+    }
 
-    // Here you would typically add to your backend/state management
-    console.log('Added Google book as Book model:', book)
+    setIsAdding(true)
+    setError(null)
+
+    try {
+      const book = convertGoogleBookToBook(googleBook)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...bookData } = book
+      
+      const bookId = await bookOperations.addBook(user.uid, bookData)
+      
+      setAddedBooks(prev => new Set([...prev, googleBook.id]))
+      setRecentlyAdded(prev => [
+        {
+          id: bookId,
+          title: book.title,
+          author: book.author
+        },
+        ...prev.slice(0, 4)
+      ])
+    } catch (err) {
+      console.error('Error adding book:', err)
+      setError('Failed to add book. Please try again.')
+    } finally {
+      setIsAdding(false)
+    }
   }
 
-  const handleAddManualBook = (book: Book) => {
-    setRecentlyAdded(prev => [
-      {
-        id: book.id,
-        title: book.title,
-        author: book.author
-      },
-      ...prev.slice(0, 4)
-    ])
+  const handleAddManualBook = async (book: Book) => {
+    if (!user) {
+      setError('You must be logged in to add books')
+      return
+    }
 
-    // Here you would typically add to your backend/state management
-    console.log('Added manual book as Book model:', book)
+    setIsAdding(true)
+    setError(null)
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...bookData } = book
+      const bookId = await bookOperations.addBook(user.uid, bookData)
+      
+      setRecentlyAdded(prev => [
+        {
+          id: bookId,
+          title: book.title,
+          author: book.author
+        },
+        ...prev.slice(0, 4)
+      ])
+    } catch (err) {
+      console.error('Error adding book:', err)
+      setError('Failed to add book. Please try again.')
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   React.useEffect(() => {
@@ -544,6 +613,18 @@ export const AddBooksPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recently Added */}
       {recentlyAdded.length > 0 && (
@@ -605,11 +686,12 @@ export const AddBooksPage = () => {
             books={searchResults}
             onAddBook={handleAddGoogleBook}
             addedBooks={addedBooks}
+            isAdding={isAdding}
           />
         </TabsContent>
 
         <TabsContent value="manual">
-          <ManualEntryForm onAddBook={handleAddManualBook} />
+          <ManualEntryForm onAddBook={handleAddManualBook} isAdding={isAdding} />
         </TabsContent>
 
         <TabsContent value="scan">

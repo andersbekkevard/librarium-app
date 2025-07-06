@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import BookCard from "@/components/app/BookCard"
 import { Book } from "@/lib/models"
-import { Timestamp } from "firebase/firestore"
 import Sidebar from "@/components/app/Sidebar"
 import AddBooksPage from "@/components/app/AddBooksPage"
 import MyLibraryPage from "@/components/app/MyLibraryPage"
@@ -12,109 +11,44 @@ import GoogleAuth from "@/components/app/GoogleAuth"
 import { BookOpen, Star, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuthContext } from "@/components/auth/AuthProvider"
+import { bookOperations } from "@/lib/firebase-utils"
 
-// Sample book data for demonstration - converted to use centralized Book model
-const sampleBooks: Book[] = [
-  {
-    id: "1",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    state: "finished",
-    progress: { currentPage: 180, totalPages: 180, percentage: 100 },
-    isOwned: true,
-    rating: 4,
-    coverImage: "https://covers.openlibrary.org/b/id/8225261-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "2", 
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    state: "in_progress",
-    progress: { currentPage: 156, totalPages: 376, percentage: 41 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "3",
-    title: "1984",
-    author: "George Orwell", 
-    state: "not_started",
-    progress: { currentPage: 0, totalPages: 328, percentage: 0 },
-    isOwned: true,
-    coverImage: "https://covers.openlibrary.org/b/id/7222246-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  },
-  {
-    id: "4",
-    title: "The Catcher in the Rye",
-    author: "J.D. Salinger",
-    state: "in_progress",
-    progress: { currentPage: 89, totalPages: 277, percentage: 32 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "5",
-    title: "Pride and Prejudice",
-    author: "Jane Austen",
-    state: "finished",
-    progress: { currentPage: 432, totalPages: 432, percentage: 100 },
-    isOwned: true,
-    rating: 5,
-    coverImage: "https://covers.openlibrary.org/b/id/8134973-M.jpg",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  },
-  {
-    id: "6",
-    title: "The Lord of the Rings",
-    author: "J.R.R. Tolkien",
-    state: "not_started",
-    progress: { currentPage: 0, totalPages: 1216, percentage: 0 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  },
-  {
-    id: "7",
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    state: "in_progress",
-    progress: { currentPage: 123, totalPages: 310, percentage: 40 },
-    isOwned: true,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    startedAt: Timestamp.now()
-  },
-  {
-    id: "8",
-    title: "Dune",
-    author: "Frank Herbert",
-    state: "finished",
-    progress: { currentPage: 688, totalPages: 688, percentage: 100 },
-    isOwned: true,
-    rating: 5,
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    finishedAt: Timestamp.now()
-  }
-]
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
-  const [, setFilteredBooks] = useState(sampleBooks)
-  const [searchQuery, setSearchQuery] = useState('')
-  const { loading, isAuthenticated } = useAuthContext()
+  const [books, setBooks] = useState<Book[]>([])
+  const [stats, setStats] = useState({
+    totalBooks: 0,
+    finishedBooks: 0,
+    totalPagesRead: 0,
+    currentlyReading: 0
+  })
+  const [searchQuery] = useState('')
+  const { loading, isAuthenticated, user } = useAuthContext()
   const router = useRouter()
+
+  // Load user's books and stats
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      const unsubscribe = bookOperations.subscribeToUserBooks(user.uid, (userBooks) => {
+        setBooks(userBooks)
+        
+        // Calculate stats
+        const finishedBooks = userBooks.filter(book => book.state === 'finished')
+        const totalPagesRead = finishedBooks.reduce((total, book) => total + (book.progress.totalPages || 0), 0)
+        const currentlyReading = userBooks.filter(book => book.state === 'in_progress')
+        
+        setStats({
+          totalBooks: userBooks.length,
+          finishedBooks: finishedBooks.length,
+          totalPagesRead,
+          currentlyReading: currentlyReading.length
+        })
+      })
+
+      return unsubscribe
+    }
+  }, [loading, isAuthenticated, user])
 
   // Route protection - redirect to landing if not authenticated
   useEffect(() => {
@@ -140,14 +74,16 @@ export default function Dashboard() {
     return null
   }
 
-  const handleEdit = (book: Book) => {
+  const handleEdit = async (book: Book) => {
+    if (!user) return
     console.log('Edit book:', book.title)
-    // Handle edit functionality
+    // TODO: Implement edit functionality
   }
 
-  const handleUpdateProgress = (book: Book) => {
+  const handleUpdateProgress = async (book: Book) => {
+    if (!user) return
     console.log('Update progress for:', book.title)
-    // Handle update progress functionality
+    // TODO: Implement update progress functionality
   }
 
 
@@ -207,7 +143,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Total Books</p>
-                        <p className="text-2xl font-bold text-foreground">{sampleBooks.length}</p>
+                        <p className="text-2xl font-bold text-foreground">{stats.totalBooks}</p>
                       </div>
                       <div className="h-8 w-8 bg-brand-primary/10 rounded-full flex items-center justify-center">
                         <BookOpen className="h-4 w-4 text-brand-primary" />
@@ -220,7 +156,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Read This Year</p>
-                        <p className="text-2xl font-bold text-foreground">{sampleBooks.filter(book => book.state === 'finished').length}</p>
+                        <p className="text-2xl font-bold text-foreground">{stats.finishedBooks}</p>
                       </div>
                       <div className="h-8 w-8 bg-status-success/10 rounded-full flex items-center justify-center">
                         <Star className="h-4 w-4 text-status-success fill-current" />
@@ -233,7 +169,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Pages This Month</p>
-                        <p className="text-2xl font-bold text-foreground">1,247</p>
+                        <p className="text-2xl font-bold text-foreground">{stats.totalPagesRead.toLocaleString()}</p>
                       </div>
                       <div className="h-8 w-8 bg-brand-accent/10 rounded-full flex items-center justify-center">
                         <BookOpen className="h-4 w-4 text-brand-accent" />
@@ -271,7 +207,7 @@ export default function Dashboard() {
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sampleBooks
+                      {books
                         .filter(book => book.state === 'in_progress')
                         .slice(0, 6)
                         .map((book) => (
@@ -283,6 +219,12 @@ export default function Dashboard() {
                           />
                         ))}
                     </div>
+                    {books.filter(book => book.state === 'in_progress').length === 0 && (
+                      <div className="text-center py-8">
+                        <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No books currently reading</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -346,8 +288,9 @@ export default function Dashboard() {
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {sampleBooks
+                    {books
                       .filter(book => book.state === 'finished')
+                      .slice(0, 8)
                       .map((book) => (
                         <BookCard
                           key={book.id}
@@ -357,6 +300,12 @@ export default function Dashboard() {
                         />
                       ))}
                   </div>
+                  {books.filter(book => book.state === 'finished').length === 0 && (
+                    <div className="text-center py-8">
+                      <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                      <p className="text-muted-foreground">No books finished yet</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
