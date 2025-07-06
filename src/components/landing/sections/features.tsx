@@ -67,14 +67,14 @@ export const FeaturesSection = () => {
         {featureList.map(({ icon, title, description }) => (
           <div key={title}>
             <Card className="h-full bg-background border-0 shadow-none">
-              <CardHeader className="flex justify-center items-center">
+              <CardHeader className="flex flex-col justify-center items-center">
                 <div className={`${BRAND_CLASSES.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}>
                   <div className={BRAND_CLASSES.primary.text}>
                     {icon}
                   </div>
                 </div>
 
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="text-center">{title}</CardTitle>
               </CardHeader>
 
               <CardContent className="text-muted-foreground text-center">
