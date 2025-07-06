@@ -48,7 +48,7 @@ const reviewList: ReviewProps[] = [
     name: "Mike R.",
     userName: "Avid Reader",
     comment:
-      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.",
+      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo.",
     rating: 5.0,
   },
   {
@@ -81,7 +81,9 @@ export const TestimonialSection = () => {
   return (
     <section id="testimonials" className="container py-24 sm:py-32">
       <div className="text-center mb-8">
-        <h2 className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}>
+        <h2
+          className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        >
           Testimonials
         </h2>
 
@@ -90,7 +92,8 @@ export const TestimonialSection = () => {
         </h2>
 
         <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground">
-          Join thousands of readers who have transformed their reading experience with Librarium.
+          Join thousands of readers who have transformed their reading
+          experience with Librarium.
         </h3>
       </div>
 
@@ -109,11 +112,21 @@ export const TestimonialSection = () => {
               <Card className="bg-muted/50 dark:bg-card">
                 <CardContent className="pt-6 pb-0">
                   <div className="flex gap-1 pb-6">
-                    <Star className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`} />
-                    <Star className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`} />
-                    <Star className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`} />
-                    <Star className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`} />
-                    <Star className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`} />
+                    <Star
+                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                    />
+                    <Star
+                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                    />
+                    <Star
+                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                    />
+                    <Star
+                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                    />
+                    <Star
+                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                    />
                   </div>
                   {`"${review.comment}"`}
                 </CardContent>
@@ -125,7 +138,12 @@ export const TestimonialSection = () => {
                         src="https://avatars.githubusercontent.com/u/75042455?v=4"
                         alt="radix"
                       />
-                      <AvatarFallback>{review.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarFallback>
+                        {review.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
                     </Avatar>
 
                     <div className="flex flex-col">
