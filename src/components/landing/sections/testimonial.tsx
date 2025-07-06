@@ -29,50 +29,50 @@ interface ReviewProps {
 const reviewList: ReviewProps[] = [
   {
     image: "https://github.com/shadcn.png",
-    name: "Sarah Chen",
-    userName: "Book Blogger",
+    name: "John D.",
+    userName: "Reader",
     comment:
-      "Librarium has completely transformed how I track my reading. The analytics are incredible and the interface is so intuitive. I've discovered more books this year than ever before!",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsom dolor sit ammet",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Michael Rodriguez",
-    userName: "Literature Professor",
+    name: "Jane S.",
+    userName: "Book Enthusiast",
     comment:
-      "As someone who reads dozens of books per semester, Librarium helps me stay organized and track my reading progress. The collaboration features are perfect for my book clubs.",
+      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Emma Thompson",
+    name: "Mike R.",
     userName: "Avid Reader",
     comment:
-      "I love how Librarium makes reading social! Sharing my progress with friends and getting recommendations has made reading so much more engaging.",
+      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "David Kim",
-    userName: "Author",
+    name: "Sarah L.",
+    userName: "Literature Fan",
     comment:
-      "The reading analytics feature is amazing! I can see exactly how my reading habits have evolved over time. It's like having a personal reading coach.",
+      "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Lisa Johnson",
-    userName: "Librarian",
+    name: "Tom W.",
+    userName: "Book Lover",
     comment:
-      "Librarium bridges the gap between traditional reading and modern technology. My patrons love the goal-setting features and progress tracking.",
+      "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Alex Martinez",
-    userName: "Book Reviewer",
+    name: "Emma K.",
+    userName: "Reading Enthusiast",
     comment:
-      "The best reading tracker I've ever used! The Google Books integration saves so much time, and the interface is clean and distraction-free.",
+      "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.",
     rating: 5.0,
   },
 ];
