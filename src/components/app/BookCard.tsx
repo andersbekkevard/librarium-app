@@ -4,8 +4,10 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Calendar } from "lucide-react";
+import { BookOpen, Star } from "lucide-react";
 import { Book } from "@/lib/models";
+import { READING_STATE_COLORS } from "@/lib/colors";
+import { cn } from "@/lib/utils";
 
 interface BookCardProps {
   book: Book;
@@ -18,18 +20,46 @@ interface BookCardProps {
 const getReadingStateBadge = (state: Book["state"]) => {
   switch (state) {
     case "not_started":
-      return { label: "Not Started", variant: "secondary" as const };
+      return { label: "Not Started", className: "bg-status-info/10 text-status-info border-status-info/20" };
     case "in_progress":
-      return { label: "Reading", variant: "default" as const };
+      return { label: "Reading", className: "bg-brand-primary/10 text-brand-primary border-brand-primary/20" };
     case "finished":
-      return { label: "Finished", variant: "outline" as const };
+      return { label: "Finished", className: "bg-status-success/10 text-status-success border-status-success/20" };
     default:
-      return { label: "Unknown", variant: "secondary" as const };
+      return { label: "Unknown", className: "bg-muted text-muted-foreground border-border" };
   }
 };
 
 const calculateProgress = (currentPage: number, totalPages: number): number => {
   return Math.round((currentPage / totalPages) * 100);
+};
+
+const StarRating = ({ rating }: { rating: number }) => {
+  return (
+    <div className="flex items-center gap-1">
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            "h-3 w-3",
+            i < rating ? "fill-yellow-400 text-yellow-400" : "fill-muted text-muted-foreground"
+          )}
+        />
+      ))}
+      <span className="ml-1 text-xs text-muted-foreground">{rating}/5</span>
+    </div>
+  );
+};
+
+const ProgressBar = ({ value, className }: { value: number; className?: string }) => {
+  return (
+    <div className={cn("w-full bg-muted rounded-full h-1.5", className)}>
+      <div
+        className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
+        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+      />
+    </div>
+  );
 };
 
 export const BookCard: React.FC<BookCardProps> = ({
@@ -55,9 +85,12 @@ export const BookCard: React.FC<BookCardProps> = ({
     }
   };
 
+  // Mock genre for now - in future this would come from the book data
+  const genre = "Fiction"; // TODO: Add genre field to Book model
+
   return (
     <Card 
-      className="group cursor-pointer transition-all duration-200 hover:shadow-sm hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
+      className="w-full max-w-sm h-48 overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -69,82 +102,69 @@ export const BookCard: React.FC<BookCardProps> = ({
       }}
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
-      <CardContent className="p-3">
-        <div className="flex gap-3">
-          {/* Book Cover */}
-          <div className="flex-shrink-0">
-            <div className="w-12 h-16 rounded-md overflow-hidden bg-muted border border-border/20">
-              {book.coverImage ? (
-                <img
-                  src={book.coverImage}
-                  alt={`${book.title} cover`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-muted-foreground" />
-                </div>
-              )}
-            </div>
+      <CardContent className="p-3 h-full flex gap-3">
+        {/* Book Cover - Takes up more space and full height */}
+        <div className="flex-shrink-0 w-24 h-full">
+          <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
+            {book.coverImage ? (
+              <img
+                src={book.coverImage}
+                alt={`${book.title} cover`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <BookOpen className="h-8 w-8 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Book Information */}
+        <div className="flex-1 flex flex-col justify-between min-w-0">
+          {/* Title and Author */}
+          <div className="space-y-1">
+            <h3 className="font-semibold text-foreground text-sm leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
+              {book.title}
+            </h3>
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              by {book.author}
+            </p>
           </div>
 
-          {/* Book Info */}
-          <div className="flex-1 min-w-0 space-y-2">
-            {/* Title & Author */}
-            <div>
-              <h3 className="font-medium text-sm text-foreground line-clamp-1 group-hover:text-brand-primary transition-colors">
-                {book.title}
-              </h3>
-              <p className="text-xs text-muted-foreground line-clamp-1">
-                {book.author}
-              </p>
-            </div>
+          {/* Genre and Status Badges */}
+          <div className="flex flex-wrap gap-1.5">
+            <Badge 
+              variant="outline" 
+              className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-border/40"
+            >
+              {genre}
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={cn("text-xs px-2 py-0.5 border", badgeInfo.className)}
+            >
+              {badgeInfo.label}
+            </Badge>
+          </div>
 
-            {/* Reading State and Progress */}
-            <div className="space-y-1.5">
-              {/* Reading State Badge */}
-              <div className="flex items-center gap-2">
-                <Badge 
-                  variant={badgeInfo.variant} 
-                  className="text-xs px-2 py-0.5 h-5"
-                >
-                  {badgeInfo.label}
-                </Badge>
-                {book.publishedDate && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>{new Date(book.publishedDate).getFullYear()}</span>
-                  </div>
-                )}
+          {/* Progress/Rating Section */}
+          <div className="mt-2">
+            {book.state === "in_progress" && book.progress.currentPage && book.progress.totalPages && (
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">
+                    {book.progress.currentPage} / {book.progress.totalPages} pages
+                  </span>
+                  <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+                </div>
+                <ProgressBar value={progress} />
               </div>
+            )}
 
-              {/* Progress Bar for In Progress Books */}
-              {book.state === "in_progress" && (
-                <div className="space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">
-                      {book.progress.currentPage || 0} / {book.progress.totalPages || "?"} pages
-                    </span>
-                    <span className="text-xs font-medium text-foreground">
-                      {progress}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-1">
-                    <div
-                      className="bg-brand-primary h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Completion info for finished books */}
-              {book.state === "finished" && book.finishedAt && (
-                <div className="text-xs text-muted-foreground">
-                  Finished {book.finishedAt?.toDate?.()?.toLocaleDateString()}
-                </div>
-              )}
-            </div>
+            {book.state === "finished" && book.rating && (
+              <StarRating rating={book.rating} />
+            )}
           </div>
         </div>
       </CardContent>
