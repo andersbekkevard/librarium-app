@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Librarium
+
+A web application for managing personal book collections and tracking reading progress.
+
+## Overview
+
+Librarium is a personal library management system that allows users to organize their book collections, track reading progress, and maintain reading statistics. The application supports both owned books and wishlist items, with features for progress tracking and book rating.
+
+## Current State
+
+The application is in active development with the following functionality implemented:
+
+- **User Authentication**: Google OAuth integration for user sign-in
+- **Book Management**: Add, edit, and organize books in personal library
+- **Reading Progress**: Track reading state (not started, in progress, finished) with page-level progress tracking
+- **Book Information**: Integration with Google Books API for automatic metadata retrieval
+- **Library Organization**: Filter and sort books by various criteria (title, author, reading state, ownership)
+- **Reading Statistics**: Basic statistics tracking for books read and library size
+- **Responsive Design**: Mobile-friendly interface with grid and list view modes
+
+## Technology Stack
+
+### Frontend
+- **Next.js 15**: React framework with App Router
+- **React 19**: UI library with TypeScript support
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Radix UI**: Accessible component primitives (via shadcn/ui)
+- **Lucide React**: Icon library
+
+### Backend & Database
+- **Firebase Authentication**: User management with Google OAuth
+- **Firebase Firestore**: Real-time NoSQL database
+
+- **Google Books API**: Book metadata and cover images
+
+### Development Tools
+- **ESLint**: Code linting with Next.js configuration
+- **PostCSS**: CSS processing with Tailwind CSS
+- **Turbopack**: Fast development bundler (Next.js 15)
+
+## Architecture
+
+The application follows a Firebase-native approach with:
+- Direct Firebase SDK integration in React components
+- Real-time data synchronization via Firestore listeners
+- Type-safe data models with TypeScript interfaces
+- Component-based React patterns with custom hooks
+- Serverless cloud functions for external API integration
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set up Firebase configuration:
+   - Create a Firebase project
+   - Enable Authentication with Google provider
+   - Create a Firestore database
+   - Add your Firebase configuration to environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) to view the application
 
-## Learn More
+## Planned Features
 
-To learn more about Next.js, take a look at the following resources:
+- Advanced search and filtering capabilities
+- Book sharing and collaboration
+- Reading analytics and goal tracking
+- Quote and note collection
+- Book recommendations
+- Import/export functionality
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                  # Next.js App Router pages
+├── components/          # Reusable UI components
+├── lib/                 # Utilities, hooks, and Firebase integration
+└── styles/             # Global styles and theme configuration
+```
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+**Copyright (c) 2025 Librarium. All rights reserved.**
+
+This software and associated documentation files (the "Software") are proprietary and confidential. The Software is owned by Librarium and is protected by copyright laws and international copyright treaties.
+
+**No part of this Software may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of Librarium, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law.**
+
+**For permission requests, write to the copyright holder at the address below:**
+anders.bekkevard@gmail.com
