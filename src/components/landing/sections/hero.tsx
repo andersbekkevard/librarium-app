@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import Image from "next/image";
 import { BRAND_CLASSES } from "@/lib/colors";
 import { signInWithGoogle } from "@/lib/auth";
 import { useAuthContext } from "@/components/auth/AuthProvider";
@@ -15,6 +17,7 @@ export const HeroSection = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
   const { user, loading, isAuthenticated } = useAuthContext();
+  const { theme } = useTheme();
 
   const handleGetStarted = async () => {
     if (isAuthenticated) {
@@ -136,17 +139,19 @@ export const HeroSection = () => {
 
         <div className="relative group mt-14">
           <div className="absolute top-2 lg:-top-8 left-1/2 transform -translate-x-1/2 w-[90%] mx-auto h-24 lg:h-80 bg-brand-primary/50 rounded-full blur-3xl"></div>
-          <div className="w-full md:w-[1200px] mx-auto rounded-lg relative leading-none flex items-center border border-t-2 border-secondary border-t-brand-primary/30 bg-gradient-to-br from-muted to-card p-8 md:p-16">
-            <div className="text-center w-full">
-              <div className="text-6xl md:text-8xl mb-4">📚</div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-2">Your Personal Library</h3>
-              <p className="text-muted-foreground">
-                Organize, track, and discover books like never before
-              </p>
-            </div>
-          </div>
+          <Image
+            width={1200}
+            height={1200}
+            className="w-full md:w-[1200px] mx-auto rounded-lg relative border border-t-2 border-secondary border-t-brand-primary/30"
+            src={
+              theme === "light"
+                ? "/images/hero-image-light.jpg"
+                : "/images/hero-image-dark.jpg"
+            }
+            alt="dashboard"
+          />
 
-          <div className="absolute bottom-0 left-0 w-full h-20 md:h-28 bg-gradient-to-b from-background/0 via-background/50 to-background rounded-lg"></div>
+          <div className="absolute bottom-0 left-0 w-full h-32 md:h-40 bg-gradient-to-b from-background/0 via-background/90 to-background rounded-lg"></div>
         </div>
       </div>
     </section>
