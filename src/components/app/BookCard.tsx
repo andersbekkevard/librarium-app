@@ -2,17 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Star, BookOpen, Edit, RotateCcw } from "lucide-react";
+import { BookOpen, Calendar } from "lucide-react";
 import { Book } from "@/lib/models";
 
 interface BookCardProps {
@@ -40,23 +32,10 @@ const calculateProgress = (currentPage: number, totalPages: number): number => {
   return Math.round((currentPage / totalPages) * 100);
 };
 
-const renderStars = (rating: number) => {
-  return Array.from({ length: 5 }, (_, i) => (
-    <Star
-      key={i}
-      className={`h-3 w-3 ${
-        i < rating
-          ? "fill-status-warning text-status-warning"
-          : "fill-muted text-muted"
-      }`}
-    />
-  ));
-};
-
 export const BookCard: React.FC<BookCardProps> = ({
   book,
-  onEdit,
-  onUpdateProgress,
+  onEdit: _onEdit,
+  onUpdateProgress: _onUpdateProgress,
   onBookClick,
 }) => {
   const router = useRouter();
@@ -76,19 +55,9 @@ export const BookCard: React.FC<BookCardProps> = ({
     }
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit?.(book);
-  };
-
-  const handleUpdateProgress = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onUpdateProgress?.(book);
-  };
-
   return (
     <Card 
-      className="w-full max-w-xs mx-auto cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-brand-primary/20"
+      className="group cursor-pointer transition-all duration-200 hover:shadow-sm hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -100,100 +69,85 @@ export const BookCard: React.FC<BookCardProps> = ({
       }}
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
-      <CardHeader className="pb-2">
-        {/* Cover Image or Fallback */}
-        <div className="relative aspect-[2/3] w-full mb-2 rounded-md overflow-hidden bg-muted">
-          {book.coverImage ? (
-            <img
-              src={book.coverImage}
-              alt={`${book.title} cover`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center">
-              <BookOpen className="h-10 w-10 text-muted-foreground mb-1" />
-              <p className="text-xs font-medium text-foreground line-clamp-2">
+      <CardContent className="p-3">
+        <div className="flex gap-3">
+          {/* Book Cover */}
+          <div className="flex-shrink-0">
+            <div className="w-12 h-16 rounded-md overflow-hidden bg-muted border border-border/20">
+              {book.coverImage ? (
+                <img
+                  src={book.coverImage}
+                  alt={`${book.title} cover`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Book Info */}
+          <div className="flex-1 min-w-0 space-y-2">
+            {/* Title & Author */}
+            <div>
+              <h3 className="font-medium text-sm text-foreground line-clamp-1 group-hover:text-brand-primary transition-colors">
                 {book.title}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                by {book.author}
+              </h3>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                {book.author}
               </p>
             </div>
-          )}
-        </div>
 
-        {/* Reading State Badge */}
-        <div className="flex justify-between items-start gap-1">
-          <Badge variant={badgeInfo.variant} className="text-xs">
-            {badgeInfo.label}
-          </Badge>
-        </div>
-      </CardHeader>
+            {/* Reading State and Progress */}
+            <div className="space-y-1.5">
+              {/* Reading State Badge */}
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={badgeInfo.variant} 
+                  className="text-xs px-2 py-0.5 h-5"
+                >
+                  {badgeInfo.label}
+                </Badge>
+                {book.publishedDate && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>{new Date(book.publishedDate).getFullYear()}</span>
+                  </div>
+                )}
+              </div>
 
-      <CardContent className="pb-2">
-        {/* Book Title and Author */}
-        <CardTitle className="text-base font-semibold mb-1 line-clamp-2">
-          {book.title}
-        </CardTitle>
-        <CardDescription className="text-xs text-muted-foreground mb-2">
-          by {book.author}
-        </CardDescription>
+              {/* Progress Bar for In Progress Books */}
+              {book.state === "in_progress" && (
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      {book.progress.currentPage || 0} / {book.progress.totalPages || "?"} pages
+                    </span>
+                    <span className="text-xs font-medium text-foreground">
+                      {progress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-1">
+                    <div
+                      className="bg-brand-primary h-1 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
-        {/* Progress for In Progress Books */}
-        {book.state === "in_progress" && book.progress.currentPage && (
-          <div className="mb-2">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-medium">{progress}% complete</span>
-              <span className="text-xs text-muted-foreground">
-                {book.progress.currentPage} / {book.progress.totalPages || "?"}{" "}
-                pages
-              </span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-1.5">
-              <div
-                className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+              {/* Completion info for finished books */}
+              {book.state === "finished" && book.finishedAt && (
+                <div className="text-xs text-muted-foreground">
+                  Finished {book.finishedAt?.toDate?.()?.toLocaleDateString()}
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Star Rating for Finished Books */}
-        {book.state === "finished" && book.rating && (
-          <div className="flex items-center gap-1 mb-2">
-            {renderStars(book.rating)}
-            <span className="text-xs text-muted-foreground ml-1">
-              ({book.rating}/5)
-            </span>
-          </div>
-        )}
+        </div>
       </CardContent>
-
-      <CardFooter className="pt-2 flex gap-2">
-        {/* Edit Button - Always Visible */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleEdit}
-          className="flex-1 text-xs px-2 py-1"
-        >
-          <Edit className="h-3 w-3 mr-1" />
-          Edit
-        </Button>
-
-        {/* Update Button - Only for In Progress Books */}
-        {book.state === "in_progress" && (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleUpdateProgress}
-            className="flex-1 text-xs px-2 py-1"
-          >
-            <RotateCcw className="h-3 w-3 mr-1" />
-            Update
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 };
