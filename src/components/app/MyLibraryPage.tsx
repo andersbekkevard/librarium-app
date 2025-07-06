@@ -84,15 +84,15 @@ export const BookListItem: React.FC<BookListItemProps> = ({
   };
 
   return (
-    <Card 
+    <Card
       className="w-full cursor-pointer transition-all duration-200 hover:shadow-md hover:border-brand-primary/20"
       onClick={handleCardClick}
     >
-      <CardContent className="p-2">
-        <div className="flex gap-2 items-center">
+      <CardContent className="p-0">
+        <div className="flex gap-4 items-center">
           {/* Cover Image */}
-          <div className="flex-shrink-0">
-            <div className="w-8 h-11 bg-muted rounded flex items-center justify-center">
+          <div className="flex-shrink-0 pl-3">
+            <div className="w-20 h-28 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
               {book.coverImage ? (
                 <img
                   src={book.coverImage}
@@ -100,13 +100,13 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   className="w-full h-full object-cover rounded"
                 />
               ) : (
-                <BookOpen className="h-3 w-3 text-muted-foreground" />
+                <BookOpen className="h-8 w-8 text-muted-foreground" />
               )}
             </div>
           </div>
 
           {/* Book Details */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-2 items-center">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
             <div className="md:col-span-2">
               <h3 className="font-semibold text-foreground truncate">
                 {book.title}
@@ -176,7 +176,9 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => handleButtonClick(e, () => onUpdateProgress(book))}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => onUpdateProgress(book))
+                    }
                     className="h-8 w-8 p-0"
                   >
                     <span className="sr-only">Update Progress</span>
@@ -227,7 +229,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
       (userBooks) => {
         setBooks(userBooks);
         setLoading(false);
-      },
+      }
     );
 
     return unsubscribe;
@@ -243,7 +245,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
         (book) =>
           book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+          book.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -255,7 +257,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     // Apply ownership filter
     if (filterOwnership !== "all") {
       filtered = filtered.filter((book) =>
-        filterOwnership === "owned" ? book.isOwned : !book.isOwned,
+        filterOwnership === "owned" ? book.isOwned : !book.isOwned
       );
     }
 

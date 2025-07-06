@@ -15,18 +15,43 @@ interface BookCardProps {
   onUpdateProgress?: (book: Book) => void;
   onBookClick?: (bookId: string) => void;
 }
-
 // Helper functions
+
+// Example color configurations for badges using brand colors from globals.css:
+// 1. Brand Primary: "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+// 2. Brand Secondary: "bg-brand-secondary/10 text-brand-secondary border-brand-secondary/20"
+// 3. Brand Accent: "bg-brand-accent/10 text-brand-accent border-brand-accent/20"
+// 4. Status Success: "bg-status-success/10 text-status-success border-status-success/20"
+// 5. Status Warning: "bg-status-warning/10 text-status-warning border-status-warning/20"
+// 6. Status Error: "bg-status-error/10 text-status-error border-status-error/20"
+// 7. Status Info: "bg-status-info/10 text-status-info border-status-info/20"
+// 8. Primary: "bg-primary/10 text-primary border-primary/20"
+// 9. Secondary: "bg-secondary/10 text-secondary border-secondary/20"
+// 10. Muted: "bg-muted/50 text-muted-foreground border-muted/40"
+
 const getReadingStateBadge = (state: Book["state"]) => {
   switch (state) {
     case "not_started":
-      return { label: "Not Started", className: "bg-status-info/10 text-status-info border-status-info/20" };
+      return {
+        label: "Not Started",
+        className: "bg-slate-50 text-slate-500 border-slate-200",
+      };
     case "in_progress":
-      return { label: "Reading", className: "bg-brand-primary/10 text-brand-primary border-brand-primary/20" };
+      return {
+        label: "Reading",
+        className:
+          "bg-brand-primary/10 text-brand-primary border-brand-primary/20",
+      };
     case "finished":
-      return { label: "Finished", className: "bg-status-success/10 text-status-success border-status-success/20" };
+      return {
+        label: "Finished",
+        className: "bg-slate-800/10 text-slate-800 border-slate-800/20",
+      };
     default:
-      return { label: "Unknown", className: "bg-muted text-muted-foreground border-border" };
+      return {
+        label: "Unknown",
+        className: "bg-muted text-muted-foreground border-border",
+      };
   }
 };
 
@@ -42,7 +67,9 @@ const StarRating = ({ rating }: { rating: number }) => {
           key={i}
           className={cn(
             "h-3 w-3",
-            i < rating ? "fill-yellow-400 text-yellow-400" : "fill-muted text-muted-foreground"
+            i < rating
+              ? "fill-yellow-400 text-yellow-400"
+              : "fill-muted text-muted-foreground"
           )}
         />
       ))}
@@ -51,7 +78,13 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-const ProgressBar = ({ value, className }: { value: number; className?: string }) => {
+const ProgressBar = ({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) => {
   return (
     <div className={cn("w-full bg-muted rounded-full h-1.5", className)}>
       <div
@@ -89,13 +122,13 @@ export const BookCard: React.FC<BookCardProps> = ({
   const genre = "Fiction"; // TODO: Add genre field to Book model
 
   return (
-    <Card 
+    <Card
       className="w-full max-w-sm h-48 overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleCardClick();
         }
@@ -134,14 +167,14 @@ export const BookCard: React.FC<BookCardProps> = ({
 
           {/* Genre and Status Badges */}
           <div className="flex flex-wrap gap-1.5">
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-border/40"
             >
               {genre}
             </Badge>
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={cn("text-xs px-2 py-0.5 border", badgeInfo.className)}
             >
               {badgeInfo.label}
@@ -150,17 +183,22 @@ export const BookCard: React.FC<BookCardProps> = ({
 
           {/* Progress/Rating Section */}
           <div className="mt-2">
-            {book.state === "in_progress" && book.progress.currentPage && book.progress.totalPages && (
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">
-                    {book.progress.currentPage} / {book.progress.totalPages} pages
-                  </span>
-                  <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+            {book.state === "in_progress" &&
+              book.progress.currentPage &&
+              book.progress.totalPages && (
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      {book.progress.currentPage} / {book.progress.totalPages}{" "}
+                      pages
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                  <ProgressBar value={progress} />
                 </div>
-                <ProgressBar value={progress} />
-              </div>
-            )}
+              )}
 
             {book.state === "finished" && book.rating && (
               <StarRating rating={book.rating} />
