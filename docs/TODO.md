@@ -39,10 +39,10 @@ This way, URLs reflect the view (e.g. /library or /dashboard vs all under /dashb
 It also avoids keeping an oversized component. Currently,
 the Dashboard component is quite large and manages many concerns (dashboard stats, book list, adding books, book detail modal) in one file
 
-- [ ] **Centralize books state management to prevent duplicate Firestore subscriptions
+- [X] **Centralize books state management to prevent duplicate Firestore subscriptions
   - Dashboard and MyLibraryPage currently subscribe to the same books data separately
   - Consider lifting state up by passing books as props from Dashboard to MyLibraryPage
   - Or implement a books context similar to auth context for global state management
   - This would eliminate redundant Firestore listeners and ensure data consistency across components**
 
-- [ ] Extract one centralized sorting method for books
+- [X] Extract one centralized sorting method for books
