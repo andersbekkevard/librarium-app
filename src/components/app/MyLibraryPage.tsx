@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Grid,
   List,
@@ -19,8 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
-import { bookOperations } from "@/lib/firebase-utils";
-import { useAuthContext } from "../../lib/AuthProvider";
+import { useBooksContext } from "../../lib/BooksProvider";
 import { calculateBookProgress, filterAndSortBooks } from "@/lib/book-utils";
 
 type ViewMode = "grid" | "list";
@@ -213,37 +212,13 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   searchQuery = "",
   onBookClick,
 }) => {
-  const { user, loading: authLoading } = useAuthContext();
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { books, loading, error, refreshBooks } = useBooksContext();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterOwnership, setFilterOwnership] = useState<string>("all");
 
-  // Load user's books from Firestore
-  useEffect(() => {
-    if (authLoading || !user) {
-      setLoading(authLoading);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    // Subscribe to real-time updates of user's books
-    const unsubscribe = bookOperations.subscribeToUserBooks(
-      user.uid,
-      (userBooks) => {
-        setBooks(userBooks);
-        setLoading(false);
-      }
-    );
-
-    return unsubscribe;
-  }, [user, authLoading]);
 
   const clearFilters = () => {
     setFilterStatus("all");
@@ -476,7 +451,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
               Error loading books
             </h3>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()} variant="outline">
+            <Button onClick={refreshBooks} variant="outline">
               Try again
             </Button>
           </CardContent>

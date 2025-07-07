@@ -27,9 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Book } from "@/lib/models";
-import { bookOperations } from "@/lib/firebase-utils";
 import { useAuthContext } from "@/lib/AuthProvider";
-import { Timestamp } from "firebase/firestore";
+import { useBooksContext } from "@/lib/BooksProvider";
 import {
   convertGoogleBookToBook,
   convertManualEntryToBook,
@@ -39,7 +38,6 @@ import {
 import {
   GoogleBooksVolume,
   getBestThumbnail,
-  getBestISBN,
   formatAuthors,
 } from "@/lib/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
@@ -371,6 +369,7 @@ const ManualEntryForm = ({
 
 export const AddBooksPage = () => {
   const { user } = useAuthContext();
+  const { addBook } = useBooksContext();
   const [searchQuery, setSearchQuery] = useState("");
   const { searchResults, isSearching, error, search, clearError } =
     useBookSearch();
@@ -407,7 +406,7 @@ export const AddBooksPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
 
-      const bookId = await bookOperations.addBook(user.uid, bookData);
+      const bookId = await addBook(bookData);
 
       setAddedBooks((prev) => new Set([...prev, googleBook.id]));
       setRecentlyAdded((prev) => [
@@ -450,7 +449,7 @@ export const AddBooksPage = () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
-      const bookId = await bookOperations.addBook(user.uid, bookData);
+      const bookId = await addBook(bookData);
 
       setRecentlyAdded((prev) => [
         {

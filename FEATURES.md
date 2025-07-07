@@ -4,7 +4,6 @@
 
 - **Description**: User registration and login system
 - **User Experience**: Email/password and social login (Google)
-- **Source**: README.md, PRD.md
 - **Workflows**: Registration → Profile setup → Library access
 
 ### 2. **Firebase Persistence Layer**
@@ -81,14 +80,12 @@
 - **Quote Capture**: Save memorable passages with page numbers
 - **Quote Organization**: Browse quotes by book or across library
 - **Page Tracking**: Reference specific pages for quotes
-- **Source**: Legacy PRD, Java code analysis
 
 ### **Review System**
 
 - **Book Ratings**: 1-5 star rating system for finished books
 - **Written Reviews**: Detailed text reviews
 - **Review History**: Track review changes over time
-- **Source**: Legacy PRD, PRD.md
 
 ## Search & Discovery Features
 
@@ -98,14 +95,12 @@
 - **Filter Capabilities**: Filter by year intervals, reading state, ownership
 - **Shelf-specific Search**: Search within specific shelves
 - **Author/Year Browsing**: Browse books by author or publication year
-- **Source**: Legacy PRD, Java UI analysis
 
 ### **Book Discovery**
 
 - **Google Books Integration**: Search and discover new books
 - **Automated Metadata**: Auto-populate book details from external sources
 - **Cover Images**: Automatic cover image fetching
-- **Source**: Current sprint goals, PRD.md
 
 ## Planned Features
 
@@ -115,14 +110,12 @@
 - **Reading Insights**: Average reading speed, favorite genres
 - **Progress Visualization**: Timeline of reading milestones
 - **Reading Streaks**: Current and longest reading streaks
-- **Source**: PRD.md, ARCHITECTURE.md
 
 ### **Goal Tracking**
 
 - **Yearly Goals**: Set and monitor reading targets
 - **Progress Tracking**: Visual progress toward goals
 - **Achievement System**: Milestones and accomplishments
-- **Source**: PRD.md, ARCHITECTURE.md
 
 ## Future/Backlog Features
 
@@ -131,14 +124,12 @@
 - **Separated Wishlist**: Dedicated wishlist separate from owned books
 - **Wishlist Organization**: Prioritize and categorize desired books
 - **Purchase Integration**: Direct purchasing from wishlist
-- **Source**: README.md, Legacy PRD
 
 ### **LLM-Based Recommendations**
 
 - **AI-Powered Suggestions**: Book recommendations based on reading history
 - **Personalized Discovery**: Tailored book suggestions
 - **Smart Recommendations**: Context-aware book suggestions
-- **Source**: README.md, Legacy PRD
 
 ### **Gamification System**
 
@@ -146,7 +137,6 @@
 - **Achievements**: Rewards for reading milestones
 - **Streaks**: Daily/weekly reading streak tracking
 - **Social Challenges**: Group reading competitions
-- **Source**: README.md, Legacy PRD
 
 ### **Advanced Social Features**
 
@@ -154,4 +144,3 @@
 - **Public Profiles**: Discoverable user profiles
 - **Reading Groups**: Book club functionality
 - **Social Sharing**: Share reading progress and reviews
-- **Source**: PRD.md Phase 4
