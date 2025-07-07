@@ -21,7 +21,7 @@ import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
 import { bookOperations } from "@/lib/firebase-utils";
 import { useAuthContext } from "../../lib/AuthProvider";
-import { filterAndSortBooks } from "@/lib/book-utils";
+import { calculateBookProgress, filterAndSortBooks } from "@/lib/book-utils";
 
 type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";
@@ -41,26 +41,6 @@ export const BookListItem: React.FC<BookListItemProps> = ({
   onUpdateProgress,
   onBookClick,
 }) => {
-  /**
-   * Calculates progress percentage for a book
-   *
-   * Returns 100% for finished books, calculated percentage for in-progress
-   * books based on current/total pages, and 0% for not started books.
-   * Used by list view to display progress information.
-   *
-   * @returns number - Progress percentage (0-100)
-   */
-  const getProgressPercentage = () => {
-    if (book.state === "finished") return 100;
-    if (book.state === "in_progress") {
-      const { currentPage, totalPages } = book.progress;
-      if (currentPage && totalPages && totalPages > 0) {
-        return Math.round((currentPage / totalPages) * 100);
-      }
-    }
-    return 0;
-  };
-
   /**
    * Returns appropriate badge component for book's reading status
    *
@@ -182,7 +162,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   </div>
                 ) : book.state === "in_progress" ? (
                   <div className="text-xs text-muted-foreground">
-                    {getProgressPercentage()}% complete
+                    {calculateBookProgress(book)}% complete
                   </div>
                 ) : (
                   <div className="text-xs text-muted-foreground">

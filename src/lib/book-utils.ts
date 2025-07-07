@@ -236,8 +236,20 @@ const filterAndSortBooks = (
   return sorted;
 };
 
+const calculateBookProgress = (book: Book): number => {
+  if (book.state === "finished") return 100;
+  if (book.state === "not_started") return 0;
+
+  const { currentPage, totalPages } = book.progress;
+  if (currentPage && totalPages && totalPages > 0) {
+    return Math.round((currentPage / totalPages) * 100);
+  }
+  return 0;
+};
+
 export {
   convertGoogleBookToBook,
   convertManualEntryToBook,
   filterAndSortBooks,
+  calculateBookProgress,
 };

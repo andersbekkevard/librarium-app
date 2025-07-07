@@ -23,6 +23,7 @@ import {
   Clock,
   TrendingUp,
 } from "lucide-react";
+import { calculateBookProgress } from "@/lib/book-utils";
 
 interface BookDetailPageProps {
   book: Book;
@@ -73,27 +74,6 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
       default:
         return { label: "Unknown", variant: "secondary" as const, icon: Clock };
     }
-  };
-
-  /**
-   * Calculates current reading progress percentage
-   *
-   * Returns 100% for finished books, 0% for not started books,
-   * and calculated percentage for in-progress books based on current page input
-   * or stored progress.
-   *
-   * @returns number - Progress percentage (0-100)
-   */
-  const calculateProgress = (): number => {
-    if (book.state === "finished") return 100;
-    if (book.state === "not_started") return 0;
-
-    const current =
-      parseInt(currentPageInput) || book.progress.currentPage || 0;
-    const total = book.progress.totalPages || 0;
-
-    if (total === 0) return 0;
-    return Math.round((current / total) * 100);
   };
 
   /**
@@ -232,7 +212,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
   const badgeInfo = getReadingStateBadge(book.state);
   const BadgeIcon = badgeInfo.icon;
-  const progress = calculateProgress();
+  const progress = calculateBookProgress(book);
 
   return (
     <div className="p-6">

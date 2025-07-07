@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Star } from "lucide-react";
 import { Book } from "@/lib/models";
-import { READING_STATE_COLORS } from "@/lib/colors";
 import { cn } from "@/lib/utils";
 
 interface BookCardProps {

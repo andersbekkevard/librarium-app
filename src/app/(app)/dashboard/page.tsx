@@ -5,17 +5,12 @@ import { useRouter } from "next/navigation";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
 import Sidebar from "@/components/app/Sidebar";
-import AddBooksPage from "@/components/app/AddBooksPage";
-import MyLibraryPage from "@/components/app/MyLibraryPage";
-import BookDetailPage from "@/components/app/BookDetailPage";
 import { BookOpen, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/lib/AuthProvider";
 import { bookOperations } from "@/lib/firebase-utils";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [stats, setStats] = useState({
     totalBooks: 0,
@@ -23,7 +18,6 @@ export default function Dashboard() {
     totalPagesRead: 0,
     currentlyReading: 0,
   });
-  const [searchQuery] = useState("");
   const { loading, isAuthenticated, user } = useAuthContext();
   const router = useRouter();
 
@@ -97,62 +91,24 @@ export default function Dashboard() {
   };
 
   const handleBookClick = (bookId: string) => {
-    setSelectedBookId(bookId);
-    setActiveSection("book-detail");
+    router.push(`/books/${bookId}`);
   };
 
-  const handleBackFromBookDetail = () => {
-    setSelectedBookId(null);
-    setActiveSection("dashboard");
-  };
-
-  const handleSidebarItemClick = (itemId: string) => {
-    setActiveSection(itemId);
-    setSelectedBookId(null);
-    console.log("Sidebar item clicked:", itemId);
-  };
 
   const handleAddBookClick = () => {
-    setActiveSection("add-books");
-    setSelectedBookId(null);
+    router.push('/add-books');
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar - Fixed Position under header */}
       <Sidebar
-        activeItem={activeSection}
-        onItemClick={handleSidebarItemClick}
         onAddBookClick={handleAddBookClick}
       />
 
       {/* Main Content - Adjusted for both fixed header and sidebar */}
       <main className="ml-64">
-        {activeSection === "add-books" ? (
-          <AddBooksPage />
-        ) : activeSection === "library" ? (
-          <MyLibraryPage
-            searchQuery={searchQuery}
-            onBookClick={handleBookClick}
-          />
-        ) : activeSection === "book-detail" && selectedBookId ? (
-          (() => {
-            const selectedBook = books.find(
-              (book) => book.id === selectedBookId
-            );
-            return selectedBook ? (
-              <BookDetailPage
-                book={selectedBook}
-                onBack={handleBackFromBookDetail}
-              />
-            ) : (
-              <div className="p-6">
-                <p>Book not found</p>
-              </div>
-            );
-          })()
-        ) : (
-          <div className="p-6">
+        <div className="p-6">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 Dashboard
@@ -404,8 +360,7 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-          </div>
-        )}
+        </div>
       </main>
     </div>
   );

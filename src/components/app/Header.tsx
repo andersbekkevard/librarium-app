@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   notificationCount = 3,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, loading } = useAuthContext();
+  const { loading } = useAuthContext();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
