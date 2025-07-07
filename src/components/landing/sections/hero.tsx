@@ -9,7 +9,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { BRAND_CLASSES } from "@/lib/colors";
 import { signInWithGoogle } from "@/lib/auth";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 
 export const HeroSection = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);

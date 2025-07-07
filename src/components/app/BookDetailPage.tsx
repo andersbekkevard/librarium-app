@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 import { Book } from "@/lib/models";
 import { bookOperations, eventOperations } from "@/lib/firebase-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +41,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const [rating, setRating] = useState(book.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
 
+  /**
+   * Maps reading state to badge configuration
+   *
+   * Returns badge properties (label, variant, icon) for each reading state.
+   * Used throughout the component for consistent state display.
+   *
+   * @param state - Book's current reading state
+   * @returns object - Badge configuration with label, variant, and icon
+   */
   const getReadingStateBadge = (state: Book["state"]) => {
     switch (state) {
       case "not_started":
@@ -66,6 +75,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     }
   };
 
+  /**
+   * Calculates current reading progress percentage
+   *
+   * Returns 100% for finished books, 0% for not started books,
+   * and calculated percentage for in-progress books based on current page input
+   * or stored progress.
+   *
+   * @returns number - Progress percentage (0-100)
+   */
   const calculateProgress = (): number => {
     if (book.state === "finished") return 100;
     if (book.state === "not_started") return 0;
@@ -74,10 +92,20 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
       parseInt(currentPageInput) || book.progress.currentPage || 0;
     const total = book.progress.totalPages || 0;
 
-    if (total === 0) return book.progress.percentage || 0;
+    if (total === 0) return 0;
     return Math.round((current / total) * 100);
   };
 
+  /**
+   * Handles progress update workflow
+   *
+   * Updates book progress and automatically handles state transitions:
+   * - not_started → in_progress when page > 0
+   * - in_progress → finished when page >= total pages
+   *
+   * Logs events for both state changes and progress updates.
+   * Used by the progress update form in the UI.
+   */
   const handleUpdateProgress = async () => {
     if (!user) return;
 
@@ -99,7 +127,12 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
       // If state is changing, use updateBookState for proper event logging
       if (newState !== book.state) {
-        await bookOperations.updateBookState(user.uid, book.id, newState, book.state);
+        await bookOperations.updateBookState(
+          user.uid,
+          book.id,
+          newState,
+          book.state
+        );
       }
 
       // Update progress and log progress event
@@ -107,7 +140,6 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         progress: {
           ...book.progress,
           currentPage: newPage,
-          percentage: calculateProgress(),
         },
       };
 
@@ -118,9 +150,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         type: "progress_update",
         bookId: book.id,
         data: {
-          currentPage: newPage,
-          totalPages: totalPages,
-          percentage: calculateProgress(),
+          previousPage: book.progress.currentPage || 0,
+          newPage: newPage,
         },
       });
 
@@ -133,13 +164,21 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     }
   };
 
+  /**
+   * Handles user rating changes
+   *
+   * Updates the book's rating and logs a rating_added event.
+   * Only available for finished books. Used by the star rating component.
+   *
+   * @param newRating - New rating value (1-5)
+   */
   const handleRatingChange = async (newRating: number) => {
     if (!user || book.state !== "finished") return;
 
     setRating(newRating);
     try {
       await bookOperations.updateBook(user.uid, book.id, { rating: newRating });
-      
+
       // Log rating event
       await eventOperations.logEvent(user.uid, {
         type: "rating_added",
@@ -153,21 +192,32 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     }
   };
 
+  /**
+   * Marks book as finished
+   *
+   * Transitions book state to 'finished' and sets progress to 100%.
+   * Uses updateBookState for proper event logging and timestamp management.
+   * Used by the "Mark as Finished" button.
+   */
   const handleMarkAsFinished = async () => {
     if (!user) return;
 
     setIsUpdating(true);
     try {
       // Use updateBookState for proper event logging
-      await bookOperations.updateBookState(user.uid, book.id, "finished", book.state);
-      
+      await bookOperations.updateBookState(
+        user.uid,
+        book.id,
+        "finished",
+        book.state
+      );
+
       // Update progress to 100%
       const updatedBook: Partial<Book> = {
         progress: {
           ...book.progress,
           currentPage:
             book.progress.totalPages || book.progress.currentPage || 0,
-          percentage: 100,
         },
       };
 
@@ -300,20 +350,28 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                         setIsUpdating(true);
                         try {
                           // Use updateBookState for proper event logging
-                          await bookOperations.updateBookState(user.uid, book.id, "in_progress", book.state);
-                          
+                          await bookOperations.updateBookState(
+                            user.uid,
+                            book.id,
+                            "in_progress",
+                            book.state
+                          );
+
                           // Update progress to page 1
                           const updatedBook: Partial<Book> = {
                             progress: {
                               ...book.progress,
                               currentPage: 1,
-                              percentage: calculateProgress(),
                             },
                           };
-                          
-                          await bookOperations.updateBook(user.uid, book.id, updatedBook);
+
+                          await bookOperations.updateBook(
+                            user.uid,
+                            book.id,
+                            updatedBook
+                          );
                           setCurrentPageInput("1");
-                          
+
                           // Refresh the page to show updated data
                           window.location.reload();
                         } catch (error) {

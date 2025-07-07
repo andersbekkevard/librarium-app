@@ -11,7 +11,7 @@ import { PricingSection } from "@/components/landing/sections/pricing";
 import { ServicesSection } from "@/components/landing/sections/services";
 import { SponsorsSection } from "@/components/landing/sections/sponsors";
 import { TestimonialSection } from "@/components/landing/sections/testimonial";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuthContext();

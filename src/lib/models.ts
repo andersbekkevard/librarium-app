@@ -46,8 +46,7 @@ export interface Book {
   state: "not_started" | "in_progress" | "finished";
   progress: {
     currentPage: number; // Current reading position
-    totalPages?: number; // Total pages (if known)
-    percentage?: number; // Reading percentage (0-100)
+    totalPages: number; // Total pages
   };
 
   // Ownership and rating
@@ -57,6 +56,7 @@ export interface Book {
   // Metadata (populated from Google Books API or user input)
   isbn?: string; // ISBN identifier
   coverImage?: string; // Cover image URL
+  genre?: string; // Genre of the book
   publishedDate?: string; // Publication date
   description?: string; // Book description
 
@@ -108,10 +108,44 @@ export type EventType = BookEvent["type"];
 /**
  * Utility type guards for type safety
  */
+
+/**
+ * Type guard to validate reading state values
+ *
+ * Ensures that a string value is a valid ReadingState.
+ * Used throughout the app for type safety when processing user input
+ * or data from external sources.
+ *
+ * @param state - String value to validate
+ * @returns boolean - True if state is a valid ReadingState
+ *
+ * @example
+ * const userInput = "in_progress";
+ * if (isValidReadingState(userInput)) {
+ *   // TypeScript now knows userInput is ReadingState
+ *   updateBookState(bookId, userInput);
+ * }
+ */
 export const isValidReadingState = (state: string): state is ReadingState => {
   return ["not_started", "in_progress", "finished"].includes(state);
 };
 
+/**
+ * Type guard to validate event type values
+ *
+ * Ensures that a string value is a valid EventType.
+ * Used when processing events from external sources or user input.
+ *
+ * @param type - String value to validate
+ * @returns boolean - True if type is a valid EventType
+ *
+ * @example
+ * const eventData = JSON.parse(eventJson);
+ * if (isValidEventType(eventData.type)) {
+ *   // TypeScript now knows eventData.type is EventType
+ *   processEvent(eventData);
+ * }
+ */
 export const isValidEventType = (type: string): type is EventType => {
   return [
     "state_change",
@@ -124,17 +158,50 @@ export const isValidEventType = (type: string): type is EventType => {
 /**
  * Helper functions for data validation
  */
+
+/**
+ * Validates book progress data
+ *
+ * Ensures that progress values are within valid bounds.
+ * Used by BookDetailPage and other components when updating reading progress.
+ *
+ * @param progress - Progress object to validate
+ * @param progress.currentPage - Current page number (must be >= 0 and <= totalPages)
+ * @param progress.totalPages - Total pages in book (must be >= 0)
+ * @returns boolean - True if progress data is valid
+ *
+ * @example
+ * const progress = { currentPage: 150, totalPages: 200 };
+ * if (validateProgress(progress)) {
+ *   await updateBookProgress(bookId, progress);
+ * } else {
+ *   showError("Invalid progress data");
+ * }
+ */
 export const validateProgress = (progress: Book["progress"]): boolean => {
-  if (progress.currentPage < 0) return false;
-  if (progress.totalPages && progress.totalPages < 0) return false;
-  if (
-    progress.percentage &&
-    (progress.percentage < 0 || progress.percentage > 100)
-  )
+  if (progress.totalPages < 0) return false;
+  if (progress.currentPage < 0 || progress.currentPage > progress.totalPages)
     return false;
   return true;
 };
 
+/**
+ * Validates book rating values
+ *
+ * Ensures that rating is within the valid range (1-5 stars).
+ * Used by BookDetailPage and BookCard when processing user ratings.
+ *
+ * @param rating - Rating value to validate
+ * @returns boolean - True if rating is between 1 and 5 (inclusive)
+ *
+ * @example
+ * const userRating = 4;
+ * if (validateRating(userRating)) {
+ *   await updateBookRating(bookId, userRating);
+ * } else {
+ *   showError("Rating must be between 1 and 5 stars");
+ * }
+ */
 export const validateRating = (rating: number): boolean => {
   return rating >= 1 && rating <= 5;
 };
@@ -142,17 +209,41 @@ export const validateRating = (rating: number): boolean => {
 /**
  * Constants for the reading state machine
  */
-export const READING_STATE_TRANSITIONS = {
+
+/**
+ * Defines valid state transitions for books
+ *
+ * Enforces the reading state machine: not_started → in_progress → finished
+ * Used by canTransitionTo() to validate state changes.
+ */
+export const READING_STATE_TRANSITIONS: Record<ReadingState, ReadingState[]> = {
   not_started: ["in_progress"],
   in_progress: ["finished"],
   finished: [],
-} as const;
+};
 
+/**
+ * Validates if a state transition is allowed
+ *
+ * Enforces the reading state machine to prevent invalid state changes.
+ * Used by BookDetailPage and other components before updating book state.
+ *
+ * @param currentState - Current reading state
+ * @param newState - Desired new reading state
+ * @returns boolean - True if transition is valid
+ *
+ * @example
+ * const currentState = "not_started";
+ * const newState = "in_progress";
+ * if (canTransitionTo(currentState, newState)) {
+ *   await updateBookState(bookId, newState, currentState);
+ * } else {
+ *   showError("Invalid state transition");
+ * }
+ */
 export const canTransitionTo = (
   currentState: ReadingState,
   newState: ReadingState
 ): boolean => {
-  return READING_STATE_TRANSITIONS[currentState].includes(
-    newState as ReadingState
-  );
+  return READING_STATE_TRANSITIONS[currentState].includes(newState);
 };

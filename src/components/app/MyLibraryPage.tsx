@@ -20,7 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
 import { bookOperations } from "@/lib/firebase-utils";
-import { useAuth } from "@/lib/useAuth";
+import { useAuthContext } from "../../lib/AuthProvider";
+import { filterAndSortBooks } from "@/lib/book-utils";
 
 type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";
@@ -40,14 +41,34 @@ export const BookListItem: React.FC<BookListItemProps> = ({
   onUpdateProgress,
   onBookClick,
 }) => {
+  /**
+   * Calculates progress percentage for a book
+   *
+   * Returns 100% for finished books, calculated percentage for in-progress
+   * books based on current/total pages, and 0% for not started books.
+   * Used by list view to display progress information.
+   *
+   * @returns number - Progress percentage (0-100)
+   */
   const getProgressPercentage = () => {
     if (book.state === "finished") return 100;
     if (book.state === "in_progress") {
-      return book.progress.percentage || 0;
+      const { currentPage, totalPages } = book.progress;
+      if (currentPage && totalPages && totalPages > 0) {
+        return Math.round((currentPage / totalPages) * 100);
+      }
     }
     return 0;
   };
 
+  /**
+   * Returns appropriate badge component for book's reading status
+   *
+   * Maps reading states to styled Badge components with appropriate
+   * variants and text. Used by list view for status display.
+   *
+   * @returns JSX.Element - Badge component with status text and styling
+   */
   const getStatusBadge = () => {
     switch (book.state) {
       case "not_started":
@@ -59,6 +80,15 @@ export const BookListItem: React.FC<BookListItemProps> = ({
     }
   };
 
+  /**
+   * Renders star rating display
+   *
+   * Creates an array of 5 star icons, filling the appropriate number
+   * based on the rating value. Used by list view to show book ratings.
+   *
+   * @param rating - Rating value (1-5)
+   * @returns JSX.Element[] - Array of Star components
+   */
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -203,7 +233,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   searchQuery = "",
   onBookClick,
 }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuthContext();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -235,79 +265,23 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     return unsubscribe;
   }, [user, authLoading]);
 
-  // Filter and sort books
+  const clearFilters = () => {
+    setFilterStatus("all");
+    setFilterOwnership("all");
+    setSortBy("title");
+    setSortDirection("asc");
+  };
+
+  // Filter and sort books using the utility function
   const filteredAndSortedBooks = useMemo(() => {
-    let filtered = books;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (book) =>
-          book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((book) => book.state === filterStatus);
-    }
-
-    // Apply ownership filter
-    if (filterOwnership !== "all") {
-      filtered = filtered.filter((book) =>
-        filterOwnership === "owned" ? book.isOwned : !book.isOwned
-      );
-    }
-
-    // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
-
-      switch (sortBy) {
-        case "title":
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        case "author":
-          aValue = a.author.toLowerCase();
-          bValue = b.author.toLowerCase();
-          break;
-        case "pages":
-          aValue = a.progress.totalPages || 0;
-          bValue = b.progress.totalPages || 0;
-          break;
-        case "rating":
-          aValue = a.rating || 0;
-          bValue = b.rating || 0;
-          break;
-        case "progress":
-          const aProgress =
-            a.state === "finished" ? 100 : a.progress.percentage || 0;
-          const bProgress =
-            b.state === "finished" ? 100 : b.progress.percentage || 0;
-          aValue = aProgress;
-          bValue = bProgress;
-          break;
-        default:
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-      }
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      } else {
-        return sortDirection === "asc"
-          ? (aValue as number) - (bValue as number)
-          : (bValue as number) - (aValue as number);
-      }
-    });
-
-    return sorted;
+    return filterAndSortBooks(
+      books,
+      searchQuery,
+      filterStatus,
+      filterOwnership,
+      sortBy,
+      sortDirection
+    );
   }, [
     books,
     searchQuery,
@@ -317,18 +291,50 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     sortDirection,
   ]);
 
+  const activeFiltersCount = [
+    filterStatus !== "all",
+    filterOwnership !== "all",
+  ].filter(Boolean).length;
+
+  /**
+   * Handles book editing workflow
+   *
+   * Placeholder function for opening book edit dialog/modal.
+   * Currently logs to console, intended to be implemented with
+   * a modal or navigation to edit page.
+   *
+   * @param book - Book object to edit
+   */
   const handleEdit = async (book: Book) => {
     if (!user) return;
     // TODO: Implement edit dialog/modal
     console.log("Edit book:", book.title);
   };
 
+  /**
+   * Handles progress update workflow
+   *
+   * Placeholder function for opening progress update dialog/modal.
+   * Currently logs to console, intended to be implemented with
+   * a modal for updating reading progress.
+   *
+   * @param book - Book object to update progress for
+   */
   const handleUpdateProgress = async (book: Book) => {
     if (!user) return;
     // TODO: Implement progress update dialog/modal
     console.log("Update progress for:", book.title);
   };
 
+  /**
+   * Toggles sort direction or changes sort field
+   *
+   * If clicking the same sort option, toggles between asc/desc.
+   * If clicking a different option, switches to that field with asc direction.
+   * Used by sort buttons in the UI.
+   *
+   * @param option - Sort field to toggle/switch to
+   */
   const toggleSort = (option: SortOption) => {
     if (sortBy === option) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -337,18 +343,6 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
       setSortDirection("asc");
     }
   };
-
-  const clearFilters = () => {
-    setFilterStatus("all");
-    setFilterOwnership("all");
-    setSortBy("title");
-    setSortDirection("asc");
-  };
-
-  const activeFiltersCount = [
-    filterStatus !== "all",
-    filterOwnership !== "all",
-  ].filter(Boolean).length;
 
   return (
     <div className="p-6 space-y-6">

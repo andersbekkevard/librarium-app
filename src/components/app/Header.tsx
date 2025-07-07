@@ -5,7 +5,7 @@ import { Search, Bell, Book, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToggleTheme } from "@/components/toggle-theme";
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;

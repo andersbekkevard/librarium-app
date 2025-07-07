@@ -60,8 +60,16 @@ export const READING_STATE_COLORS = {
 
 /**
  * Utility function to get CSS variable value
- * @param variableName - The CSS variable name (without --)
- * @returns The CSS variable value
+ * 
+ * Constructs a CSS variable reference string for use in JavaScript.
+ * Used when you need to access CSS custom properties programmatically.
+ * 
+ * @param variableName - The CSS variable name (without -- prefix)
+ * @returns string - CSS variable reference (e.g., "var(--color-primary)")
+ * 
+ * @example
+ * const primaryColor = getCSSVariable("color-primary");
+ * element.style.backgroundColor = primaryColor;
  */
 export const getCSSVariable = (variableName: string): string => {
   return `var(--${variableName})`;

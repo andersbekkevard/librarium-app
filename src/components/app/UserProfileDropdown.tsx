@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 import { signOut as authSignOut } from "@/lib/auth";
 import {
   User,

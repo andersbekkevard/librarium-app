@@ -96,7 +96,7 @@ export const BookCard: React.FC<BookCardProps> = ({
     book.progress.currentPage &&
     book.progress.totalPages
       ? calculateProgress(book.progress.currentPage, book.progress.totalPages)
-      : book.progress.percentage || 0;
+      : 0;
 
   const handleCardClick = () => {
     if (onBookClick) {
@@ -106,8 +106,7 @@ export const BookCard: React.FC<BookCardProps> = ({
     }
   };
 
-  // Mock genre for now - in future this would come from the book data
-  const genre = "Fiction"; // TODO: Add genre field to Book model
+  const genre = book.genre || "Unknown";
 
   return (
     <Card

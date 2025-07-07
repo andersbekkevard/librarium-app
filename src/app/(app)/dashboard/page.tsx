@@ -8,10 +8,9 @@ import Sidebar from "@/components/app/Sidebar";
 import AddBooksPage from "@/components/app/AddBooksPage";
 import MyLibraryPage from "@/components/app/MyLibraryPage";
 import BookDetailPage from "@/components/app/BookDetailPage";
-import GoogleAuth from "@/components/app/GoogleAuth";
 import { BookOpen, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 import { bookOperations } from "@/lib/firebase-utils";
 
 export default function Dashboard() {
@@ -38,14 +37,14 @@ export default function Dashboard() {
 
           // Calculate stats
           const finishedBooks = userBooks.filter(
-            (book) => book.state === "finished",
+            (book) => book.state === "finished"
           );
           const totalPagesRead = finishedBooks.reduce(
             (total, book) => total + (book.progress.totalPages || 0),
-            0,
+            0
           );
           const currentlyReading = userBooks.filter(
-            (book) => book.state === "in_progress",
+            (book) => book.state === "in_progress"
           );
 
           setStats({
@@ -54,7 +53,7 @@ export default function Dashboard() {
             totalPagesRead,
             currentlyReading: currentlyReading.length,
           });
-        },
+        }
       );
 
       return unsubscribe;
@@ -132,30 +131,26 @@ export default function Dashboard() {
         {activeSection === "add-books" ? (
           <AddBooksPage />
         ) : activeSection === "library" ? (
-          <MyLibraryPage searchQuery={searchQuery} onBookClick={handleBookClick} />
+          <MyLibraryPage
+            searchQuery={searchQuery}
+            onBookClick={handleBookClick}
+          />
         ) : activeSection === "book-detail" && selectedBookId ? (
           (() => {
-            const selectedBook = books.find(book => book.id === selectedBookId);
+            const selectedBook = books.find(
+              (book) => book.id === selectedBookId
+            );
             return selectedBook ? (
-              <BookDetailPage book={selectedBook} onBack={handleBackFromBookDetail} />
+              <BookDetailPage
+                book={selectedBook}
+                onBack={handleBackFromBookDetail}
+              />
             ) : (
               <div className="p-6">
                 <p>Book not found</p>
               </div>
             );
           })()
-        ) : activeSection === "auth-demo" ? (
-          <div className="p-6">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Firebase Authentication Demo
-              </h1>
-              <p className="text-muted-foreground">
-                Test Google authentication with Firebase popup.
-              </p>
-            </div>
-            <GoogleAuth />
-          </div>
         ) : (
           <div className="p-6">
             <div className="mb-6">

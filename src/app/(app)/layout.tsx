@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/components/auth/AuthProvider";
+import { AuthProvider } from "@/lib/AuthProvider";
 import { Header } from "@/components/app/Header";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

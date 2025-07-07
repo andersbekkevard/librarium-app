@@ -28,17 +28,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Book } from "@/lib/models";
 import { bookOperations } from "@/lib/firebase-utils";
-import { useAuthContext } from "@/components/auth/AuthProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 import { Timestamp } from "firebase/firestore";
+import {
+  convertGoogleBookToBook,
+  convertManualEntryToBook,
+} from "@/lib/book-utils";
 
 // Google Books API integration
 import {
-  googleBooksApi,
   GoogleBooksVolume,
   getBestThumbnail,
   getBestISBN,
   formatAuthors,
 } from "@/lib/google-books-api";
+import { useBookSearch } from "@/lib/hooks/useBookSearch";
 
 const SearchResults = ({
   books,
@@ -194,74 +198,6 @@ const SearchResults = ({
   );
 };
 
-// Convert GoogleBooksVolume to our Book model
-const convertGoogleBookToBook = (googleBook: GoogleBooksVolume): Book => {
-  const isbn = getBestISBN(googleBook);
-
-  const book: Book = {
-    id: googleBook.id,
-    title: googleBook.volumeInfo.title,
-    author: formatAuthors(googleBook.volumeInfo.authors),
-    state: "not_started",
-    progress: {
-      currentPage: 0,
-      totalPages: googleBook.volumeInfo.pageCount || 0,
-      percentage: 0,
-    },
-    isOwned: false, // Default to wishlist
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  };
-
-  // Only add optional fields if they have values
-  if (isbn) book.isbn = isbn;
-  if (getBestThumbnail(googleBook))
-    book.coverImage = getBestThumbnail(googleBook);
-  if (googleBook.volumeInfo.publishedDate)
-    book.publishedDate = googleBook.volumeInfo.publishedDate;
-  if (googleBook.volumeInfo.description)
-    book.description = googleBook.volumeInfo.description;
-
-  return book;
-};
-
-// Convert manual entry to our Book model
-const convertManualEntryToBook = (formData: {
-  title: string;
-  author: string;
-  isbn: string;
-  pages: string;
-  publishedYear: string;
-  ownership: string;
-  description: string;
-}): Book => {
-  const book: Book = {
-    id: `manual-${Date.now()}`,
-    title: formData.title.trim(),
-    author: formData.author.trim(),
-    state: "not_started",
-    progress: {
-      currentPage: 0,
-      totalPages: formData.pages ? parseInt(formData.pages) : 0,
-      percentage: 0,
-    },
-    isOwned: formData.ownership === "owned",
-    addedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  };
-
-  // Only add optional fields if they have values
-  if (formData.isbn && formData.isbn.trim()) book.isbn = formData.isbn.trim();
-  if (formData.publishedYear && formData.publishedYear.trim()) {
-    book.publishedDate = `${formData.publishedYear.trim()}-01-01`;
-  }
-  if (formData.description && formData.description.trim()) {
-    book.description = formData.description.trim();
-  }
-
-  return book;
-};
-
 const ManualEntryForm = ({
   onAddBook,
   isAdding,
@@ -272,7 +208,7 @@ const ManualEntryForm = ({
   const [formData, setFormData] = useState({
     title: "",
     author: "",
-    isbn: "",
+    genre: "",
     pages: "",
     publishedYear: "",
     ownership: "wishlist",
@@ -289,7 +225,7 @@ const ManualEntryForm = ({
     setFormData({
       title: "",
       author: "",
-      isbn: "",
+      genre: "",
       pages: "",
       publishedYear: "",
       ownership: "wishlist",
@@ -335,12 +271,12 @@ const ManualEntryForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="isbn">ISBN (optional)</Label>
+              <Label htmlFor="genre">Genre (optional)</Label>
               <Input
-                id="isbn"
-                value={formData.isbn}
-                onChange={(e) => updateField("isbn", e.target.value)}
-                placeholder="Enter ISBN (optional)"
+                id="genre"
+                value={formData.genre}
+                onChange={(e) => updateField("genre", e.target.value)}
+                placeholder="Enter genre (optional)"
               />
             </div>
 
@@ -415,7 +351,7 @@ const ManualEntryForm = ({
                 setFormData({
                   title: "",
                   author: "",
-                  isbn: "",
+                  genre: "",
                   pages: "",
                   publishedYear: "",
                   ownership: "wishlist",
@@ -436,46 +372,35 @@ const ManualEntryForm = ({
 export const AddBooksPage = () => {
   const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const { searchResults, isSearching, error, search, clearError } =
+    useBookSearch();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
   const [recentlyAdded, setRecentlyAdded] = useState<
     Array<{ id: string; title: string; author: string }>
   >([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsSearching(true);
-    setError(null);
-
-    try {
-      const results = await googleBooksApi.search(query, 20);
-      setSearchResults(results);
-    } catch (err) {
-      console.error("Error searching books:", err);
-      setError(
-        "Failed to search books. Please check your internet connection and try again."
-      );
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
+  /**
+   * Adds a book from Google Books API to user's library
+   *
+   * Converts the Google Books volume to internal Book model and saves
+   * it to Firestore. Updates UI state to show success/failure.
+   * Used by SearchResults component when user clicks "Add Book".
+   *
+   * @param googleBook - Google Books API volume to add
+   *
+   * @example
+   * await handleAddGoogleBook(searchResults[0]);
+   */
   const handleAddGoogleBook = async (googleBook: GoogleBooksVolume) => {
     if (!user) {
-      setError("You must be logged in to add books");
+      // Handle auth error differently since we can't use the search error state
+      console.error("User must be logged in to add books");
       return;
     }
 
     setIsAdding(true);
-    setError(null);
+    clearError();
 
     try {
       const book = convertGoogleBookToBook(googleBook);
@@ -495,20 +420,32 @@ export const AddBooksPage = () => {
       ]);
     } catch (err) {
       console.error("Error adding book:", err);
-      setError("Failed to add book. Please try again.");
+      // TODO: Add proper error handling for book addition failures
     } finally {
       setIsAdding(false);
     }
   };
 
+  /**
+   * Adds a manually entered book to user's library
+   *
+   * Saves a Book object (created from form data) to Firestore.
+   * Updates UI state to show success/failure.
+   * Used by ManualEntryForm component when user submits the form.
+   *
+   * @param book - Book object created from manual form entry
+   *
+   * @example
+   * const book = convertManualEntryToBook(formData);
+   * await handleAddManualBook(book);
+   */
   const handleAddManualBook = async (book: Book) => {
     if (!user) {
-      setError("You must be logged in to add books");
+      console.error("User must be logged in to add books");
       return;
     }
 
     setIsAdding(true);
-    setError(null);
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -525,7 +462,7 @@ export const AddBooksPage = () => {
       ]);
     } catch (err) {
       console.error("Error adding book:", err);
-      setError("Failed to add book. Please try again.");
+      // TODO: Add proper error handling for book addition failures
     } finally {
       setIsAdding(false);
     }
@@ -535,21 +472,20 @@ export const AddBooksPage = () => {
   React.useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchQuery.trim()) {
-        handleSearch(searchQuery);
-      } else {
-        setSearchResults([]);
+        search(searchQuery);
       }
+      // Note: clearResults is handled by the hook when search is called with empty query
     }, 500); // Increased debounce time for API calls
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+  }, [searchQuery, search]);
 
   // Clear error when user starts typing
   React.useEffect(() => {
     if (searchQuery.trim() && error) {
-      setError(null);
+      clearError();
     }
-  }, [searchQuery, error]);
+  }, [searchQuery, error, clearError]);
 
   return (
     <div className="p-6 space-y-6">
