@@ -1,48 +1,103 @@
+## UI
 - [ ] Land on coloring for BookDetailsPage (states, genres etc), and extract to globals.css
-- [ ] Tie state change to page number?
+
+
+## Nice-to-have feature
 - [ ] Align search bar properly, and integrate it with actual functionality
-- [X] Remove progress percentage hard coded in book?
-- [X] Start fetching genres when adding books, and add to books data model
-- [ ] Start logging user events in database. Link with Recent activity in dashboard
+- [ ] Improve search (fzf, etc)
+
+
+## Bigger feature
 - [ ] Implement statistics page
 - [ ] Add commenting on books
 - [ ] Create profile pages, settings etc etc
-- [ ] Improve search (fzf, etc)
 - [ ] Add shelf/collection functionality
+
+## Design/Architectural changes
+- [ ] Tie state change to page number?
 - [ ] Clean the codebase, extract components where possible
 - [ ] Force rating on "finish"
+- [ ] Start logging user events in database. Link with Recent activity in dashboard
+
+
+## LLM
+- [ ] Integrate
 
 
 
 
-TBM:
-- [X] Ensure that you don’t duplicate logic across modules.
-Currently, there are two parallel ways to access auth state – via the context (useAuthContext) and via a custom hook (useAuth).
-The AuthProvider uses Firebase’s onAuthStateChanged and stores the user in context, and your useAuth hook also sets up its own onAuthStateChanged listener.
-This can lead to multiple subscriptions and inconsistent state.
-It’s better to converge on one approach – ideally use the context everywhere so all components share the same user state.
-For example, in MyLibraryPage you import useAuth and get the user that way, whereas in AddBooksPage you correctly use useAuthContext.
-Unifying these (e.g. have useAuth() internally call useAuthContext() or remove the custom hook) will reduce tech debt and ensure consistent auth handling.
 
-- [X] One pattern that could be improved is separation of presentational vs container logic. The architecture doc mentions separating presentational and container components,
-but currently some components mix UI and data fetching logic. For instance, MyLibraryPage both subscribes to Firestore and renders the list.
-This is acceptable for now, but as complexity grows, consider moving data-fetching into a custom hook or context provider.
-For example, a hook useUserBooks(userId) could encapsulate the Firestore subscription and provide loading/error state and book list, which the component then consumes.
-This would make the component more focused on presentation (rendering lists, filters, etc.) and easier to test, while the hook deals with side-effects.
+**From tests**
 
-- [X] One critique: the Dashboard page is functioning as a single-page application within Next – it uses a state (activeSection) to conditionally render sub-sections like “My Library”, “Add Books”,
-and even a “Book Detail” view. While this works, it bypasses Next.js’s routing capabilities.
-Ideally, each major section could be its own route for clarity and deep-linking.
-For example, instead of activeSection === "library" inside the dashboard component,
-you could have src/app/(app)/library/page.tsx that shows the library (and navigate to it via Next’s Link or router).
-This way, URLs reflect the view (e.g. /library or /dashboard vs all under /dashboard).
-It also avoids keeping an oversized component. Currently,
-the Dashboard component is quite large and manages many concerns (dashboard stats, book list, adding books, book detail modal) in one file
+- [ ] Get full test coverage
+  
+────────────────────────────────────────
+1. Bug(s) in the **test environment / Jest setup**
+────────────────────────────────────────
+• ❌  src/lib/__tests__/firebase-utils.test.ts  
+  Error: “Cannot find module './firebase' …”  
+  →  The test mocks `./firebase`, but because Jest hasn’t been told how to
+     resolve TS alias paths (or transpile ESM to CJS) the resolver can’t
+     find the file. Add a `moduleNameMapper` (or point the mock at
+     `'../firebase'`) and the suite will run.
 
-- [X] **Centralize books state management to prevent duplicate Firestore subscriptions
-  - Dashboard and MyLibraryPage currently subscribe to the same books data separately
-  - Consider lifting state up by passing books as props from Dashboard to MyLibraryPage
-  - Or implement a books context similar to auth context for global state management
-  - This would eliminate redundant Firestore listeners and ensure data consistency across components**
+• ❌  BookCard “should not trigger action for other keys”  
+  `@testing-library/user-event` fires a synthetic `click` after certain
+   keyboard interactions on elements with `role="button"`. In JSDOM that
+   extra click is dispatched even for `{escape}`, so the callback is invoked
+   once. The component is fine; the JSDOM + user-event behaviour is the
+   culprit.
 
-- [X] Extract one centralized sorting method for books
+────────────────────────────────────────
+2. **Faulty / over-strict test assertions**
+────────────────────────────────────────
+• ❌  Google Books API test-suite  
+  – Expects `q=test%20book`, but `URLSearchParams` encodes spaces as
+    “+”.  
+  – Expects custom error text (“Network error …”) although the service
+    re-throws the original `Error("Network error")`.  
+  – Treats the (internal) class as a public export.  
+  All three mismatches are in the tests, not the implementation.
+
+• ❌  filterAndSortBooks “search query” cases  
+  The tests assume searching for “Alpha” should only return *Alpha Book*,
+  but “alpha” is also contained in the word “alphabet” that appears in the
+  other mock descriptions, so the real filter quite correctly returns
+  three items.
+
+• ❌  cn utility “duplicate classes”  
+  `clsx` intentionally keeps duplicate class names (only Tailwind
+  conflicts are merged by `twMerge`). The test demanding perfect de-dupe is
+  over-strict.
+
+• ❌  AuthProvider test block  
+  Several expectations don’t match the component’s actual console output or
+  life-cycle (e.g. waiting for `updateDoc` before user/profile are ready).
+  The provider behaves correctly; the tests need to await the right
+  promises or loosen their expectations.
+
+────────────────────────────────────────
+3. **Real defects in the application code**
+────────────────────────────────────────
+• ❌  src/lib/google-books-api.ts  
+  The class `GoogleBooksApiService` is **not exported**, yet other modules
+  (and the tests) need to construct it. Exporting the class (or refactoring
+  tests to use the singleton only) is required.
+
+• ❌  convertManualEntryToBook (book-utils.ts)  
+  – Parses page count with `parseInt`, so invalid input becomes `NaN`
+    → store `0` instead.  
+  – Uses `Date.now()` for IDs; two rapid calls can return the same value.  
+    Include a random suffix or `crypto.randomUUID()`.
+
+• ❌  validateRating (models.ts)  
+  Relies on JS coercion so `'3'`, `null`, `NaN` all pass.  
+  Guard with `typeof rating === 'number' && Number.isFinite(rating)`.
+
+• ❌  canTransitionTo (models.ts)  
+  `READING_STATE_TRANSITIONS[currentState]` crashes when `currentState`
+  is invalid. Add a guard (`if !READING_STATE_TRANSITIONS[currentState] return false`).
+
+These are the areas you need to fix (or loosen) to get the test suite back
+to all-green.
+
