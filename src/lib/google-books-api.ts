@@ -154,10 +154,13 @@ class GoogleBooksApiService {
    * Build URL with parameters for API requests
    */
   private buildUrl(endpoint: string, params: Record<string, string>): string {
-    const urlParams = new URLSearchParams({
-      ...params,
-      key: this.apiKey,
-    });
+    const urlParams = new URLSearchParams();
+    for (const key in params) {
+      if (params[key]) {
+        urlParams.append(key, params[key]);
+      }
+    }
+    urlParams.append('key', this.apiKey);
     return `${GOOGLE_BOOKS_API_BASE_URL}${endpoint}?${urlParams}`;
   }
 

@@ -203,6 +203,9 @@ export const validateProgress = (progress: Book["progress"]): boolean => {
  * }
  */
 export const validateRating = (rating: number): boolean => {
+  if (typeof rating !== "number" || isNaN(rating)) {
+    return false;
+  }
   return rating >= 1 && rating <= 5;
 };
 
@@ -245,5 +248,8 @@ export const canTransitionTo = (
   currentState: ReadingState,
   newState: ReadingState
 ): boolean => {
+  if (!READING_STATE_TRANSITIONS[currentState]) {
+    return false;
+  }
   return READING_STATE_TRANSITIONS[currentState].includes(newState);
 };

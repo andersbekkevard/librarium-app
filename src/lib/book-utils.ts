@@ -90,14 +90,15 @@ const convertManualEntryToBook = (formData: {
   ownership: string;
   description: string;
 }): Book => {
+  const totalPages = parseInt(formData.pages);
   const book: Book = {
-    id: `manual-${Date.now()}`,
+    id: `manual-${Date.now()}-${Math.random()}`,
     title: formData.title.trim(),
     author: formData.author.trim(),
     state: "not_started",
     progress: {
       currentPage: 0,
-      totalPages: formData.pages ? parseInt(formData.pages) : 0,
+      totalPages: isNaN(totalPages) ? 0 : totalPages,
     },
     isOwned: formData.ownership === "owned",
     addedAt: Timestamp.now(),
@@ -117,9 +118,85 @@ const convertManualEntryToBook = (formData: {
   return book;
 };
 
+const filterAndSortBooks = (books: Book[], query: string, state: string, ownership: string, sortBy: string, sortDirection: string): Book[] => {
+  let filteredBooks = books;
 
+  if (query) {
+    const lowerCaseQuery = query.toLowerCase();
+    filteredBooks = filteredBooks.filter(book =>
+      book.title.toLowerCase().includes(lowerCaseQuery) ||
+      book.author.toLowerCase().includes(lowerCaseQuery) ||
+      book.description?.toLowerCase().includes(lowerCaseQuery)
+    );
+  }
+
+  if (state !== 'all') {
+    filteredBooks = filteredBooks.filter(book => book.state === state);
+  }
+
+  if (ownership !== 'all') {
+    const isOwned = ownership === 'owned';
+    filteredBooks = filteredBooks.filter(book => book.isOwned === isOwned);
+  }
+
+  const sortedBooks = [...filteredBooks].sort((a, b) => {
+    let compareA: any;
+    let compareB: any;
+
+    switch (sortBy) {
+      case 'title':
+        compareA = a.title;
+        compareB = b.title;
+        break;
+      case 'author':
+        compareA = a.author;
+        compareB = b.author;
+        break;
+      case 'pages':
+        compareA = a.progress.totalPages;
+        compareB = b.progress.totalPages;
+        break;
+      case 'rating':
+        compareA = a.rating || 0;
+        compareB = b.rating || 0;
+        break;
+      case 'progress':
+        compareA = calculateBookProgress(a);
+        compareB = calculateBookProgress(b);
+        break;
+      default:
+        compareA = a.title;
+        compareB = b.title;
+    }
+
+    if (compareA < compareB) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (compareA > compareB) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  return sortedBooks;
+}
+
+const calculateBookProgress = (book: Book): number => {
+  if (book.state === 'finished') {
+    return 100;
+  }
+  if (book.state === 'not_started') {
+    return 0;
+  }
+  if (!book.progress.totalPages || !book.progress.currentPage) {
+    return 0;
+  }
+  return Math.round((book.progress.currentPage / book.progress.totalPages) * 100);
+}
 
 export {
   convertGoogleBookToBook,
   convertManualEntryToBook,
+  filterAndSortBooks,
+  calculateBookProgress,
 };
