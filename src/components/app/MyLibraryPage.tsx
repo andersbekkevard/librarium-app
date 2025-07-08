@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
 import { useBooksContext } from "../../lib/BooksProvider";
+import { useAuthContext } from "@/lib/AuthProvider";
 import { calculateBookProgress, filterAndSortBooks } from "@/lib/book-utils";
 
 type ViewMode = "grid" | "list";
@@ -213,6 +214,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   onBookClick,
 }) => {
   const { books, loading, error, refreshBooks } = useBooksContext();
+  const { user } = useAuthContext();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");

@@ -43,6 +43,7 @@ const getReadingStateBadge = (state: Book["state"]) => {
 };
 
 const calculateProgress = (currentPage: number, totalPages: number): number => {
+  if (totalPages <= 0) return 0;
   return Math.round((currentPage / totalPages) * 100);
 };
 

@@ -12,7 +12,6 @@ import { auth, db } from "@/lib/firebase";
 import { UserProfile } from "@/lib/models";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { Timestamp, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 /**
@@ -43,7 +42,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   /**
    * Creates or updates user profile in Firestore
@@ -164,7 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, [router]);
+  }, []);
 
   const value: AuthContextType = {
     user,
