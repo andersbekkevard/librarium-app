@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Book } from "@/lib/models";
 import Sidebar from "@/components/app/Sidebar";
 import { Loader2 } from "lucide-react";
-import { useAuthContext } from "@/lib/AuthProvider";
-import { useBooksContext } from "@/lib/BooksProvider";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 
 export default function Dashboard() {

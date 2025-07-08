@@ -27,8 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Book } from "@/lib/models";
-import { useAuthContext } from "@/lib/AuthProvider";
-import { useBooksContext } from "@/lib/BooksProvider";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import {
   convertGoogleBookToBook,
   convertManualEntryToBook,
@@ -393,8 +393,7 @@ export const AddBooksPage = () => {
    */
   const handleAddGoogleBook = async (googleBook: GoogleBooksVolume) => {
     if (!user) {
-      // Handle auth error differently since we can't use the search error state
-      console.error("User must be logged in to add books");
+      // Authentication error - user should be redirected to login
       return;
     }
 
@@ -417,9 +416,8 @@ export const AddBooksPage = () => {
         },
         ...prev.slice(0, 4),
       ]);
-    } catch (err) {
-      console.error("Error adding book:", err);
-      // TODO: Add proper error handling for book addition failures
+    } catch {
+      // Error is handled by the BooksProvider
     } finally {
       setIsAdding(false);
     }
@@ -440,7 +438,7 @@ export const AddBooksPage = () => {
    */
   const handleAddManualBook = async (book: Book) => {
     if (!user) {
-      console.error("User must be logged in to add books");
+      // Authentication error - user should be redirected to login
       return;
     }
 
@@ -459,9 +457,8 @@ export const AddBooksPage = () => {
         },
         ...prev.slice(0, 4),
       ]);
-    } catch (err) {
-      console.error("Error adding book:", err);
-      // TODO: Add proper error handling for book addition failures
+    } catch {
+      // Error is handled by the BooksProvider
     } finally {
       setIsAdding(false);
     }

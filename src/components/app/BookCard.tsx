@@ -7,11 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Star } from "lucide-react";
 import { Book } from "@/lib/models";
 import { cn } from "@/lib/utils";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 interface BookCardProps {
   book: Book;
-  onEdit?: (book: Book) => void;
-  onUpdateProgress?: (book: Book) => void;
   onBookClick?: (bookId: string) => void;
 }
 // Helper functions
@@ -42,10 +41,6 @@ const getReadingStateBadge = (state: Book["state"]) => {
   }
 };
 
-const calculateProgress = (currentPage: number, totalPages: number): number => {
-  if (totalPages <= 0) return 0;
-  return Math.round((currentPage / totalPages) * 100);
-};
 
 const StarRating = ({ rating }: { rating: number }) => {
   return (
@@ -85,18 +80,12 @@ const ProgressBar = ({
 
 export const BookCard: React.FC<BookCardProps> = ({
   book,
-  onEdit: _onEdit,
-  onUpdateProgress: _onUpdateProgress,
   onBookClick,
 }) => {
   const router = useRouter();
+  const { calculateBookProgress } = useBooksContext();
   const badgeInfo = getReadingStateBadge(book.state);
-  const progress =
-    book.state === "in_progress" &&
-    book.progress.currentPage &&
-    book.progress.totalPages
-      ? calculateProgress(book.progress.currentPage, book.progress.totalPages)
-      : 0;
+  const progress = calculateBookProgress(book);
 
   const handleCardClick = () => {
     if (onBookClick) {
@@ -180,7 +169,7 @@ export const BookCard: React.FC<BookCardProps> = ({
                       pages
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {Math.round(progress)}%
+                      {progress}%
                     </span>
                   </div>
                   <ProgressBar value={progress} />

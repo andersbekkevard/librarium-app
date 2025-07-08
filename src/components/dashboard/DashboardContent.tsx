@@ -31,12 +31,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const handleViewAllCurrently = () => {
     // TODO: Navigate to library with "currently reading" filter
-    console.log("View all currently reading");
   };
 
   const handleViewAllRecent = () => {
     // TODO: Navigate to library with "finished" filter
-    console.log("View all recently read");
   };
 
   return (

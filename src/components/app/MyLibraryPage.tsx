@@ -19,9 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
-import { useBooksContext } from "../../lib/BooksProvider";
-import { useAuthContext } from "@/lib/AuthProvider";
-import { calculateBookProgress, filterAndSortBooks } from "@/lib/book-utils";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { bookService } from "@/lib/services/BookService";
 
 type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";
@@ -30,15 +30,11 @@ type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
 
 interface BookListItemProps {
   book: Book;
-  onEdit: (book: Book) => void;
-  onUpdateProgress: (book: Book) => void;
   onBookClick?: (bookId: string) => void;
 }
 
 export const BookListItem: React.FC<BookListItemProps> = ({
   book,
-  onEdit,
-  onUpdateProgress,
   onBookClick,
 }) => {
   /**
@@ -162,38 +158,12 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   </div>
                 ) : book.state === "in_progress" ? (
                   <div className="text-xs text-muted-foreground">
-                    {calculateBookProgress(book)}% complete
+                    {bookService.calculateProgress(book)}% complete
                   </div>
                 ) : (
                   <div className="text-xs text-muted-foreground">
                     Not started
                   </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => handleButtonClick(e, () => onEdit(book))}
-                  className="h-8 w-8 p-0"
-                >
-                  <span className="sr-only">Edit</span>
-                  ✏️
-                </Button>
-                {book.state === "in_progress" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => onUpdateProgress(book))
-                    }
-                    className="h-8 w-8 p-0"
-                  >
-                    <span className="sr-only">Update Progress</span>
-                    📖
-                  </Button>
                 )}
               </div>
             </div>
@@ -213,14 +183,14 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   searchQuery = "",
   onBookClick,
 }) => {
-  const { books, loading, error, refreshBooks } = useBooksContext();
+  const { books, loading, error, refreshBooks, filterAndSortBooks } =
+    useBooksContext();
   const { user } = useAuthContext();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterOwnership, setFilterOwnership] = useState<string>("all");
-
 
   const clearFilters = () => {
     setFilterStatus("all");
@@ -229,10 +199,9 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     setSortDirection("asc");
   };
 
-  // Filter and sort books using the utility function
+  // Filter and sort books using the service function
   const filteredAndSortedBooks = useMemo(() => {
     return filterAndSortBooks(
-      books,
       searchQuery,
       filterStatus,
       filterOwnership,
@@ -240,12 +209,12 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
       sortDirection
     );
   }, [
-    books,
     searchQuery,
     filterStatus,
     filterOwnership,
     sortBy,
     sortDirection,
+    filterAndSortBooks,
   ]);
 
   const activeFiltersCount = [
@@ -466,13 +435,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredAndSortedBooks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  onEdit={handleEdit}
-                  onUpdateProgress={handleUpdateProgress}
-                  onBookClick={onBookClick}
-                />
+                <BookCard key={book.id} book={book} onBookClick={onBookClick} />
               ))}
             </div>
           ) : (
@@ -481,8 +444,6 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
                 <BookListItem
                   key={book.id}
                   book={book}
-                  onEdit={handleEdit}
-                  onUpdateProgress={handleUpdateProgress}
                   onBookClick={onBookClick}
                 />
               ))}

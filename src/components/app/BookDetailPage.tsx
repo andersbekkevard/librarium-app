@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { useAuthContext } from "@/lib/AuthProvider";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { Book } from "@/lib/models";
-import { bookOperations, eventOperations } from "@/lib/firebase-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ import {
   Clock,
   TrendingUp,
 } from "lucide-react";
-import { calculateBookProgress } from "@/lib/book-utils";
 
 interface BookDetailPageProps {
   book: Book;
@@ -35,6 +34,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   onBack,
 }) => {
   const { user } = useAuthContext();
+  const { updateBookProgress, updateBookRating, updateBookState, calculateBookProgress, error } = useBooksContext();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(
     book.progress.currentPage?.toString() || ""
@@ -79,11 +79,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   /**
    * Handles progress update workflow
    *
-   * Updates book progress and automatically handles state transitions:
-   * - not_started → in_progress when page > 0
-   * - in_progress → finished when page >= total pages
-   *
-   * Logs events for both state changes and progress updates.
+   * Updates book progress using the service layer, which automatically handles 
+   * state transitions and event logging.
    * Used by the progress update form in the UI.
    */
   const handleUpdateProgress = async () => {
@@ -92,53 +89,12 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     setIsUpdating(true);
     try {
       const newPage = parseInt(currentPageInput) || 0;
-      const totalPages = book.progress.totalPages || 0;
-
-      let newState = book.state;
-      if (newPage > 0 && book.state === "not_started") {
-        newState = "in_progress";
-      } else if (
-        totalPages > 0 &&
-        newPage >= totalPages &&
-        book.state === "in_progress"
-      ) {
-        newState = "finished";
-      }
-
-      // If state is changing, use updateBookState for proper event logging
-      if (newState !== book.state) {
-        await bookOperations.updateBookState(
-          user.uid,
-          book.id,
-          newState,
-          book.state
-        );
-      }
-
-      // Update progress and log progress event
-      const updatedBook: Partial<Book> = {
-        progress: {
-          ...book.progress,
-          currentPage: newPage,
-        },
-      };
-
-      await bookOperations.updateBook(user.uid, book.id, updatedBook);
-
-      // Log progress update event
-      await eventOperations.logEvent(user.uid, {
-        type: "progress_update",
-        bookId: book.id,
-        data: {
-          previousPage: book.progress.currentPage || 0,
-          newPage: newPage,
-        },
-      });
-
+      await updateBookProgress(book.id, newPage);
+      
       // Refresh the page to show updated data
       window.location.reload();
-    } catch (error) {
-      console.error("Error updating progress:", error);
+    } catch {
+      // Error is handled by the BooksProvider
     } finally {
       setIsUpdating(false);
     }
@@ -147,7 +103,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   /**
    * Handles user rating changes
    *
-   * Updates the book's rating and logs a rating_added event.
+   * Updates the book's rating using the service layer, which automatically 
+   * handles validation and event logging.
    * Only available for finished books. Used by the star rating component.
    *
    * @param newRating - New rating value (1-5)
@@ -157,26 +114,17 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
     setRating(newRating);
     try {
-      await bookOperations.updateBook(user.uid, book.id, { rating: newRating });
-
-      // Log rating event
-      await eventOperations.logEvent(user.uid, {
-        type: "rating_added",
-        bookId: book.id,
-        data: {
-          rating: newRating,
-        },
-      });
-    } catch (error) {
-      console.error("Error updating rating:", error);
+      await updateBookRating(book.id, newRating);
+    } catch {
+      // Error is handled by the BooksProvider
     }
   };
 
   /**
    * Marks book as finished
    *
-   * Transitions book state to 'finished' and sets progress to 100%.
-   * Uses updateBookState for proper event logging and timestamp management.
+   * Transitions book state to 'finished' using the service layer, which automatically 
+   * handles progress updates, event logging, and timestamp management.
    * Used by the "Mark as Finished" button.
    */
   const handleMarkAsFinished = async () => {
@@ -184,27 +132,10 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
     setIsUpdating(true);
     try {
-      // Use updateBookState for proper event logging
-      await bookOperations.updateBookState(
-        user.uid,
-        book.id,
-        "finished",
-        book.state
-      );
-
-      // Update progress to 100%
-      const updatedBook: Partial<Book> = {
-        progress: {
-          ...book.progress,
-          currentPage:
-            book.progress.totalPages || book.progress.currentPage || 0,
-        },
-      };
-
-      await bookOperations.updateBook(user.uid, book.id, updatedBook);
+      await updateBookState(book.id, "finished", book.state);
       window.location.reload();
-    } catch (error) {
-      console.error("Error marking as finished:", error);
+    } catch {
+      // Error is handled by the BooksProvider
     } finally {
       setIsUpdating(false);
     }
@@ -229,6 +160,13 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
             Back to Library
           </Button>
         </div>
+
+        {/* Error display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -329,33 +267,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                         if (!user) return;
                         setIsUpdating(true);
                         try {
-                          // Use updateBookState for proper event logging
-                          await bookOperations.updateBookState(
-                            user.uid,
-                            book.id,
-                            "in_progress",
-                            book.state
-                          );
-
-                          // Update progress to page 1
-                          const updatedBook: Partial<Book> = {
-                            progress: {
-                              ...book.progress,
-                              currentPage: 1,
-                            },
-                          };
-
-                          await bookOperations.updateBook(
-                            user.uid,
-                            book.id,
-                            updatedBook
-                          );
+                          // Use service layer for state transition and progress update
+                          await updateBookState(book.id, "in_progress", book.state);
+                          await updateBookProgress(book.id, 1);
                           setCurrentPageInput("1");
 
                           // Refresh the page to show updated data
                           window.location.reload();
-                        } catch (error) {
-                          console.error("Error starting reading:", error);
+                        } catch {
+                          // Error is handled by the BooksProvider
                         } finally {
                           setIsUpdating(false);
                         }

@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Book } from "@/lib/models";
-import { useAuthContext } from "@/lib/AuthProvider";
-import { bookOperations } from "@/lib/firebase-utils";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import BookDetailPage from "@/components/app/BookDetailPage";
 
 export default function BookDetailRoute() {
@@ -16,33 +16,25 @@ export default function BookDetailRoute() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuthContext();
+  const { books } = useBooksContext();
 
   const bookId = params.id as string;
 
   useEffect(() => {
-    const fetchBook = async () => {
-      if (!isAuthenticated || !user || !bookId) {
-        setLoading(false);
-        return;
-      }
+    if (!isAuthenticated || !user || !bookId) {
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const fetchedBook = await bookOperations.getBook(user.uid, bookId);
-        if (fetchedBook) {
-          setBook(fetchedBook);
-        } else {
-          setError("Book not found");
-        }
-      } catch (err) {
-        console.error("Error fetching book:", err);
-        setError("Failed to load book");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-  }, [isAuthenticated, user, bookId]);
+    // Find book from the books context instead of making a separate API call
+    const foundBook = books.find((b) => b.id === bookId);
+    if (foundBook) {
+      setBook(foundBook);
+    } else {
+      setError("Book not found");
+    }
+    setLoading(false);
+  }, [isAuthenticated, user, bookId, books]);
 
   const handleBack = () => {
     router.back();

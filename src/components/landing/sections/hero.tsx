@@ -8,15 +8,14 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { BRAND_CLASSES } from "@/lib/colors";
-import { signInWithGoogle } from "@/lib/auth";
-import { useAuthContext } from "@/lib/AuthProvider";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
 
 export const HeroSection = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
-  const { user, loading, isAuthenticated } = useAuthContext();
+  const { loading, isAuthenticated, signInWithGoogle } = useAuthContext();
   const { theme } = useTheme();
 
   const handleGetStarted = async () => {
@@ -29,16 +28,15 @@ export const HeroSection = () => {
     setIsSigningIn(true);
     setAuthError(null);
 
-    const result = await signInWithGoogle();
-
-    if (result.success) {
+    try {
+      await signInWithGoogle();
       // Show success message briefly before redirecting
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
-    } else {
-      setAuthError(result.error?.message || "Failed to sign in");
+    } catch (err) {
+      setAuthError("Failed to sign in");
       setIsSigningIn(false);
     }
   };

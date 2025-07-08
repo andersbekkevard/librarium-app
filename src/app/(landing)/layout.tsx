@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/landing/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/lib/AuthProvider";
+import { AuthProvider } from "@/lib/providers/AuthProvider";
 
 export default function LandingLayout({
   children,

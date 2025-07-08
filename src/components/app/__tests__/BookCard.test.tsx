@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BookCard } from '../BookCard'
 import { Book } from '@/lib/models'
+import { Timestamp } from 'firebase/firestore'
 
 // Mock next/navigation
 const mockPush = jest.fn()
@@ -25,8 +26,8 @@ describe('BookCard', () => {
     isOwned: true,
     genre: 'Fiction',
     coverImage: 'https://example.com/cover.jpg',
-    addedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
-    updatedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+    addedAt: new Timestamp(1234567890, 0),
+    updatedAt: new Timestamp(1234567890, 0),
   }
 
   beforeEach(() => {

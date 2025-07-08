@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/lib/AuthProvider";
-import { signOut as authSignOut } from "@/lib/auth";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useUserContext } from "@/lib/providers/UserProvider";
 import {
   User,
   Settings,
@@ -19,7 +19,8 @@ import {
 export const UserProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const { user, userProfile } = useAuthContext();
+  const { user, signOut } = useAuthContext();
+  const { userProfile } = useUserContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -42,28 +43,19 @@ export const UserProfileDropdown: React.FC = () => {
     setIsSigningOut(true);
 
     try {
-      const result = await authSignOut();
-
-      if (result.success) {
-        setIsOpen(false);
-        // Redirect to landing page after successful logout
-        router.push("/");
-      } else {
-        // Handle sign out error
-        console.error("Sign out failed:", result.error?.message);
-        // You could show a toast notification here
-        alert(`Failed to sign out: ${result.error?.message}`);
-      }
-    } catch (error) {
-      console.error("Error signing out:", error);
+      await signOut();
+      setIsOpen(false);
+      // Redirect to landing page after successful logout
+      router.push("/");
+    } catch {
+      // Error is handled by the AuthProvider
       alert("An unexpected error occurred while signing out");
     } finally {
       setIsSigningOut(false);
     }
   };
 
-  const handleMenuItemClick = (action: string) => {
-    console.log("Menu item clicked:", action);
+  const handleMenuItemClick = () => {
     setIsOpen(false);
     // TODO: Implement navigation to respective pages
   };
@@ -73,43 +65,43 @@ export const UserProfileDropdown: React.FC = () => {
       id: "profile",
       label: "Profile Settings",
       icon: User,
-      action: () => handleMenuItemClick("profile"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "account",
       label: "Account Settings",
       icon: Settings,
-      action: () => handleMenuItemClick("account"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "goals",
       label: "Reading Goals",
       icon: Target,
-      action: () => handleMenuItemClick("goals"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "privacy",
       label: "Privacy Settings",
       icon: Shield,
-      action: () => handleMenuItemClick("privacy"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "activity",
       label: "Activity History",
       icon: Activity,
-      action: () => handleMenuItemClick("activity"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "export",
       label: "Export Data",
       icon: Download,
-      action: () => handleMenuItemClick("export"),
+      action: () => handleMenuItemClick(),
     },
     {
       id: "help",
       label: "Help & Support",
       icon: HelpCircle,
-      action: () => handleMenuItemClick("help"),
+      action: () => handleMenuItemClick(),
     },
   ];
 
