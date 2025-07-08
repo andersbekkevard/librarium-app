@@ -4,11 +4,11 @@ A web application for managing personal book collections and tracking reading pr
 
 ### Landing page
 
-![Landing Page](docs/images/landing-page.png "Landing Page")
+![Landing Page](/images/landing-page.png "Landing Page")
 
 ### Dashboard
 
-![Dashboard](docs/images/dashboard.png "Dashboard")
+![Dashboard](/images/dashboard.png "Dashboard")
 
 ## Overview
 
