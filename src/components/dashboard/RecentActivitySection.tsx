@@ -1,54 +1,29 @@
-interface ActivityItem {
-  id: string;
-  type: 'finished' | 'started' | 'rated' | 'added' | 'progress';
-  bookTitle: string;
-  details?: string;
-  timeAgo: string;
-  colorClass: string;
-}
+import { ActivityItem } from "@/lib/services/EventService";
 
 interface RecentActivitySectionProps {
   activities?: ActivityItem[];
+  loading?: boolean;
+  error?: string | null;
 }
 
-const defaultActivities: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'finished',
-    bookTitle: 'The Great Gatsby',
-    timeAgo: '2 hours ago',
-    colorClass: 'bg-status-success',
-  },
-  {
-    id: '2',
-    type: 'started',
-    bookTitle: 'The Catcher in the Rye',
-    timeAgo: '1 day ago',
-    colorClass: 'bg-brand-primary',
-  },
-  {
-    id: '3',
-    type: 'rated',
-    bookTitle: 'Pride and Prejudice',
-    details: '5 stars',
-    timeAgo: '3 days ago',
-    colorClass: 'bg-status-warning',
-  },
-  {
-    id: '4',
-    type: 'added',
-    bookTitle: '1984',
-    timeAgo: '5 days ago',
-    colorClass: 'bg-brand-accent',
-  },
-  {
-    id: '5',
-    type: 'progress',
-    bookTitle: 'To Kill a Mockingbird',
-    timeAgo: '1 week ago',
-    colorClass: 'bg-status-info',
-  },
-];
+const formatTimeAgo = (timestamp: Date): string => {
+  const now = new Date();
+  const diff = now.getTime() - timestamp.getTime();
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+  
+  if (minutes < 60) {
+    return minutes <= 1 ? 'just now' : `${minutes} minutes ago`;
+  } else if (hours < 24) {
+    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+  } else if (days < 7) {
+    return days === 1 ? '1 day ago' : `${days} days ago`;
+  } else {
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+  }
+};
 
 const getActivityText = (activity: ActivityItem): string => {
   switch (activity.type) {
@@ -68,7 +43,9 @@ const getActivityText = (activity: ActivityItem): string => {
 };
 
 export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
-  activities = defaultActivities,
+  activities = [],
+  loading = false,
+  error = null,
 }) => {
   return (
     <div className="lg:col-span-1">
@@ -76,23 +53,48 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         <h2 className="text-lg font-semibold text-foreground mb-4">
           Recent Activity
         </h2>
-        <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-3">
-              <div className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2`}></div>
-              <div className="flex-1">
-                <p className="text-sm text-foreground">
-                  {getActivityText(activity)}{" "}
-                  <span className="font-medium">{activity.bookTitle}</span>
-                  {activity.details && ` ${activity.details}`}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {activity.timeAgo}
-                </p>
-              </div>
+        
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm text-muted-foreground">Loading recent activity...</div>
+          </div>
+        )}
+        
+        {error && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm text-red-500">
+              Failed to load recent activity: {error}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+        
+        {!loading && !error && activities.length === 0 && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm text-muted-foreground">
+              No recent activity to display
+            </div>
+          </div>
+        )}
+        
+        {!loading && !error && activities.length > 0 && (
+          <div className="space-y-4">
+            {activities.map((activity) => (
+              <div key={activity.id} className="flex items-start space-x-3">
+                <div className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2`}></div>
+                <div className="flex-1">
+                  <p className="text-sm text-foreground">
+                    {getActivityText(activity)}{" "}
+                    <span className="font-medium">{activity.bookTitle}</span>
+                    {activity.details && ` ${activity.details}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatTimeAgo(activity.timestamp)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

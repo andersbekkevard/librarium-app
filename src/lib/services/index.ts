@@ -12,3 +12,4 @@ export * from "./types";
 export { AuthService, authService } from "./AuthService";
 export { UserService, userService } from "./UserService";
 export { BookService, bookService } from "./BookService";
+export { EventService, eventService } from "./EventService";

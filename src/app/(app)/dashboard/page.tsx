@@ -105,6 +105,7 @@ export default function Dashboard() {
         <DashboardContent
           books={books}
           stats={stats}
+          userId={user?.uid || ''}
           onEdit={handleEdit}
           onUpdateProgress={handleUpdateProgress}
           onBookClick={handleBookClick}
