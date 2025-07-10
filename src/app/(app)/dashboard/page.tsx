@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Book } from "@/lib/models";
+import { userService } from "@/lib/services";
 import Sidebar from "@/components/app/Sidebar";
 import { Loader2 } from "lucide-react";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
@@ -15,41 +16,52 @@ export default function Dashboard() {
     finishedBooks: 0,
     totalPagesRead: 0,
     currentlyReading: 0,
+    readingStreak: 0,
   });
   const { loading, isAuthenticated, user } = useAuthContext();
   const { books, loading: booksLoading } = useBooksContext();
   const router = useRouter();
 
-  // Calculate stats when books change
+  // Calculate stats using UserService when user and books change
   useEffect(() => {
-    if (books.length > 0) {
-      const finishedBooks = books.filter(
-        (book) => book.state === "finished"
-      );
-      const totalPagesRead = finishedBooks.reduce(
-        (total, book) => total + (book.progress.totalPages || 0),
-        0
-      );
-      const currentlyReading = books.filter(
-        (book) => book.state === "in_progress"
-      );
+    const fetchStats = async () => {
+      if (!user) return;
+      
+      try {
+        const result = await userService.getUserStats(user.uid);
+        if (result.success && result.data) {
+          setStats({
+            totalBooks: result.data.booksInLibrary,
+            finishedBooks: result.data.booksReadThisYear, // Use "Read This Year" for the second stat
+            totalPagesRead: result.data.totalPagesRead,
+            currentlyReading: result.data.currentlyReading,
+            readingStreak: result.data.readingStreak,
+          });
+        } else {
+          // Reset stats on error
+          setStats({
+            totalBooks: 0,
+            finishedBooks: 0,
+            totalPagesRead: 0,
+            currentlyReading: 0,
+            readingStreak: 0,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+        // Reset stats on error
+        setStats({
+          totalBooks: 0,
+          finishedBooks: 0,
+          totalPagesRead: 0,
+          currentlyReading: 0,
+          readingStreak: 0,
+        });
+      }
+    };
 
-      setStats({
-        totalBooks: books.length,
-        finishedBooks: finishedBooks.length,
-        totalPagesRead,
-        currentlyReading: currentlyReading.length,
-      });
-    } else {
-      // Reset stats when no books
-      setStats({
-        totalBooks: 0,
-        finishedBooks: 0,
-        totalPagesRead: 0,
-        currentlyReading: 0,
-      });
-    }
-  }, [books]);
+    fetchStats();
+  }, [user, books]); // Re-fetch when books change to get updated stats
 
   // Route protection - redirect to landing if not authenticated
   useEffect(() => {
@@ -109,7 +121,6 @@ export default function Dashboard() {
           onEdit={handleEdit}
           onUpdateProgress={handleUpdateProgress}
           onBookClick={handleBookClick}
-          streakDays={12}
         />
       </main>
     </div>

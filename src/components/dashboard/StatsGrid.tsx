@@ -7,16 +7,15 @@ interface Stats {
   finishedBooks: number;
   totalPagesRead: number;
   currentlyReading: number;
+  readingStreak: number;
 }
 
 interface StatsGridProps {
   stats: Stats;
-  streakDays?: number;
 }
 
 export const StatsGrid: React.FC<StatsGridProps> = ({
   stats,
-  streakDays = 12,
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
@@ -49,7 +48,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
 
       {/* Reading Streak */}
       <ReadingStreakCard 
-        streakDays={streakDays}
+        streakDays={stats.readingStreak}
         encouragementText="Keep it up!"
       />
     </div>

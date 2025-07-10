@@ -12,6 +12,7 @@ interface Stats {
   finishedBooks: number;
   totalPagesRead: number;
   currentlyReading: number;
+  readingStreak: number;
 }
 
 interface DashboardContentProps {
@@ -21,7 +22,6 @@ interface DashboardContentProps {
   onEdit: (book: Book) => void;
   onUpdateProgress: (book: Book) => void;
   onBookClick: (bookId: string) => void;
-  streakDays?: number;
 }
 
 export const DashboardContent: React.FC<DashboardContentProps> = ({
@@ -31,7 +31,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onEdit,
   onUpdateProgress,
   onBookClick,
-  streakDays = 12,
 }) => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
@@ -76,7 +75,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     <div className="p-6">
       <DashboardHeader />
       
-      <StatsGrid stats={stats} streakDays={streakDays} />
+      <StatsGrid stats={stats} />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <CurrentlyReadingSection
