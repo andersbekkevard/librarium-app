@@ -17,9 +17,9 @@
   - @radix-ui/react-tabs: ^1.1.12
 - **shadcn/ui**: (Radix + Tailwind integration, see components.json)
 - **Lucide React** (icons): ^0.525.0
-- **Embla Carousel**: ^8.6.0
+- **Embla Carousel**: ^8.6.0 (carousel components)
 - **next-themes** (theme switching): ^0.4.6
-- **tw-animate-css** (animations): ^1.3.5
+- **tw-animate-css** (animations): ^1.3.5 (dev dependency)
 - **class-variance-authority**: ^0.7.1
 - **clsx**: ^2.1.1
 - **tailwind-merge**: ^3.3.1

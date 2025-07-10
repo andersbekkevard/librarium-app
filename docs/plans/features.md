@@ -26,32 +26,32 @@
 
 ## Core MVP Features (Phase 1)
 
-### **Personal Library Management**
+### **Personal Library Management** ✅ IMPLEMENTED
 
 - **Book Collection Tracking**: Manage owned books and wishlist items in unified interface
 - **Book Operations**: Add, edit, delete, search, and filter books
 - **Book Metadata**: Title, author, ISBN, pages, genre, publication year, cover images
 
-### **Reading State Management**
+### **Reading State Management** ✅ IMPLEMENTED
 
 - **State Transitions**: not_started → in_progress → finished (with validation)
 - **Progress Tracking**: Page-by-page reading progress for in-progress books
 - **State-Based Actions**: Different actions available per reading state
 
-### **Rich Interaction History**
+### **Rich Interaction History** 🚧 PARTIALLY IMPLEMENTED
 
-- **Event Types**: State changes, progress updates, comments, quotes, reviews
-- **Timeline View**: Chronological display of all book interactions
-- **Activity Feed**: Recent events across user's library
+- **Event Types**: State changes, progress updates, rating changes (comments, quotes, reviews planned)
+- **Timeline View**: Basic event logging in place (UI pending)
+- **Activity Feed**: Backend support implemented (dashboard display pending)
 
-### **Real-time Collaboration**
+### **Real-time Collaboration** 📋 PLANNED
 
 - **Book Sharing**: Share individual books with other users
 - **Collaborative Access**: Multiple users can interact with shared books
 - **Live Updates**: Changes appear instantly for all collaborators
-- Lets us keep track of who in a house owns what
+- Household/family sharing functionality
 
-## Organization & Shelf Features
+## Organization & Shelf Features 📋 PLANNED
 
 ### **Shelf Management**
 
@@ -62,43 +62,42 @@
 
 ### **Collaborative Shelves**
 
-- People living together should be able to form a "house" or called by another name
-- THey can then keep track of the books each other own, and where they are located in the house
-- They can loan books from each other
+- **Household Management**: People living together can form a "house" or family group
+- **Shared Book Tracking**: Keep track of books each person owns and their location
+- **Book Lending**: Loan books between household members with tracking
 
 ## Reading Experience Features
 
-### **Comment System**
+### **Comment System** 📋 PLANNED
 
 - **Reading Comments**: Add thoughts during in-progress reading
 - **Afterthoughts**: Comments after finishing books
 - **Page References**: Associate comments with specific pages
-- **Source**: Legacy PRD, sequence diagrams
 
-### **Quote Collection**
+### **Quote Collection** 📋 PLANNED
 
 - **Quote Capture**: Save memorable passages with page numbers
 - **Quote Organization**: Browse quotes by book or across library
 - **Page Tracking**: Reference specific pages for quotes
 
-### **Review System**
+### **Review System** ✅ IMPLEMENTED
 
 - **Book Ratings**: 1-5 star rating system for finished books
-- **Written Reviews**: Detailed text reviews
-- **Review History**: Track review changes over time
+- **Written Reviews**: Basic support (detailed reviews planned)
+- **Review History**: Track rating changes over time
 
 ## Search & Discovery Features
 
-### **Advanced Search**
+### **Advanced Search** 🚧 PARTIALLY IMPLEMENTED
 
-- **Multi-field Search**: Search by title, author, publication year, genre
-- **Filter Capabilities**: Filter by year intervals, reading state, ownership
-- **Shelf-specific Search**: Search within specific shelves
-- **Author/Year Browsing**: Browse books by author or publication year
+- **Multi-field Search**: Basic search by title and author (advanced filters planned)
+- **Filter Capabilities**: Basic filtering by reading state, ownership (year intervals planned)
+- **Shelf-specific Search**: Planned for shelf feature implementation
+- **Author/Year Browsing**: Planned for enhanced library views
 
-### **Book Discovery**
+### **Book Discovery** ✅ IMPLEMENTED
 
-- **Google Books Integration**: Search and discover new books
+- **Google Books Integration**: Search and discover new books via Google Books API
 - **Automated Metadata**: Auto-populate book details from external sources
 - **Cover Images**: Automatic cover image fetching
 

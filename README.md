@@ -4,11 +4,11 @@ A web application for managing personal book collections and tracking reading pr
 
 ### Landing page
 
-![Landing Page](/docs/images/landing-page.png "Landing Page")
+![Landing Page](docs/images/landing-page.png "Landing Page")
 
 ### Dashboard
 
-![Dashboard](/docs/images/dashboard.png "Dashboard")
+![Dashboard](docs/images/dashboard.png "Dashboard")
 
 ## Overview
 
@@ -19,12 +19,14 @@ Librarium is a personal library management system that allows users to organize 
 The application is in active development with the following functionality implemented:
 
 - **User Authentication**: Google OAuth integration for user sign-in
-- **Book Management**: Add, edit, and organize books in personal library
+- **Book Management**: Add, edit, delete, and organize books in personal library
 - **Reading Progress**: Track reading state (not started, in progress, finished) with page-level progress tracking
 - **Book Information**: Integration with Google Books API for automatic metadata retrieval
 - **Library Organization**: Filter and sort books by various criteria (title, author, reading state, ownership)
-- **Reading Statistics**: Basic statistics tracking for books read and library size
-- **Responsive Design**: Mobile-friendly interface with grid and list view modes
+- **Reading Statistics**: Basic statistics tracking on dashboard with visual displays
+- **Service Layer Architecture**: Clean separation of concerns with repository pattern
+- **Event Logging**: Track reading activities and state changes
+- **Responsive Design**: Mobile-friendly interface with modern UI components
 
 ## Technology Stack
 
@@ -52,13 +54,14 @@ The application is in active development with the following functionality implem
 
 ## Architecture
 
-The application follows a Firebase-native approach with:
+The application follows a modern service layer architecture with:
 
-- Direct Firebase SDK integration in React components
-- Real-time data synchronization via Firestore listeners
-- Type-safe data models with TypeScript interfaces
-- Component-based React patterns with custom hooks
-- Serverless cloud functions for external API integration
+- **Service Layer Pattern**: Business logic centralized in dedicated services
+- **Repository Pattern**: Data access abstracted through repository interfaces  
+- **Firebase-native Integration**: Real-time data synchronization via Firestore listeners
+- **Type-safe Development**: TypeScript interfaces throughout the application
+- **React Context Patterns**: Providers for state management and component composition
+- **Clean Architecture**: Clear separation of concerns across layers
 
 ## Getting Started
 
@@ -84,21 +87,38 @@ npm run dev
 
 ## Planned Features
 
-- Advanced search and filtering capabilities
-- Book sharing and collaboration
-- Reading analytics and goal tracking
-- Quote and note collection
-- Book recommendations
-- Import/export functionality
+- **Enhanced Statistics**: Detailed reading analytics with charts and goal tracking
+- **Shelf System**: Custom shelves and collections for book organization
+- **Comments & Quotes**: Add notes, comments, and save favorite quotes
+- **Household Sharing**: Share books with family members and track lending
+- **Advanced Search**: Enhanced filtering and search capabilities
+- **LLM Integration**: AI-powered book recommendations and insights
+- **Import/Export**: Bulk import/export functionality
 
 ## Project Structure
 
 ```
 src/
-├── app/                  # Next.js App Router pages
-├── components/          # Reusable UI components
-├── lib/                 # Utilities, hooks, and Firebase integration
-└── styles/             # Global styles and theme configuration
+├── app/
+│   ├── (app)/           # Authenticated app pages
+│   ├── (landing)/       # Public landing page
+│   ├── globals.css      # Global styles with custom color system
+│   └── layout.tsx       # Root layout
+├── components/
+│   ├── app/             # App-specific components
+│   ├── dashboard/       # Dashboard components
+│   ├── landing/         # Landing page sections
+│   ├── ui/              # Reusable UI components (shadcn/ui)
+│   └── ...
+├── lib/
+│   ├── hooks/           # Custom React hooks
+│   ├── providers/       # Context providers
+│   ├── repositories/    # Data access layer
+│   ├── services/        # Business logic layer
+│   ├── models.ts        # TypeScript interfaces
+│   ├── colors.ts        # Centralized color system
+│   └── utils.ts         # Utility functions
+└── docs/                # Documentation
 ```
 
 ## Development

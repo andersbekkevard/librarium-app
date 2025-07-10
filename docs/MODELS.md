@@ -44,8 +44,7 @@ interface Book {
   state: "not_started" | "in_progress" | "finished";
   progress: {
     currentPage: number; // Current reading position
-    totalPages?: number; // Total pages (if known)
-    percentage?: number; // Reading percentage (0-100)
+    totalPages: number; // Total pages
   };
 
   // Ownership and rating
@@ -55,6 +54,7 @@ interface Book {
   // Metadata (populated from Google Books API or user input)
   isbn?: string; // ISBN identifier
   coverImage?: string; // Cover image URL
+  genre?: string; // Genre of the book
   publishedDate?: string; // Publication date
   description?: string; // Book description
 
