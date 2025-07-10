@@ -49,8 +49,6 @@ export const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = (
               <BookCard
                 key={book.id}
                 book={book}
-                onEdit={onEdit}
-                onUpdateProgress={onUpdateProgress}
                 onBookClick={onBookClick}
               />
             ))}
