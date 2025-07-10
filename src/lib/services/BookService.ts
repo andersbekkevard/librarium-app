@@ -6,12 +6,21 @@
  */
 
 import { Timestamp } from "firebase/firestore";
-import { Book, BookEvent } from "../models";
-import { IBookRepository, IEventRepository } from "../repositories/types";
+import {
+  Book,
+  canTransitionTo,
+  validateProgress,
+  validateRating,
+} from "../models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
-import { IBookService, ServiceResult, ServiceError, ServiceErrorType } from "./types";
-import { canTransitionTo, validateProgress, validateRating } from "../models";
+import { IBookRepository, IEventRepository } from "../repositories/types";
+import {
+  IBookService,
+  ServiceError,
+  ServiceErrorType,
+  ServiceResult,
+} from "./types";
 
 export class BookService implements IBookService {
   constructor(
@@ -92,10 +101,13 @@ export class BookService implements IBookService {
   /**
    * Get a single book
    */
-  async getBook(userId: string, bookId: string): Promise<ServiceResult<Book | null>> {
+  async getBook(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<Book | null>> {
     try {
       const result = await this.bookRepository.getBook(userId, bookId);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -113,7 +125,7 @@ export class BookService implements IBookService {
   async getUserBooks(userId: string): Promise<ServiceResult<Book[]>> {
     try {
       const result = await this.bookRepository.getUserBooks(userId);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -128,10 +140,13 @@ export class BookService implements IBookService {
   /**
    * Get books by reading state
    */
-  async getBooksByState(userId: string, state: Book["state"]): Promise<ServiceResult<Book[]>> {
+  async getBooksByState(
+    userId: string,
+    state: Book["state"]
+  ): Promise<ServiceResult<Book[]>> {
     try {
       const result = await this.bookRepository.getBooksByState(userId, state);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -146,7 +161,10 @@ export class BookService implements IBookService {
   /**
    * Add a new book to user's collection
    */
-  async addBook(userId: string, book: Omit<Book, "id" | "addedAt" | "updatedAt">): Promise<ServiceResult<string>> {
+  async addBook(
+    userId: string,
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ): Promise<ServiceResult<string>> {
     try {
       const validationError = this.validateBookData(book);
       if (validationError) {
@@ -154,7 +172,7 @@ export class BookService implements IBookService {
       }
 
       const result = await this.bookRepository.addBook(userId, book);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -178,15 +196,23 @@ export class BookService implements IBookService {
   /**
    * Update book (general updates)
    */
-  async updateBook(userId: string, bookId: string, updates: Partial<Book>): Promise<ServiceResult<void>> {
+  async updateBook(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<ServiceResult<void>> {
     try {
       const validationError = this.validateBookData(updates);
       if (validationError) {
         return { success: false, error: validationError.message };
       }
 
-      const result = await this.bookRepository.updateBook(userId, bookId, updates);
-      
+      const result = await this.bookRepository.updateBook(
+        userId,
+        bookId,
+        updates
+      );
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -201,7 +227,11 @@ export class BookService implements IBookService {
   /**
    * Update book progress with business logic
    */
-  async updateBookProgress(userId: string, bookId: string, currentPage: number): Promise<ServiceResult<void>> {
+  async updateBookProgress(
+    userId: string,
+    bookId: string,
+    currentPage: number
+  ): Promise<ServiceResult<void>> {
     try {
       // Get current book state
       const bookResult = await this.getBook(userId, bookId);
@@ -219,14 +249,18 @@ export class BookService implements IBookService {
 
       // Determine if state should change based on progress
       let newState = book.state;
-      
+
       // Auto-transition to in_progress if starting from not_started
       if (book.state === "not_started" && currentPage > 0) {
         newState = "in_progress";
       }
-      
+
       // Auto-transition to finished if reaching the end
-      if (book.state === "in_progress" && totalPages > 0 && currentPage >= totalPages) {
+      if (
+        book.state === "in_progress" &&
+        totalPages > 0 &&
+        currentPage >= totalPages
+      ) {
         newState = "finished";
       }
 
@@ -249,7 +283,11 @@ export class BookService implements IBookService {
       }
 
       // Update book
-      const updateResult = await this.bookRepository.updateBook(userId, bookId, progressUpdate);
+      const updateResult = await this.bookRepository.updateBook(
+        userId,
+        bookId,
+        progressUpdate
+      );
       if (!updateResult.success) {
         const serviceError = this.handleRepositoryError(updateResult.error!);
         return { success: false, error: serviceError.message };
@@ -286,7 +324,12 @@ export class BookService implements IBookService {
   /**
    * Update book reading state with proper event logging
    */
-  async updateBookState(userId: string, bookId: string, newState: Book["state"], currentState?: Book["state"]): Promise<ServiceResult<void>> {
+  async updateBookState(
+    userId: string,
+    bookId: string,
+    newState: Book["state"],
+    currentState?: Book["state"]
+  ): Promise<ServiceResult<void>> {
     try {
       // Get current book if currentState not provided
       let actualCurrentState = currentState;
@@ -300,7 +343,10 @@ export class BookService implements IBookService {
 
       // Validate state transition
       if (!canTransitionTo(actualCurrentState, newState)) {
-        return { success: false, error: `Cannot transition from ${actualCurrentState} to ${newState}` };
+        return {
+          success: false,
+          error: `Cannot transition from ${actualCurrentState} to ${newState}`,
+        };
       }
 
       // Prepare update data
@@ -318,13 +364,20 @@ export class BookService implements IBookService {
         if (bookResult.success && bookResult.data) {
           updateData.progress = {
             ...bookResult.data.progress,
-            currentPage: bookResult.data.progress.totalPages || bookResult.data.progress.currentPage || 0,
+            currentPage:
+              bookResult.data.progress.totalPages ||
+              bookResult.data.progress.currentPage ||
+              0,
           };
         }
       }
 
       // Update book
-      const updateResult = await this.bookRepository.updateBook(userId, bookId, updateData);
+      const updateResult = await this.bookRepository.updateBook(
+        userId,
+        bookId,
+        updateData
+      );
       if (!updateResult.success) {
         const serviceError = this.handleRepositoryError(updateResult.error!);
         return { success: false, error: serviceError.message };
@@ -349,7 +402,11 @@ export class BookService implements IBookService {
   /**
    * Update book rating
    */
-  async updateBookRating(userId: string, bookId: string, rating: number): Promise<ServiceResult<void>> {
+  async updateBookRating(
+    userId: string,
+    bookId: string,
+    rating: number
+  ): Promise<ServiceResult<void>> {
     try {
       if (!validateRating(rating)) {
         return { success: false, error: "Rating must be between 1 and 5" };
@@ -366,7 +423,11 @@ export class BookService implements IBookService {
       }
 
       // Update rating
-      const updateResult = await this.bookRepository.updateBook(userId, bookId, { rating });
+      const updateResult = await this.bookRepository.updateBook(
+        userId,
+        bookId,
+        { rating }
+      );
       if (!updateResult.success) {
         const serviceError = this.handleRepositoryError(updateResult.error!);
         return { success: false, error: serviceError.message };
@@ -390,14 +451,17 @@ export class BookService implements IBookService {
   /**
    * Delete a book
    */
-  async deleteBook(userId: string, bookId: string): Promise<ServiceResult<void>> {
+  async deleteBook(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<void>> {
     try {
       // Delete book events first
       await this.eventRepository.deleteBookEvents(userId, bookId);
 
       // Delete book
       const result = await this.bookRepository.deleteBook(userId, bookId);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -412,25 +476,34 @@ export class BookService implements IBookService {
   /**
    * Subscribe to user's book collection
    */
-  subscribeToUserBooks(userId: string, callback: (books: Book[]) => void): () => void {
+  subscribeToUserBooks(
+    userId: string,
+    callback: (books: Book[]) => void
+  ): () => void {
     return this.bookRepository.subscribeToUserBooks(userId, callback);
   }
 
   /**
    * Import multiple books
    */
-  async importBooks(userId: string, books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>): Promise<ServiceResult<string[]>> {
+  async importBooks(
+    userId: string,
+    books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>
+  ): Promise<ServiceResult<string[]>> {
     try {
       // Validate all books
       for (const book of books) {
         const validationError = this.validateBookData(book);
         if (validationError) {
-          return { success: false, error: `Invalid book data: ${validationError.message}` };
+          return {
+            success: false,
+            error: `Invalid book data: ${validationError.message}`,
+          };
         }
       }
 
       const result = await this.bookRepository.importBooks(userId, books);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };

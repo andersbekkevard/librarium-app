@@ -26,13 +26,19 @@ interface BooksContextType {
   /** Error message if any operation fails */
   error: string | null;
   /** Function to add a new book to the collection */
-  addBook: (book: Omit<Book, "id" | "addedAt" | "updatedAt">) => Promise<string>;
+  addBook: (
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ) => Promise<string>;
   /** Function to update an existing book */
   updateBook: (bookId: string, updates: Partial<Book>) => Promise<void>;
   /** Function to update book progress */
   updateBookProgress: (bookId: string, currentPage: number) => Promise<void>;
   /** Function to update book state */
-  updateBookState: (bookId: string, newState: Book["state"], currentState?: Book["state"]) => Promise<void>;
+  updateBookState: (
+    bookId: string,
+    newState: Book["state"],
+    currentState?: Book["state"]
+  ) => Promise<void>;
   /** Function to update book rating */
   updateBookRating: (bookId: string, rating: number) => Promise<void>;
   /** Function to delete a book from the collection */
@@ -42,7 +48,13 @@ interface BooksContextType {
   /** Function to get a single book by ID */
   getBook: (bookId: string) => Promise<Book | null>;
   /** Function to filter and sort books */
-  filterAndSortBooks: (searchQuery: string, filterStatus: string, filterOwnership: string, sortBy: string, sortDirection: "asc" | "desc") => Book[];
+  filterAndSortBooks: (
+    searchQuery: string,
+    filterStatus: string,
+    filterOwnership: string,
+    sortBy: string,
+    sortDirection: "asc" | "desc"
+  ) => Book[];
   /** Function to calculate book progress */
   calculateBookProgress: (book: Book) => number;
   /** Computed statistics */
@@ -68,7 +80,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Add a new book to the collection
    */
-  const addBook = async (book: Omit<Book, "id" | "addedAt" | "updatedAt">): Promise<string> => {
+  const addBook = async (
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ): Promise<string> => {
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -76,7 +90,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await bookService.addBook(user.uid, book);
-      
+
       if (result.success) {
         // Real-time listener will automatically update the books array
         // Update user statistics
@@ -87,7 +101,8 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to add book");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to add book";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add book";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -96,7 +111,10 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Update an existing book
    */
-  const updateBook = async (bookId: string, updates: Partial<Book>): Promise<void> => {
+  const updateBook = async (
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<void> => {
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -104,7 +122,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await bookService.updateBook(user.uid, bookId, updates);
-      
+
       if (result.success) {
         // Real-time listener will automatically update the books array
         // Update user statistics if state changed
@@ -116,7 +134,8 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to update book");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update book";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update book";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -125,15 +144,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Update book progress
    */
-  const updateBookProgress = async (bookId: string, currentPage: number): Promise<void> => {
+  const updateBookProgress = async (
+    bookId: string,
+    currentPage: number
+  ): Promise<void> => {
     if (!user) {
       throw new Error("User not authenticated");
     }
 
     try {
       setError(null);
-      const result = await bookService.updateBookProgress(user.uid, bookId, currentPage);
-      
+      const result = await bookService.updateBookProgress(
+        user.uid,
+        bookId,
+        currentPage
+      );
+
       if (result.success) {
         // Real-time listener will automatically update the books array
         // Update user statistics in case state changed
@@ -143,7 +169,10 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to update book progress");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update book progress";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to update book progress";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -152,15 +181,24 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Update book state
    */
-  const updateBookState = async (bookId: string, newState: Book["state"], currentState?: Book["state"]): Promise<void> => {
+  const updateBookState = async (
+    bookId: string,
+    newState: Book["state"],
+    currentState?: Book["state"]
+  ): Promise<void> => {
     if (!user) {
       throw new Error("User not authenticated");
     }
 
     try {
       setError(null);
-      const result = await bookService.updateBookState(user.uid, bookId, newState, currentState);
-      
+      const result = await bookService.updateBookState(
+        user.uid,
+        bookId,
+        newState,
+        currentState
+      );
+
       if (result.success) {
         // Real-time listener will automatically update the books array
         // Update user statistics
@@ -170,7 +208,8 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to update book state");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update book state";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update book state";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -179,15 +218,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Update book rating
    */
-  const updateBookRating = async (bookId: string, rating: number): Promise<void> => {
+  const updateBookRating = async (
+    bookId: string,
+    rating: number
+  ): Promise<void> => {
     if (!user) {
       throw new Error("User not authenticated");
     }
 
     try {
       setError(null);
-      const result = await bookService.updateBookRating(user.uid, bookId, rating);
-      
+      const result = await bookService.updateBookRating(
+        user.uid,
+        bookId,
+        rating
+      );
+
       if (result.success) {
         // Real-time listener will automatically update the books array
       } else {
@@ -195,7 +241,8 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to update book rating");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update book rating";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update book rating";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -212,7 +259,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await bookService.deleteBook(user.uid, bookId);
-      
+
       if (result.success) {
         // Real-time listener will automatically update the books array
         // Update user statistics
@@ -222,7 +269,8 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         throw new Error(result.error || "Failed to delete book");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to delete book";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete book";
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -238,7 +286,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       setError(null);
       setLoading(true);
       const result = await bookService.getUserBooks(user.uid);
-      
+
       if (result.success) {
         setBooks(result.data!);
       } else {
@@ -260,9 +308,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await bookService.getBook(user.uid, bookId);
-      
+
       if (result.success) {
-        return result.data;
+        return result.data || null;
       } else {
         setError(result.error || "Failed to get book");
         return null;
@@ -302,9 +350,15 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
   // Computed statistics
   const totalBooks = books.length;
-  const booksInProgress = books.filter(book => book.state === "in_progress").length;
-  const booksFinished = books.filter(book => book.state === "finished").length;
-  const booksNotStarted = books.filter(book => book.state === "not_started").length;
+  const booksInProgress = books.filter(
+    (book) => book.state === "in_progress"
+  ).length;
+  const booksFinished = books.filter(
+    (book) => book.state === "finished"
+  ).length;
+  const booksNotStarted = books.filter(
+    (book) => book.state === "not_started"
+  ).length;
 
   // Set up real-time listener for books
   useEffect(() => {
@@ -319,11 +373,14 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     setError(null);
 
     // Set up real-time books listener
-    const unsubscribe = bookService.subscribeToUserBooks(user.uid, (userBooks) => {
-      setBooks(userBooks);
-      setLoading(false);
-      setError(null);
-    });
+    const unsubscribe = bookService.subscribeToUserBooks(
+      user.uid,
+      (userBooks) => {
+        setBooks(userBooks);
+        setLoading(false);
+        setError(null);
+      }
+    );
 
     return unsubscribe;
   }, [isAuthenticated, user]);
@@ -348,7 +405,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     booksNotStarted,
   };
 
-  return <BooksContext.Provider value={value}>{children}</BooksContext.Provider>;
+  return (
+    <BooksContext.Provider value={value}>{children}</BooksContext.Provider>
+  );
 };
 
 /**

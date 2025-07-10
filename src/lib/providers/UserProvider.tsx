@@ -10,8 +10,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { UserProfile } from "../models";
 import { userService } from "../services/UserService";
-import { useAuthContext } from "./AuthProvider";
 import { UserStats } from "../services/types";
+import { useAuthContext } from "./AuthProvider";
 
 /**
  * User context type definition
@@ -51,7 +51,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   /**
    * Update user profile
    */
-  const updateUserProfile = async (updates: Partial<UserProfile>): Promise<void> => {
+  const updateUserProfile = async (
+    updates: Partial<UserProfile>
+  ): Promise<void> => {
     if (!user) {
       setError("User not authenticated");
       return;
@@ -60,7 +62,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await userService.updateProfile(user.uid, updates);
-      
+
       if (result.success) {
         setUserProfile(result.data!);
       } else {
@@ -84,9 +86,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setError(null);
       setLoading(true);
       const result = await userService.getProfile(user.uid);
-      
+
       if (result.success) {
-        setUserProfile(result.data);
+        setUserProfile(result.data || null);
       } else {
         setError(result.error || "Failed to refresh profile");
       }
@@ -109,7 +111,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await userService.getUserStats(user.uid);
-      
+
       if (result.success) {
         setUserStats(result.data!);
       } else {
@@ -132,7 +134,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await userService.updateUserStats(user.uid);
-      
+
       if (result.success) {
         // Refresh stats after update
         await refreshUserStats();
@@ -158,10 +160,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setError(null);
 
     // Create or get user profile
-    const initializeUserProfile = async () => {
+    const initializeUserProfile = async (): Promise<void> => {
       try {
         const result = await userService.createProfileFromFirebaseUser(user);
-        
+
         if (result.success) {
           setUserProfile(result.data!);
           // Also load statistics
@@ -170,7 +172,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           setError(result.error || "Failed to initialize user profile");
         }
       } catch (error) {
-        setError("An unexpected error occurred while initializing user profile");
+        setError(
+          "An unexpected error occurred while initializing user profile"
+        );
       } finally {
         setLoading(false);
       }

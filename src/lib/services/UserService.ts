@@ -7,11 +7,17 @@
 
 import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
-import { UserProfile } from "../models";
-import { IUserRepository } from "../repositories/types";
-import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
+import { Book, UserProfile } from "../models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
-import { IUserService, ServiceResult, ServiceError, ServiceErrorType, UserStats } from "./types";
+import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
+import { IUserRepository } from "../repositories/types";
+import {
+  IUserService,
+  ServiceError,
+  ServiceErrorType,
+  ServiceResult,
+  UserStats,
+} from "./types";
 
 export class UserService implements IUserService {
   constructor(
@@ -57,8 +63,13 @@ export class UserService implements IUserService {
   /**
    * Validate user profile data
    */
-  private validateUserProfileData(profile: Partial<UserProfile>): ServiceError | null {
-    if (profile.displayName !== undefined && profile.displayName.trim().length === 0) {
+  private validateUserProfileData(
+    profile: Partial<UserProfile>
+  ): ServiceError | null {
+    if (
+      profile.displayName !== undefined &&
+      profile.displayName.trim().length === 0
+    ) {
       return new ServiceError(
         ServiceErrorType.VALIDATION_ERROR,
         "Display name cannot be empty"
@@ -79,7 +90,10 @@ export class UserService implements IUserService {
       );
     }
 
-    if (profile.currentlyReading !== undefined && profile.currentlyReading < 0) {
+    if (
+      profile.currentlyReading !== undefined &&
+      profile.currentlyReading < 0
+    ) {
       return new ServiceError(
         ServiceErrorType.VALIDATION_ERROR,
         "Currently reading count cannot be negative"
@@ -102,7 +116,7 @@ export class UserService implements IUserService {
   async getProfile(userId: string): Promise<ServiceResult<UserProfile | null>> {
     try {
       const result = await this.userRepository.getProfile(userId);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -117,14 +131,17 @@ export class UserService implements IUserService {
   /**
    * Create user profile from Firebase user
    */
-  async createProfileFromFirebaseUser(firebaseUser: User): Promise<ServiceResult<UserProfile>> {
+  async createProfileFromFirebaseUser(
+    firebaseUser: User
+  ): Promise<ServiceResult<UserProfile>> {
     try {
       // First check if profile already exists
       const existingProfile = await this.getProfile(firebaseUser.uid);
       if (existingProfile.success && existingProfile.data) {
         // Update existing profile with latest auth data
         const updates: Partial<UserProfile> = {
-          displayName: firebaseUser.displayName || existingProfile.data.displayName,
+          displayName:
+            firebaseUser.displayName || existingProfile.data.displayName,
           email: firebaseUser.email || existingProfile.data.email,
           photoURL: firebaseUser.photoURL || existingProfile.data.photoURL,
           emailVerified: firebaseUser.emailVerified,
@@ -136,7 +153,6 @@ export class UserService implements IUserService {
 
       // Create new profile
       const newProfile: Omit<UserProfile, "id"> = {
-        id: firebaseUser.uid,
         displayName: firebaseUser.displayName || "Anonymous User",
         email: firebaseUser.email || "",
         photoURL: firebaseUser.photoURL || undefined,
@@ -154,8 +170,11 @@ export class UserService implements IUserService {
         return { success: false, error: validationError.message };
       }
 
-      const result = await this.userRepository.createProfile(newProfile);
-      
+      const result = await this.userRepository.createProfile(
+        firebaseUser.uid,
+        newProfile
+      );
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -170,7 +189,10 @@ export class UserService implements IUserService {
   /**
    * Update user profile
    */
-  async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<ServiceResult<UserProfile>> {
+  async updateProfile(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<ServiceResult<UserProfile>> {
     try {
       const validationError = this.validateUserProfileData(updates);
       if (validationError) {
@@ -178,7 +200,7 @@ export class UserService implements IUserService {
       }
 
       const result = await this.userRepository.updateProfile(userId, updates);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -196,7 +218,7 @@ export class UserService implements IUserService {
   async deleteProfile(userId: string): Promise<ServiceResult<void>> {
     try {
       const result = await this.userRepository.deleteProfile(userId);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -215,18 +237,23 @@ export class UserService implements IUserService {
     try {
       const booksResult = await this.bookRepository.getUserBooks(userId);
       if (!booksResult.success) {
-        return { success: false, error: "Failed to get user books for statistics" };
+        return {
+          success: false,
+          error: "Failed to get user books for statistics",
+        };
       }
 
       const books = booksResult.data!;
       const stats = {
-        totalBooksRead: books.filter((book) => book.state === "finished").length,
-        currentlyReading: books.filter((book) => book.state === "in_progress").length,
+        totalBooksRead: books.filter((book) => book.state === "finished")
+          .length,
+        currentlyReading: books.filter((book) => book.state === "in_progress")
+          .length,
         booksInLibrary: books.length,
       };
 
       const result = await this.userRepository.updateProfile(userId, stats);
-      
+
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
         return { success: false, error: serviceError.message };
@@ -245,13 +272,18 @@ export class UserService implements IUserService {
     try {
       const booksResult = await this.bookRepository.getUserBooks(userId);
       if (!booksResult.success) {
-        return { success: false, error: "Failed to get user books for statistics" };
+        return {
+          success: false,
+          error: "Failed to get user books for statistics",
+        };
       }
 
       const books = booksResult.data!;
       const finishedBooks = books.filter((book) => book.state === "finished");
-      const currentlyReadingBooks = books.filter((book) => book.state === "in_progress");
-      
+      const currentlyReadingBooks = books.filter(
+        (book) => book.state === "in_progress"
+      );
+
       // Calculate total pages read
       const totalPagesRead = finishedBooks.reduce(
         (total, book) => total + (book.progress.totalPages || 0),
@@ -260,9 +292,13 @@ export class UserService implements IUserService {
 
       // Calculate average rating
       const booksWithRatings = finishedBooks.filter((book) => book.rating);
-      const averageRating = booksWithRatings.length > 0
-        ? booksWithRatings.reduce((sum, book) => sum + (book.rating || 0), 0) / booksWithRatings.length
-        : 0;
+      const averageRating =
+        booksWithRatings.length > 0
+          ? booksWithRatings.reduce(
+              (sum, book) => sum + (book.rating || 0),
+              0
+            ) / booksWithRatings.length
+          : 0;
 
       // Calculate reading streak (simplified - books finished in consecutive days)
       const readingStreak = this.calculateReadingStreak(finishedBooks);
@@ -274,14 +310,17 @@ export class UserService implements IUserService {
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
-      
-      const booksReadThisMonth = finishedBooks.filter(book => {
+
+      const booksReadThisMonth = finishedBooks.filter((book) => {
         if (!book.finishedAt) return false;
         const finishedDate = book.finishedAt.toDate();
-        return finishedDate.getMonth() === currentMonth && finishedDate.getFullYear() === currentYear;
+        return (
+          finishedDate.getMonth() === currentMonth &&
+          finishedDate.getFullYear() === currentYear
+        );
       }).length;
 
-      const booksReadThisYear = finishedBooks.filter(book => {
+      const booksReadThisYear = finishedBooks.filter((book) => {
         if (!book.finishedAt) return false;
         const finishedDate = book.finishedAt.toDate();
         return finishedDate.getFullYear() === currentYear;
@@ -308,46 +347,52 @@ export class UserService implements IUserService {
   /**
    * Subscribe to user profile changes
    */
-  subscribeToProfile(userId: string, callback: (profile: UserProfile | null) => void): () => void {
+  subscribeToProfile(
+    userId: string,
+    callback: (profile: UserProfile | null) => void
+  ): () => void {
     return this.userRepository.subscribeToProfile(userId, callback);
   }
 
   /**
    * Calculate reading streak (simplified implementation)
    */
-  private calculateReadingStreak(finishedBooks: any[]): number {
+  private calculateReadingStreak(finishedBooks: Book[]): number {
     if (finishedBooks.length === 0) return 0;
-    
+
     // Sort books by finish date
     const sortedBooks = finishedBooks
-      .filter(book => book.finishedAt)
-      .sort((a, b) => b.finishedAt.toDate().getTime() - a.finishedAt.toDate().getTime());
-    
+      .filter((book) => book.finishedAt)
+      .sort(
+        (a, b) =>
+          b.finishedAt!.toDate().getTime() - a.finishedAt!.toDate().getTime()
+      );
+
     if (sortedBooks.length === 0) return 0;
-    
+
     // Simple implementation: return number of books finished in last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    return sortedBooks.filter(book => 
-      book.finishedAt.toDate() >= thirtyDaysAgo
+
+    return sortedBooks.filter(
+      (book) => book.finishedAt!.toDate() >= thirtyDaysAgo
     ).length;
   }
 
   /**
    * Get favorite genres based on book collection
    */
-  private getFavoriteGenres(books: any[]): string[] {
+  private getFavoriteGenres(books: Book[]): string[] {
     const genreCounts: Record<string, number> = {};
-    
-    books.forEach(book => {
+
+    books.forEach((book) => {
       if (book.genre) {
         genreCounts[book.genre] = (genreCounts[book.genre] || 0) + 1;
       }
     });
-    
+
     return Object.entries(genreCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([genre]) => genre);
   }

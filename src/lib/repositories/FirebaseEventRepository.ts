@@ -6,21 +6,25 @@
  */
 
 import {
-  collection,
-  doc,
+  FirestoreError,
+  Timestamp,
   addDoc,
-  deleteDoc,
+  collection,
   getDocs,
+  limit,
+  orderBy,
   query,
   where,
-  orderBy,
-  limit,
-  Timestamp,
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { BookEvent } from "../models";
-import { IEventRepository, RepositoryResult, RepositoryError, RepositoryErrorType } from "./types";
+import {
+  IEventRepository,
+  RepositoryError,
+  RepositoryErrorType,
+  RepositoryResult,
+} from "./types";
 
 export class FirebaseEventRepository implements IEventRepository {
   /**
@@ -33,7 +37,7 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Convert Firebase errors to repository errors
    */
-  private handleFirebaseError(error: any): RepositoryError {
+  private handleFirebaseError(error: FirestoreError): RepositoryError {
     if (error.code === "permission-denied") {
       return new RepositoryError(
         RepositoryErrorType.PERMISSION_DENIED,
@@ -41,7 +45,7 @@ export class FirebaseEventRepository implements IEventRepository {
         error
       );
     }
-    
+
     if (error.code === "unavailable" || error.code === "deadline-exceeded") {
       return new RepositoryError(
         RepositoryErrorType.NETWORK_ERROR,
@@ -60,7 +64,10 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Log a new event
    */
-  async logEvent(userId: string, event: Omit<BookEvent, "id" | "userId" | "timestamp">): Promise<RepositoryResult<string>> {
+  async logEvent(
+    userId: string,
+    event: Omit<BookEvent, "id" | "userId" | "timestamp">
+  ): Promise<RepositoryResult<string>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);
       const eventData = {
@@ -72,7 +79,7 @@ export class FirebaseEventRepository implements IEventRepository {
       const docRef = await addDoc(eventsRef, eventData);
       return { success: true, data: docRef.id };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -80,7 +87,10 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Get events for a specific book
    */
-  async getBookEvents(userId: string, bookId: string): Promise<RepositoryResult<BookEvent[]>> {
+  async getBookEvents(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<BookEvent[]>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);
       const eventsQuery = query(
@@ -90,14 +100,17 @@ export class FirebaseEventRepository implements IEventRepository {
       );
       const snapshot = await getDocs(eventsQuery);
 
-      const events: BookEvent[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as BookEvent));
+      const events: BookEvent[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as BookEvent)
+      );
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -105,7 +118,10 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Get recent events for a user
    */
-  async getRecentEvents(userId: string, eventLimit: number = 10): Promise<RepositoryResult<BookEvent[]>> {
+  async getRecentEvents(
+    userId: string,
+    eventLimit: number = 10
+  ): Promise<RepositoryResult<BookEvent[]>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);
       const eventsQuery = query(
@@ -115,14 +131,17 @@ export class FirebaseEventRepository implements IEventRepository {
       );
       const snapshot = await getDocs(eventsQuery);
 
-      const events: BookEvent[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as BookEvent));
+      const events: BookEvent[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as BookEvent)
+      );
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -130,7 +149,10 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Get events by type
    */
-  async getEventsByType(userId: string, type: BookEvent["type"]): Promise<RepositoryResult<BookEvent[]>> {
+  async getEventsByType(
+    userId: string,
+    type: BookEvent["type"]
+  ): Promise<RepositoryResult<BookEvent[]>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);
       const eventsQuery = query(
@@ -140,14 +162,17 @@ export class FirebaseEventRepository implements IEventRepository {
       );
       const snapshot = await getDocs(eventsQuery);
 
-      const events: BookEvent[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as BookEvent));
+      const events: BookEvent[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as BookEvent)
+      );
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -155,13 +180,13 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Delete events for a book (used when book is deleted)
    */
-  async deleteBookEvents(userId: string, bookId: string): Promise<RepositoryResult<void>> {
+  async deleteBookEvents(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<void>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);
-      const eventsQuery = query(
-        eventsRef,
-        where("bookId", "==", bookId)
-      );
+      const eventsQuery = query(eventsRef, where("bookId", "==", bookId));
       const snapshot = await getDocs(eventsQuery);
 
       if (snapshot.empty) {
@@ -176,7 +201,7 @@ export class FirebaseEventRepository implements IEventRepository {
       await batch.commit();
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -201,7 +226,7 @@ export class FirebaseEventRepository implements IEventRepository {
       await batch.commit();
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }

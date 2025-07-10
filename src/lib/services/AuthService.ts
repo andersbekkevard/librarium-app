@@ -5,21 +5,27 @@
  * Provides a clean interface for authentication functionality.
  */
 
-import { 
-  User, 
-  onAuthStateChanged, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut as firebaseSignOut 
+import {
+  AuthError,
+  GoogleAuthProvider,
+  User,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../firebase";
-import { IAuthService, ServiceResult, ServiceError, ServiceErrorType } from "./types";
+import {
+  IAuthService,
+  ServiceError,
+  ServiceErrorType,
+  ServiceResult,
+} from "./types";
 
 export class AuthService implements IAuthService {
   /**
    * Convert auth errors to service errors
    */
-  private handleAuthError(error: any): ServiceError {
+  private handleAuthError(error: AuthError): ServiceError {
     if (error.code === "auth/popup-blocked") {
       return new ServiceError(
         ServiceErrorType.EXTERNAL_API_ERROR,
@@ -64,7 +70,7 @@ export class AuthService implements IAuthService {
       const result = await signInWithPopup(auth, provider);
       return { success: true, data: result.user };
     } catch (error) {
-      const serviceError = this.handleAuthError(error);
+      const serviceError = this.handleAuthError(error as AuthError);
       return { success: false, error: serviceError.message };
     }
   }
@@ -77,7 +83,7 @@ export class AuthService implements IAuthService {
       await firebaseSignOut(auth);
       return { success: true };
     } catch (error) {
-      const serviceError = this.handleAuthError(error);
+      const serviceError = this.handleAuthError(error as AuthError);
       return { success: false, error: serviceError.message };
     }
   }

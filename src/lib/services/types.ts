@@ -6,7 +6,7 @@
  */
 
 import { User } from "firebase/auth";
-import { Book, BookEvent, UserProfile } from "../models";
+import { Book, UserProfile } from "../models";
 
 /**
  * Common service result type for operations that can fail
@@ -19,7 +19,7 @@ export interface ServiceResult<T> {
 
 /**
  * Authentication service interface
- * 
+ *
  * Handles authentication operations only
  */
 export interface IAuthService {
@@ -51,7 +51,7 @@ export interface IAuthService {
 
 /**
  * User service interface
- * 
+ *
  * Handles user profile and statistics operations
  */
 export interface IUserService {
@@ -63,12 +63,17 @@ export interface IUserService {
   /**
    * Create user profile from Firebase user
    */
-  createProfileFromFirebaseUser(firebaseUser: User): Promise<ServiceResult<UserProfile>>;
+  createProfileFromFirebaseUser(
+    firebaseUser: User
+  ): Promise<ServiceResult<UserProfile>>;
 
   /**
    * Update user profile
    */
-  updateProfile(userId: string, updates: Partial<UserProfile>): Promise<ServiceResult<UserProfile>>;
+  updateProfile(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<ServiceResult<UserProfile>>;
 
   /**
    * Delete user profile
@@ -88,12 +93,15 @@ export interface IUserService {
   /**
    * Subscribe to user profile changes
    */
-  subscribeToProfile(userId: string, callback: (profile: UserProfile | null) => void): () => void;
+  subscribeToProfile(
+    userId: string,
+    callback: (profile: UserProfile | null) => void
+  ): () => void;
 }
 
 /**
  * Book service interface
- * 
+ *
  * Handles book operations and business logic
  */
 export interface IBookService {
@@ -110,32 +118,55 @@ export interface IBookService {
   /**
    * Get books by reading state
    */
-  getBooksByState(userId: string, state: Book["state"]): Promise<ServiceResult<Book[]>>;
+  getBooksByState(
+    userId: string,
+    state: Book["state"]
+  ): Promise<ServiceResult<Book[]>>;
 
   /**
    * Add a new book to user's collection
    */
-  addBook(userId: string, book: Omit<Book, "id" | "addedAt" | "updatedAt">): Promise<ServiceResult<string>>;
+  addBook(
+    userId: string,
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ): Promise<ServiceResult<string>>;
 
   /**
    * Update book (general updates)
    */
-  updateBook(userId: string, bookId: string, updates: Partial<Book>): Promise<ServiceResult<void>>;
+  updateBook(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<ServiceResult<void>>;
 
   /**
    * Update book progress with business logic
    */
-  updateBookProgress(userId: string, bookId: string, currentPage: number): Promise<ServiceResult<void>>;
+  updateBookProgress(
+    userId: string,
+    bookId: string,
+    currentPage: number
+  ): Promise<ServiceResult<void>>;
 
   /**
    * Update book reading state with proper event logging
    */
-  updateBookState(userId: string, bookId: string, newState: Book["state"], currentState?: Book["state"]): Promise<ServiceResult<void>>;
+  updateBookState(
+    userId: string,
+    bookId: string,
+    newState: Book["state"],
+    currentState?: Book["state"]
+  ): Promise<ServiceResult<void>>;
 
   /**
    * Update book rating
    */
-  updateBookRating(userId: string, bookId: string, rating: number): Promise<ServiceResult<void>>;
+  updateBookRating(
+    userId: string,
+    bookId: string,
+    rating: number
+  ): Promise<ServiceResult<void>>;
 
   /**
    * Delete a book
@@ -145,12 +176,18 @@ export interface IBookService {
   /**
    * Subscribe to user's book collection
    */
-  subscribeToUserBooks(userId: string, callback: (books: Book[]) => void): () => void;
+  subscribeToUserBooks(
+    userId: string,
+    callback: (books: Book[]) => void
+  ): () => void;
 
   /**
    * Import multiple books
    */
-  importBooks(userId: string, books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>): Promise<ServiceResult<string[]>>;
+  importBooks(
+    userId: string,
+    books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>
+  ): Promise<ServiceResult<string[]>>;
 
   /**
    * Filter and sort books
@@ -231,7 +268,7 @@ export class ServiceError extends Error {
   constructor(
     public type: ServiceErrorType,
     message: string,
-    public details?: any,
+    public details?: unknown,
     public originalError?: Error
   ) {
     super(message);

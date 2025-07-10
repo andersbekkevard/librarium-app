@@ -19,7 +19,7 @@ export interface RepositoryResult<T> {
 
 /**
  * User repository interface
- * 
+ *
  * Handles all user profile data operations
  */
 export interface IUserRepository {
@@ -31,12 +31,18 @@ export interface IUserRepository {
   /**
    * Create a new user profile
    */
-  createProfile(profile: Omit<UserProfile, "id">): Promise<RepositoryResult<UserProfile>>;
+  createProfile(
+    userId: string,
+    profile: Omit<UserProfile, "id" | "createdAt" | "updatedAt">
+  ): Promise<RepositoryResult<UserProfile>>;
 
   /**
    * Update existing user profile
    */
-  updateProfile(userId: string, updates: Partial<UserProfile>): Promise<RepositoryResult<UserProfile>>;
+  updateProfile(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<RepositoryResult<UserProfile>>;
 
   /**
    * Delete user profile
@@ -46,19 +52,25 @@ export interface IUserRepository {
   /**
    * Subscribe to user profile changes
    */
-  subscribeToProfile(userId: string, callback: (profile: UserProfile | null) => void): Unsubscribe;
+  subscribeToProfile(
+    userId: string,
+    callback: (profile: UserProfile | null) => void
+  ): Unsubscribe;
 }
 
 /**
  * Book repository interface
- * 
+ *
  * Handles all book collection data operations
  */
 export interface IBookRepository {
   /**
    * Get a single book by ID
    */
-  getBook(userId: string, bookId: string): Promise<RepositoryResult<Book | null>>;
+  getBook(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<Book | null>>;
 
   /**
    * Get all books for a user
@@ -68,17 +80,27 @@ export interface IBookRepository {
   /**
    * Get books by reading state
    */
-  getBooksByState(userId: string, state: Book["state"]): Promise<RepositoryResult<Book[]>>;
+  getBooksByState(
+    userId: string,
+    state: Book["state"]
+  ): Promise<RepositoryResult<Book[]>>;
 
   /**
    * Add a new book to user's collection
    */
-  addBook(userId: string, book: Omit<Book, "id" | "addedAt" | "updatedAt">): Promise<RepositoryResult<string>>;
+  addBook(
+    userId: string,
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ): Promise<RepositoryResult<string>>;
 
   /**
    * Update an existing book
    */
-  updateBook(userId: string, bookId: string, updates: Partial<Book>): Promise<RepositoryResult<void>>;
+  updateBook(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<RepositoryResult<void>>;
 
   /**
    * Delete a book from user's collection
@@ -88,49 +110,73 @@ export interface IBookRepository {
   /**
    * Subscribe to user's book collection changes
    */
-  subscribeToUserBooks(userId: string, callback: (books: Book[]) => void): Unsubscribe;
+  subscribeToUserBooks(
+    userId: string,
+    callback: (books: Book[]) => void
+  ): Unsubscribe;
 
   /**
    * Batch operations for multiple books
    */
-  batchUpdateBooks(userId: string, updates: Array<{ bookId: string; data: Partial<Book> }>): Promise<RepositoryResult<void>>;
+  batchUpdateBooks(
+    userId: string,
+    updates: Array<{ bookId: string; data: Partial<Book> }>
+  ): Promise<RepositoryResult<void>>;
 
   /**
    * Import multiple books at once
    */
-  importBooks(userId: string, books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>): Promise<RepositoryResult<string[]>>;
+  importBooks(
+    userId: string,
+    books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>
+  ): Promise<RepositoryResult<string[]>>;
 }
 
 /**
  * Event repository interface
- * 
+ *
  * Handles all event logging operations
  */
 export interface IEventRepository {
   /**
    * Log a new event
    */
-  logEvent(userId: string, event: Omit<BookEvent, "id" | "userId" | "timestamp">): Promise<RepositoryResult<string>>;
+  logEvent(
+    userId: string,
+    event: Omit<BookEvent, "id" | "userId" | "timestamp">
+  ): Promise<RepositoryResult<string>>;
 
   /**
    * Get events for a specific book
    */
-  getBookEvents(userId: string, bookId: string): Promise<RepositoryResult<BookEvent[]>>;
+  getBookEvents(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<BookEvent[]>>;
 
   /**
    * Get recent events for a user
    */
-  getRecentEvents(userId: string, limit?: number): Promise<RepositoryResult<BookEvent[]>>;
+  getRecentEvents(
+    userId: string,
+    limit?: number
+  ): Promise<RepositoryResult<BookEvent[]>>;
 
   /**
    * Get events by type
    */
-  getEventsByType(userId: string, type: BookEvent["type"]): Promise<RepositoryResult<BookEvent[]>>;
+  getEventsByType(
+    userId: string,
+    type: BookEvent["type"]
+  ): Promise<RepositoryResult<BookEvent[]>>;
 
   /**
    * Delete events for a book (used when book is deleted)
    */
-  deleteBookEvents(userId: string, bookId: string): Promise<RepositoryResult<void>>;
+  deleteBookEvents(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<void>>;
 }
 
 /**

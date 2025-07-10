@@ -37,7 +37,9 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({
+  children,
+}): React.ReactNode => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,9 +51,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      
+
       const result = await authService.signInWithGoogle();
-      
+
       if (!result.success) {
         setError(result.error || "Sign-in failed");
       }
@@ -70,9 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      
+
       const result = await authService.signOut();
-      
+
       if (!result.success) {
         setError(result.error || "Sign-out failed");
       }

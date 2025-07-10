@@ -6,18 +6,24 @@
  */
 
 import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
+  FirestoreError,
   Timestamp,
   Unsubscribe,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { UserProfile } from "../models";
-import { IUserRepository, RepositoryResult, RepositoryError, RepositoryErrorType } from "./types";
+import {
+  IUserRepository,
+  RepositoryError,
+  RepositoryErrorType,
+  RepositoryResult,
+} from "./types";
 
 export class FirebaseUserRepository implements IUserRepository {
   /**
@@ -30,7 +36,7 @@ export class FirebaseUserRepository implements IUserRepository {
   /**
    * Convert Firebase errors to repository errors
    */
-  private handleFirebaseError(error: any): RepositoryError {
+  private handleFirebaseError(error: FirestoreError): RepositoryError {
     if (error.code === "permission-denied") {
       return new RepositoryError(
         RepositoryErrorType.PERMISSION_DENIED,
@@ -38,7 +44,7 @@ export class FirebaseUserRepository implements IUserRepository {
         error
       );
     }
-    
+
     if (error.code === "unavailable" || error.code === "deadline-exceeded") {
       return new RepositoryError(
         RepositoryErrorType.NETWORK_ERROR,
@@ -57,7 +63,9 @@ export class FirebaseUserRepository implements IUserRepository {
   /**
    * Get user profile by ID
    */
-  async getProfile(userId: string): Promise<RepositoryResult<UserProfile | null>> {
+  async getProfile(
+    userId: string
+  ): Promise<RepositoryResult<UserProfile | null>> {
     try {
       const profileRef = this.getUserProfileRef(userId);
       const profileDoc = await getDoc(profileRef);
@@ -73,7 +81,7 @@ export class FirebaseUserRepository implements IUserRepository {
 
       return { success: true, data: profile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -81,12 +89,16 @@ export class FirebaseUserRepository implements IUserRepository {
   /**
    * Create a new user profile
    */
-  async createProfile(profile: Omit<UserProfile, "id">): Promise<RepositoryResult<UserProfile>> {
+  async createProfile(
+    userId: string,
+    profile: Omit<UserProfile, "id" | "createdAt" | "updatedAt">
+  ): Promise<RepositoryResult<UserProfile>> {
     try {
-      const profileRef = this.getUserProfileRef(profile.id);
-      
+      const profileRef = this.getUserProfileRef(userId);
+
       const profileData = {
         ...profile,
+        id: userId,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
@@ -94,13 +106,12 @@ export class FirebaseUserRepository implements IUserRepository {
       await setDoc(profileRef, profileData);
 
       const createdProfile: UserProfile = {
-        id: profile.id,
         ...profileData,
       };
 
       return { success: true, data: createdProfile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -108,10 +119,13 @@ export class FirebaseUserRepository implements IUserRepository {
   /**
    * Update existing user profile
    */
-  async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<RepositoryResult<UserProfile>> {
+  async updateProfile(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<RepositoryResult<UserProfile>> {
     try {
       const profileRef = this.getUserProfileRef(userId);
-      
+
       // Get current profile first
       const currentProfile = await this.getProfile(userId);
       if (!currentProfile.success || !currentProfile.data) {
@@ -132,7 +146,7 @@ export class FirebaseUserRepository implements IUserRepository {
 
       return { success: true, data: updatedProfile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -146,7 +160,7 @@ export class FirebaseUserRepository implements IUserRepository {
       await deleteDoc(profileRef);
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = this.handleFirebaseError(error as FirestoreError);
       return { success: false, error: repoError.message };
     }
   }
@@ -154,9 +168,12 @@ export class FirebaseUserRepository implements IUserRepository {
   /**
    * Subscribe to user profile changes
    */
-  subscribeToProfile(userId: string, callback: (profile: UserProfile | null) => void): Unsubscribe {
+  subscribeToProfile(
+    userId: string,
+    callback: (profile: UserProfile | null) => void
+  ): Unsubscribe {
     const profileRef = this.getUserProfileRef(userId);
-    
+
     return onSnapshot(
       profileRef,
       (doc) => {

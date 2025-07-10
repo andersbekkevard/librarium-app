@@ -1,7 +1,14 @@
-import { useState, useCallback } from "react";
-import { googleBooksApi, GoogleBooksVolume } from "../google-books-api";
+import { useCallback, useState } from "react";
+import { GoogleBooksVolume, googleBooksApi } from "../google-books-api";
 
-export const useBookSearch = () => {
+export const useBookSearch = (): {
+  searchResults: GoogleBooksVolume[];
+  isSearching: boolean;
+  error: string | null;
+  search: (query: string, maxResults?: number) => Promise<void>;
+  clearResults: () => void;
+  clearError: () => void;
+} => {
   const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
