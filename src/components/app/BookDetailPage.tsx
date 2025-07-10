@@ -91,8 +91,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
       const newPage = parseInt(currentPageInput) || 0;
       await updateBookProgress(book.id, newPage);
       
-      // Refresh the page to show updated data
-      window.location.reload();
+      // Firebase real-time listener will automatically update the UI
     } catch {
       // Error is handled by the BooksProvider
     } finally {
@@ -133,7 +132,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     setIsUpdating(true);
     try {
       await updateBookState(book.id, "finished", book.state);
-      window.location.reload();
+      // Firebase real-time listener will automatically update the UI
     } catch {
       // Error is handled by the BooksProvider
     } finally {
@@ -272,8 +271,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                           await updateBookProgress(book.id, 1);
                           setCurrentPageInput("1");
 
-                          // Refresh the page to show updated data
-                          window.location.reload();
+                          // Firebase real-time listener will automatically update the UI
                         } catch {
                           // Error is handled by the BooksProvider
                         } finally {

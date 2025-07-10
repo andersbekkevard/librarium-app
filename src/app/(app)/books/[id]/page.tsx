@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import BookDetailPage from "@/components/app/BookDetailPage";
+import Sidebar from "@/components/app/Sidebar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import BookDetailPage from "@/components/app/BookDetailPage";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function BookDetailRoute() {
   const params = useParams();
@@ -16,7 +17,7 @@ export default function BookDetailRoute() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuthContext();
-  const { books } = useBooksContext();
+  const { books, loading: booksLoading, getBook } = useBooksContext();
 
   const bookId = params.id as string;
 
@@ -26,27 +27,62 @@ export default function BookDetailRoute() {
       return;
     }
 
-    // Find book from the books context instead of making a separate API call
+    // Wait for BooksProvider to finish loading before determining if book exists
+    if (booksLoading) {
+      setLoading(true);
+      return;
+    }
+
+    // Find book from the books context
     const foundBook = books.find((b) => b.id === bookId);
     if (foundBook) {
       setBook(foundBook);
+      setError(null);
+      setLoading(false);
     } else {
-      setError("Book not found");
+      // Fallback: try to fetch the book directly if not found in the books array
+      // This handles cases where the book exists but isn't in the cached books array yet
+      const fetchBook = async () => {
+        setLoading(true);
+        try {
+          const fetchedBook = await getBook(bookId);
+          if (fetchedBook) {
+            setBook(fetchedBook);
+            setError(null);
+          } else {
+            setError("Book not found");
+            setBook(null);
+          }
+        } catch {
+          setError("Failed to load book");
+          setBook(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchBook();
     }
-    setLoading(false);
-  }, [isAuthenticated, user, bookId, books]);
+  }, [isAuthenticated, user, bookId, books, booksLoading, getBook]);
 
   const handleBack = () => {
     router.back();
   };
 
+  const handleAddBookClick = () => {
+    router.push("/add-books");
+  };
+
   if (loading) {
     return (
-      <div className="ml-64 p-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading book details...</p>
+      <div className="min-h-screen bg-background">
+        <Sidebar onAddBookClick={handleAddBookClick} />
+        <div className="ml-64 p-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading book details...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -55,23 +91,27 @@ export default function BookDetailRoute() {
 
   if (error || !book) {
     return (
-      <div className="ml-64 p-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              {error || "Book not found"}
-            </h2>
-            <p className="text-muted-foreground mb-4">
-              The book you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
-            </p>
-            <Button
-              onClick={handleBack}
-              variant="outline"
-              className="border-brand-primary text-brand-primary hover:bg-brand-primary/10"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
+      <div className="min-h-screen bg-background">
+        <Sidebar onAddBookClick={handleAddBookClick} />
+        <div className="ml-64 p-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-foreground mb-2">
+                {error || "Book not found"}
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                The book you&apos;re looking for doesn&apos;t exist or you
+                don&apos;t have access to it.
+              </p>
+              <Button
+                onClick={handleBack}
+                variant="outline"
+                className="border-brand-primary text-brand-primary hover:bg-brand-primary/10"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Go Back
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -79,8 +119,11 @@ export default function BookDetailRoute() {
   }
 
   return (
-    <div className="ml-64">
-      <BookDetailPage book={book} onBack={handleBack} />
+    <div className="min-h-screen bg-background">
+      <Sidebar onAddBookClick={handleAddBookClick} />
+      <div className="ml-64">
+        <BookDetailPage book={book} onBack={handleBack} />
+      </div>
     </div>
   );
 }

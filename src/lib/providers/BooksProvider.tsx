@@ -39,6 +39,8 @@ interface BooksContextType {
   deleteBook: (bookId: string) => Promise<void>;
   /** Function to manually refresh books (for error recovery) */
   refreshBooks: () => Promise<void>;
+  /** Function to get a single book by ID */
+  getBook: (bookId: string) => Promise<Book | null>;
   /** Function to filter and sort books */
   filterAndSortBooks: (searchQuery: string, filterStatus: string, filterOwnership: string, sortBy: string, sortDirection: "asc" | "desc") => Book[];
   /** Function to calculate book progress */
@@ -250,6 +252,28 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
+   * Get a single book by ID (fallback for when book not found in books array)
+   */
+  const getBook = async (bookId: string): Promise<Book | null> => {
+    if (!user) return null;
+
+    try {
+      setError(null);
+      const result = await bookService.getBook(user.uid, bookId);
+      
+      if (result.success) {
+        return result.data;
+      } else {
+        setError(result.error || "Failed to get book");
+        return null;
+      }
+    } catch (error) {
+      setError("An unexpected error occurred while getting book");
+      return null;
+    }
+  };
+
+  /**
    * Filter and sort books using service
    */
   const filterAndSortBooks = (
@@ -315,6 +339,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     updateBookRating,
     deleteBook,
     refreshBooks,
+    getBook,
     filterAndSortBooks,
     calculateBookProgress,
     totalBooks,
