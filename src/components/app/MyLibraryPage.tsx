@@ -7,7 +7,6 @@ import {
   Loader2,
   SortAsc,
   SortDesc,
-  Star,
   User,
   X,
 } from "lucide-react";
@@ -18,6 +17,8 @@ import BookCard from "@/components/app/BookCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { StarRating } from "@/components/ui/star-rating";
+import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
@@ -37,46 +38,6 @@ export const BookListItem: React.FC<BookListItemProps> = ({
   book,
   onBookClick,
 }) => {
-  /**
-   * Returns appropriate badge component for book's reading status
-   *
-   * Maps reading states to styled Badge components with appropriate
-   * variants and text. Used by list view for status display.
-   *
-   * @returns JSX.Element - Badge component with status text and styling
-   */
-  const getStatusBadge = () => {
-    switch (book.state) {
-      case "not_started":
-        return <Badge variant="secondary">Not Started</Badge>;
-      case "in_progress":
-        return <Badge variant="default">Reading</Badge>;
-      case "finished":
-        return <Badge variant="outline">Finished</Badge>;
-    }
-  };
-
-  /**
-   * Renders star rating display
-   *
-   * Creates an array of 5 star icons, filling the appropriate number
-   * based on the rating value. Used by list view to show book ratings.
-   *
-   * @param rating - Rating value (1-5)
-   * @returns JSX.Element[] - Array of Star components
-   */
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-3 w-3 ${
-          i < rating
-            ? "fill-status-warning text-status-warning"
-            : "fill-muted text-muted"
-        }`}
-      />
-    ));
-  };
 
   const handleCardClick = () => {
     if (onBookClick) {
@@ -143,19 +104,19 @@ export const BookListItem: React.FC<BookListItemProps> = ({
             </div>
 
             <div className="flex items-center justify-center">
-              {getStatusBadge()}
+              <ReadingStateBadge state={book.state} />
             </div>
 
             <div className="flex items-center justify-between">
               {/* Rating or Progress */}
               <div className="flex items-center gap-1">
                 {book.state === "finished" && book.rating ? (
-                  <div className="flex items-center gap-1">
-                    {renderStars(book.rating)}
-                    <span className="text-xs text-muted-foreground ml-1">
-                      ({book.rating}/5)
-                    </span>
-                  </div>
+                  <StarRating 
+                    rating={book.rating} 
+                    size="sm" 
+                    showText={false}
+                    className="gap-0.5"
+                  />
                 ) : book.state === "in_progress" ? (
                   <div className="text-xs text-muted-foreground">
                     {bookService.calculateProgress(book)}% complete

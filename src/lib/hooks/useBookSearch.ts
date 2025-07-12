@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { GoogleBooksVolume, googleBooksApi } from "../google-books-api";
+import { API_CONFIG } from "../constants";
 
 export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];
@@ -26,7 +27,7 @@ export const useBookSearch = (): {
    * const { search } = useBookSearch();
    * await search("javascript programming");
    */
-  const search = useCallback(async (query: string, maxResults: number = 20) => {
+  const search = useCallback(async (query: string, maxResults: number = API_CONFIG.SEARCH.DEFAULT_LIMIT) => {
     if (!query.trim()) {
       setSearchResults([]);
       return;

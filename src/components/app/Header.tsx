@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ToggleTheme } from "@/components/toggle-theme";
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { UI_CONFIG } from "@/lib/constants";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -14,7 +15,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onSearch,
-  notificationCount = 3,
+  notificationCount = UI_CONFIG.DEFAULT_NOTIFICATION_COUNT,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { loading } = useAuthContext();
@@ -25,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-background border-b border-border px-6 py-4 z-50">
+    <header className={`fixed top-0 left-0 right-0 bg-background border-b border-border px-6 py-4 z-${UI_CONFIG.Z_INDEX.MODAL}`}>
       <div className="flex items-center justify-between h-10">
         {/* Logo Section */}
         <div className="flex items-center space-x-2 h-full">

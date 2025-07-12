@@ -50,6 +50,20 @@ export const STATUS_CLASSES = {
 } as const;
 
 /**
+ * Star rating color mappings
+ */
+export const STAR_RATING_COLORS = {
+  filled: {
+    bg: "fill-status-warning",
+    text: "text-status-warning",
+  },
+  empty: {
+    bg: "fill-muted",
+    text: "text-muted-foreground",
+  },
+} as const;
+
+/**
  * Reading state color mappings
  */
 export const READING_STATE_COLORS = {
@@ -78,6 +92,7 @@ export const getCSSVariable = (variableName: string): string => {
 export default {
   BRAND_CLASSES,
   STATUS_CLASSES,
+  STAR_RATING_COLORS,
   READING_STATE_COLORS,
   getCSSVariable,
 };

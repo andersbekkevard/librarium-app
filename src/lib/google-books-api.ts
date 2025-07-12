@@ -3,6 +3,8 @@
  * Handles all interactions with the Google Books API v1
  */
 
+import { API_CONFIG } from "./constants";
+
 // Google Books API response interfaces
 export interface GoogleBooksVolumeInfo {
   title: string;
@@ -213,7 +215,10 @@ class GoogleBooksApiService {
 
     const params: Record<string, string> = {
       q: options.query.trim(),
-      maxResults: Math.min(options.maxResults || 10, 40).toString(),
+      maxResults: Math.min(
+        options.maxResults || API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS,
+        API_CONFIG.GOOGLE_BOOKS.MAX_SEARCH_RESULTS
+      ).toString(),
     };
 
     if (options.startIndex) params.startIndex = options.startIndex.toString();
@@ -237,7 +242,7 @@ class GoogleBooksApiService {
    */
   async search(
     query: string,
-    maxResults: number = 10
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({ query, maxResults });
   }
@@ -264,7 +269,7 @@ class GoogleBooksApiService {
    */
   async searchByISBN(
     isbn: string,
-    maxResults: number = 5
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.AUTHOR_SEARCH_RESULTS
   ): Promise<GoogleBooksVolume[]> {
     const cleanIsbn = isbn.replace(/[-\s]/g, "");
     return this.searchBooks({
@@ -281,7 +286,7 @@ class GoogleBooksApiService {
    */
   async searchByTitle(
     title: string,
-    maxResults: number = 10
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query: `intitle:"${title}"`,
@@ -297,7 +302,7 @@ class GoogleBooksApiService {
    */
   async searchByAuthor(
     author: string,
-    maxResults: number = 10
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query: `inauthor:"${author}"`,
@@ -332,7 +337,7 @@ class GoogleBooksApiService {
 
     return this.searchBooks({
       query,
-      maxResults: params.maxResults || 10,
+      maxResults: params.maxResults || API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS,
       orderBy: params.orderBy,
       langRestrict: params.language,
     });
@@ -346,7 +351,7 @@ class GoogleBooksApiService {
    */
   async searchFreeEbooks(
     query: string,
-    maxResults: number = 10
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<GoogleBooksVolume[]> {
     return this.searchBooks({
       query,

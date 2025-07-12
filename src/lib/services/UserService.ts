@@ -18,6 +18,7 @@ import {
   ServiceResult,
   UserStats,
 } from "./types";
+import { EVENT_CONFIG } from "../constants";
 
 export class UserService implements IUserService {
   constructor(

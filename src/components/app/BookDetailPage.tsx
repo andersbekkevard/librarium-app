@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
@@ -20,7 +21,6 @@ import {
   BookOpen,
   Calendar,
   CheckCircle,
-  Clock,
   Edit,
   Hash,
   Play,
@@ -56,39 +56,6 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const [hoverRating, setHoverRating] = useState(0);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
 
-  /**
-   * Maps reading state to badge configuration
-   *
-   * Returns badge properties (label, variant, icon) for each reading state.
-   * Used throughout the component for consistent state display.
-   *
-   * @param state - Book's current reading state
-   * @returns object - Badge configuration with label, variant, and icon
-   */
-  const getReadingStateBadge = (state: Book["state"]) => {
-    switch (state) {
-      case "not_started":
-        return {
-          label: "Not Started",
-          variant: "secondary" as const,
-          icon: Clock,
-        };
-      case "in_progress":
-        return {
-          label: "Currently Reading",
-          variant: "default" as const,
-          icon: Play,
-        };
-      case "finished":
-        return {
-          label: "Finished",
-          variant: "outline" as const,
-          icon: CheckCircle,
-        };
-      default:
-        return { label: "Unknown", variant: "secondary" as const, icon: Clock };
-    }
-  };
 
   /**
    * Handles progress update workflow
@@ -154,8 +121,6 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     }
   };
 
-  const badgeInfo = getReadingStateBadge(book.state);
-  const BadgeIcon = badgeInfo.icon;
   const progress = calculateBookProgress(book);
 
   return (
@@ -210,13 +175,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
                 {/* Reading status badge */}
                 <div className="flex items-center gap-2 mb-4">
-                  <Badge
-                    variant={badgeInfo.variant}
-                    className="flex items-center gap-1"
-                  >
-                    <BadgeIcon className="h-3 w-3" />
-                    {badgeInfo.label}
-                  </Badge>
+                  <ReadingStateBadge state={book.state} showIcon={true} />
                   {book.isOwned && (
                     <Badge variant="outline" className="text-xs">
                       Owned

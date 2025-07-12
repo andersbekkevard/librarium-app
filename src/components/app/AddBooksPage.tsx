@@ -19,6 +19,8 @@ import {
 import * as React from "react";
 import { useState } from "react";
 
+import { UI_CONFIG, TIMING_CONFIG } from "@/lib/constants";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -414,7 +416,7 @@ export const AddBooksPage = () => {
           title: book.title,
           author: book.author,
         },
-        ...prev.slice(0, 4),
+        ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
       ]);
     } catch {
       // Error is handled by the BooksProvider
@@ -455,7 +457,7 @@ export const AddBooksPage = () => {
           title: book.title,
           author: book.author,
         },
-        ...prev.slice(0, 4),
+        ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
       ]);
     } catch {
       // Error is handled by the BooksProvider
@@ -471,7 +473,7 @@ export const AddBooksPage = () => {
         search(searchQuery);
       }
       // Note: clearResults is handled by the hook when search is called with empty query
-    }, 500); // Increased debounce time for API calls
+    }, TIMING_CONFIG.SEARCH_DEBOUNCE_MS); // Debounce time for API calls
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, search]);

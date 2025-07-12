@@ -2,6 +2,7 @@ import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
+import { UI_CONFIG } from "@/lib/constants";
 
 interface RecentlyReadSectionProps {
   books: Book[];
@@ -18,7 +19,7 @@ export const RecentlyReadSection: React.FC<RecentlyReadSectionProps> = ({
   onUpdateProgress,
   onBookClick,
   onViewAll,
-  maxBooks = 6,
+  maxBooks = UI_CONFIG.DASHBOARD.RECENTLY_READ_LIMIT,
 }) => {
   const finishedBooks = books
     .filter((book) => book.state === "finished")

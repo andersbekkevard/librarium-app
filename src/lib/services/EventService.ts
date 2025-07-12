@@ -9,6 +9,7 @@ import { BookEvent, Book } from "../models";
 import { ServiceResult } from "./types";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
+import { EVENT_CONFIG } from "../constants";
 
 /**
  * Activity item for dashboard display
@@ -74,7 +75,7 @@ export class EventService implements IEventService {
    */
   async getRecentEvents(
     userId: string,
-    limit: number = 10
+    limit: number = EVENT_CONFIG.RECENT_EVENTS_LIMIT
   ): Promise<ServiceResult<BookEvent[]>> {
     try {
       if (!userId) {
@@ -110,7 +111,7 @@ export class EventService implements IEventService {
    */
   async getRecentActivityItems(
     userId: string,
-    limit: number = 5
+    limit: number = EVENT_CONFIG.USER_ACTIVITY_LIMIT
   ): Promise<ServiceResult<ActivityItem[]>> {
     try {
       if (!userId) {

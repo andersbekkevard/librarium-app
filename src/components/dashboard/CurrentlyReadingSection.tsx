@@ -2,6 +2,7 @@ import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BookCard from "@/components/app/BookCard";
 import { Book } from "@/lib/models";
+import { UI_CONFIG } from "@/lib/constants";
 
 interface CurrentlyReadingSectionProps {
   books: Book[];
@@ -18,7 +19,7 @@ export const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = (
   onUpdateProgress,
   onBookClick,
   onViewAll,
-  maxBooks = 4,
+  maxBooks = UI_CONFIG.DASHBOARD.CURRENTLY_READING_LIMIT,
 }) => {
   const currentlyReadingBooks = books
     .filter((book) => book.state === "in_progress")
