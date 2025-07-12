@@ -36,24 +36,37 @@ jest.mock("next/navigation", () => ({
 
 // Mock Firebase
 jest.mock("firebase/app", () => ({
-  initializeApp: jest.fn(),
+  initializeApp: jest.fn(() => ({})),
+  getApps: jest.fn(() => [({})]),
+  getApp: jest.fn(() => ({})),
 }));
 
 jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(() => ({
     currentUser: null,
-    onAuthStateChanged: jest.fn(),
+    onAuthStateChanged: jest.fn((auth, callback) => {
+      // Simulate initial state (no user)
+      if (callback) callback(null);
+      // Return an unsubscribe function
+      return jest.fn();
+    }),
   })),
   GoogleAuthProvider: jest.fn(() => ({
     addScope: jest.fn(),
   })),
   signInWithPopup: jest.fn(),
   signOut: jest.fn(),
+  onAuthStateChanged: jest.fn((auth, callback) => {
+    if (callback) callback(null);
+    return jest.fn();
+  }),
 }));
 
 jest.mock("firebase/firestore", () => ({
-  getFirestore: jest.fn(),
-  collection: jest.fn(),
+  getFirestore: jest.fn(() => ({
+    collection: jest.fn(() => ({})),
+  })),
+  collection: jest.fn(() => ({})),
   doc: jest.fn(),
   addDoc: jest.fn(),
   updateDoc: jest.fn(),
@@ -63,12 +76,24 @@ jest.mock("firebase/firestore", () => ({
   query: jest.fn(),
   where: jest.fn(),
   orderBy: jest.fn(),
+  limit: jest.fn(),
   onSnapshot: jest.fn(),
   Timestamp: {
-    now: jest.fn(() => ({ seconds: 1234567890, nanoseconds: 0 })),
+    now: jest.fn(() => ({ seconds: 1234567890, nanoseconds: 0, toDate: () => new Date(1234567890000) })),
     fromDate: jest.fn(),
   },
-  writeBatch: jest.fn(),
+  writeBatch: jest.fn(() => ({
+    set: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    commit: jest.fn().mockResolvedValue(undefined),
+  })),
+}));
+
+// Mock Firebase Analytics
+jest.mock("firebase/analytics", () => ({
+  getAnalytics: jest.fn(() => ({})),
+  isSupported: jest.fn().mockResolvedValue(false),
 }));
 
 // Mock Firebase Storage
