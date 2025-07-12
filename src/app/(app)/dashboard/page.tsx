@@ -1,7 +1,6 @@
 "use client";
 import Sidebar from "@/components/app/Sidebar";
 import DashboardContent from "@/components/dashboard/DashboardContent";
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
@@ -46,7 +45,7 @@ export default function Dashboard() {
     if (user && books) {
       refreshUserStats();
     }
-  }, [user, books, refreshUserStats]);
+  }, [user, books]);
 
   // Route protection - redirect to landing if not authenticated
   useEffect(() => {
@@ -93,7 +92,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className={`min-h-screen ${BRAND_COLORS.primary.bg}`}>
+    <div className="min-h-screen bg-background">
       {/* Sidebar - Fixed Position under header */}
       <Sidebar onAddBookClick={handleAddBookClick} />
 

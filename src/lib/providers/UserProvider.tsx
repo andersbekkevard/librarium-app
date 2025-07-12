@@ -8,7 +8,13 @@
  * Now uses standardized error handling with ProviderResult pattern.
  */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   ProviderResult,
   StandardError,
@@ -65,72 +71,77 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   /**
    * Clears the current error state
    */
-  const clearError = (): void => {
+  const clearError = useCallback((): void => {
     setError(null);
-  };
+  }, []);
 
   /**
    * Update user profile with standardized error handling
    */
-  const updateUserProfile = async (
-    updates: Partial<UserProfile>
-  ): Promise<ProviderResult<UserProfile>> => {
-    if (!user) {
-      const standardError = createAuthError("User not authenticated");
-      setError(standardError);
-      return createProviderError(standardError);
-    }
+  const updateUserProfile = useCallback(
+    async (
+      updates: Partial<UserProfile>
+    ): Promise<ProviderResult<UserProfile>> => {
+      if (!user) {
+        const standardError = createAuthError("User not authenticated");
+        setError(standardError);
+        return createProviderError(standardError);
+      }
 
-    try {
-      setError(null);
+      try {
+        setError(null);
 
-      // Log user action
-      LoggerUtils.logUserAction("user_profile_update_attempt", {
-        userId: user.uid,
-        metadata: {
-          updates: Object.keys(updates),
-        },
-      });
-
-      const result = await userService.updateProfile(user.uid, updates);
-
-      if (result.success && result.data) {
-        setUserProfile(result.data);
-
-        // Log successful update
-        LoggerUtils.logUserAction("user_profile_update_success", {
+        // Log user action
+        LoggerUtils.logUserAction("user_profile_update_attempt", {
           userId: user.uid,
           metadata: {
             updates: Object.keys(updates),
           },
         });
 
-        return createProviderSuccess(result.data);
-      } else {
-        // Handle service error
+        const result = await userService.updateProfile(user.uid, updates);
+
+        if (result.success && result.data) {
+          setUserProfile(result.data);
+
+          // Log successful update
+          LoggerUtils.logUserAction("user_profile_update_success", {
+            userId: user.uid,
+            metadata: {
+              updates: Object.keys(updates),
+            },
+          });
+
+          return createProviderSuccess(result.data);
+        } else {
+          // Handle service error
+          const standardError = createSystemError(
+            result.error?.message || "Failed to update profile"
+          );
+
+          setError(standardError);
+          return createProviderError(standardError);
+        }
+      } catch (error) {
+        // Handle unexpected errors
         const standardError = createSystemError(
-          result.error?.message || "Failed to update profile"
+          "An unexpected error occurred while updating profile",
+          error as Error
         );
 
         setError(standardError);
         return createProviderError(standardError);
       }
-    } catch (error) {
-      // Handle unexpected errors
-      const standardError = createSystemError(
-        "An unexpected error occurred while updating profile",
-        error as Error
-      );
-
-      setError(standardError);
-      return createProviderError(standardError);
-    }
-  };
+    },
+    [user]
+  );
 
   /**
    * Refresh user profile from server with standardized error handling
    */
-  const refreshUserProfile = async (): Promise<ProviderResult<void>> => {
+  const refreshUserProfile = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
       const standardError = createAuthError("User not authenticated");
       setError(standardError);
@@ -178,12 +189,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   /**
    * Refresh user statistics with standardized error handling
    */
-  const refreshUserStats = async (): Promise<ProviderResult<void>> => {
+  const refreshUserStats = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
       const standardError = createAuthError("User not authenticated");
       setError(standardError);
@@ -228,12 +241,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setError(standardError);
       return createProviderError(standardError);
     }
-  };
+  }, [user]);
 
   /**
    * Update user statistics with standardized error handling
    */
-  const updateUserStats = async (): Promise<ProviderResult<void>> => {
+  const updateUserStats = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
       const standardError = createAuthError("User not authenticated");
       setError(standardError);
@@ -279,7 +294,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setError(standardError);
       return createProviderError(standardError);
     }
-  };
+  }, [user, refreshUserStats]);
 
   // Initialize user profile when user changes
   useEffect(() => {
