@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { StarRating } from "@/components/ui/star-rating";
+import { calculateBookProgress } from "@/lib/books/book-utils";
 import { Book } from "@/lib/models/models";
-import { bookService } from "@/lib/services/BookService";
 
 interface BookListItemProps {
   book: Book;
@@ -94,7 +94,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   />
                 ) : book.state === "in_progress" ? (
                   <div className="text-xs text-muted-foreground">
-                    {bookService.calculateProgress(book)}% complete
+                    {calculateBookProgress(book)}% complete
                   </div>
                 ) : (
                   <div className="text-xs text-muted-foreground">

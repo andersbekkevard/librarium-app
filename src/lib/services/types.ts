@@ -5,9 +5,9 @@
  * a clean interface for the presentation layer.
  */
 
+import { StandardError } from "@/lib/errors/error-handling";
+import { Book, UserProfile } from "@/lib/models/models";
 import { User } from "firebase/auth";
-import { StandardError } from "../error-handling";
-import { Book, UserProfile } from "../models";
 
 /**
  * Common service result type for operations that can fail
@@ -210,11 +210,6 @@ export interface IBookService {
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[];
-
-  /**
-   * Calculate reading progress percentage
-   */
-  calculateProgress(book: Book): number;
 }
 
 /**

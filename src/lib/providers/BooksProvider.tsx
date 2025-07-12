@@ -8,7 +8,7 @@
  * Now uses standardized error handling with ProviderResult pattern.
  */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { calculateBookProgress } from "@/lib/books/book-utils";
 import {
   ProviderResult,
   StandardError,
@@ -16,9 +16,10 @@ import {
   createProviderError,
   createProviderSuccess,
   createSystemError,
-} from "../error-handling";
-import { LoggerUtils } from "../error-logging";
-import { Book } from "../models";
+} from "@/lib/errors/error-handling";
+import { LoggerUtils } from "@/lib/errors/error-logging";
+import { Book } from "@/lib/models/models";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { bookService } from "../services/BookService";
 import { useAuthContext } from "./AuthProvider";
 import { useUserContext } from "./UserProvider";
@@ -655,9 +656,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   /**
    * Calculate book progress
    */
-  const calculateBookProgress = (book: Book): number => {
+  const calculateBookProgressWrapper = (book: Book): number => {
     try {
-      return bookService.calculateProgress(book);
+      return calculateBookProgress(book);
     } catch (error) {
       const standardError = createSystemError(
         "An unexpected error occurred while calculating book progress",
@@ -724,7 +725,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     refreshBooks,
     getBook,
     filterAndSortBooks,
-    calculateBookProgress,
+    calculateBookProgress: calculateBookProgressWrapper,
     clearError,
     totalBooks,
     booksInProgress,

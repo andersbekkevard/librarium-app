@@ -5,6 +5,7 @@
  * Coordinates between book, event, and user repositories.
  */
 
+import { calculateBookProgress } from "@/lib/books/book-utils";
 import { Timestamp } from "firebase/firestore";
 import {
   ErrorBuilder,
@@ -607,8 +608,8 @@ export class BookService implements IBookService {
           bValue = b.rating || 0;
           break;
         case "progress":
-          aValue = this.calculateProgress(a);
-          bValue = this.calculateProgress(b);
+          aValue = calculateBookProgress(a);
+          bValue = calculateBookProgress(b);
           break;
         default:
           aValue = a.addedAt.seconds;
@@ -671,20 +672,6 @@ export class BookService implements IBookService {
       );
       return { success: false, error: standardError };
     }
-  }
-
-  /**
-   * Calculate reading progress percentage
-   */
-  calculateProgress(book: Book): number {
-    if (!book.progress?.totalPages || book.progress.totalPages === 0) {
-      return 0;
-    }
-
-    const currentPage = book.progress.currentPage || 0;
-    const totalPages = book.progress.totalPages;
-
-    return Math.round((currentPage / totalPages) * 100);
   }
 }
 
