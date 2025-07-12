@@ -17,7 +17,7 @@
 - [ ] Tie state change to page number?
 - [ ] Clean the codebase, extract components where possible
 - [ ] Force rating on "finish"
-- [ ] Start logging user events in database. Link with Recent activity in dashboard
+- [ ] Create a useEventContext hook to use the correct design pattern
 - [ ] Refactor Google Books interaction to a service/provider structure (?)
 - [ ] Refactor to use colors.ts
 ## Color System
