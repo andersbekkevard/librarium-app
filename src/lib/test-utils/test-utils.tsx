@@ -95,11 +95,9 @@ const TestProviders: React.FC<TestProvidersProps> = ({
   }, [testConfig.preloadedState]);
 
   return (
-    <AuthProvider initialUser={testConfig.user}>
-      <UserProvider initialProfile={testConfig.userProfile}>
-        <BooksProvider initialBooks={testConfig.books}>
-          {children}
-        </BooksProvider>
+    <AuthProvider>
+      <UserProvider>
+        <BooksProvider>{children}</BooksProvider>
       </UserProvider>
     </AuthProvider>
   );
@@ -147,7 +145,7 @@ export function renderWithProviders(
   return {
     ...renderResult,
     config: testConfig,
-    rerender: enhancedRerender,
+    rerender: enhancedRerender as any,
   };
 }
 

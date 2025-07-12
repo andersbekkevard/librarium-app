@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
+import { ErrorCategory } from "../../error-handling";
+import { GoogleBooksVolume, googleBooksApi } from "../../google-books-api";
 import { useBookSearch } from "../useBookSearch";
-import { googleBooksApi, GoogleBooksVolume } from "../../google-books-api";
 
 // Mock the Google Books API
 jest.mock("../../google-books-api", () => ({
@@ -53,8 +54,10 @@ describe("useBookSearch", () => {
 
     expect(result.current.searchResults).toEqual([]);
     expect(result.current.isSearching).toBe(false);
-    expect(result.current.error).toBe(
+    expect(result.current.error).toBeDefined();
+    expect(result.current.error?.userMessage).toBe(
       "Failed to search books. Please check your internet connection and try again."
     );
+    expect(result.current.error?.category).toBe(ErrorCategory.NETWORK);
   });
 });

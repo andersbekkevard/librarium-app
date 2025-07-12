@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  AlertCircle,
-  Camera,
-  Check,
-  FileText,
-  Loader2,
-  Search,
-} from "lucide-react";
+import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +22,9 @@ import { useBookSearch } from "@/lib/hooks/useBookSearch";
 // Extracted components
 import { ManualEntryForm } from "./books/ManualEntryForm";
 import { SearchResults } from "./books/SearchResults";
+
+// Error handling components
+import { ErrorAlert } from "@/components/ui/error-display";
 
 export const AddBooksPage = () => {
   const { user } = useAuthContext();
@@ -170,16 +165,7 @@ export const AddBooksPage = () => {
       </div>
 
       {/* Error Message */}
-      {error && (
-        <Card className="border-destructive">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-4 w-4" />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {error && <ErrorAlert error={error} onDismiss={clearError} />}
 
       {/* Recently Added */}
       {recentlyAdded.length > 0 && (
@@ -201,31 +187,30 @@ export const AddBooksPage = () => {
       )}
 
       {/* Main Content */}
-      <Tabs defaultValue="search" className="space-y-6">
+      <Tabs defaultValue="search" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="search" className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            Search Books
+          <TabsTrigger value="search">
+            <Search className="h-4 w-4 mr-2" />
+            Search Online
           </TabsTrigger>
-          <TabsTrigger value="manual" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <TabsTrigger value="manual">
+            <FileText className="h-4 w-4 mr-2" />
             Manual Entry
           </TabsTrigger>
-          <TabsTrigger value="scan" className="flex items-center gap-2">
-            <Camera className="h-4 w-4" />
-            Scan ISBN
+          <TabsTrigger value="scan">
+            <Camera className="h-4 w-4 mr-2" />
+            Scan Barcode
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="search" className="space-y-6">
-          {/* Search Input */}
+        <TabsContent value="search" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Search Google Books</CardTitle>
+              <CardTitle>Search Books</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by title, author, or ISBN..."
                   value={searchQuery}
@@ -234,97 +219,53 @@ export const AddBooksPage = () => {
                 />
               </div>
 
-              {/* Advanced Search Options */}
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSearchQuery((prev) =>
-                      prev.includes("intitle:") ? prev : `intitle:"${prev}"`
-                    )
-                  }
-                  disabled={isSearching}
-                >
-                  Search Titles Only
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSearchQuery((prev) =>
-                      prev.includes("inauthor:") ? prev : `inauthor:"${prev}"`
-                    )
-                  }
-                  disabled={isSearching}
-                >
-                  Search Authors Only
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSearchQuery((prev) =>
-                      prev.includes("isbn:")
-                        ? prev
-                        : `isbn:${prev.replace(/[-\s]/g, "")}`
-                    )
-                  }
-                  disabled={isSearching}
-                >
-                  Search by ISBN
-                </Button>
-              </div>
-
               {isSearching && (
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Searching Google Books...
-                </p>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">
+                    Searching...
+                  </span>
+                </div>
               )}
+
+              <SearchResults
+                books={searchResults}
+                addedBooks={addedBooks}
+                onAddBook={handleAddGoogleBook}
+                isAdding={isAdding}
+              />
             </CardContent>
           </Card>
-
-          {/* Search Results */}
-          <SearchResults
-            books={searchResults}
-            onAddBook={handleAddGoogleBook}
-            addedBooks={addedBooks}
-            isAdding={isAdding}
-          />
         </TabsContent>
 
-        <TabsContent value="manual">
-          <ManualEntryForm
-            onAddBook={handleAddManualBook}
-            isAdding={isAdding}
-          />
-        </TabsContent>
-
-        <TabsContent value="scan">
+        <TabsContent value="manual" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Scan ISBN Barcode
-              </CardTitle>
+              <CardTitle>Add Book Manually</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 space-y-4">
-                <Camera className="h-16 w-16 mx-auto text-muted-foreground" />
-                <div>
-                  <h3 className="text-lg font-medium text-foreground">
-                    ISBN Scanner Coming Soon
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Use your device&apos;s camera to scan book barcodes and
-                    automatically add them to your library.
-                  </p>
-                </div>
-                <Button disabled>
-                  <Camera className="h-4 w-4 mr-2" />
-                  Enable Camera
-                </Button>
+              <ManualEntryForm
+                onAddBook={handleAddManualBook}
+                isAdding={isAdding}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="scan" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Scan Barcode</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-4">
+                  Barcode scanning feature coming soon!
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Use manual entry or search for now.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  FileText,
-  Loader2,
-  Plus,
-  X,
-} from "lucide-react";
+import { FileText, Loader2, Plus, X } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -18,7 +13,7 @@ import { convertManualEntryToBook } from "@/lib/book-utils";
 import { Book } from "@/lib/models";
 
 interface ManualEntryFormProps {
-  onAddBook: (book: Book) => void;
+  onAddBook: (book: Book) => Promise<void>;
   isAdding: boolean;
 }
 

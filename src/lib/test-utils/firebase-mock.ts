@@ -1,5 +1,7 @@
 import { jest } from "@jest/globals";
+import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
+import { Book, UserProfile } from "../models";
 
 // Mock Firebase Timestamp
 export const mockTimestamp = {
@@ -31,6 +33,8 @@ export const mockFirestore = {
   Timestamp: {
     now: jest.fn(() => mockTimestamp),
   },
+  clearData: jest.fn(),
+  seedData: jest.fn(),
 };
 
 // Mock Firebase Auth functions
@@ -72,7 +76,7 @@ jest.mock("firebase/storage", () => mockStorage);
 // Mock the firebase.ts config file
 jest.mock("../firebase", () => ({
   db: mockFirestore, // Use the mocked firestore
-  auth: mockAuth,     // Use the mocked auth
+  auth: mockAuth, // Use the mocked auth
   storage: mockStorage, // Use the mocked storage
 }));
 
@@ -92,4 +96,125 @@ export const resetFirebaseMocks = () => {
   });
   mockFirestore.writeBatch.mockClear(); // Clear the mock implementation as well
   mockFirestore.Timestamp.now.mockClear();
+};
+
+// Mock data creators
+export const createMockUser = (overrides?: Partial<User>): User =>
+  ({
+    uid: "test-user-id",
+    email: "test@example.com",
+    displayName: "Test User",
+    photoURL: "https://example.com/photo.jpg",
+    emailVerified: true,
+    isAnonymous: false,
+    metadata: {
+      creationTime: "2023-01-01T00:00:00.000Z",
+      lastSignInTime: "2023-01-01T00:00:00.000Z",
+    },
+    providerData: [],
+    refreshToken: "mock-refresh-token",
+    tenantId: null,
+    delete: jest.fn(),
+    getIdToken: jest.fn(),
+    getIdTokenResult: jest.fn(),
+    reload: jest.fn(),
+    toJSON: jest.fn(),
+    ...overrides,
+  } as User);
+
+export const createMockUserProfile = (
+  overrides?: Partial<UserProfile>
+): UserProfile => ({
+  id: "test-user-id",
+  displayName: "Test User",
+  email: "test@example.com",
+  photoURL: "https://example.com/photo.jpg",
+  createdAt: mockTimestamp,
+  updatedAt: mockTimestamp,
+  emailVerified: true,
+  lastSignInTime: "2023-01-01T00:00:00.000Z",
+  totalBooksRead: 0,
+  currentlyReading: 0,
+  booksInLibrary: 0,
+  ...overrides,
+});
+
+export const createMockBook = (overrides?: Partial<Book>): Book => ({
+  id: "test-book-id",
+  title: "Test Book",
+  author: "Test Author",
+  state: "not_started",
+  isOwned: true,
+  progress: {
+    currentPage: 0,
+    totalPages: 100,
+  },
+  addedAt: mockTimestamp,
+  updatedAt: mockTimestamp,
+  ...overrides,
+});
+
+// Test data presets
+export const testDataPresets = {
+  empty: {
+    user: createMockUserProfile(),
+    books: [],
+    events: [],
+  },
+  small: {
+    user: createMockUserProfile({
+      totalBooksRead: 2,
+      currentlyReading: 1,
+      booksInLibrary: 3,
+    }),
+    books: [
+      createMockBook({ id: "book-1", title: "Book 1", state: "finished" }),
+      createMockBook({ id: "book-2", title: "Book 2", state: "in_progress" }),
+      createMockBook({ id: "book-3", title: "Book 3", state: "not_started" }),
+    ],
+    events: [],
+  },
+  large: {
+    user: createMockUserProfile({
+      totalBooksRead: 10,
+      currentlyReading: 3,
+      booksInLibrary: 15,
+    }),
+    books: Array.from({ length: 15 }, (_, i) =>
+      createMockBook({
+        id: `book-${i + 1}`,
+        title: `Book ${i + 1}`,
+        state: i < 3 ? "in_progress" : i < 10 ? "finished" : "not_started",
+      })
+    ),
+    events: [],
+  },
+  mixed: {
+    user: createMockUserProfile({
+      totalBooksRead: 5,
+      currentlyReading: 2,
+      booksInLibrary: 8,
+    }),
+    books: [
+      createMockBook({
+        id: "book-1",
+        title: "Fiction Book",
+        state: "finished",
+        genre: "Fiction",
+      }),
+      createMockBook({
+        id: "book-2",
+        title: "Non-Fiction Book",
+        state: "in_progress",
+        genre: "Non-Fiction",
+      }),
+      createMockBook({
+        id: "book-3",
+        title: "Mystery Book",
+        state: "not_started",
+        genre: "Mystery",
+      }),
+    ],
+    events: [],
+  },
 };

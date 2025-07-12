@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 
-import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 // Extracted components
@@ -14,8 +13,6 @@ type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";
 type SortDirection = "asc" | "desc";
 type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
-
-
 
 interface MyLibraryPageProps {
   searchQuery?: string;
@@ -105,7 +102,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
         viewMode={viewMode}
         onBookClick={onBookClick}
         loading={loading}
-        error={error}
+        error={error?.message ?? null}
         onRefresh={refreshBooks}
         onClearFilters={clearFilters}
         activeFiltersCount={activeFiltersCount}
