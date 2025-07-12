@@ -27,7 +27,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </p>
         </div>
         <div className={`h-8 w-8 ${iconBgColor} rounded-full flex items-center justify-center`}>
-          <Icon className={`h-4 w-4 ${iconColor}`} />
+          <Icon className={`h-4 w-4 ${iconColor}`} data-testid="stat-card-icon" />
         </div>
       </div>
     </div>

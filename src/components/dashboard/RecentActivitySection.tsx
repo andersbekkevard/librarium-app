@@ -1,11 +1,12 @@
-import { STATUS_CLASSES } from "@/lib/colors";
+import { ErrorAlert } from "@/components/ui/error-display";
 import { TIMING_CONFIG } from "@/lib/constants";
+import { StandardError } from "@/lib/error-handling";
 import { ActivityItem } from "@/lib/services/EventService";
 
 interface RecentActivitySectionProps {
   activities?: ActivityItem[];
   loading?: boolean;
-  error?: string | null;
+  error?: StandardError | null;
 }
 
 const formatTimeAgo = (timestamp: Date): string => {
@@ -65,10 +66,8 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         )}
 
         {error && (
-          <div className="flex items-center justify-center py-8">
-            <div className={`text-sm ${STATUS_CLASSES.error.text}`}>
-              Failed to load recent activity: {error}
-            </div>
+          <div className="py-4">
+            <ErrorAlert error={error} />
           </div>
         )}
 

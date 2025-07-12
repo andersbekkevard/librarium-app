@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 import { Book, Sparkles, TrendingUp, Users2 } from "lucide-react";
 
 interface BenefitsProps {
@@ -41,7 +41,7 @@ export const BenefitsSection = () => {
       <div className="grid lg:grid-cols-2 place-items-center lg:gap-24">
         <div>
           <h2
-            className={`text-lg ${BRAND_CLASSES.primary.text} mb-2 tracking-wider`}
+            className={`text-lg ${BRAND_COLORS.primary.text} mb-2 tracking-wider`}
           >
             Benefits
           </h2>
@@ -62,7 +62,7 @@ export const BenefitsSection = () => {
             >
               <CardHeader>
                 <div className="flex justify-between">
-                  <div className={`${BRAND_CLASSES.primary.text} mb-6`}>
+                  <div className={`${BRAND_COLORS.primary.text} mb-6`}>
                     {icon}
                   </div>
                   <span className="text-5xl text-muted-foreground/15 font-medium transition-all delay-75 group-hover/number:text-muted-foreground/30">

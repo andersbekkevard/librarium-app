@@ -11,30 +11,25 @@ import {
 import * as React from "react";
 import { useState } from "react";
 
-import { UI_CONFIG, TIMING_CONFIG } from "@/lib/constants";
+import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  convertGoogleBookToBook,
-} from "@/lib/book-utils";
+import { convertGoogleBookToBook } from "@/lib/book-utils";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 // Google Books API integration
-import {
-  GoogleBooksVolume,
-} from "@/lib/google-books-api";
+import { GoogleBooksVolume } from "@/lib/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 
 // Extracted components
-import { SearchResults } from "./books/SearchResults";
 import { ManualEntryForm } from "./books/ManualEntryForm";
-
+import { SearchResults } from "./books/SearchResults";
 
 export const AddBooksPage = () => {
   const { user } = useAuthContext();
@@ -74,19 +69,23 @@ export const AddBooksPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
 
-      const bookId = await addBook(bookData);
+      const result = await addBook(bookData);
 
-      setAddedBooks((prev) => new Set([...prev, googleBook.id]));
-      setRecentlyAdded((prev) => [
-        {
-          id: bookId,
-          title: book.title,
-          author: book.author,
-        },
-        ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
-      ]);
-    } catch {
-      // Error is handled by the BooksProvider
+      if (result.success && result.data) {
+        const bookId = result.data;
+        setAddedBooks((prev) => new Set([...prev, googleBook.id]));
+        setRecentlyAdded((prev) => [
+          {
+            id: bookId,
+            title: book.title,
+            author: book.author,
+          },
+          ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
+        ]);
+      }
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error adding Google Book:", error);
     } finally {
       setIsAdding(false);
     }
@@ -116,18 +115,22 @@ export const AddBooksPage = () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
-      const bookId = await addBook(bookData);
+      const result = await addBook(bookData);
 
-      setRecentlyAdded((prev) => [
-        {
-          id: bookId,
-          title: book.title,
-          author: book.author,
-        },
-        ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
-      ]);
-    } catch {
-      // Error is handled by the BooksProvider
+      if (result.success && result.data) {
+        const bookId = result.data;
+        setRecentlyAdded((prev) => [
+          {
+            id: bookId,
+            title: book.title,
+            author: book.author,
+          },
+          ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
+        ]);
+      }
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error adding manual book:", error);
     } finally {
       setIsAdding(false);
     }

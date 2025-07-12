@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BRAND_CLASSES, STATUS_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS, STATUS_COLORS } from "@/lib/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -60,7 +60,7 @@ export const HeroSection = () => {
         <div className="text-center space-y-8">
           <Badge variant="outline" className="text-sm py-2">
             <span className="mr-2 text-brand-primary">
-              <Badge className={BRAND_CLASSES.primary.bg}>MVP</Badge>
+              <Badge className={BRAND_COLORS.primary.bg}>MVP</Badge>
             </span>
             <span>Essential reading tools are ready!</span>
           </Badge>
@@ -89,7 +89,7 @@ export const HeroSection = () => {
                   ? "Go to your dashboard"
                   : "Sign in with Google to start reading"
               }
-              className={`w-5/6 md:w-1/4 font-bold group/arrow ${BRAND_CLASSES.primary.bg} hover:${BRAND_CLASSES.primary.bgHover}`}
+              className={`w-5/6 md:w-1/4 font-bold group/arrow ${BRAND_COLORS.primary.bg} hover:${BRAND_COLORS.primary.bgHover}`}
             >
               {showSuccess ? (
                 <>✓ Welcome! Redirecting...</>
@@ -135,11 +135,11 @@ export const HeroSection = () => {
           {/* Success Message */}
           {showSuccess && (
             <div
-              className={`mt-4 p-3 ${STATUS_CLASSES.success.bgLight} ${STATUS_CLASSES.success.borderLight} rounded-lg`}
+              className={`mt-4 p-3 ${STATUS_COLORS.success.bgLight} ${STATUS_COLORS.success.borderLight} rounded-lg`}
               role="status"
             >
               <p
-                className={`text-sm ${STATUS_CLASSES.success.text} text-center`}
+                className={`text-sm ${STATUS_COLORS.success.text} text-center`}
               >
                 ✓ Successfully signed in! Welcome to Librarium.
               </p>

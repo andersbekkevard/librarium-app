@@ -1,6 +1,6 @@
 "use client";
 
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 
 interface ReviewProps {
   image: string;
@@ -66,7 +66,7 @@ export const TestimonialSection = () => {
     <section id="testimonials" className="container py-24 sm:py-32">
       <div className="text-center mb-8">
         <h2
-          className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+          className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
           Testimonials
         </h2>
@@ -115,19 +115,19 @@ export const TestimonialSection = () => {
                 <CardContent className="pt-6 pb-0">
                   <div className="flex gap-1 pb-6">
                     <Star
-                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                      className={`size-4 fill-brand-primary ${BRAND_COLORS.primary.text}`}
                     />
                     <Star
-                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                      className={`size-4 fill-brand-primary ${BRAND_COLORS.primary.text}`}
                     />
                     <Star
-                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                      className={`size-4 fill-brand-primary ${BRAND_COLORS.primary.text}`}
                     />
                     <Star
-                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                      className={`size-4 fill-brand-primary ${BRAND_COLORS.primary.text}`}
                     />
                     <Star
-                      className={`size-4 fill-brand-primary ${BRAND_CLASSES.primary.text}`}
+                      className={`size-4 fill-brand-primary ${BRAND_COLORS.primary.text}`}
                     />
                   </div>
                   {`"${review.comment}"`}

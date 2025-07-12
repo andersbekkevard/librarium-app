@@ -133,7 +133,7 @@ export interface AdvancedSearchParams {
 
 const GOOGLE_BOOKS_API_BASE_URL = "https://www.googleapis.com/books/v1";
 
-class GoogleBooksApiService {
+export class GoogleBooksApiService {
   private apiKey: string;
 
   constructor() {

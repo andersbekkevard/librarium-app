@@ -47,8 +47,9 @@ export const UserProfileDropdown: React.FC = () => {
       setIsOpen(false);
       // Redirect to landing page after successful logout
       router.push("/");
-    } catch {
-      // Error is handled by the AuthProvider
+    } catch (error) {
+      // Error is handled by the AuthProvider, but log locally and show alert
+      console.error("Error signing out:", error);
       alert("An unexpected error occurred while signing out");
     } finally {
       setIsSigningOut(false);

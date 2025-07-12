@@ -1,13 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { STATUS_CLASSES } from "@/lib/colors";
+import { STATUS_COLORS } from "@/lib/colors";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import {
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 import { EditBookSheet } from "./EditBookSheet";
@@ -43,8 +41,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     setIsUpdating(true);
     try {
       await updateBookProgress(book.id, currentPage);
-    } catch {
-      // Error is handled by the BooksProvider
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error updating book progress:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -54,8 +53,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     if (!user || book.state !== "finished") return;
     try {
       await updateBookRating(book.id, newRating);
-    } catch {
-      // Error is handled by the BooksProvider
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error updating book rating:", error);
     }
   };
 
@@ -64,8 +64,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     setIsUpdating(true);
     try {
       await updateBookState(book.id, "finished", book.state);
-    } catch {
-      // Error is handled by the BooksProvider
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error marking book as finished:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -77,8 +78,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     try {
       await updateBookState(book.id, "in_progress", book.state);
       await updateBookProgress(book.id, 1);
-    } catch {
-      // Error is handled by the BooksProvider
+    } catch (error) {
+      // Error is handled by the BooksProvider, but log locally for debugging
+      console.error("Error starting to read book:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -105,9 +107,11 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         {/* Error display */}
         {error && (
           <div
-            className={`mb-6 p-4 ${STATUS_CLASSES.error.bgLight} ${STATUS_CLASSES.error.borderLight} rounded-lg`}
+            className={`mb-6 p-4 ${STATUS_COLORS.error.bgLight} ${STATUS_COLORS.error.borderLight} rounded-lg`}
           >
-            <p className={`${STATUS_CLASSES.error.text} text-sm`}>{error}</p>
+            <p className={`${STATUS_COLORS.error.text} text-sm`}>
+              {error.userMessage}
+            </p>
           </div>
         )}
 
@@ -129,7 +133,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
           {/* Book details and progress */}
           <div className="lg:col-span-2 space-y-6">
             <BookInfo book={book} />
-            
+
             <ProgressTracker
               book={book}
               progress={progress}

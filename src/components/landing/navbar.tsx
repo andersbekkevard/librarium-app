@@ -1,15 +1,10 @@
 "use client";
+import { BRAND_COLORS } from "@/lib/colors";
 import { Book, Github, Menu } from "lucide-react";
+import Link from "next/link";
 import React from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../ui/sheet";
-import { Separator } from "../ui/separator";
+import { ToggleTheme } from "../toggle-theme";
+import { Button } from "../ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,10 +13,15 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
-import { Button } from "../ui/button";
-import Link from "next/link";
-import { ToggleTheme } from "../toggle-theme";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { Separator } from "../ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
 
 interface RouteProps {
   href: string;
@@ -75,7 +75,7 @@ export const Navbar = () => {
     <header className="shadow-inner bg-opacity-15 w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border border-secondary z-40 rounded-2xl flex justify-between items-center p-2 bg-card">
       <Link href="/" className="font-bold text-lg flex items-center">
         <Book
-          className={`${BRAND_CLASSES.primary.bg} ${BRAND_CLASSES.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
+          className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
         />
         Librarium
       </Link>
@@ -98,7 +98,7 @@ export const Navbar = () => {
                 <SheetTitle className="flex items-center">
                   <Link href="/" className="flex items-center">
                     <Book
-                      className={`${BRAND_CLASSES.primary.bg} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-9 h-9 mr-2 border text-white`}
+                      className={`${BRAND_COLORS.primary.bg} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-9 h-9 mr-2 border text-white`}
                     />
                     Librarium
                   </Link>

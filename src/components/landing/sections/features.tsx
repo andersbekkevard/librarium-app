@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 import { BarChart3, Book, Search, Star, Users } from "lucide-react";
 
 interface FeaturesProps {
@@ -51,7 +51,7 @@ export const FeaturesSection = () => {
   return (
     <section id="features" className="container py-24 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Features
       </h2>
@@ -69,9 +69,9 @@ export const FeaturesSection = () => {
             <Card className="h-full bg-background border-0 shadow-none">
               <CardHeader className="flex flex-col justify-center items-center">
                 <div
-                  className={`${BRAND_CLASSES.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
+                  className={`${BRAND_COLORS.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
                 >
-                  <div className={BRAND_CLASSES.primary.text}>{icon}</div>
+                  <div className={BRAND_COLORS.primary.text}>{icon}</div>
                 </div>
 
                 <CardTitle className="text-center">{title}</CardTitle>

@@ -1,31 +1,36 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
-import { Book } from "@/lib/models";
-import { useBooksContext } from "@/lib/providers/BooksProvider";
 import {
-  validateEditedBook,
-  validateStringField,
-  validateNumericField,
-  READING_STATE_OPTIONS,
-  ValidationResult,
-} from "@/lib/book-validation";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Star, Save, X, AlertCircle } from "lucide-react";
+import {
+  READING_STATE_OPTIONS,
+  ValidationResult,
+  validateEditedBook,
+  validateNumericField,
+  validateStringField,
+} from "@/lib/book-validation";
+import { Book } from "@/lib/models";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { AlertCircle, Save, Star, X } from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
 
 interface EditBookSheetProps {
   book: Book;
@@ -82,14 +87,22 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
   /**
    * Updates nested progress data
    */
-  const updateProgressField = (field: "currentPage" | "totalPages", value: string) => {
+  const updateProgressField = (
+    field: "currentPage" | "totalPages",
+    value: string
+  ) => {
     const numValue = parseInt(value) || 0;
     const newProgress = { ...formData.progress!, [field]: numValue };
     setFormData({ ...formData, progress: newProgress });
 
     // Validate progress data
     if (field === "currentPage") {
-      const validation = validateNumericField(numValue, "Current page", 0, newProgress.totalPages);
+      const validation = validateNumericField(
+        numValue,
+        "Current page",
+        0,
+        newProgress.totalPages
+      );
       setFieldErrors({
         ...fieldErrors,
         currentPage: validation.isValid ? [] : validation.errors,
@@ -126,10 +139,18 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
         validation = validateStringField(value as string, "Genre", false);
         break;
       case "publishedDate":
-        validation = validateStringField(value as string, "Published Date", false);
+        validation = validateStringField(
+          value as string,
+          "Published Date",
+          false
+        );
         break;
       case "coverImage":
-        validation = validateStringField(value as string, "Cover Image URL", false);
+        validation = validateStringField(
+          value as string,
+          "Cover Image URL",
+          false
+        );
         break;
       default:
         return;
@@ -179,13 +200,13 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
    */
   const filterUndefinedValues = (data: Partial<Book>): Partial<Book> => {
     const filtered: Partial<Book> = {};
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined) {
         (filtered as any)[key] = value;
       }
     });
-    
+
     return filtered;
   };
 
@@ -207,12 +228,13 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
     try {
       // Filter out undefined values to prevent Firebase errors
       const filteredData = filterUndefinedValues(formData);
-      
+
       // Update book with new data using manual update to bypass state machine
       await updateBookManual(book.id, filteredData);
       onOpenChange(false);
-    } catch {
-      // Error is handled by BooksProvider
+    } catch (error) {
+      // Error is handled by BooksProvider, but log locally for debugging
+      console.error("Error updating book:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -224,8 +246,8 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
         <SheetHeader>
           <SheetTitle>Edit Book</SheetTitle>
           <SheetDescription>
-            Make changes to your book details. You can manually adjust any field,
-            including reading state, to fix errors or make corrections.
+            Make changes to your book details. You can manually adjust any
+            field, including reading state, to fix errors or make corrections.
           </SheetDescription>
         </SheetHeader>
 
@@ -242,7 +264,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                     </p>
                   ))}
                   {error && (
-                    <p className="text-sm text-status-error">{error}</p>
+                    <p className="text-sm text-status-error">
+                      {error.userMessage}
+                    </p>
                   )}
                 </div>
               </div>
@@ -252,7 +276,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Basic Information</h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -262,7 +286,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                 placeholder="Enter book title"
               />
               {fieldErrors.title && (
-                <p className="text-sm text-status-error">{fieldErrors.title[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.title[0]}
+                </p>
               )}
             </div>
 
@@ -275,7 +301,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                 placeholder="Enter author name"
               />
               {fieldErrors.author && (
-                <p className="text-sm text-status-error">{fieldErrors.author[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.author[0]}
+                </p>
               )}
             </div>
 
@@ -287,12 +315,16 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                     <Textarea
                       id="description"
                       value={formData.description || ""}
-                      onChange={(e) => updateFormField("description", e.target.value)}
+                      onChange={(e) =>
+                        updateFormField("description", e.target.value)
+                      }
                       placeholder="Enter book description"
                       rows={3}
                     />
                     {fieldErrors.description && (
-                      <p className="text-sm text-status-error">{fieldErrors.description[0]}</p>
+                      <p className="text-sm text-status-error">
+                        {fieldErrors.description[0]}
+                      </p>
                     )}
                   </div>
                 </AccordionContent>
@@ -305,14 +337,16 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
           {/* Reading Status */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Reading Status</h3>
-            
+
             <div className="space-y-2">
               <Label>Reading State</Label>
               <div className="flex gap-2">
                 {READING_STATE_OPTIONS.map((option) => (
                   <Button
                     key={option.value}
-                    variant={formData.state === option.value ? "default" : "outline"}
+                    variant={
+                      formData.state === option.value ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => updateFormField("state", option.value)}
                   >
@@ -329,11 +363,15 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                   id="currentPage"
                   type="number"
                   value={formData.progress?.currentPage || 0}
-                  onChange={(e) => updateProgressField("currentPage", e.target.value)}
+                  onChange={(e) =>
+                    updateProgressField("currentPage", e.target.value)
+                  }
                   min="0"
                 />
                 {fieldErrors.currentPage && (
-                  <p className="text-sm text-status-error">{fieldErrors.currentPage[0]}</p>
+                  <p className="text-sm text-status-error">
+                    {fieldErrors.currentPage[0]}
+                  </p>
                 )}
               </div>
 
@@ -343,11 +381,15 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                   id="totalPages"
                   type="number"
                   value={formData.progress?.totalPages || 0}
-                  onChange={(e) => updateProgressField("totalPages", e.target.value)}
+                  onChange={(e) =>
+                    updateProgressField("totalPages", e.target.value)
+                  }
                   min="1"
                 />
                 {fieldErrors.totalPages && (
-                  <p className="text-sm text-status-error">{fieldErrors.totalPages[0]}</p>
+                  <p className="text-sm text-status-error">
+                    {fieldErrors.totalPages[0]}
+                  </p>
                 )}
               </div>
             </div>
@@ -389,7 +431,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
           {/* Metadata */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Metadata</h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="isbn">ISBN</Label>
               <Input
@@ -399,7 +441,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                 placeholder="Enter ISBN (10 or 13 digits)"
               />
               {fieldErrors.isbn && (
-                <p className="text-sm text-status-error">{fieldErrors.isbn[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.isbn[0]}
+                </p>
               )}
             </div>
 
@@ -412,7 +456,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                 placeholder="Enter book genre"
               />
               {fieldErrors.genre && (
-                <p className="text-sm text-status-error">{fieldErrors.genre[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.genre[0]}
+                </p>
               )}
             </div>
 
@@ -421,11 +467,15 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
               <Input
                 id="publishedDate"
                 value={formData.publishedDate || ""}
-                onChange={(e) => updateFormField("publishedDate", e.target.value)}
+                onChange={(e) =>
+                  updateFormField("publishedDate", e.target.value)
+                }
                 placeholder="YYYY or YYYY-MM or YYYY-MM-DD"
               />
               {fieldErrors.publishedDate && (
-                <p className="text-sm text-status-error">{fieldErrors.publishedDate[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.publishedDate[0]}
+                </p>
               )}
             </div>
 
@@ -438,7 +488,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                 placeholder="Enter cover image URL"
               />
               {fieldErrors.coverImage && (
-                <p className="text-sm text-status-error">{fieldErrors.coverImage[0]}</p>
+                <p className="text-sm text-status-error">
+                  {fieldErrors.coverImage[0]}
+                </p>
               )}
             </div>
           </div>
@@ -448,7 +500,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
           {/* Ownership */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Ownership</h3>
-            
+
             <div className="space-y-2">
               <Label>Ownership Status</Label>
               <div className="flex gap-2">
@@ -472,7 +524,11 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
         </div>
 
         <SheetFooter className="gap-2">
-          <Button variant="outline" onClick={handleReset} disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            disabled={isSubmitting}
+          >
             Reset
           </Button>
           <Button

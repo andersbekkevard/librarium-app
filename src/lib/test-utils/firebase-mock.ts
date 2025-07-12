@@ -1,177 +1,15 @@
-import { Book, BookEvent, UserProfile } from "@/lib/models";
+import { jest } from "@jest/globals";
 import { Timestamp } from "firebase/firestore";
 
-// Mock Firebase User
-export const createMockUser = (overrides?: any) => ({
-  uid: "test-user-id",
-  displayName: "Test User",
-  email: "test@example.com",
-  emailVerified: true,
-  isAnonymous: false,
-  metadata: {
-    creationTime: "2023-01-01T00:00:00.000Z",
-    lastSignInTime: "2023-01-01T00:00:00.000Z",
-  },
-  phoneNumber: undefined,
-  photoURL: undefined,
-  providerData: [],
-  refreshToken: "mock-refresh-token",
-  tenantId: null,
-  providerId: "google.com",
-  delete: jest.fn(),
-  getIdToken: jest.fn().mockResolvedValue("mock-token"),
-  getIdTokenResult: jest.fn(),
-  reload: jest.fn(),
-  toJSON: jest.fn(),
-  ...overrides,
-});
+// Mock Firebase Timestamp
+export const mockTimestamp = {
+  seconds: 1234567890,
+  nanoseconds: 0,
+  toDate: () => new Date(1234567890000),
+} as Timestamp;
 
-// Mock UserProfile
-export const createMockUserProfile = (
-  overrides?: Partial<UserProfile>
-): UserProfile => ({
-  id: "test-user-id",
-  displayName: "Test User",
-  email: "test@example.com",
-  photoURL: null,
-  totalBooksRead: 5,
-  currentlyReading: 2,
-  booksInLibrary: 10,
-  createdAt: { seconds: 1672531200, nanoseconds: 0 } as Timestamp,
-  updatedAt: { seconds: 1672531200, nanoseconds: 0 } as Timestamp,
-  emailVerified: true,
-  lastSignInTime: "2023-01-01T00:00:00.000Z",
-  ...overrides,
-});
-
-// Mock Book
-export const createMockBook = (overrides?: Partial<Book>): Book => ({
-  id: "test-book-id",
-  title: "Test Book",
-  author: "Test Author",
-  state: "not_started",
-  progress: { currentPage: 0, totalPages: 200 },
-  isOwned: true,
-  genre: "Fiction",
-  coverImage: "https://example.com/cover.jpg",
-  addedAt: { seconds: 1672531200, nanoseconds: 0 } as Timestamp,
-  updatedAt: { seconds: 1672531200, nanoseconds: 0 } as Timestamp,
-  ...overrides,
-});
-
-// Mock BookEvent
-export const createMockEvent = (overrides?: Partial<BookEvent>): BookEvent => ({
-  id: "test-event-id",
-  userId: "test-user-id",
-  type: "state_change",
-  bookId: "test-book-id",
-  timestamp: { seconds: 1672531200, nanoseconds: 0 } as Timestamp,
-  data: {},
-  ...overrides,
-});
-
-// Mock Firestore
+// Mock Firestore functions
 export const mockFirestore = {
-  data: new Map<string, any[]>(),
-
-  seedData: (collection: string, data: any[]) => {
-    mockFirestore.data.set(collection, data);
-  },
-
-  clearData: () => {
-    mockFirestore.data.clear();
-  },
-
-  getData: (collection: string) => {
-    return mockFirestore.data.get(collection) || [];
-  },
-};
-
-// Test data presets
-export const testDataPresets = {
-  empty: {
-    user: null,
-    books: [],
-    events: [],
-  },
-
-  small: {
-    user: createMockUserProfile(),
-    books: [
-      createMockBook(),
-      createMockBook({
-        id: "book-2",
-        title: "Book 2",
-        state: "in_progress",
-        progress: { currentPage: 50, totalPages: 200 },
-      }),
-    ],
-    events: [
-      createMockEvent(),
-      createMockEvent({
-        id: "event-2",
-        type: "progress_update",
-        bookId: "book-2",
-      }),
-    ],
-  },
-
-  large: {
-    user: createMockUserProfile({ totalBooksRead: 15, currentlyReading: 3 }),
-    books: Array.from({ length: 10 }, (_, i) =>
-      createMockBook({
-        id: `book-${i + 1}`,
-        title: `Book ${i + 1}`,
-        state: i < 5 ? "finished" : i < 8 ? "in_progress" : "not_started",
-        progress: {
-          currentPage: i < 5 ? 200 : i < 8 ? 50 + i * 10 : 0,
-          totalPages: 200,
-        },
-      })
-    ),
-    events: Array.from({ length: 20 }, (_, i) =>
-      createMockEvent({
-        id: `event-${i + 1}`,
-        type: i % 2 === 0 ? "state_change" : "progress_update",
-        bookId: `book-${(i % 10) + 1}`,
-      })
-    ),
-  },
-
-  mixed: {
-    user: createMockUserProfile({ totalBooksRead: 8, currentlyReading: 2 }),
-    books: [
-      createMockBook({ state: "finished", rating: 4 }),
-      createMockBook({
-        id: "book-2",
-        title: "In Progress Book",
-        state: "in_progress",
-        progress: { currentPage: 100, totalPages: 200 },
-      }),
-      createMockBook({
-        id: "book-3",
-        title: "Not Started Book",
-        state: "not_started",
-      }),
-    ],
-    events: [
-      createMockEvent({ type: "rating_added" }),
-      createMockEvent({ type: "progress_update", bookId: "book-2" }),
-      createMockEvent({ type: "state_change", bookId: "book-3" }),
-    ],
-  },
-};
-
-// Mock Firebase Auth
-export const mockFirebaseAuth = {
-  currentUser: createMockUser(),
-  onAuthStateChanged: jest.fn(),
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-};
-
-// Mock Firebase Firestore
-export const mockFirebaseFirestore = {
   collection: jest.fn(),
   doc: jest.fn(),
   addDoc: jest.fn(),
@@ -184,5 +22,74 @@ export const mockFirebaseFirestore = {
   orderBy: jest.fn(),
   limit: jest.fn(),
   onSnapshot: jest.fn(),
-  writeBatch: jest.fn(),
+  writeBatch: jest.fn(() => ({
+    set: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    commit: jest.fn(),
+  })),
+  Timestamp: {
+    now: jest.fn(() => mockTimestamp),
+  },
+};
+
+// Mock Firebase Auth functions
+export const mockAuth = {
+  getAuth: jest.fn(() => ({})),
+  onAuthStateChanged: jest.fn(),
+  signInWithPopup: jest.fn(),
+  signOut: jest.fn(),
+  GoogleAuthProvider: jest.fn(() => ({})),
+};
+
+// Mock Firebase App
+export const mockFirebaseApp = {
+  initializeApp: jest.fn(),
+  getApps: jest.fn(() => []),
+  getApp: jest.fn(),
+};
+
+// Mock Firebase Storage
+export const mockStorage = {
+  getStorage: jest.fn(() => ({})),
+  ref: jest.fn(),
+  uploadBytes: jest.fn(),
+  getDownloadURL: jest.fn(),
+};
+
+// Mock the entire firebase/firestore module
+jest.mock("firebase/firestore", () => mockFirestore);
+
+// Mock the entire firebase/auth module
+jest.mock("firebase/auth", () => mockAuth);
+
+// Mock the entire firebase/app module
+jest.mock("firebase/app", () => mockFirebaseApp);
+
+// Mock the entire firebase/storage module
+jest.mock("firebase/storage", () => mockStorage);
+
+// Mock the firebase.ts config file
+jest.mock("../firebase", () => ({
+  db: mockFirestore, // Use the mocked firestore
+  auth: mockAuth,     // Use the mocked auth
+  storage: mockStorage, // Use the mocked storage
+}));
+
+// Helper to reset all mocks
+export const resetFirebaseMocks = () => {
+  Object.values(mockFirestore).forEach((mockFn) => {
+    if (typeof mockFn === "function") mockFn.mockClear();
+  });
+  Object.values(mockAuth).forEach((mockFn) => {
+    if (typeof mockFn === "function") mockFn.mockClear();
+  });
+  Object.values(mockFirebaseApp).forEach((mockFn) => {
+    if (typeof mockFn === "function") mockFn.mockClear();
+  });
+  Object.values(mockStorage).forEach((mockFn) => {
+    if (typeof mockFn === "function") mockFn.mockClear();
+  });
+  mockFirestore.writeBatch.mockClear(); // Clear the mock implementation as well
+  mockFirestore.Timestamp.now.mockClear();
 };

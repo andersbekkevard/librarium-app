@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Clock, Play, CheckCircle, LucideIcon } from "lucide-react";
+import { Clock, Play, CheckCircle, LucideIcon, HelpCircle } from "lucide-react";
 import { Badge } from "./badge";
 import type { Book } from "@/lib/models";
 
@@ -24,7 +24,7 @@ const READING_STATE_CONFIG: Record<Book["state"], BadgeConfig & { testId: string
   },
   in_progress: {
     label: "Reading",
-    variant: "default", 
+    variant: "default",
     icon: Play,
     testId: "play-icon",
   },
@@ -36,12 +36,19 @@ const READING_STATE_CONFIG: Record<Book["state"], BadgeConfig & { testId: string
   },
 };
 
+const UNKNOWN_STATE_CONFIG: BadgeConfig & { testId: string } = {
+  label: "Unknown",
+  variant: "outline",
+  icon: HelpCircle,
+  testId: "unknown-icon",
+};
+
 /**
  * ReadingStateBadge Component
- * 
+ *
  * Displays a consistent reading state badge across the application.
  * Consolidates all reading state badge implementations.
- * 
+ *
  * @param state - The book's reading state
  * @param showIcon - Whether to show an icon in the badge (default: false)
  * @param className - Additional CSS classes
@@ -51,7 +58,7 @@ export const ReadingStateBadge: React.FC<ReadingStateBadgeProps> = ({
   showIcon = false,
   className,
 }) => {
-  const config = READING_STATE_CONFIG[state];
+  const config = READING_STATE_CONFIG[state] || UNKNOWN_STATE_CONFIG;
   const IconComponent = config.icon;
 
   return (

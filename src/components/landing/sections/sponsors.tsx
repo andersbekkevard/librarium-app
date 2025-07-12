@@ -1,10 +1,10 @@
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 
 export const SponsorsSection = () => {
   return (
     <section id="sponsors" className="container pt-8 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Integrations
       </h2>

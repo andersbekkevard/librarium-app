@@ -2,7 +2,7 @@
  * Tailwind CSS class names for brand colors
  * Use these for consistent styling across components
  */
-export const BRAND_CLASSES = {
+export const BRAND_COLORS = {
   primary: {
     bg: "bg-brand-primary",
     bgHover: "hover:bg-brand-primary-hover",
@@ -26,7 +26,7 @@ export const BRAND_CLASSES = {
 /**
  * Tailwind CSS class names for status colors
  */
-export const STATUS_CLASSES = {
+export const STATUS_COLORS = {
   success: {
     bg: "bg-status-success",
     bgLight: "bg-status-success/10",
@@ -109,10 +109,12 @@ export const getCSSVariable = (variableName: string): string => {
   return `var(--${variableName})`;
 };
 
-export default {
-  BRAND_CLASSES,
-  STATUS_CLASSES,
+const colors = {
+  BRAND_COLORS,
+  STATUS_COLORS,
   STAR_RATING_COLORS,
   READING_STATE_COLORS,
   getCSSVariable,
 };
+
+export default colors;

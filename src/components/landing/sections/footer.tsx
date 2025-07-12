@@ -1,6 +1,6 @@
+import { BRAND_COLORS } from "@/lib/colors";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
-import { BRAND_CLASSES } from "@/lib/colors";
 
 export const FooterSection = () => {
   return (
@@ -10,7 +10,7 @@ export const FooterSection = () => {
           <div className="col-span-full xl:col-span-2">
             <Link href="#" className="flex font-bold items-center">
               <BookOpen
-                className={`${BRAND_CLASSES.primary.bg} w-9 h-9 mr-2 rounded-lg border border-secondary text-white p-2`}
+                className={`${BRAND_COLORS.primary.bg} w-9 h-9 mr-2 rounded-lg border border-secondary text-white p-2`}
               />
               <h3 className="text-2xl">Librarium</h3>
             </Link>

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 
 enum ProService {
   YES = 1,
@@ -44,7 +44,7 @@ export const ServicesSection = () => {
   return (
     <section id="services" className="container py-24 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Integrations
       </h2>
@@ -67,7 +67,7 @@ export const ServicesSection = () => {
                 {pro === ProService.YES && (
                   <Badge
                     variant="secondary"
-                    className={`${BRAND_CLASSES.primary.bg} text-primary-foreground`}
+                    className={`${BRAND_COLORS.primary.bg} text-primary-foreground`}
                   >
                     PRO
                   </Badge>

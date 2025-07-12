@@ -2,22 +2,21 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
+import { StarRating } from "@/components/ui/star-rating";
+import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants";
 import { Book } from "@/lib/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils";
 import { BookOpen } from "lucide-react";
-import { StarRating } from "@/components/ui/star-rating";
-import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { UI_CONFIG, TIMING_CONFIG } from "@/lib/constants";
 
 interface BookCardProps {
   book: Book;
   onBookClick?: (bookId: string) => void;
 }
 // Helper functions
-
 
 const ProgressBar = ({
   value,
@@ -45,7 +44,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
     if (onBookClick) {
       onBookClick(book.id);
     } else {
-      router.push(`/book/${book.id}`);
+      router.push(`/books/${book.id}`);
     }
   };
 

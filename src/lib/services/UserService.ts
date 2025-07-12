@@ -168,7 +168,7 @@ export class UserService implements IUserService {
 
       const validationError = this.validateUserProfileData(newProfile);
       if (validationError) {
-        return { success: false, error: validationError.message };
+        throw validationError;
       }
 
       const result = await this.userRepository.createProfile(
@@ -178,11 +178,14 @@ export class UserService implements IUserService {
 
       if (!result.success) {
         const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        throw serviceError;
       }
 
       return { success: true, data: result.data };
     } catch (error) {
+      if (error instanceof ServiceError) {
+        return { success: false, error: error.message };
+      }
       return { success: false, error: "Failed to create user profile" };
     }
   }

@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/colors";
 
 interface FAQProps {
   question: string;
@@ -50,7 +50,7 @@ export const FAQSection = () => {
     <section id="faq" className="container mx-auto md:w-[700px] py-24 sm:py-32">
       <div className="text-center mb-8">
         <h2
-          className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+          className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
           FAQS
         </h2>
