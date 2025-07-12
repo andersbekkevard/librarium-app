@@ -1,4 +1,5 @@
 import { ActivityItem } from "@/lib/services/EventService";
+import { TIMING_CONFIG } from "@/lib/constants";
 
 interface RecentActivitySectionProps {
   activities?: ActivityItem[];
@@ -9,10 +10,10 @@ interface RecentActivitySectionProps {
 const formatTimeAgo = (timestamp: Date): string => {
   const now = new Date();
   const diff = now.getTime() - timestamp.getTime();
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+  const minutes = Math.floor(diff / TIMING_CONFIG.TIME.MINUTE_MS);
+  const hours = Math.floor(diff / TIMING_CONFIG.TIME.HOUR_MS);
+  const days = Math.floor(diff / TIMING_CONFIG.TIME.DAY_MS);
+  const weeks = Math.floor(diff / TIMING_CONFIG.TIME.WEEK_MS);
   
   if (minutes < 60) {
     return minutes <= 1 ? 'just now' : `${minutes} minutes ago`;

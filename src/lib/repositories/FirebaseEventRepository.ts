@@ -18,6 +18,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { EVENT_CONFIG } from "../constants";
 import { BookEvent } from "../models";
 import {
   IEventRepository,
@@ -139,7 +140,7 @@ export class FirebaseEventRepository implements IEventRepository {
    */
   async getRecentEvents(
     userId: string,
-    eventLimit: number = 10
+    eventLimit: number = EVENT_CONFIG.RECENT_EVENTS_LIMIT
   ): Promise<RepositoryResult<BookEvent[]>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);

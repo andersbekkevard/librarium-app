@@ -29,23 +29,31 @@ export const BRAND_CLASSES = {
 export const STATUS_CLASSES = {
   success: {
     bg: "bg-status-success",
+    bgLight: "bg-status-success/10",
     text: "text-status-success",
     border: "border-status-success",
+    borderLight: "border-status-success/20",
   },
   warning: {
     bg: "bg-status-warning",
+    bgLight: "bg-status-warning/10",
     text: "text-status-warning",
     border: "border-status-warning",
+    borderLight: "border-status-warning/20",
   },
   error: {
     bg: "bg-status-error",
+    bgLight: "bg-status-error/10",
     text: "text-status-error",
     border: "border-status-error",
+    borderLight: "border-status-error/20",
   },
   info: {
     bg: "bg-status-info",
+    bgLight: "bg-status-info/10",
     text: "text-status-info",
     border: "border-status-info",
+    borderLight: "border-status-info/20",
   },
 } as const;
 
@@ -67,20 +75,32 @@ export const STAR_RATING_COLORS = {
  * Reading state color mappings
  */
 export const READING_STATE_COLORS = {
-  not_started: STATUS_CLASSES.info,
-  in_progress: BRAND_CLASSES.primary,
-  finished: STATUS_CLASSES.success,
+  not_started: {
+    bg: "bg-secondary",
+    text: "text-secondary-foreground",
+    border: "border-secondary",
+  },
+  in_progress: {
+    bg: "bg-brand-primary/10",
+    text: "text-brand-primary",
+    border: "border-brand-primary/20",
+  },
+  finished: {
+    bg: "bg-muted",
+    text: "text-muted-foreground",
+    border: "border-muted",
+  },
 } as const;
 
 /**
  * Utility function to get CSS variable value
- * 
+ *
  * Constructs a CSS variable reference string for use in JavaScript.
  * Used when you need to access CSS custom properties programmatically.
- * 
+ *
  * @param variableName - The CSS variable name (without -- prefix)
  * @returns string - CSS variable reference (e.g., "var(--color-primary)")
- * 
+ *
  * @example
  * const primaryColor = getCSSVariable("color-primary");
  * element.style.backgroundColor = primaryColor;

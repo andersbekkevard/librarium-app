@@ -7,6 +7,7 @@
  */
 
 import { Book, ReadingState, isValidReadingState } from "./models";
+import { VALIDATION_CONFIG } from "./constants";
 
 /**
  * Validation result interface for consistent error reporting
@@ -275,8 +276,8 @@ export const validateStringField = (
 
   if (required && (!value || value.trim() === "")) {
     errors.push(`${fieldName} is required`);
-  } else if (value && value.trim().length > 500) {
-    errors.push(`${fieldName} cannot exceed 500 characters`);
+  } else if (value && value.trim().length > VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH) {
+    errors.push(`${fieldName} cannot exceed ${VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH} characters`);
   }
 
   return {
@@ -299,7 +300,7 @@ export const validateStringField = (
 export const validateNumericField = (
   value: number | string | undefined,
   fieldName: string,
-  min: number = 0,
+  min: number = VALIDATION_CONFIG.NUMERIC.MIN_PAGE,
   max?: number
 ): ValidationResult => {
   const errors: string[] = [];

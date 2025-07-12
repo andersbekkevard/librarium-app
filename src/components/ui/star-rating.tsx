@@ -2,6 +2,7 @@ import * as React from "react";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STAR_RATING_COLORS } from "@/lib/colors";
+import { UI_CONFIG } from "@/lib/constants";
 
 interface StarRatingProps {
   rating: number;
@@ -37,7 +38,7 @@ const textSizeClasses = {
  */
 export const StarRating: React.FC<StarRatingProps> = ({
   rating,
-  maxRating = 5,
+  maxRating = UI_CONFIG.RATING.MAX_RATING,
   size = "sm",
   showText = true,
   className,

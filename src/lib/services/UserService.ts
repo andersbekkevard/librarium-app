@@ -394,7 +394,7 @@ export class UserService implements IUserService {
 
     return Object.entries(genreCounts)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
+      .slice(0, EVENT_CONFIG.FAVORITE_GENRES_LIMIT)
       .map(([genre]) => genre);
   }
 }
