@@ -1,26 +1,26 @@
 "use client";
 
-import * as React from "react";
-import { useState, useMemo } from "react";
 import {
+  BookOpen,
   Grid,
   List,
+  Loader2,
   SortAsc,
   SortDesc,
-  X,
-  BookOpen,
   Star,
   User,
-  Loader2,
+  X,
 } from "lucide-react";
+import * as React from "react";
+import { useMemo, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import BookCard from "@/components/app/BookCard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Book } from "@/lib/models";
-import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { bookService } from "@/lib/services/BookService";
 
 type ViewMode = "grid" | "list";

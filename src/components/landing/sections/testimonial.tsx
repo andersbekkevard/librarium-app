@@ -1,21 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Star } from "lucide-react";
 import { BRAND_CLASSES } from "@/lib/colors";
 
 interface ReviewProps {
@@ -88,15 +72,33 @@ export const TestimonialSection = () => {
         </h2>
 
         <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-          What Readers Are Saying
+          Early Access Preview
         </h2>
 
         <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground">
-          Join thousands of readers who have transformed their reading
-          experience with Librarium.
+          Librarium is in active development. Join the early access to help
+          shape the future of reading tracking.
         </h3>
       </div>
 
+      <div className="bg-muted/50 dark:bg-card rounded-lg p-8 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-2xl font-bold mb-4">Be Part of the Journey</h3>
+          <p className="text-lg text-muted-foreground mb-6">
+            Librarium is a work in progress, built for readers who want simple,
+            effective book tracking. Your feedback helps us build the features
+            that matter most to you.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <span>• Essential reading tools ready</span>
+            <span>• Regular updates</span>
+            <span>• Community-driven development</span>
+            <span>• Privacy-focused</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Commented out fake testimonials - replace with real ones when available
       <Carousel
         opts={{
           align: "start",
@@ -159,6 +161,7 @@ export const TestimonialSection = () => {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+      */}
     </section>
   );
 };

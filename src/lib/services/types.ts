@@ -141,6 +141,15 @@ export interface IBookService {
   ): Promise<ServiceResult<void>>;
 
   /**
+   * Manual update book (bypasses state machine validation)
+   */
+  updateBookManual(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<ServiceResult<void>>;
+
+  /**
    * Update book progress with business logic
    */
   updateBookProgress(

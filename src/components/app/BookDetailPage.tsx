@@ -1,28 +1,35 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
-import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { useBooksContext } from "@/lib/providers/BooksProvider";
-import { Book } from "@/lib/models";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Book } from "@/lib/models";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 import {
-  Star,
-  BookOpen,
-  Edit,
   ArrowLeft,
+  BookOpen,
   Calendar,
-  Hash,
   CheckCircle,
-  Play,
   Clock,
+  Edit,
+  Hash,
+  Play,
+  Star,
   TrendingUp,
 } from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
+import { EditBookSheet } from "./EditBookSheet";
 
 interface BookDetailPageProps {
   book: Book;
@@ -34,13 +41,20 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   onBack,
 }) => {
   const { user } = useAuthContext();
-  const { updateBookProgress, updateBookRating, updateBookState, calculateBookProgress, error } = useBooksContext();
+  const {
+    updateBookProgress,
+    updateBookRating,
+    updateBookState,
+    calculateBookProgress,
+    error,
+  } = useBooksContext();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(
     book.progress.currentPage?.toString() || ""
   );
   const [rating, setRating] = useState(book.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
 
   /**
    * Maps reading state to badge configuration
@@ -79,7 +93,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   /**
    * Handles progress update workflow
    *
-   * Updates book progress using the service layer, which automatically handles 
+   * Updates book progress using the service layer, which automatically handles
    * state transitions and event logging.
    * Used by the progress update form in the UI.
    */
@@ -90,7 +104,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     try {
       const newPage = parseInt(currentPageInput) || 0;
       await updateBookProgress(book.id, newPage);
-      
+
       // Firebase real-time listener will automatically update the UI
     } catch {
       // Error is handled by the BooksProvider
@@ -102,7 +116,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   /**
    * Handles user rating changes
    *
-   * Updates the book's rating using the service layer, which automatically 
+   * Updates the book's rating using the service layer, which automatically
    * handles validation and event logging.
    * Only available for finished books. Used by the star rating component.
    *
@@ -122,7 +136,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   /**
    * Marks book as finished
    *
-   * Transitions book state to 'finished' using the service layer, which automatically 
+   * Transitions book state to 'finished' using the service layer, which automatically
    * handles progress updates, event logging, and timestamp management.
    * Used by the "Mark as Finished" button.
    */
@@ -267,7 +281,11 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                         setIsUpdating(true);
                         try {
                           // Use service layer for state transition and progress update
-                          await updateBookState(book.id, "in_progress", book.state);
+                          await updateBookState(
+                            book.id,
+                            "in_progress",
+                            book.state
+                          );
                           await updateBookProgress(book.id, 1);
                           setCurrentPageInput("1");
 
@@ -297,7 +315,11 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                     </Button>
                   )}
 
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setIsEditSheetOpen(true)}
+                  >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Book
                   </Button>
@@ -350,12 +372,16 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
                 {book.description && (
                   <>
                     <Separator />
-                    <div>
-                      <h3 className="font-semibold mb-2">Description</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {book.description}
-                      </p>
-                    </div>
+                    <Accordion type="single" collapsible>
+                      <AccordionItem value="description">
+                        <AccordionTrigger>Description</AccordionTrigger>
+                        <AccordionContent>
+                          <p className="text-muted-foreground text-sm leading-relaxed">
+                            {book.description}
+                          </p>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </>
                 )}
               </CardContent>
@@ -466,6 +492,13 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Edit Book Sheet */}
+      <EditBookSheet
+        book={book}
+        open={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+      />
     </div>
   );
 };

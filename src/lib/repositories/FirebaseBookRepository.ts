@@ -6,26 +6,47 @@
  */
 
 import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
   Timestamp,
-  writeBatch,
   Unsubscribe,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { Book } from "../models";
-import { IBookRepository, RepositoryResult, RepositoryError, RepositoryErrorType } from "./types";
+import {
+  IBookRepository,
+  RepositoryError,
+  RepositoryErrorType,
+  RepositoryResult,
+} from "./types";
 
 export class FirebaseBookRepository implements IBookRepository {
+  /**
+   * Filters out undefined values from data for Firebase compatibility
+   * Firebase Firestore doesn't allow undefined values in documents
+   */
+  private filterUndefinedValues<T extends Record<string, any>>(data: T): Partial<T> {
+    const filtered: Partial<T> = {};
+    
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) {
+        filtered[key as keyof T] = value;
+      }
+    });
+    
+    return filtered;
+  }
+
   /**
    * Get user's books collection reference
    */
@@ -51,7 +72,7 @@ export class FirebaseBookRepository implements IBookRepository {
         error
       );
     }
-    
+
     if (error.code === "unavailable" || error.code === "deadline-exceeded") {
       return new RepositoryError(
         RepositoryErrorType.NETWORK_ERROR,
@@ -70,7 +91,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Get a single book by ID
    */
-  async getBook(userId: string, bookId: string): Promise<RepositoryResult<Book | null>> {
+  async getBook(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<Book | null>> {
     try {
       const bookRef = this.getBookDocRef(userId, bookId);
       const bookDoc = await getDoc(bookRef);
@@ -100,10 +124,13 @@ export class FirebaseBookRepository implements IBookRepository {
       const booksQuery = query(booksRef, orderBy("addedAt", "desc"));
       const snapshot = await getDocs(booksQuery);
 
-      const books: Book[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Book));
+      const books: Book[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Book)
+      );
 
       return { success: true, data: books };
     } catch (error) {
@@ -115,7 +142,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Get books by reading state
    */
-  async getBooksByState(userId: string, state: Book["state"]): Promise<RepositoryResult<Book[]>> {
+  async getBooksByState(
+    userId: string,
+    state: Book["state"]
+  ): Promise<RepositoryResult<Book[]>> {
     try {
       const booksRef = this.getBooksCollectionRef(userId);
       const booksQuery = query(
@@ -125,10 +155,13 @@ export class FirebaseBookRepository implements IBookRepository {
       );
       const snapshot = await getDocs(booksQuery);
 
-      const books: Book[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Book));
+      const books: Book[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Book)
+      );
 
       return { success: true, data: books };
     } catch (error) {
@@ -140,7 +173,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Add a new book to user's collection
    */
-  async addBook(userId: string, book: Omit<Book, "id" | "addedAt" | "updatedAt">): Promise<RepositoryResult<string>> {
+  async addBook(
+    userId: string,
+    book: Omit<Book, "id" | "addedAt" | "updatedAt">
+  ): Promise<RepositoryResult<string>> {
     try {
       const booksRef = this.getBooksCollectionRef(userId);
       const bookData = {
@@ -149,7 +185,10 @@ export class FirebaseBookRepository implements IBookRepository {
         updatedAt: Timestamp.now(),
       };
 
-      const docRef = await addDoc(booksRef, bookData);
+      // Filter out undefined values before sending to Firebase
+      const filteredBookData = this.filterUndefinedValues(bookData);
+
+      const docRef = await addDoc(booksRef, filteredBookData);
       return { success: true, data: docRef.id };
     } catch (error) {
       const repoError = this.handleFirebaseError(error);
@@ -160,7 +199,11 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Update an existing book
    */
-  async updateBook(userId: string, bookId: string, updates: Partial<Book>): Promise<RepositoryResult<void>> {
+  async updateBook(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<RepositoryResult<void>> {
     try {
       const bookRef = this.getBookDocRef(userId, bookId);
       const updateData = {
@@ -168,7 +211,10 @@ export class FirebaseBookRepository implements IBookRepository {
         updatedAt: Timestamp.now(),
       };
 
-      await updateDoc(bookRef, updateData);
+      // Filter out undefined values before sending to Firebase
+      const filteredUpdateData = this.filterUndefinedValues(updateData);
+
+      await updateDoc(bookRef, filteredUpdateData);
       return { success: true };
     } catch (error) {
       const repoError = this.handleFirebaseError(error);
@@ -179,7 +225,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Delete a book from user's collection
    */
-  async deleteBook(userId: string, bookId: string): Promise<RepositoryResult<void>> {
+  async deleteBook(
+    userId: string,
+    bookId: string
+  ): Promise<RepositoryResult<void>> {
     try {
       const bookRef = this.getBookDocRef(userId, bookId);
       await deleteDoc(bookRef);
@@ -193,17 +242,23 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Subscribe to user's book collection changes
    */
-  subscribeToUserBooks(userId: string, callback: (books: Book[]) => void): Unsubscribe {
+  subscribeToUserBooks(
+    userId: string,
+    callback: (books: Book[]) => void
+  ): Unsubscribe {
     const booksRef = this.getBooksCollectionRef(userId);
     const booksQuery = query(booksRef, orderBy("addedAt", "desc"));
 
     return onSnapshot(
       booksQuery,
       (snapshot) => {
-        const books: Book[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        } as Book));
+        const books: Book[] = snapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Book)
+        );
         callback(books);
       },
       (error) => {
@@ -216,7 +271,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Batch operations for multiple books
    */
-  async batchUpdateBooks(userId: string, updates: Array<{ bookId: string; data: Partial<Book> }>): Promise<RepositoryResult<void>> {
+  async batchUpdateBooks(
+    userId: string,
+    updates: Array<{ bookId: string; data: Partial<Book> }>
+  ): Promise<RepositoryResult<void>> {
     try {
       const batch = writeBatch(db);
 
@@ -239,7 +297,10 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Import multiple books at once
    */
-  async importBooks(userId: string, books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>): Promise<RepositoryResult<string[]>> {
+  async importBooks(
+    userId: string,
+    books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>
+  ): Promise<RepositoryResult<string[]>> {
     try {
       const batch = writeBatch(db);
       const bookIds: string[] = [];
@@ -253,7 +314,10 @@ export class FirebaseBookRepository implements IBookRepository {
           updatedAt: Timestamp.now(),
         };
 
-        batch.set(bookRef, book);
+        // Filter out undefined values before sending to Firebase
+        const filteredBook = this.filterUndefinedValues(book);
+
+        batch.set(bookRef, filteredBook);
         bookIds.push(bookRef.id);
       });
 

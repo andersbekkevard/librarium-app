@@ -28,6 +28,22 @@ import {
 
 export class FirebaseEventRepository implements IEventRepository {
   /**
+   * Filters out undefined values from data for Firebase compatibility
+   * Firebase Firestore doesn't allow undefined values in documents
+   */
+  private filterUndefinedValues<T extends Record<string, any>>(data: T): Partial<T> {
+    const filtered: Partial<T> = {};
+    
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) {
+        filtered[key as keyof T] = value;
+      }
+    });
+    
+    return filtered;
+  }
+
+  /**
    * Get user's events collection reference
    */
   private getEventsCollectionRef(userId: string) {
@@ -76,7 +92,10 @@ export class FirebaseEventRepository implements IEventRepository {
         timestamp: Timestamp.now(),
       };
 
-      const docRef = await addDoc(eventsRef, eventData);
+      // Filter out undefined values before sending to Firebase
+      const filteredEventData = this.filterUndefinedValues(eventData);
+
+      const docRef = await addDoc(eventsRef, filteredEventData);
       return { success: true, data: docRef.id };
     } catch (error) {
       const repoError = this.handleFirebaseError(error as FirestoreError);

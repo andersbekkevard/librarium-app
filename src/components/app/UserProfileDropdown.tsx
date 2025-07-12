@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
 import {
-  User,
-  Settings,
-  Target,
-  Shield,
   Activity,
+  ChevronRight,
   Download,
   HelpCircle,
   LogOut,
-  ChevronRight,
+  Settings,
+  Shield,
+  Target,
+  User,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export const UserProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

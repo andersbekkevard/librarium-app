@@ -1,13 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Star } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Book } from "@/lib/models";
-import { cn } from "@/lib/utils";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { cn } from "@/lib/utils";
+import { BookOpen, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
 interface BookCardProps {
   book: Book;
@@ -40,7 +40,6 @@ const getReadingStateBadge = (state: Book["state"]) => {
       };
   }
 };
-
 
 const StarRating = ({ rating }: { rating: number }) => {
   return (
@@ -78,10 +77,7 @@ const ProgressBar = ({
   );
 };
 
-export const BookCard: React.FC<BookCardProps> = ({
-  book,
-  onBookClick,
-}) => {
+export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   const router = useRouter();
   const { calculateBookProgress } = useBooksContext();
   const badgeInfo = getReadingStateBadge(book.state);

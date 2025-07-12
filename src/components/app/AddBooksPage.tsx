@@ -1,44 +1,44 @@
 "use client";
 
+import {
+  AlertCircle,
+  BookOpen,
+  Building,
+  Calendar,
+  Camera,
+  Check,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Plus,
+  Search,
+  Star,
+  User,
+  X,
+} from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
-import {
-  Search,
-  Plus,
-  BookOpen,
-  ExternalLink,
-  Camera,
-  FileText,
-  Check,
-  X,
-  Star,
-  Calendar,
-  User,
-  Building,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Book } from "@/lib/models";
-import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { useBooksContext } from "@/lib/providers/BooksProvider";
 import {
   convertGoogleBookToBook,
   convertManualEntryToBook,
 } from "@/lib/book-utils";
+import { Book } from "@/lib/models";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 // Google Books API integration
 import {
   GoogleBooksVolume,
-  getBestThumbnail,
   formatAuthors,
+  getBestThumbnail,
 } from "@/lib/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 

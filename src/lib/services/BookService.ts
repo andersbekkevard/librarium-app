@@ -596,6 +596,95 @@ export class BookService implements IBookService {
   }
 
   /**
+   * Manual update book (bypasses state machine validation)
+   * 
+   * This function allows manual editing of all book data including state transitions
+   * that would normally be prevented by the state machine. Used for error correction
+   * and manual data management.
+   */
+  async updateBookManual(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<ServiceResult<void>> {
+    try {
+      // Still validate basic data integrity but allow any state changes
+      const validationError = this.validateBookData(updates);
+      if (validationError) {
+        return { success: false, error: validationError.message };
+      }
+
+      // Get current book to prepare proper timestamp updates
+      const currentBookResult = await this.getBook(userId, bookId);
+      if (!currentBookResult.success || !currentBookResult.data) {
+        return { success: false, error: "Book not found" };
+      }
+
+      const currentBook = currentBookResult.data;
+      const updateData = { ...updates };
+
+      // Handle state-related timestamp updates
+      if (updates.state && updates.state !== currentBook.state) {
+        switch (updates.state) {
+          case "in_progress":
+            // Only set startedAt if transitioning from not_started
+            if (currentBook.state === "not_started") {
+              updateData.startedAt = Timestamp.now();
+            }
+            // Clear finishedAt if moving from finished back to in_progress
+            if (currentBook.state === "finished") {
+              updateData.finishedAt = undefined;
+            }
+            break;
+          case "finished":
+            // Set finishedAt if not already set
+            if (!currentBook.finishedAt) {
+              updateData.finishedAt = Timestamp.now();
+            }
+            // Ensure we have a startedAt timestamp
+            if (!currentBook.startedAt) {
+              updateData.startedAt = Timestamp.now();
+            }
+            break;
+          case "not_started":
+            // Clear both timestamps when resetting to not_started
+            updateData.startedAt = undefined;
+            updateData.finishedAt = undefined;
+            break;
+        }
+      }
+
+      // Update the book
+      const result = await this.bookRepository.updateBook(
+        userId,
+        bookId,
+        updateData
+      );
+
+      if (!result.success) {
+        const serviceError = this.handleRepositoryError(result.error!);
+        return { success: false, error: serviceError.message };
+      }
+
+      // Log manual edit event (if state changed)
+      if (updates.state && updates.state !== currentBook.state) {
+        await this.eventRepository.logEvent(userId, {
+          bookId,
+          type: "state_change",
+          data: {
+            previousState: currentBook.state,
+            newState: updates.state,
+          },
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Failed to update book" };
+    }
+  }
+
+  /**
    * Calculate reading progress percentage
    */
   calculateProgress(book: Book): number {

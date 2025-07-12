@@ -31,6 +31,8 @@ interface BooksContextType {
   ) => Promise<string>;
   /** Function to update an existing book */
   updateBook: (bookId: string, updates: Partial<Book>) => Promise<void>;
+  /** Function to manually update book (bypasses state machine validation) */
+  updateBookManual: (bookId: string, updates: Partial<Book>) => Promise<void>;
   /** Function to update book progress */
   updateBookProgress: (bookId: string, currentPage: number) => Promise<void>;
   /** Function to update book state */
@@ -122,6 +124,39 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
       const result = await bookService.updateBook(user.uid, bookId, updates);
+
+      if (result.success) {
+        // Real-time listener will automatically update the books array
+        // Update user statistics if state changed
+        if (updates.state) {
+          await updateUserStats();
+        }
+      } else {
+        setError(result.error || "Failed to update book");
+        throw new Error(result.error || "Failed to update book");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update book";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  /**
+   * Manually update book (bypasses state machine validation)
+   */
+  const updateBookManual = async (
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      setError(null);
+      const result = await bookService.updateBookManual(user.uid, bookId, updates);
 
       if (result.success) {
         // Real-time listener will automatically update the books array
@@ -391,6 +426,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     error,
     addBook,
     updateBook,
+    updateBookManual,
     updateBookProgress,
     updateBookState,
     updateBookRating,

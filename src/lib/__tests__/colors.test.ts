@@ -32,8 +32,9 @@ describe("colors", () => {
     it("should be a const object", () => {
       // TypeScript will enforce this at compile time, but we can test immutability
       expect(() => {
-        // @ts-ignore - Testing runtime immutability
-        colors.BRAND_CLASSES.primary = {} as any;
+        // @ts-expect-error - Testing runtime immutability
+        colors.BRAND_CLASSES.primary =
+          {} as typeof colors.BRAND_CLASSES.primary;
       }).toThrow(TypeError);
     });
 
@@ -44,7 +45,7 @@ describe("colors", () => {
 
     it("should have consistent structure across all brand colors", () => {
       const expectedProperties = ["bg", "bgHover", "text", "border"];
-      
+
       Object.values(colors.BRAND_CLASSES).forEach((brandColor) => {
         expect(Object.keys(brandColor)).toEqual(expectedProperties);
       });
@@ -87,8 +88,9 @@ describe("colors", () => {
     it("should be a const object", () => {
       // TypeScript will enforce this at compile time, but we can test immutability
       expect(() => {
-        // @ts-ignore - Testing runtime immutability
-        colors.STATUS_CLASSES.success = {} as any;
+        // @ts-expect-error - Testing runtime immutability
+        colors.STATUS_CLASSES.success =
+          {} as typeof colors.STATUS_CLASSES.success;
       }).toThrow(TypeError);
     });
 
@@ -99,7 +101,7 @@ describe("colors", () => {
 
     it("should have consistent structure across all status colors", () => {
       const expectedProperties = ["bg", "text", "border"];
-      
+
       Object.values(colors.STATUS_CLASSES).forEach((statusColor) => {
         expect(Object.keys(statusColor)).toEqual(expectedProperties);
       });
@@ -114,22 +116,29 @@ describe("colors", () => {
 
   describe("READING_STATE_COLORS", () => {
     it("should map not_started to info status", () => {
-      expect(colors.READING_STATE_COLORS.not_started).toEqual(colors.STATUS_CLASSES.info);
+      expect(colors.READING_STATE_COLORS.not_started).toEqual(
+        colors.STATUS_CLASSES.info
+      );
     });
 
     it("should map in_progress to primary brand", () => {
-      expect(colors.READING_STATE_COLORS.in_progress).toEqual(colors.BRAND_CLASSES.primary);
+      expect(colors.READING_STATE_COLORS.in_progress).toEqual(
+        colors.BRAND_CLASSES.primary
+      );
     });
 
     it("should map finished to success status", () => {
-      expect(colors.READING_STATE_COLORS.finished).toEqual(colors.STATUS_CLASSES.success);
+      expect(colors.READING_STATE_COLORS.finished).toEqual(
+        colors.STATUS_CLASSES.success
+      );
     });
 
     it("should be a const object", () => {
       // TypeScript will enforce this at compile time, but we can test immutability
       expect(() => {
-        // @ts-ignore - Testing runtime immutability
-        colors.READING_STATE_COLORS.finished = {} as any;
+        // @ts-expect-error - Testing runtime immutability
+        colors.READING_STATE_COLORS.finished =
+          {} as typeof colors.READING_STATE_COLORS.finished;
       }).toThrow(TypeError);
     });
 
@@ -139,29 +148,43 @@ describe("colors", () => {
     });
 
     it("should reference existing color objects", () => {
-      expect(colors.READING_STATE_COLORS.not_started).toEqual(colors.STATUS_CLASSES.info);
-      expect(colors.READING_STATE_COLORS.in_progress).toEqual(colors.BRAND_CLASSES.primary);
-      expect(colors.READING_STATE_COLORS.finished).toEqual(colors.STATUS_CLASSES.success);
+      expect(colors.READING_STATE_COLORS.not_started).toEqual(
+        colors.STATUS_CLASSES.info
+      );
+      expect(colors.READING_STATE_COLORS.in_progress).toEqual(
+        colors.BRAND_CLASSES.primary
+      );
+      expect(colors.READING_STATE_COLORS.finished).toEqual(
+        colors.STATUS_CLASSES.success
+      );
     });
 
     it("should provide access to nested color properties", () => {
       expect(colors.READING_STATE_COLORS.not_started.bg).toBe("bg-status-info");
-      expect(colors.READING_STATE_COLORS.in_progress.bg).toBe("bg-brand-primary");
+      expect(colors.READING_STATE_COLORS.in_progress.bg).toBe(
+        "bg-brand-primary"
+      );
       expect(colors.READING_STATE_COLORS.finished.bg).toBe("bg-status-success");
     });
   });
 
   describe("getCSSVariable", () => {
     it("should return correct CSS variable format", () => {
-      expect(colors.getCSSVariable("color-primary")).toBe("var(--color-primary)");
+      expect(colors.getCSSVariable("color-primary")).toBe(
+        "var(--color-primary)"
+      );
     });
 
     it("should handle variable names with hyphens", () => {
-      expect(colors.getCSSVariable("color-primary-hover")).toBe("var(--color-primary-hover)");
+      expect(colors.getCSSVariable("color-primary-hover")).toBe(
+        "var(--color-primary-hover)"
+      );
     });
 
     it("should handle variable names with underscores", () => {
-      expect(colors.getCSSVariable("color_primary_hover")).toBe("var(--color_primary_hover)");
+      expect(colors.getCSSVariable("color_primary_hover")).toBe(
+        "var(--color_primary_hover)"
+      );
     });
 
     it("should handle simple variable names", () => {
@@ -173,11 +196,15 @@ describe("colors", () => {
     });
 
     it("should handle complex variable names", () => {
-      expect(colors.getCSSVariable("component-card-background-color")).toBe("var(--component-card-background-color)");
+      expect(colors.getCSSVariable("component-card-background-color")).toBe(
+        "var(--component-card-background-color)"
+      );
     });
 
     it("should not modify variable names with existing dashes", () => {
-      expect(colors.getCSSVariable("--color-primary")).toBe("var(----color-primary)");
+      expect(colors.getCSSVariable("--color-primary")).toBe(
+        "var(----color-primary)"
+      );
     });
 
     it("should handle numeric variable names", () => {
@@ -188,17 +215,17 @@ describe("colors", () => {
       const variableName = "test-variable";
       const result1 = colors.getCSSVariable(variableName);
       const result2 = colors.getCSSVariable(variableName);
-      
+
       expect(result1).toBe(result2);
       expect(result1).toBe("var(--test-variable)");
     });
   });
 
   describe("default export", () => {
-    it("should not have a default export", () => {
-      const defaultExport = require("../colors").default;
-      
-      expect(defaultExport).toBeUndefined();
+    it("should not have a default export", async () => {
+      const colorsModule = await import("../colors");
+
+      expect(colorsModule.default).toBeUndefined();
     });
   });
 
@@ -206,7 +233,9 @@ describe("colors", () => {
     it("should provide consistent color scheme for reading states", () => {
       // Test that reading states use appropriate semantic colors
       expect(colors.READING_STATE_COLORS.not_started.bg).toBe("bg-status-info");
-      expect(colors.READING_STATE_COLORS.in_progress.bg).toBe("bg-brand-primary");
+      expect(colors.READING_STATE_COLORS.in_progress.bg).toBe(
+        "bg-brand-primary"
+      );
       expect(colors.READING_STATE_COLORS.finished.bg).toBe("bg-status-success");
     });
 

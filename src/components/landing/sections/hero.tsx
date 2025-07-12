@@ -1,14 +1,14 @@
 "use client";
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import Image from "next/image";
 import { BRAND_CLASSES } from "@/lib/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export const HeroSection = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -60,9 +60,9 @@ export const HeroSection = () => {
         <div className="text-center space-y-8">
           <Badge variant="outline" className="text-sm py-2">
             <span className="mr-2 text-brand-primary">
-              <Badge className={BRAND_CLASSES.primary.bg}>New</Badge>
+              <Badge className={BRAND_CLASSES.primary.bg}>MVP</Badge>
             </span>
-            <span>Reading analytics are here!</span>
+            <span>Essential reading tools are ready!</span>
           </Badge>
 
           <div className="max-w-screen-md mx-auto text-center text-4xl md:text-6xl font-bold">
@@ -76,9 +76,8 @@ export const HeroSection = () => {
           </div>
 
           <p className="max-w-screen-sm mx-auto text-xl text-muted-foreground">
-            Build your personal library, track reading progress, discover new
-            books, and connect with fellow readers. Your books, your pace, your
-            way.
+            Build your personal library, track reading progress, and discover
+            new books. Start with the essentials - more features coming soon.
           </p>
 
           <div className="space-y-4 md:space-y-0 md:space-x-4">
