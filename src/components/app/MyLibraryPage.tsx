@@ -1,139 +1,21 @@
 "use client";
 
-import {
-  BookOpen,
-  Grid,
-  List,
-  Loader2,
-  SortAsc,
-  SortDesc,
-  User,
-  X,
-} from "lucide-react";
 import * as React from "react";
 import { useMemo, useState } from "react";
 
-import BookCard from "@/components/app/BookCard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { StarRating } from "@/components/ui/star-rating";
-import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
-import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import { bookService } from "@/lib/services/BookService";
+
+// Extracted components
+import { LibraryControls } from "./library/LibraryControls";
+import { LibraryGrid } from "./library/LibraryGrid";
 
 type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";
 type SortDirection = "asc" | "desc";
 type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
 
-interface BookListItemProps {
-  book: Book;
-  onBookClick?: (bookId: string) => void;
-}
 
-export const BookListItem: React.FC<BookListItemProps> = ({
-  book,
-  onBookClick,
-}) => {
-
-  const handleCardClick = () => {
-    if (onBookClick) {
-      onBookClick(book.id);
-    }
-  };
-
-  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
-    e.stopPropagation();
-    action();
-  };
-
-  return (
-    <Card
-      className="w-full cursor-pointer transition-all duration-200 hover:shadow-md hover:border-brand-primary/20"
-      onClick={handleCardClick}
-    >
-      <CardContent className="p-0">
-        <div className="flex gap-4 items-center">
-          {/* Cover Image */}
-          <div className="flex-shrink-0 pl-3">
-            <div className="w-20 h-28 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
-              {book.coverImage ? (
-                <img
-                  src={book.coverImage}
-                  alt={`${book.title} cover`}
-                  className="w-full h-full object-cover rounded"
-                />
-              ) : (
-                <BookOpen className="h-8 w-8 text-muted-foreground" />
-              )}
-            </div>
-          </div>
-
-          {/* Book Details */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-            <div className="md:col-span-2">
-              <h3 className="font-semibold text-foreground truncate">
-                {book.title}
-              </h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <User className="h-3 w-3" />
-                {book.author}
-              </p>
-            </div>
-
-            <div className="text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <BookOpen className="h-3 w-3" />
-                {book.progress.totalPages || "?"} pages
-              </span>
-            </div>
-
-            <div>
-              {book.isOwned ? (
-                <Badge variant="outline" className="text-xs">
-                  Owned
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="text-xs">
-                  Wishlist
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center justify-center">
-              <ReadingStateBadge state={book.state} />
-            </div>
-
-            <div className="flex items-center justify-between">
-              {/* Rating or Progress */}
-              <div className="flex items-center gap-1">
-                {book.state === "finished" && book.rating ? (
-                  <StarRating 
-                    rating={book.rating} 
-                    size="sm" 
-                    showText={false}
-                    className="gap-0.5"
-                  />
-                ) : book.state === "in_progress" ? (
-                  <div className="text-xs text-muted-foreground">
-                    {bookService.calculateProgress(book)}% complete
-                  </div>
-                ) : (
-                  <div className="text-xs text-muted-foreground">
-                    Not started
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 interface MyLibraryPageProps {
   searchQuery?: string;
@@ -146,7 +28,6 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
 }) => {
   const { books, loading, error, refreshBooks, filterAndSortBooks } =
     useBooksContext();
-  const { user } = useAuthContext();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -184,36 +65,6 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   ].filter(Boolean).length;
 
   /**
-   * Handles book editing workflow
-   *
-   * Placeholder function for opening book edit dialog/modal.
-   * Currently logs to console, intended to be implemented with
-   * a modal or navigation to edit page.
-   *
-   * @param book - Book object to edit
-   */
-  const handleEdit = async (book: Book) => {
-    if (!user) return;
-    // TODO: Implement edit dialog/modal
-    console.log("Edit book:", book.title);
-  };
-
-  /**
-   * Handles progress update workflow
-   *
-   * Placeholder function for opening progress update dialog/modal.
-   * Currently logs to console, intended to be implemented with
-   * a modal for updating reading progress.
-   *
-   * @param book - Book object to update progress for
-   */
-  const handleUpdateProgress = async (book: Book) => {
-    if (!user) return;
-    // TODO: Implement progress update dialog/modal
-    console.log("Update progress for:", book.title);
-  };
-
-  /**
    * Toggles sort direction or changes sort field
    *
    * If clicking the same sort option, toggles between asc/desc.
@@ -233,207 +84,32 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-            My Library
-          </h1>
-          <p className="text-muted-foreground">
-            Manage and organize your book collection
-          </p>
-        </div>
+      <LibraryControls
+        searchQuery={searchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        filterStatus={filterStatus}
+        onFilterStatusChange={setFilterStatus}
+        filterOwnership={filterOwnership}
+        onFilterOwnershipChange={setFilterOwnership}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        onSortChange={toggleSort}
+        onClearFilters={clearFilters}
+        filteredCount={filteredAndSortedBooks.length}
+        totalCount={books.length}
+      />
 
-        {/* View Toggle */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          {/* Search info - controlled by header */}
-          {searchQuery.trim() && (
-            <div className="bg-muted/50 p-3 rounded-md">
-              <p className="text-sm text-muted-foreground">
-                Searching for:{" "}
-                <span className="font-medium text-foreground">
-                  &quot;{searchQuery}&quot;
-                </span>
-              </p>
-            </div>
-          )}
-
-          {/* Filters and Sorting */}
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Status:</span>
-              <select
-                value={filterStatus}
-                onChange={(e) =>
-                  setFilterStatus(e.target.value as FilterStatus)
-                }
-                className="bg-background border border-input rounded-md px-3 py-1 text-sm"
-              >
-                <option value="all">All</option>
-                <option value="not_started">Not Started</option>
-                <option value="in_progress">Reading</option>
-                <option value="finished">Finished</option>
-              </select>
-            </div>
-
-            {/* Ownership Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Ownership:</span>
-              <select
-                value={filterOwnership}
-                onChange={(e) => setFilterOwnership(e.target.value)}
-                className="bg-background border border-input rounded-md px-3 py-1 text-sm"
-              >
-                <option value="all">All Books</option>
-                <option value="owned">Owned</option>
-                <option value="wishlist">Wishlist</option>
-              </select>
-            </div>
-
-            {/* Sort Options */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Sort by:</span>
-              <div className="flex gap-1">
-                {[
-                  { key: "title" as const, label: "Title" },
-                  { key: "author" as const, label: "Author" },
-                  { key: "pages" as const, label: "Pages" },
-                  { key: "rating" as const, label: "Rating" },
-                  { key: "progress" as const, label: "Progress" },
-                ].map(({ key, label }) => (
-                  <Button
-                    key={key}
-                    variant={sortBy === key ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleSort(key)}
-                    className="flex items-center gap-1"
-                  >
-                    {label}
-                    {sortBy === key &&
-                      (sortDirection === "asc" ? (
-                        <SortAsc className="h-3 w-3" />
-                      ) : (
-                        <SortDesc className="h-3 w-3" />
-                      ))}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Clear Filters */}
-            {activeFiltersCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="flex items-center gap-1"
-              >
-                <X className="h-3 w-3" />
-                Clear Filters ({activeFiltersCount})
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Results Summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {filteredAndSortedBooks.length} of {books.length} books
-        </p>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">Loading your library...</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <div className="text-destructive mb-4">⚠️</div>
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              Error loading books
-            </h3>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={refreshBooks} variant="outline">
-              Try again
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Books Display */}
-      {!loading && !error && (
-        <>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredAndSortedBooks.map((book) => (
-                <BookCard key={book.id} book={book} onBookClick={onBookClick} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {filteredAndSortedBooks.map((book) => (
-                <BookListItem
-                  key={book.id}
-                  book={book}
-                  onBookClick={onBookClick}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && filteredAndSortedBooks.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              No books found
-            </h3>
-            <p className="text-muted-foreground">
-              {activeFiltersCount > 0
-                ? "Try adjusting your filters or search terms"
-                : "Your library is empty. Start by adding some books!"}
-            </p>
-            {activeFiltersCount > 0 && (
-              <Button variant="outline" onClick={clearFilters} className="mt-4">
-                Clear all filters
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <LibraryGrid
+        books={filteredAndSortedBooks}
+        viewMode={viewMode}
+        onBookClick={onBookClick}
+        loading={loading}
+        error={error}
+        onRefresh={refreshBooks}
+        onClearFilters={clearFilters}
+        activeFiltersCount={activeFiltersCount}
+      />
     </div>
   );
 };

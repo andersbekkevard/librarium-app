@@ -1,7 +1,7 @@
-import { renderHook, act } from "@testing-library/react";
-import { useBookSearch } from "../useBookSearch";
-import { googleBooksApi } from "../../google-books-api";
+import { act, renderHook } from "@testing-library/react";
 import type { GoogleBooksVolume } from "../../google-books-api";
+import { googleBooksApi } from "../../google-books-api";
+import { useBookSearch } from "../useBookSearch";
 
 // Mock the Google Books API
 jest.mock("../../google-books-api", () => ({
@@ -149,7 +149,10 @@ describe("useBookSearch", () => {
       expect(result.current.error).toBe(
         "Failed to search books. Please check your internet connection and try again."
       );
-      expect(console.error).toHaveBeenCalledWith("Error searching books:", mockError);
+      expect(console.error).toHaveBeenCalledWith(
+        "Error searching books:",
+        mockError
+      );
     });
 
     it("should clear error before new search", async () => {
@@ -190,7 +193,15 @@ describe("useBookSearch", () => {
       expect(result.current.isSearching).toBe(false);
 
       // Start multiple searches
-      const mockResults: GoogleBooksVolume[] = [];
+      const mockResults: GoogleBooksVolume[] = [
+        {
+          id: "book1",
+          volumeInfo: {
+            title: "JavaScript: The Good Parts",
+            authors: ["Douglas Crockford"],
+          },
+        },
+      ];
       mockGoogleBooksApi.search.mockResolvedValue(mockResults);
 
       // First search
@@ -309,9 +320,9 @@ describe("useBookSearch", () => {
       const { result, rerender } = renderHook(() => useBookSearch());
 
       const clearResults1 = result.current.clearResults;
-      
+
       rerender();
-      
+
       const clearResults2 = result.current.clearResults;
 
       expect(clearResults1).toBe(clearResults2);
@@ -364,9 +375,9 @@ describe("useBookSearch", () => {
       const { result, rerender } = renderHook(() => useBookSearch());
 
       const clearError1 = result.current.clearError;
-      
+
       rerender();
-      
+
       const clearError2 = result.current.clearError;
 
       expect(clearError1).toBe(clearError2);
@@ -387,8 +398,12 @@ describe("useBookSearch", () => {
       const { result: rerenderedResult } = renderHook(() => useBookSearch());
 
       expect(rerenderedResult.current.search).toBe(initialFunctions.search);
-      expect(rerenderedResult.current.clearResults).toBe(initialFunctions.clearResults);
-      expect(rerenderedResult.current.clearError).toBe(initialFunctions.clearError);
+      expect(rerenderedResult.current.clearResults).toBe(
+        initialFunctions.clearResults
+      );
+      expect(rerenderedResult.current.clearError).toBe(
+        initialFunctions.clearError
+      );
     });
 
     it("should maintain state across re-renders", async () => {

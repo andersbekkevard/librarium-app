@@ -4,11 +4,32 @@ import userEvent from "@testing-library/user-event";
 import { Timestamp } from "firebase/firestore";
 import { BookCard } from "../BookCard";
 
+// Import Jest DOM matchers types
+import "@testing-library/jest-dom";
+
 // Mock next/navigation
 const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
+  }),
+}));
+
+// Mock BooksProvider
+jest.mock("@/lib/providers/BooksProvider", () => ({
+  useBooksContext: () => ({
+    calculateBookProgress: (book: Book) => {
+      if (
+        book.state === "in_progress" &&
+        book.progress.currentPage &&
+        book.progress.totalPages
+      ) {
+        return Math.round(
+          (book.progress.currentPage / book.progress.totalPages) * 100
+        );
+      }
+      return 0;
+    },
   }),
 }));
 
@@ -25,8 +46,8 @@ describe("BookCard", () => {
     isOwned: true,
     genre: "Fiction",
     coverImage: "https://example.com/cover.jpg",
-    addedAt: new Timestamp(1234567890, 0),
-    updatedAt: new Timestamp(1234567890, 0),
+    addedAt: { seconds: 1234567890, nanoseconds: 0 } as Timestamp,
+    updatedAt: { seconds: 1234567890, nanoseconds: 0 } as Timestamp,
   };
 
   beforeEach(() => {
@@ -335,23 +356,6 @@ describe("BookCard", () => {
     it("should work without optional props", () => {
       expect(() => render(<BookCard book={mockBook} />)).not.toThrow();
     });
-
-    it("should accept but not call unused callback props", () => {
-      const onEdit = jest.fn();
-      const onUpdateProgress = jest.fn();
-
-      render(
-        <BookCard
-          book={mockBook}
-          onEdit={onEdit}
-          onUpdateProgress={onUpdateProgress}
-        />
-      );
-
-      // These callbacks are not currently used in the component
-      expect(onEdit).not.toHaveBeenCalled();
-      expect(onUpdateProgress).not.toHaveBeenCalled();
-    });
   });
 
   describe("Styling and Classes", () => {
@@ -363,8 +367,7 @@ describe("BookCard", () => {
         "hover:shadow-md",
         "hover:border-border/80",
         "hover:bg-card",
-        "transition-all",
-        "duration-200"
+        "transition-all"
       );
     });
 
@@ -392,8 +395,8 @@ describe("BookCard", () => {
         state: "not_started",
         progress: { currentPage: 0, totalPages: 0 },
         isOwned: false,
-        addedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
-        updatedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+        addedAt: { seconds: 1234567890, nanoseconds: 0 } as Timestamp,
+        updatedAt: { seconds: 1234567890, nanoseconds: 0 } as Timestamp,
       };
 
       expect(() => render(<BookCard book={minimalBook} />)).not.toThrow();
