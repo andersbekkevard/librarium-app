@@ -7,6 +7,7 @@
 
 import { User } from "firebase/auth";
 import { Book, UserProfile } from "../models";
+import { StandardError } from "../error-handling";
 
 /**
  * Common service result type for operations that can fail
@@ -14,7 +15,7 @@ import { Book, UserProfile } from "../models";
 export interface ServiceResult<T> {
   success: boolean;
   data?: T;
-  error?: string;
+  error?: StandardError;
 }
 
 /**

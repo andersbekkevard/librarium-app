@@ -9,6 +9,7 @@ import { BookEvent, Book } from "../models";
 import { ServiceResult } from "./types";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
+import { ErrorHandlerUtils, ErrorBuilder, ErrorCategory, ErrorSeverity } from "../error-handling";
 import { EVENT_CONFIG } from "../constants";
 
 /**
@@ -81,7 +82,10 @@ export class EventService implements IEventService {
       if (!userId) {
         return {
           success: false,
-          error: "User ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "userId",
+            "User ID is required"
+          )
         };
       }
 
@@ -90,7 +94,12 @@ export class EventService implements IEventService {
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Failed to fetch recent events"
+          error: new ErrorBuilder(result.error || "Failed to fetch recent events")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to fetch recent activity at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build()
         };
       }
 
@@ -101,7 +110,12 @@ export class EventService implements IEventService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: new ErrorBuilder("Failed to get recent events")
+          .withCategory(ErrorCategory.SYSTEM)
+          .withUserMessage("An unexpected error occurred while fetching recent events")
+          .withOriginalError(error as Error)
+          .withSeverity(ErrorSeverity.MEDIUM)
+          .build()
       };
     }
   }
@@ -117,7 +131,10 @@ export class EventService implements IEventService {
       if (!userId) {
         return {
           success: false,
-          error: "User ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "userId",
+            "User ID is required"
+          )
         };
       }
 
@@ -126,7 +143,12 @@ export class EventService implements IEventService {
       if (!eventsResult.success || !eventsResult.data) {
         return {
           success: false,
-          error: eventsResult.error || "Failed to fetch events"
+          error: eventsResult.error || new ErrorBuilder("Failed to fetch events")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to fetch recent activity at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build()
         };
       }
 
@@ -153,7 +175,12 @@ export class EventService implements IEventService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: new ErrorBuilder("Failed to get recent activity items")
+          .withCategory(ErrorCategory.SYSTEM)
+          .withUserMessage("An unexpected error occurred while fetching recent activity")
+          .withOriginalError(error as Error)
+          .withSeverity(ErrorSeverity.MEDIUM)
+          .build()
       };
     }
   }
@@ -169,14 +196,20 @@ export class EventService implements IEventService {
       if (!userId) {
         return {
           success: false,
-          error: "User ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "userId",
+            "User ID is required"
+          )
         };
       }
 
       if (!event.bookId) {
         return {
           success: false,
-          error: "Book ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "bookId",
+            "Book ID is required"
+          )
         };
       }
 
@@ -185,7 +218,12 @@ export class EventService implements IEventService {
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Failed to log event"
+          error: new ErrorBuilder(result.error || "Failed to log event")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to log activity at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build()
         };
       }
 
@@ -196,7 +234,12 @@ export class EventService implements IEventService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: new ErrorBuilder("Failed to log event")
+          .withCategory(ErrorCategory.SYSTEM)
+          .withUserMessage("An unexpected error occurred while logging activity")
+          .withOriginalError(error as Error)
+          .withSeverity(ErrorSeverity.MEDIUM)
+          .build()
       };
     }
   }
@@ -212,14 +255,20 @@ export class EventService implements IEventService {
       if (!userId) {
         return {
           success: false,
-          error: "User ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "userId",
+            "User ID is required"
+          )
         };
       }
 
       if (!bookId) {
         return {
           success: false,
-          error: "Book ID is required"
+          error: ErrorHandlerUtils.createValidationError(
+            "bookId",
+            "Book ID is required"
+          )
         };
       }
 
@@ -228,7 +277,12 @@ export class EventService implements IEventService {
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Failed to fetch book events"
+          error: new ErrorBuilder(result.error || "Failed to fetch book events")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to fetch book activity at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build()
         };
       }
 
@@ -239,7 +293,12 @@ export class EventService implements IEventService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: new ErrorBuilder("Failed to get book events")
+          .withCategory(ErrorCategory.SYSTEM)
+          .withUserMessage("An unexpected error occurred while fetching book activity")
+          .withOriginalError(error as Error)
+          .withSeverity(ErrorSeverity.MEDIUM)
+          .build()
       };
     }
   }

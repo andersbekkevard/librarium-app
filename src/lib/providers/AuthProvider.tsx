@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Sign-in failed",
+          result.error?.message || "Sign-in failed",
           {
             component: "AuthProvider",
             action: "signInWithGoogle",
@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Sign-out failed",
+          result.error?.message || "Sign-out failed",
           {
             component: "AuthProvider",
             action: "signOut",

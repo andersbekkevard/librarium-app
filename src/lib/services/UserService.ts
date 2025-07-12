@@ -11,13 +11,8 @@ import { Book, UserProfile } from "../models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
 import { IUserRepository } from "../repositories/types";
-import {
-  IUserService,
-  ServiceError,
-  ServiceErrorType,
-  ServiceResult,
-  UserStats,
-} from "./types";
+import { IUserService, ServiceResult, UserStats } from "./types";
+import { ErrorHandlerUtils, ErrorBuilder, ErrorCategory, ErrorSeverity, StandardError } from "../error-handling";
 import { EVENT_CONFIG } from "../constants";
 
 export class UserService implements IUserService {
@@ -27,38 +22,44 @@ export class UserService implements IUserService {
   ) {}
 
   /**
-   * Convert repository errors to service errors
+   * Convert repository errors to standard errors
    */
-  private handleRepositoryError(error: string): ServiceError {
+  private handleRepositoryError(error: string): StandardError {
     if (error.includes("Access denied")) {
-      return new ServiceError(
-        ServiceErrorType.AUTHORIZATION_ERROR,
-        "You don't have permission to access this user profile",
-        error
-      );
+      return new ErrorBuilder("Repository access denied")
+        .withCategory(ErrorCategory.AUTHORIZATION)
+        .withUserMessage("You don't have permission to access this user profile")
+        .withContext({ originalError: error })
+        .withSeverity(ErrorSeverity.HIGH)
+        .build();
     }
 
     if (error.includes("Network error")) {
-      return new ServiceError(
-        ServiceErrorType.EXTERNAL_API_ERROR,
-        "Network error. Please check your connection and try again.",
-        error
-      );
+      return new ErrorBuilder("Network error during repository operation")
+        .withCategory(ErrorCategory.NETWORK)
+        .withUserMessage("Network error. Please check your connection and try again.")
+        .withContext({ originalError: error })
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .retryable()
+        .build();
     }
 
     if (error.includes("not found")) {
-      return new ServiceError(
-        ServiceErrorType.NOT_FOUND,
-        "User profile not found",
-        error
-      );
+      return new ErrorBuilder("User profile not found in repository")
+        .withCategory(ErrorCategory.VALIDATION)
+        .withUserMessage("User profile not found")
+        .withContext({ originalError: error })
+        .withSeverity(ErrorSeverity.LOW)
+        .build();
     }
 
-    return new ServiceError(
-      ServiceErrorType.REPOSITORY_ERROR,
-      `Database error: ${error}`,
-      error
-    );
+    return new ErrorBuilder(`Database error: ${error}`)
+      .withCategory(ErrorCategory.SYSTEM)
+      .withUserMessage("A database error occurred. Please try again.")
+      .withContext({ originalError: error })
+      .withSeverity(ErrorSeverity.MEDIUM)
+      .retryable()
+      .build();
   }
 
   /**
@@ -66,27 +67,27 @@ export class UserService implements IUserService {
    */
   private validateUserProfileData(
     profile: Partial<UserProfile>
-  ): ServiceError | null {
+  ): StandardError | null {
     if (
       profile.displayName !== undefined &&
       profile.displayName.trim().length === 0
     ) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return ErrorHandlerUtils.createValidationError(
+        "displayName",
         "Display name cannot be empty"
       );
     }
 
     if (profile.email !== undefined && profile.email.trim().length === 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return ErrorHandlerUtils.createValidationError(
+        "email",
         "Email cannot be empty"
       );
     }
 
     if (profile.totalBooksRead !== undefined && profile.totalBooksRead < 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return ErrorHandlerUtils.createValidationError(
+        "totalBooksRead",
         "Total books read cannot be negative"
       );
     }
@@ -95,15 +96,15 @@ export class UserService implements IUserService {
       profile.currentlyReading !== undefined &&
       profile.currentlyReading < 0
     ) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return ErrorHandlerUtils.createValidationError(
+        "currentlyReading",
         "Currently reading count cannot be negative"
       );
     }
 
     if (profile.booksInLibrary !== undefined && profile.booksInLibrary < 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return ErrorHandlerUtils.createValidationError(
+        "booksInLibrary",
         "Books in library count cannot be negative"
       );
     }
@@ -119,13 +120,19 @@ export class UserService implements IUserService {
       const result = await this.userRepository.getProfile(userId);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { success: false, error: "Failed to get user profile" };
+      const standardError = new ErrorBuilder("Failed to get user profile")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while getting profile")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 
@@ -177,16 +184,22 @@ export class UserService implements IUserService {
       );
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        throw serviceError;
+        const standardError = this.handleRepositoryError(result.error!);
+        throw standardError;
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      if (error instanceof ServiceError) {
-        return { success: false, error: error.message };
+      if (error instanceof Error && 'category' in error) {
+        return { success: false, error: error as StandardError };
       }
-      return { success: false, error: "Failed to create user profile" };
+      const standardError = new ErrorBuilder("Failed to create user profile")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while creating profile")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 
@@ -200,19 +213,25 @@ export class UserService implements IUserService {
     try {
       const validationError = this.validateUserProfileData(updates);
       if (validationError) {
-        return { success: false, error: validationError.message };
+        return { success: false, error: validationError };
       }
 
       const result = await this.userRepository.updateProfile(userId, updates);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { success: false, error: "Failed to update user profile" };
+      const standardError = new ErrorBuilder("Failed to update user profile")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while updating profile")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 
@@ -224,13 +243,19 @@ export class UserService implements IUserService {
       const result = await this.userRepository.deleteProfile(userId);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: "Failed to delete user profile" };
+      const standardError = new ErrorBuilder("Failed to delete user profile")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while deleting profile")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 
@@ -243,7 +268,12 @@ export class UserService implements IUserService {
       if (!booksResult.success) {
         return {
           success: false,
-          error: "Failed to get user books for statistics",
+          error: new ErrorBuilder("Failed to get user books for statistics")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to calculate statistics at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build(),
         };
       }
 
@@ -259,13 +289,19 @@ export class UserService implements IUserService {
       const result = await this.userRepository.updateProfile(userId, stats);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: "Failed to update user statistics" };
+      const standardError = new ErrorBuilder("Failed to update user statistics")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while updating statistics")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 
@@ -278,7 +314,12 @@ export class UserService implements IUserService {
       if (!booksResult.success) {
         return {
           success: false,
-          error: "Failed to get user books for statistics",
+          error: new ErrorBuilder("Failed to get user books for statistics")
+            .withCategory(ErrorCategory.SYSTEM)
+            .withUserMessage("Unable to calculate statistics at this time")
+            .withSeverity(ErrorSeverity.MEDIUM)
+            .retryable()
+            .build(),
         };
       }
 
@@ -344,7 +385,13 @@ export class UserService implements IUserService {
 
       return { success: true, data: stats };
     } catch (error) {
-      return { success: false, error: "Failed to calculate user statistics" };
+      const standardError = new ErrorBuilder("Failed to calculate user statistics")
+        .withCategory(ErrorCategory.SYSTEM)
+        .withUserMessage("An unexpected error occurred while calculating statistics")
+        .withOriginalError(error as Error)
+        .withSeverity(ErrorSeverity.MEDIUM)
+        .build();
+      return { success: false, error: standardError };
     }
   }
 

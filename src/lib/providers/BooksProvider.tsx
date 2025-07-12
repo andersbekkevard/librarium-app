@@ -157,7 +157,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to add book",
+          result.error?.message || "Failed to add book",
           {
             component: "BooksProvider",
             action: "addBook",
@@ -236,7 +236,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update book",
+          result.error?.message || "Failed to update book",
           {
             component: "BooksProvider",
             action: "updateBook",
@@ -319,7 +319,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update book",
+          result.error?.message || "Failed to update book",
           {
             component: "BooksProvider",
             action: "updateBookManual",
@@ -400,7 +400,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update book progress",
+          result.error?.message || "Failed to update book progress",
           {
             component: "BooksProvider",
             action: "updateBookProgress",
@@ -485,7 +485,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update book state",
+          result.error?.message || "Failed to update book state",
           {
             component: "BooksProvider",
             action: "updateBookState",
@@ -564,7 +564,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update book rating",
+          result.error?.message || "Failed to update book rating",
           {
             component: "BooksProvider",
             action: "updateBookRating",
@@ -636,7 +636,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to delete book",
+          result.error?.message || "Failed to delete book",
           {
             component: "BooksProvider",
             action: "deleteBook",
@@ -705,7 +705,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to refresh books",
+          result.error?.message || "Failed to refresh books",
           {
             component: "BooksProvider",
             action: "refreshBooks",
@@ -776,7 +776,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } else {
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to get book",
+          result.error?.message || "Failed to get book",
           {
             component: "BooksProvider",
             action: "getBook",

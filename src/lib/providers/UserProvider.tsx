@@ -113,7 +113,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update profile",
+          result.error?.message || "Failed to update profile",
           {
             component: "UserProvider",
             action: "updateUserProfile",
@@ -183,7 +183,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to refresh profile",
+          result.error?.message || "Failed to refresh profile",
           {
             component: "UserProvider",
             action: "refreshUserProfile",
@@ -254,7 +254,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to refresh statistics",
+          result.error?.message || "Failed to refresh statistics",
           {
             component: "UserProvider",
             action: "refreshUserStats",
@@ -324,7 +324,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Handle service error
         const standardError = ErrorHandlerUtils.handleProviderError(
           ProviderErrorType.OPERATION_FAILED,
-          result.error || "Failed to update statistics",
+          result.error?.message || "Failed to update statistics",
           {
             component: "UserProvider",
             action: "updateUserStats",
@@ -378,7 +378,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         } else {
           const standardError = ErrorHandlerUtils.handleProviderError(
             ProviderErrorType.INITIALIZATION_FAILED,
-            result.error || "Failed to initialize user profile",
+            result.error?.message || "Failed to initialize user profile",
             {
               component: "UserProvider",
               action: "initializeUserProfile",
