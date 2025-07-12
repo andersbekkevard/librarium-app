@@ -1,8 +1,8 @@
-import { BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import BookCard from "@/components/app/BookCard";
-import { Book } from "@/lib/models";
-import { UI_CONFIG } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
+import { UI_CONFIG } from "@/lib/constants/constants";
+import { Book } from "@/lib/models/models";
+import { BookOpen } from "lucide-react";
 
 interface RecentlyReadSectionProps {
   books: Book[];
@@ -43,23 +43,17 @@ export const RecentlyReadSection: React.FC<RecentlyReadSectionProps> = ({
             </Button>
           )}
         </div>
-        
+
         {finishedBooks.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
             {finishedBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onBookClick={onBookClick}
-              />
+              <BookCard key={book.id} book={book} onBookClick={onBookClick} />
             ))}
           </div>
         ) : (
           <div className="text-center py-8">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">
-              No books finished yet
-            </p>
+            <p className="text-muted-foreground">No books finished yet</p>
           </div>
         )}
       </div>

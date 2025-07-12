@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { BarChart3, Book, Search, Star, Users } from "lucide-react";
 
 interface FeaturesProps {

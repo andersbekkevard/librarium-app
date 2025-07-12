@@ -5,7 +5,7 @@
  * with all required providers and context for comprehensive testing.
  */
 
-import { Book, UserProfile } from "@/lib/models";
+import { Book, UserProfile } from "@/lib/models/models";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { BooksProvider } from "@/lib/providers/BooksProvider";
 import { UserProvider } from "@/lib/providers/UserProvider";

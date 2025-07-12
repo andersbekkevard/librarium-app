@@ -1,4 +1,4 @@
-import { ErrorContext } from "@/lib/error-handling";
+import { ErrorContext } from "@/lib/errors/error-handling";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import {

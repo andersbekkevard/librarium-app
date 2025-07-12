@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 
 interface FAQProps {
   question: string;

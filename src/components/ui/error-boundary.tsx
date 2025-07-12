@@ -11,8 +11,8 @@ import {
   ErrorContext,
   StandardError,
   createSystemError,
-} from "@/lib/error-handling";
-import { simpleErrorLogger } from "@/lib/error-logging";
+} from "@/lib/errors/error-handling";
+import { simpleErrorLogger } from "@/lib/errors/error-logging";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { ErrorBoundaryFallback } from "./error-display";
 

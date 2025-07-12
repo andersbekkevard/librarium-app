@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BRAND_COLORS, STATUS_COLORS } from "@/lib/colors";
+import { BRAND_COLORS, STATUS_COLORS } from "@/lib/design/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";

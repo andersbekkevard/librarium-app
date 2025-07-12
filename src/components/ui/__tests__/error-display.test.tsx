@@ -3,7 +3,7 @@ import {
   ErrorRecoveryAction,
   ErrorSeverity,
   StandardError,
-} from "@/lib/error-handling";
+} from "@/lib/errors/error-handling";
 import { fireEvent, render, screen } from "@testing-library/react";
 import {
   ErrorAlert,

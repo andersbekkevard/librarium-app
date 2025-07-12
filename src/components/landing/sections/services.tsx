@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 
 enum ProService {
   YES = 1,

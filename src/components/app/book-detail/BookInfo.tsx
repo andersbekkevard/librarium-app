@@ -7,7 +7,7 @@ import { BookOpen, Calendar, ChevronDown, ChevronUp, Hash } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 
 interface BookInfoProps {
   book: Book;

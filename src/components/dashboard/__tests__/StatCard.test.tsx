@@ -1,4 +1,4 @@
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { render, screen } from "@testing-library/react";
 import { Book, TrendingUp, Zap } from "lucide-react";
 import { StatCard } from "../StatCard";

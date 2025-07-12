@@ -1,16 +1,13 @@
 "use client";
 
-import {
-  BookOpen,
-  Loader2,
-} from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 import * as React from "react";
 
 import BookCard from "@/components/app/BookCard";
-import { BookListItem } from "./BookListItem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
+import { BookListItem } from "./BookListItem";
 
 type ViewMode = "grid" | "list";
 
@@ -104,11 +101,7 @@ export const LibraryGrid: React.FC<LibraryGridProps> = ({
     return (
       <div className="space-y-1">
         {books.map((book) => (
-          <BookListItem
-            key={book.id}
-            book={book}
-            onBookClick={onBookClick}
-          />
+          <BookListItem key={book.id} book={book} onBookClick={onBookClick} />
         ))}
       </div>
     );

@@ -1,7 +1,7 @@
+import type { Book } from "@/lib/models/models";
+import { CheckCircle, Clock, HelpCircle, LucideIcon, Play } from "lucide-react";
 import * as React from "react";
-import { Clock, Play, CheckCircle, LucideIcon, HelpCircle } from "lucide-react";
 import { Badge } from "./badge";
-import type { Book } from "@/lib/models";
 
 interface ReadingStateBadgeProps {
   state: Book["state"];
@@ -15,7 +15,10 @@ interface BadgeConfig {
   icon: LucideIcon;
 }
 
-const READING_STATE_CONFIG: Record<Book["state"], BadgeConfig & { testId: string }> = {
+const READING_STATE_CONFIG: Record<
+  Book["state"],
+  BadgeConfig & { testId: string }
+> = {
   not_started: {
     label: "Not Started",
     variant: "secondary",
@@ -63,7 +66,9 @@ export const ReadingStateBadge: React.FC<ReadingStateBadgeProps> = ({
 
   return (
     <Badge variant={config.variant} className={className}>
-      {showIcon && <IconComponent className="h-3 w-3" data-testid={config.testId} />}
+      {showIcon && (
+        <IconComponent className="h-3 w-3" data-testid={config.testId} />
+      )}
       {config.label}
     </Badge>
   );

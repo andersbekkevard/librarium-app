@@ -1,16 +1,13 @@
 "use client";
 
-import {
-  BookOpen,
-  User,
-} from "lucide-react";
+import { BookOpen, User } from "lucide-react";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { StarRating } from "@/components/ui/star-rating";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
-import { Book } from "@/lib/models";
+import { StarRating } from "@/components/ui/star-rating";
+import { Book } from "@/lib/models/models";
 import { bookService } from "@/lib/services/BookService";
 
 interface BookListItemProps {
@@ -22,13 +19,11 @@ export const BookListItem: React.FC<BookListItemProps> = ({
   book,
   onBookClick,
 }) => {
-
   const handleCardClick = () => {
     if (onBookClick) {
       onBookClick(book.id);
     }
   };
-
 
   return (
     <Card
@@ -91,9 +86,9 @@ export const BookListItem: React.FC<BookListItemProps> = ({
               {/* Rating or Progress */}
               <div className="flex items-center gap-1">
                 {book.state === "finished" && book.rating ? (
-                  <StarRating 
-                    rating={book.rating} 
-                    size="sm" 
+                  <StarRating
+                    rating={book.rating}
+                    size="sm"
                     showText={false}
                     className="gap-0.5"
                   />

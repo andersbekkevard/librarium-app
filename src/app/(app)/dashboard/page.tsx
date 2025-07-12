@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Book } from "@/lib/models";
-import { userService } from "@/lib/services";
 import Sidebar from "@/components/app/Sidebar";
-import { Loader2 } from "lucide-react";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import DashboardContent from "@/components/dashboard/DashboardContent";
+import { userService } from "@/lib/services";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -26,7 +26,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       if (!user) return;
-      
+
       try {
         const result = await userService.getUserStats(user.uid);
         if (result.success && result.data) {
@@ -48,7 +48,7 @@ export default function Dashboard() {
           });
         }
       } catch (error) {
-        console.error('Error fetching user stats:', error);
+        console.error("Error fetching user stats:", error);
         // Reset stats on error
         setStats({
           totalBooks: 0,
@@ -104,7 +104,7 @@ export default function Dashboard() {
   };
 
   const handleAddBookClick = () => {
-    router.push('/add-books');
+    router.push("/add-books");
   };
 
   return (
@@ -117,7 +117,7 @@ export default function Dashboard() {
         <DashboardContent
           books={books}
           stats={stats}
-          userId={user?.uid || ''}
+          userId={user?.uid || ""}
           onEdit={handleEdit}
           onUpdateProgress={handleUpdateProgress}
           onBookClick={handleBookClick}

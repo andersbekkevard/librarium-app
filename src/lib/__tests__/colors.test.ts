@@ -1,4 +1,4 @@
-import * as colors from "../colors";
+import * as colors from "@/lib/design/colors";
 
 describe("colors", () => {
   describe("BRAND_COLORS", () => {

@@ -1,4 +1,4 @@
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 

@@ -1,5 +1,5 @@
 "use client";
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book, Github, Menu } from "lucide-react";
 import Link from "next/link";
 import React from "react";

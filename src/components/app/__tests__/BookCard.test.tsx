@@ -1,4 +1,4 @@
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Timestamp } from "firebase/firestore";
@@ -202,9 +202,9 @@ describe("BookCard", () => {
       expect(screen.getByText("(4/5)")).toBeInTheDocument();
       const stars = screen.getAllByTestId("star-icon");
       expect(stars).toHaveLength(5);
-      const filledStars = screen.getAllByTestId("star-icon").filter((star) =>
-        star.classList.contains("fill-status-warning")
-      );
+      const filledStars = screen
+        .getAllByTestId("star-icon")
+        .filter((star) => star.classList.contains("fill-status-warning"));
       expect(filledStars).toHaveLength(4);
     });
 
@@ -281,7 +281,8 @@ describe("BookCard", () => {
     it("should handle long titles appropriately", () => {
       const bookWithLongTitle: Book = {
         ...mockBook,
-        title: "This is a very long book title that should be truncated when displayed",
+        title:
+          "This is a very long book title that should be truncated when displayed",
       };
       render(<BookCard book={bookWithLongTitle} />);
       const titleElement = screen.getByText(bookWithLongTitle.title);

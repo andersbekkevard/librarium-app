@@ -1,6 +1,6 @@
 "use client";
 
-import { BRAND_COLORS } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 
 interface ReviewProps {
   image: string;

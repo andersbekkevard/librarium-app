@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { STATUS_COLORS } from "@/lib/colors";
-import { Book } from "@/lib/models";
+import { STATUS_COLORS } from "@/lib/design/colors";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { ArrowLeft } from "lucide-react";

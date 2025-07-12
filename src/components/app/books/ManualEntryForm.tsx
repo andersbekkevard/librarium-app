@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { convertManualEntryToBook } from "@/lib/book-utils";
-import { Book } from "@/lib/models";
+import { convertManualEntryToBook } from "@/lib/books/book-utils";
+import { Book } from "@/lib/models/models";
 
 interface ManualEntryFormProps {
   onAddBook: (book: Book) => Promise<void>;

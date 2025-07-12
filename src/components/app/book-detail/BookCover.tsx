@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BookOpen,
-  CheckCircle,
-  Edit,
-  Play,
-  Star,
-} from "lucide-react";
+import { BookOpen, CheckCircle, Edit, Play, Star } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -15,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 
 interface BookCoverProps {
   book: Book;
@@ -61,9 +55,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
               <p className="text-sm font-medium text-foreground mb-2">
                 {book.title}
               </p>
-              <p className="text-xs text-muted-foreground">
-                by {book.author}
-              </p>
+              <p className="text-xs text-muted-foreground">by {book.author}</p>
             </div>
           )}
         </div>
@@ -82,9 +74,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
         {book.state === "in_progress" && (
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium">
-                {progress}% complete
-              </span>
+              <span className="text-sm font-medium">{progress}% complete</span>
               <span className="text-xs text-muted-foreground">
                 {book.progress.currentPage || 0} /{" "}
                 {book.progress.totalPages || "?"} pages
@@ -150,11 +140,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
             </Button>
           )}
 
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onEditBook}
-          >
+          <Button variant="outline" className="w-full" onClick={onEditBook}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Book
           </Button>

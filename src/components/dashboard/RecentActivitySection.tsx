@@ -1,6 +1,6 @@
 import { ErrorAlert } from "@/components/ui/error-display";
-import { TIMING_CONFIG } from "@/lib/constants";
-import { StandardError } from "@/lib/error-handling";
+import { TIMING_CONFIG } from "@/lib/constants/constants";
+import { StandardError } from "@/lib/errors/error-handling";
 import { ActivityItem } from "@/lib/services/EventService";
 
 interface RecentActivitySectionProps {

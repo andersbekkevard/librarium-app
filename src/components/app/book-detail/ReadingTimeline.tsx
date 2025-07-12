@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 
 interface ReadingTimelineProps {
   book: Book;
@@ -22,8 +22,7 @@ export const ReadingTimeline: React.FC<ReadingTimelineProps> = ({ book }) => {
             <div>
               <p className="text-sm font-medium">Added to library</p>
               <p className="text-xs text-muted-foreground">
-                {book.addedAt?.toDate?.()?.toLocaleDateString() ||
-                  "Unknown"}
+                {book.addedAt?.toDate?.()?.toLocaleDateString() || "Unknown"}
               </p>
             </div>
           </div>

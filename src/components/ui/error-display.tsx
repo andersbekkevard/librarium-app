@@ -5,14 +5,14 @@
  * error handling system.
  */
 
-import { STATUS_COLORS } from "@/lib/colors";
+import { STATUS_COLORS } from "@/lib/design/colors";
 import {
   ErrorInfo,
   ErrorRecoveryAction,
   ErrorSeverity,
   StandardError,
-} from "@/lib/error-handling";
-import { cn } from "@/lib/utils";
+} from "@/lib/errors/error-handling";
+import { cn } from "@/lib/utils/utils";
 import { AlertCircle, AlertTriangle, Info, RefreshCw, X } from "lucide-react";
 import React from "react";
 import { Button } from "./button";

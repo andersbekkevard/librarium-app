@@ -1,8 +1,8 @@
-import * as React from "react";
+import { UI_CONFIG } from "@/lib/constants/constants";
+import { STAR_RATING_COLORS } from "@/lib/design/colors";
+import { cn } from "@/lib/utils/utils";
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { STAR_RATING_COLORS } from "@/lib/colors";
-import { UI_CONFIG } from "@/lib/constants";
+import * as React from "react";
 
 interface StarRatingProps {
   rating: number;
@@ -14,7 +14,7 @@ interface StarRatingProps {
 
 const sizeClasses = {
   sm: "h-3 w-3",
-  md: "h-4 w-4", 
+  md: "h-4 w-4",
   lg: "h-5 w-5",
 };
 
@@ -26,10 +26,10 @@ const textSizeClasses = {
 
 /**
  * StarRating Component
- * 
+ *
  * Displays a visual star rating with optional text display.
  * Consolidates all star rating implementations across the app.
- * 
+ *
  * @param rating - Rating value (0-maxRating)
  * @param maxRating - Maximum rating value (default: 5)
  * @param size - Size variant for stars (default: sm)
@@ -57,10 +57,15 @@ export const StarRating: React.FC<StarRatingProps> = ({
   ));
 
   return (
-    <div className={cn("flex items-center gap-1", className)} data-testid="star-rating-container">
+    <div
+      className={cn("flex items-center gap-1", className)}
+      data-testid="star-rating-container"
+    >
       {stars}
       {showText && (
-        <span className={cn("ml-1 text-muted-foreground", textSizeClasses[size])}>
+        <span
+          className={cn("ml-1 text-muted-foreground", textSizeClasses[size])}
+        >
           ({rating}/{maxRating})
         </span>
       )}

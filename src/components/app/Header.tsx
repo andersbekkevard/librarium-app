@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Bell, Book, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ToggleTheme } from "@/components/toggle-theme";
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
+import { ToggleTheme } from "@/components/toggle-theme";
+import { Button } from "@/components/ui/button";
+import { UI_CONFIG } from "@/lib/constants/constants";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { UI_CONFIG } from "@/lib/constants";
+import { Bell, Book, Loader2, Search } from "lucide-react";
+import { useState } from "react";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;

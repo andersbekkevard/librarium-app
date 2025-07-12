@@ -21,7 +21,7 @@ import {
   GoogleBooksVolume,
   formatAuthors,
   getBestThumbnail,
-} from "@/lib/google-books-api";
+} from "@/lib/api/google-books-api";
 
 interface SearchResultsProps {
   books: GoogleBooksVolume[];

@@ -3,7 +3,7 @@
 import BookDetailPage from "@/components/app/BookDetailPage";
 import Sidebar from "@/components/app/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { ArrowLeft, Loader2 } from "lucide-react";

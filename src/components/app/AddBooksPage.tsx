@@ -4,19 +4,19 @@ import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
-import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants";
+import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { convertGoogleBookToBook } from "@/lib/book-utils";
-import { Book } from "@/lib/models";
+import { convertGoogleBookToBook } from "@/lib/books/book-utils";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 // Google Books API integration
-import { GoogleBooksVolume } from "@/lib/google-books-api";
+import { GoogleBooksVolume } from "@/lib/api/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 
 // Extracted components

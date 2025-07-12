@@ -1,5 +1,5 @@
-import { StandardError, createSystemError } from "@/lib/error-handling";
-import { Book } from "@/lib/models";
+import { StandardError, createSystemError } from "@/lib/errors/error-handling";
+import { Book } from "@/lib/models/models";
 import { ActivityItem, eventService } from "@/lib/services/EventService";
 import { useEffect, useState } from "react";
 import CurrentlyReadingSection from "./CurrentlyReadingSection";

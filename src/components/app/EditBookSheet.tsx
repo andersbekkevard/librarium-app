@@ -25,8 +25,8 @@ import {
   validateEditedBook,
   validateNumericField,
   validateStringField,
-} from "@/lib/book-validation";
-import { Book } from "@/lib/models";
+} from "@/lib/books/book-validation";
+import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { AlertCircle, Save, Star, X } from "lucide-react";
 import * as React from "react";
