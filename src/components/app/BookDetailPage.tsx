@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
+import { Separator } from "@/components/ui/separator";
+import { STATUS_CLASSES } from "@/lib/colors";
 import { Book } from "@/lib/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
@@ -55,7 +56,6 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
   const [rating, setRating] = useState(book.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
-
 
   /**
    * Handles progress update workflow
@@ -141,8 +141,10 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
         {/* Error display */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">{error}</p>
+          <div
+            className={`mb-6 p-4 ${STATUS_CLASSES.error.bgLight} ${STATUS_CLASSES.error.borderLight} rounded-lg`}
+          >
+            <p className={`${STATUS_CLASSES.error.text} text-sm`}>{error}</p>
           </div>
         )}
 

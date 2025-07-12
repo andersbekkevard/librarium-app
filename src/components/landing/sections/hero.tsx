@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_CLASSES, STATUS_CLASSES } from "@/lib/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -135,10 +135,12 @@ export const HeroSection = () => {
           {/* Success Message */}
           {showSuccess && (
             <div
-              className="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg"
+              className={`mt-4 p-3 ${STATUS_CLASSES.success.bgLight} ${STATUS_CLASSES.success.borderLight} rounded-lg`}
               role="status"
             >
-              <p className="text-sm text-green-800 text-center">
+              <p
+                className={`text-sm ${STATUS_CLASSES.success.text} text-center`}
+              >
                 ✓ Successfully signed in! Welcome to Librarium.
               </p>
             </div>
