@@ -327,13 +327,13 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
     switch (severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
-        return "border-l-destructive";
+        return STATUS_COLORS.error.borderLeft;
       case ErrorSeverity.MEDIUM:
-        return "border-l-yellow-500";
+        return STATUS_COLORS.warning.borderLeft;
       case ErrorSeverity.LOW:
-        return "border-l-blue-500";
+        return STATUS_COLORS.info.borderLeft;
       default:
-        return "border-l-destructive";
+        return STATUS_COLORS.error.borderLeft;
     }
   };
 

@@ -1,19 +1,11 @@
 "use client";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  BookOpen,
-  Calendar,
-  Hash,
-} from "lucide-react";
+import { BookOpen, Calendar, ChevronDown, ChevronUp, Hash } from "lucide-react";
 import * as React from "react";
+import { useState } from "react";
 
 import { Book } from "@/lib/models";
 
@@ -22,13 +14,17 @@ interface BookInfoProps {
 }
 
 export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  const toggleDescription = () => {
+    setIsDescriptionExpanded(!isDescriptionExpanded);
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-2xl">{book.title}</CardTitle>
-        <p className="text-lg text-muted-foreground">
-          by {book.author}
-        </p>
+        <p className="text-lg text-muted-foreground">by {book.author}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Book metadata */}
@@ -64,16 +60,36 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
         {book.description && (
           <>
             <Separator />
-            <Accordion type="single" collapsible>
-              <AccordionItem value="description">
-                <AccordionTrigger>Description</AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {book.description}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Description</h3>
+              <div className="space-y-2">
+                <p
+                  className={`text-muted-foreground text-sm leading-relaxed ${
+                    isDescriptionExpanded ? "" : "line-clamp-4"
+                  }`}
+                >
+                  {book.description}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleDescription}
+                  className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
+                >
+                  {isDescriptionExpanded ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-1" />
+                      Read less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-1" />
+                      Read more
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </>
         )}
       </CardContent>

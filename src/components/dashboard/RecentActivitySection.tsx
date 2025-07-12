@@ -29,19 +29,22 @@ const formatTimeAgo = (timestamp: Date): string => {
 };
 
 const getActivityText = (activity: ActivityItem): string => {
+  const bookTitle = activity.bookTitle;
+  const details = activity.details;
+
   switch (activity.type) {
     case "finished":
-      return "Finished reading";
+      return `Finished reading ${bookTitle}`;
     case "started":
-      return "Started reading";
+      return `Started reading ${bookTitle}`;
     case "rated":
-      return "Rated";
+      return `Rated ${bookTitle}${details ? ` ${details}` : ""}`;
     case "added":
-      return "Added";
+      return `Added ${bookTitle}`;
     case "progress":
-      return "Updated progress on";
+      return `Updated progress on ${bookTitle}${details ? ` ${details}` : ""}`;
     default:
-      return "";
+      return `${bookTitle}`;
   }
 };
 
@@ -88,9 +91,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
                 ></div>
                 <div className="flex-1">
                   <p className="text-sm text-foreground">
-                    {getActivityText(activity)}{" "}
-                    <span className="font-medium">{activity.bookTitle}</span>
-                    {activity.details && ` ${activity.details}`}
+                    {getActivityText(activity)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatTimeAgo(activity.timestamp)}

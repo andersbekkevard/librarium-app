@@ -11,15 +11,14 @@
 import { User } from "firebase/auth";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
-  ErrorHandlerUtils,
-  ProviderErrorType,
   ProviderResult,
   StandardError,
+  createAuthError,
   createProviderError,
   createProviderSuccess,
-  enhancedErrorLogger,
+  createSystemError,
 } from "../error-handling";
-import { LoggerUtils } from "../error-logging";
+import { LoggerUtils, simpleErrorLogger } from "../error-logging";
 import { authService } from "../services/AuthService";
 
 /**
@@ -79,25 +78,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
       if (result.success && result.data) {
         // Set user ID for logging context
-        enhancedErrorLogger.setUserId(result.data.uid);
+        simpleErrorLogger.setUserId(result.data.uid);
 
         // Log successful sign-in
         LoggerUtils.logUserAction("auth_sign_in_google_success", {
           userId: result.data.uid,
-          email: result.data.email,
+          metadata: {
+            email: result.data.email,
+          },
         });
 
         return createProviderSuccess(result.data);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
+        const standardError = createAuthError(
           result.error?.message || "Sign-in failed",
-          {
-            component: "AuthProvider",
-            action: "signInWithGoogle",
-            userId: user?.uid,
-          }
+          result.error?.userMessage || "Failed to sign in with Google"
         );
 
         setError(standardError);
@@ -105,14 +101,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred during sign-in",
-        {
-          component: "AuthProvider",
-          action: "signInWithGoogle",
-          userId: user?.uid,
-        },
         error as Error
       );
 
@@ -147,14 +137,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         return createProviderSuccess(undefined);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
+        const standardError = createAuthError(
           result.error?.message || "Sign-out failed",
-          {
-            component: "AuthProvider",
-            action: "signOut",
-            userId: user?.uid,
-          }
+          result.error?.userMessage || "Failed to sign out"
         );
 
         setError(standardError);
@@ -162,14 +147,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred during sign-out",
-        {
-          component: "AuthProvider",
-          action: "signOut",
-          userId: user?.uid,
-        },
         error as Error
       );
 
@@ -190,15 +169,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
         // Update logger context
         if (firebaseUser) {
-          enhancedErrorLogger.setUserId(firebaseUser.uid);
+          simpleErrorLogger.setUserId(firebaseUser.uid);
           LoggerUtils.logUserAction("auth_state_changed", {
             userId: firebaseUser.uid,
-            email: firebaseUser.email,
-            authenticated: true,
+            metadata: {
+              email: firebaseUser.email,
+              authenticated: true,
+            },
           });
         } else {
           LoggerUtils.logUserAction("auth_state_changed", {
-            authenticated: false,
+            metadata: {
+              authenticated: false,
+            },
           });
         }
       });
@@ -206,13 +189,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return unsubscribe;
     } catch (error) {
       // Handle subscription errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.SUBSCRIPTION_FAILED,
+      const standardError = createSystemError(
         "Failed to initialize authentication state listener",
-        {
-          component: "AuthProvider",
-          action: "onAuthStateChanged",
-        },
         error as Error
       );
 

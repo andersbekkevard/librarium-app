@@ -19,30 +19,13 @@ export enum ErrorSeverity {
 }
 
 /**
- * Standard error categories for consistent classification
+ * Simplified error categories for consistent classification
  */
 export enum ErrorCategory {
-  AUTHENTICATION = "authentication",
-  AUTHORIZATION = "authorization",
-  VALIDATION = "validation",
-  NETWORK = "network",
-  BUSINESS_LOGIC = "business_logic",
-  EXTERNAL_API = "external_api",
-  SYSTEM = "system",
-  USER_INPUT = "user_input",
-  UNKNOWN = "unknown",
-}
-
-/**
- * Provider-specific error types
- */
-export enum ProviderErrorType {
-  INITIALIZATION_FAILED = "initialization_failed",
-  SUBSCRIPTION_FAILED = "subscription_failed",
-  STATE_UPDATE_FAILED = "state_update_failed",
-  OPERATION_FAILED = "operation_failed",
-  TIMEOUT = "timeout",
-  UNKNOWN = "unknown",
+  VALIDATION = "validation", // Form validation, data validation
+  NETWORK = "network", // API calls, connectivity issues
+  AUTHORIZATION = "authorization", // Auth failures, permissions
+  SYSTEM = "system", // Unexpected errors, crashes
 }
 
 /**
@@ -171,10 +154,10 @@ export class ErrorBuilder {
   build(): StandardError {
     // Set defaults if not provided
     if (!this.error.type) {
-      this.error.type = ErrorCategory.UNKNOWN;
+      this.error.type = this.error.category || ErrorCategory.SYSTEM;
     }
     if (!this.error.category) {
-      this.error.category = ErrorCategory.UNKNOWN;
+      this.error.category = ErrorCategory.SYSTEM;
     }
     if (!this.error.severity) {
       this.error.severity = ErrorSeverity.MEDIUM;
@@ -194,7 +177,7 @@ export class ErrorHandlerUtils {
   static handleFirebaseAuthError(error: AuthError): StandardError {
     const builder = new ErrorBuilder(error.message)
       .withType(error.code)
-      .withCategory(ErrorCategory.AUTHENTICATION)
+      .withCategory(ErrorCategory.AUTHORIZATION)
       .withOriginalError(error);
 
     // Map specific error codes to user-friendly messages
@@ -220,6 +203,7 @@ export class ErrorHandlerUtils {
           .withUserMessage(
             "Network error. Please check your connection and try again."
           )
+          .withCategory(ErrorCategory.NETWORK)
           .withSeverity(ErrorSeverity.MEDIUM)
           .retryable()
           .build();
@@ -290,75 +274,12 @@ export class ErrorHandlerUtils {
   }
 
   /**
-   * Creates a standardized error from a provider operation
-   */
-  static handleProviderError(
-    type: ProviderErrorType,
-    message: string,
-    context?: ErrorContext,
-    originalError?: Error
-  ): StandardError {
-    const builder = new ErrorBuilder(message)
-      .withType(type)
-      .withCategory(ErrorCategory.SYSTEM)
-      .withContext(context || {});
-
-    if (originalError) {
-      builder.withOriginalError(originalError);
-    }
-
-    // Set severity and recovery options based on type
-    switch (type) {
-      case ProviderErrorType.INITIALIZATION_FAILED:
-        return builder
-          .withUserMessage("Failed to initialize. Please refresh the page.")
-          .withSeverity(ErrorSeverity.HIGH)
-          .retryable()
-          .build();
-
-      case ProviderErrorType.SUBSCRIPTION_FAILED:
-        return builder
-          .withUserMessage("Connection lost. Data may not be up to date.")
-          .withSeverity(ErrorSeverity.MEDIUM)
-          .retryable()
-          .build();
-
-      case ProviderErrorType.STATE_UPDATE_FAILED:
-        return builder
-          .withUserMessage("Update failed. Please try again.")
-          .withSeverity(ErrorSeverity.MEDIUM)
-          .retryable()
-          .build();
-
-      case ProviderErrorType.OPERATION_FAILED:
-        return builder
-          .withUserMessage("Operation failed. Please try again.")
-          .withSeverity(ErrorSeverity.MEDIUM)
-          .retryable()
-          .build();
-
-      case ProviderErrorType.TIMEOUT:
-        return builder
-          .withUserMessage("Request timed out. Please try again.")
-          .withSeverity(ErrorSeverity.MEDIUM)
-          .retryable()
-          .build();
-
-      default:
-        return builder
-          .withUserMessage("An unexpected error occurred.")
-          .withSeverity(ErrorSeverity.MEDIUM)
-          .build();
-    }
-  }
-
-  /**
    * Creates a standardized error from a generic error
    */
   static handleGenericError(
     error: Error | string,
     context?: ErrorContext,
-    category: ErrorCategory = ErrorCategory.UNKNOWN
+    category: ErrorCategory = ErrorCategory.SYSTEM
   ): StandardError {
     const message = typeof error === "string" ? error : error.message;
     const builder = new ErrorBuilder(message)
@@ -411,24 +332,47 @@ export class ErrorHandlerUtils {
       .retryable()
       .build();
   }
-
-  /**
-   * Creates a business logic error
-   */
-  static createBusinessLogicError(
-    message: string,
-    userMessage: string,
-    context?: ErrorContext
-  ): StandardError {
-    return new ErrorBuilder(message)
-      .withType("business_logic_error")
-      .withCategory(ErrorCategory.BUSINESS_LOGIC)
-      .withSeverity(ErrorSeverity.MEDIUM)
-      .withUserMessage(userMessage)
-      .withContext(context || {})
-      .build();
-  }
 }
+
+/**
+ * Convenience functions for common error types
+ */
+export const createValidationError = (message: string, userMessage?: string) =>
+  new ErrorBuilder(message)
+    .withCategory(ErrorCategory.VALIDATION)
+    .withUserMessage(userMessage || message)
+    .withSeverity(ErrorSeverity.MEDIUM)
+    .build();
+
+export const createNetworkError = (message: string, userMessage?: string) =>
+  new ErrorBuilder(message)
+    .withCategory(ErrorCategory.NETWORK)
+    .withUserMessage(
+      userMessage || "Please check your connection and try again"
+    )
+    .withSeverity(ErrorSeverity.MEDIUM)
+    .retryable()
+    .build();
+
+export const createAuthError = (message: string, userMessage?: string) =>
+  new ErrorBuilder(message)
+    .withCategory(ErrorCategory.AUTHORIZATION)
+    .withUserMessage(userMessage || "Authentication failed")
+    .withSeverity(ErrorSeverity.HIGH)
+    .build();
+
+export const createSystemError = (message: string, originalError?: Error) => {
+  const builder = new ErrorBuilder(message)
+    .withCategory(ErrorCategory.SYSTEM)
+    .withUserMessage("An unexpected error occurred")
+    .withSeverity(ErrorSeverity.HIGH);
+
+  if (originalError) {
+    builder.withOriginalError(originalError);
+  }
+
+  return builder.build();
+};
 
 /**
  * Error logging service interface
@@ -480,9 +424,6 @@ export class ConsoleErrorLogger implements ErrorLogger {
  */
 export const errorLogger: ErrorLogger = new ConsoleErrorLogger();
 
-// Re-export enhanced logger for advanced use cases
-export { enhancedErrorLogger } from "./error-logging";
-
 /**
  * Helper function to create ProviderResult success response
  */
@@ -499,7 +440,6 @@ export function createProviderSuccess<T>(data: T): ProviderResult<T> {
 export function createProviderError<T>(
   error: StandardError
 ): ProviderResult<T> {
-  errorLogger.logError(error);
   return {
     success: false,
     error,
@@ -507,12 +447,12 @@ export function createProviderError<T>(
 }
 
 /**
- * Helper function to safely execute async operations with error handling
+ * Safe async operation wrapper
  */
 export async function safeAsyncOperation<T>(
   operation: () => Promise<T>,
   context?: ErrorContext,
-  errorCategory: ErrorCategory = ErrorCategory.UNKNOWN
+  errorCategory: ErrorCategory = ErrorCategory.SYSTEM
 ): Promise<ProviderResult<T>> {
   try {
     const result = await operation();
@@ -528,12 +468,12 @@ export async function safeAsyncOperation<T>(
 }
 
 /**
- * Helper function to safely execute sync operations with error handling
+ * Safe sync operation wrapper
  */
 export function safeSyncOperation<T>(
   operation: () => T,
   context?: ErrorContext,
-  errorCategory: ErrorCategory = ErrorCategory.UNKNOWN
+  errorCategory: ErrorCategory = ErrorCategory.SYSTEM
 ): ProviderResult<T> {
   try {
     const result = operation();

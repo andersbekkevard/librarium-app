@@ -1,8 +1,4 @@
-import {
-  ErrorCategory,
-  ErrorHandlerUtils,
-  StandardError,
-} from "@/lib/error-handling";
+import { StandardError, createSystemError } from "@/lib/error-handling";
 import { Book } from "@/lib/models";
 import { ActivityItem, eventService } from "@/lib/services/EventService";
 import { useEffect, useState } from "react";
@@ -57,26 +53,14 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         if (result.success && result.data) {
           setActivities(result.data);
         } else {
-          const standardError = ErrorHandlerUtils.handleGenericError(
-            result.error || "Failed to load recent activity",
-            {
-              component: "DashboardContent",
-              action: "fetchRecentActivity",
-              userId,
-            },
-            ErrorCategory.SYSTEM
-          );
+          const standardError =
+            result.error || createSystemError("Failed to load recent activity");
           setActivitiesError(standardError);
         }
       } catch (error) {
-        const standardError = ErrorHandlerUtils.handleGenericError(
-          error as Error,
-          {
-            component: "DashboardContent",
-            action: "fetchRecentActivity",
-            userId,
-          },
-          ErrorCategory.SYSTEM
+        const standardError = createSystemError(
+          "Failed to load recent activity",
+          error as Error
         );
         setActivitiesError(standardError);
         console.error("Error fetching recent activity:", error);

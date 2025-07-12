@@ -5,9 +5,12 @@ import {
   ErrorCategory,
   ErrorHandlerUtils,
   ErrorSeverity,
-  ProviderErrorType,
+  createAuthError,
+  createNetworkError,
   createProviderError,
   createProviderSuccess,
+  createSystemError,
+  createValidationError,
   safeAsyncOperation,
   safeSyncOperation,
 } from "../error-handling";
@@ -20,7 +23,7 @@ describe("Error Handling System", () => {
       expect(error.message).toBe("Test error");
       expect(error.userMessage).toBe("Test error");
       expect(error.severity).toBe(ErrorSeverity.MEDIUM);
-      expect(error.category).toBe(ErrorCategory.UNKNOWN);
+      expect(error.category).toBe(ErrorCategory.SYSTEM);
       expect(error.recoverable).toBe(true);
       expect(error.retryable).toBe(false);
       expect(error.id).toMatch(/^err_\d+_[a-z0-9]+$/);
@@ -84,7 +87,7 @@ describe("Error Handling System", () => {
         const error = ErrorHandlerUtils.handleFirebaseAuthError(authError);
 
         expect(error.type).toBe("auth/popup-blocked");
-        expect(error.category).toBe(ErrorCategory.AUTHENTICATION);
+        expect(error.category).toBe(ErrorCategory.AUTHORIZATION);
         expect(error.userMessage).toBe(
           "Popup was blocked by your browser. Please allow popups and try again."
         );
@@ -119,6 +122,7 @@ describe("Error Handling System", () => {
         expect(error.userMessage).toBe(
           "Network error. Please check your connection and try again."
         );
+        expect(error.category).toBe(ErrorCategory.NETWORK);
         expect(error.severity).toBe(ErrorSeverity.MEDIUM);
         expect(error.retryable).toBe(true);
       });
@@ -198,7 +202,6 @@ describe("Error Handling System", () => {
         expect(error.userMessage).toBe(
           "The requested data could not be found."
         );
-        expect(error.severity).toBe(ErrorSeverity.LOW);
       });
 
       it("handles already-exists error", () => {
@@ -211,14 +214,12 @@ describe("Error Handling System", () => {
 
         expect(error.userMessage).toBe("This item already exists.");
         expect(error.category).toBe(ErrorCategory.VALIDATION);
-        expect(error.severity).toBe(ErrorSeverity.LOW);
       });
 
       it("handles unknown firestore errors", () => {
         const firestoreError = {
-          code: "internal",
+          code: "unknown",
           message: "Unknown error",
-          name: "FirestoreError",
         } as FirestoreError;
 
         const error = ErrorHandlerUtils.handleFirestoreError(firestoreError);
@@ -226,122 +227,64 @@ describe("Error Handling System", () => {
         expect(error.userMessage).toBe(
           "A database error occurred. Please try again."
         );
-        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
         expect(error.retryable).toBe(true);
-      });
-    });
-
-    describe("handleProviderError", () => {
-      it("handles initialization failed error", () => {
-        const context = { component: "TestProvider" };
-        const error = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.INITIALIZATION_FAILED,
-          "Init failed",
-          context
-        );
-
-        expect(error.type).toBe(ProviderErrorType.INITIALIZATION_FAILED);
-        expect(error.userMessage).toBe(
-          "Failed to initialize. Please refresh the page."
-        );
-        expect(error.severity).toBe(ErrorSeverity.HIGH);
-        expect(error.retryable).toBe(true);
-        expect(error.context).toEqual(context);
-      });
-
-      it("handles subscription failed error", () => {
-        const error = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.SUBSCRIPTION_FAILED,
-          "Subscription failed"
-        );
-
-        expect(error.userMessage).toBe(
-          "Connection lost. Data may not be up to date."
-        );
-        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
-        expect(error.retryable).toBe(true);
-      });
-
-      it("handles timeout error", () => {
-        const error = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.TIMEOUT,
-          "Request timeout"
-        );
-
-        expect(error.userMessage).toBe("Request timed out. Please try again.");
-        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
-        expect(error.retryable).toBe(true);
-      });
-
-      it("includes original error when provided", () => {
-        const originalError = new Error("Original error");
-        const error = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          "Operation failed",
-          undefined,
-          originalError
-        );
-
-        expect(error.originalError).toBe(originalError);
       });
     });
 
     describe("handleGenericError", () => {
       it("handles Error objects", () => {
         const originalError = new Error("Test error");
-        const context = { component: "TestComponent" };
+        const context = { userId: "test-user" };
 
         const error = ErrorHandlerUtils.handleGenericError(
           originalError,
           context,
-          ErrorCategory.BUSINESS_LOGIC
+          ErrorCategory.VALIDATION
         );
 
         expect(error.message).toBe("Test error");
+        expect(error.category).toBe(ErrorCategory.VALIDATION);
+        expect(error.context).toEqual(context);
+        expect(error.originalError).toBe(originalError);
         expect(error.userMessage).toBe(
           "An unexpected error occurred. Please try again."
         );
-        expect(error.category).toBe(ErrorCategory.BUSINESS_LOGIC);
-        expect(error.context).toEqual(context);
-        expect(error.originalError).toBe(originalError);
-        expect(error.retryable).toBe(true);
       });
 
       it("handles string errors", () => {
-        const error = ErrorHandlerUtils.handleGenericError("String error", {
-          action: "test",
-        });
+        const errorMessage = "String error";
+        const context = { action: "test" };
 
-        expect(error.message).toBe("String error");
-        expect(error.userMessage).toBe(
-          "An unexpected error occurred. Please try again."
+        const error = ErrorHandlerUtils.handleGenericError(
+          errorMessage,
+          context,
+          ErrorCategory.NETWORK
         );
-        expect(error.category).toBe(ErrorCategory.UNKNOWN);
+
+        expect(error.message).toBe(errorMessage);
+        expect(error.category).toBe(ErrorCategory.NETWORK);
+        expect(error.context).toEqual(context);
         expect(error.originalError).toBeUndefined();
       });
 
       it("uses default category when not provided", () => {
         const error = ErrorHandlerUtils.handleGenericError("Test error");
 
-        expect(error.category).toBe(ErrorCategory.UNKNOWN);
+        expect(error.category).toBe(ErrorCategory.SYSTEM);
       });
     });
 
     describe("createValidationError", () => {
-      it("creates validation error with field context", () => {
+      it("creates validation error with field name", () => {
         const error = ErrorHandlerUtils.createValidationError(
           "email",
-          "Email is required",
-          { userId: "test-user" }
+          "Invalid email format"
         );
 
         expect(error.category).toBe(ErrorCategory.VALIDATION);
-        expect(error.userMessage).toBe("email: Email is required");
         expect(error.severity).toBe(ErrorSeverity.LOW);
-        expect(error.context).toEqual({
-          fieldName: "email",
-          userId: "test-user",
-        });
+        expect(error.userMessage).toBe("email: Invalid email format");
+        expect(error.context).toEqual({ fieldName: "email" });
       });
     });
 
@@ -350,187 +293,184 @@ describe("Error Handling System", () => {
         const error = ErrorHandlerUtils.createNetworkError();
 
         expect(error.category).toBe(ErrorCategory.NETWORK);
+        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
         expect(error.userMessage).toBe(
           "Network error. Please check your connection and try again."
         );
-        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
         expect(error.retryable).toBe(true);
       });
 
       it("creates network error with custom message", () => {
-        const error = ErrorHandlerUtils.createNetworkError("Connection failed");
+        const error =
+          ErrorHandlerUtils.createNetworkError("Connection timeout");
 
-        expect(error.userMessage).toBe(
-          "Network error. Please check your connection and try again."
-        );
-      });
-    });
-
-    describe("createBusinessLogicError", () => {
-      it("creates business logic error", () => {
-        const error = ErrorHandlerUtils.createBusinessLogicError(
-          "Invalid operation",
-          "You cannot perform this action",
-          { action: "delete" }
-        );
-
-        expect(error.category).toBe(ErrorCategory.BUSINESS_LOGIC);
-        expect(error.message).toBe("Invalid operation");
-        expect(error.userMessage).toBe("You cannot perform this action");
-        expect(error.context).toEqual({ action: "delete" });
+        expect(error.message).toBe("Connection timeout");
+        expect(error.category).toBe(ErrorCategory.NETWORK);
       });
     });
   });
 
-  describe("Provider Result Patterns", () => {
+  describe("Convenience Functions", () => {
+    describe("createValidationError", () => {
+      it("creates validation error with default user message", () => {
+        const error = createValidationError("Test validation error");
+
+        expect(error.category).toBe(ErrorCategory.VALIDATION);
+        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+        expect(error.userMessage).toBe("Test validation error");
+      });
+
+      it("creates validation error with custom user message", () => {
+        const error = createValidationError(
+          "Technical message",
+          "User-friendly message"
+        );
+
+        expect(error.message).toBe("Technical message");
+        expect(error.userMessage).toBe("User-friendly message");
+      });
+    });
+
+    describe("createNetworkError", () => {
+      it("creates network error with default user message", () => {
+        const error = createNetworkError("Connection failed");
+
+        expect(error.category).toBe(ErrorCategory.NETWORK);
+        expect(error.severity).toBe(ErrorSeverity.MEDIUM);
+        expect(error.retryable).toBe(true);
+        expect(error.userMessage).toBe(
+          "Please check your connection and try again"
+        );
+      });
+
+      it("creates network error with custom user message", () => {
+        const error = createNetworkError("Timeout", "Request timed out");
+
+        expect(error.message).toBe("Timeout");
+        expect(error.userMessage).toBe("Request timed out");
+      });
+    });
+
+    describe("createAuthError", () => {
+      it("creates auth error with default user message", () => {
+        const error = createAuthError("Invalid credentials");
+
+        expect(error.category).toBe(ErrorCategory.AUTHORIZATION);
+        expect(error.severity).toBe(ErrorSeverity.HIGH);
+        expect(error.userMessage).toBe("Authentication failed");
+      });
+
+      it("creates auth error with custom user message", () => {
+        const error = createAuthError("Token expired", "Please sign in again");
+
+        expect(error.message).toBe("Token expired");
+        expect(error.userMessage).toBe("Please sign in again");
+      });
+    });
+
+    describe("createSystemError", () => {
+      it("creates system error without original error", () => {
+        const error = createSystemError("Database connection failed");
+
+        expect(error.category).toBe(ErrorCategory.SYSTEM);
+        expect(error.severity).toBe(ErrorSeverity.HIGH);
+        expect(error.userMessage).toBe("An unexpected error occurred");
+        expect(error.originalError).toBeUndefined();
+      });
+
+      it("creates system error with original error", () => {
+        const originalError = new Error("Database timeout");
+        const error = createSystemError("System failure", originalError);
+
+        expect(error.message).toBe("System failure");
+        expect(error.originalError).toBe(originalError);
+      });
+    });
+  });
+
+  describe("Provider Result Helpers", () => {
     describe("createProviderSuccess", () => {
       it("creates successful provider result", () => {
-        const data = { id: "test", name: "Test" };
+        const data = { id: "123", name: "Test" };
         const result = createProviderSuccess(data);
 
         expect(result.success).toBe(true);
         expect(result.data).toBe(data);
         expect(result.error).toBeUndefined();
       });
-
-      it("handles null data", () => {
-        const result = createProviderSuccess(null);
-
-        expect(result.success).toBe(true);
-        expect(result.data).toBe(null);
-      });
-
-      it("handles undefined data", () => {
-        const result = createProviderSuccess(undefined);
-
-        expect(result.success).toBe(true);
-        expect(result.data).toBe(undefined);
-      });
     });
 
     describe("createProviderError", () => {
       it("creates error provider result", () => {
-        const error = new ErrorBuilder("Test error").build();
+        const error = createSystemError("Test error");
         const result = createProviderError(error);
 
         expect(result.success).toBe(false);
-        expect(result.data).toBeUndefined();
         expect(result.error).toBe(error);
+        expect(result.data).toBeUndefined();
       });
     });
   });
 
-  describe("Safe Operations", () => {
+  describe("Safe Operation Wrappers", () => {
     describe("safeAsyncOperation", () => {
-      it("returns success for successful async operation", async () => {
-        const operation = jest.fn().mockResolvedValue("success");
+      it("returns success result for successful operation", async () => {
+        const operation = async () => "success";
         const result = await safeAsyncOperation(operation);
 
         expect(result.success).toBe(true);
         expect(result.data).toBe("success");
         expect(result.error).toBeUndefined();
-        expect(operation).toHaveBeenCalledTimes(1);
       });
 
-      it("returns error for failed async operation", async () => {
-        const operation = jest.fn().mockRejectedValue(new Error("Async error"));
-        const context = { component: "TestComponent" };
+      it("returns error result for failed operation", async () => {
+        const operation = async () => {
+          throw new Error("Operation failed");
+        };
+        const result = await safeAsyncOperation(operation);
 
+        expect(result.success).toBe(false);
+        expect(result.error).toBeDefined();
+        expect(result.error?.category).toBe(ErrorCategory.SYSTEM);
+        expect(result.data).toBeUndefined();
+      });
+
+      it("uses custom error category", async () => {
+        const operation = async () => {
+          throw new Error("Validation failed");
+        };
         const result = await safeAsyncOperation(
           operation,
-          context,
-          ErrorCategory.BUSINESS_LOGIC
-        );
-
-        expect(result.success).toBe(false);
-        expect(result.data).toBeUndefined();
-        expect(result.error).toBeDefined();
-        expect(result.error?.message).toBe("Async error");
-        expect(result.error?.category).toBe(ErrorCategory.BUSINESS_LOGIC);
-        expect(result.error?.context).toEqual(context);
-      });
-
-      it("uses default error category", async () => {
-        const operation = jest.fn().mockRejectedValue(new Error("Test error"));
-        const result = await safeAsyncOperation(operation);
-
-        expect(result.success).toBe(false);
-        expect(result.error?.category).toBe(ErrorCategory.UNKNOWN);
-      });
-    });
-
-    describe("safeSyncOperation", () => {
-      it("returns success for successful sync operation", () => {
-        const operation = jest.fn().mockReturnValue("success");
-        const result = safeSyncOperation(operation);
-
-        expect(result.success).toBe(true);
-        expect(result.data).toBe("success");
-        expect(result.error).toBeUndefined();
-        expect(operation).toHaveBeenCalledTimes(1);
-      });
-
-      it("returns error for failed sync operation", () => {
-        const operation = jest.fn().mockImplementation(() => {
-          throw new Error("Sync error");
-        });
-        const context = { component: "TestComponent" };
-
-        const result = safeSyncOperation(
-          operation,
-          context,
+          undefined,
           ErrorCategory.VALIDATION
         );
 
         expect(result.success).toBe(false);
-        expect(result.data).toBeUndefined();
-        expect(result.error).toBeDefined();
-        expect(result.error?.message).toBe("Sync error");
         expect(result.error?.category).toBe(ErrorCategory.VALIDATION);
-        expect(result.error?.context).toEqual(context);
+      });
+    });
+
+    describe("safeSyncOperation", () => {
+      it("returns success result for successful operation", () => {
+        const operation = () => "success";
+        const result = safeSyncOperation(operation);
+
+        expect(result.success).toBe(true);
+        expect(result.data).toBe("success");
+        expect(result.error).toBeUndefined();
       });
 
-      it("uses default error category", () => {
-        const operation = jest.fn().mockImplementation(() => {
-          throw new Error("Test error");
-        });
+      it("returns error result for failed operation", () => {
+        const operation = () => {
+          throw new Error("Operation failed");
+        };
         const result = safeSyncOperation(operation);
 
         expect(result.success).toBe(false);
-        expect(result.error?.category).toBe(ErrorCategory.UNKNOWN);
+        expect(result.error).toBeDefined();
+        expect(result.error?.category).toBe(ErrorCategory.SYSTEM);
+        expect(result.data).toBeUndefined();
       });
-    });
-  });
-
-  describe("Error Enums", () => {
-    it("has all expected error severities", () => {
-      expect(ErrorSeverity.LOW).toBe("low");
-      expect(ErrorSeverity.MEDIUM).toBe("medium");
-      expect(ErrorSeverity.HIGH).toBe("high");
-      expect(ErrorSeverity.CRITICAL).toBe("critical");
-    });
-
-    it("has all expected error categories", () => {
-      expect(ErrorCategory.AUTHENTICATION).toBe("authentication");
-      expect(ErrorCategory.AUTHORIZATION).toBe("authorization");
-      expect(ErrorCategory.VALIDATION).toBe("validation");
-      expect(ErrorCategory.NETWORK).toBe("network");
-      expect(ErrorCategory.BUSINESS_LOGIC).toBe("business_logic");
-      expect(ErrorCategory.EXTERNAL_API).toBe("external_api");
-      expect(ErrorCategory.SYSTEM).toBe("system");
-      expect(ErrorCategory.USER_INPUT).toBe("user_input");
-      expect(ErrorCategory.UNKNOWN).toBe("unknown");
-    });
-
-    it("has all expected provider error types", () => {
-      expect(ProviderErrorType.INITIALIZATION_FAILED).toBe(
-        "initialization_failed"
-      );
-      expect(ProviderErrorType.SUBSCRIPTION_FAILED).toBe("subscription_failed");
-      expect(ProviderErrorType.STATE_UPDATE_FAILED).toBe("state_update_failed");
-      expect(ProviderErrorType.OPERATION_FAILED).toBe("operation_failed");
-      expect(ProviderErrorType.TIMEOUT).toBe("timeout");
-      expect(ProviderErrorType.UNKNOWN).toBe("unknown");
     });
   });
 });

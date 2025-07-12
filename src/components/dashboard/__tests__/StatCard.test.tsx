@@ -1,3 +1,4 @@
+import { BRAND_COLORS } from "@/lib/colors";
 import { render, screen } from "@testing-library/react";
 import { Book, TrendingUp, Zap } from "lucide-react";
 import { StatCard } from "../StatCard";
@@ -35,9 +36,9 @@ describe("StatCard", () => {
     render(<StatCard title="Total Books" value={125} icon={Book} />);
 
     const icon = screen.getByTestId("stat-card-icon");
-    expect(icon).toHaveClass("text-brand-primary");
+    expect(icon).toHaveClass(BRAND_COLORS.primary.text);
     const iconContainer = icon.parentElement;
-    expect(iconContainer).toHaveClass("bg-brand-primary/10");
+    expect(iconContainer).toHaveClass(BRAND_COLORS.primary.bgLight);
   });
 
   it("should apply custom icon colors when provided", () => {

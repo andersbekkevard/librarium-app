@@ -6,8 +6,14 @@ describe("colors", () => {
       expect(colors.BRAND_COLORS.primary).toEqual({
         bg: "bg-brand-primary",
         bgHover: "hover:bg-brand-primary-hover",
+        bgLight: "bg-brand-primary/10",
+        bgBlur: "bg-brand-primary/50",
         text: "text-brand-primary",
         border: "border-brand-primary",
+        borderLight: "border-brand-primary/20",
+        borderTop: "border-t-brand-primary/30",
+        gradientFrom: "from-brand-primary",
+        gradientTo: "to-brand-primary",
       });
     });
 
@@ -25,6 +31,7 @@ describe("colors", () => {
         text: "text-status-success",
         border: "border-status-success",
         borderLight: "border-status-success/20",
+        borderLeft: "border-l-status-success",
       });
     });
 

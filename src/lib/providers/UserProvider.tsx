@@ -10,12 +10,12 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
-  ErrorHandlerUtils,
-  ProviderErrorType,
   ProviderResult,
   StandardError,
+  createAuthError,
   createProviderError,
   createProviderSuccess,
+  createSystemError,
 } from "../error-handling";
 import { LoggerUtils } from "../error-logging";
 import { UserProfile } from "../models";
@@ -76,14 +76,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     updates: Partial<UserProfile>
   ): Promise<ProviderResult<UserProfile>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "UserProvider",
-          action: "updateUserProfile",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -94,7 +87,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Log user action
       LoggerUtils.logUserAction("user_profile_update_attempt", {
         userId: user.uid,
-        updates: Object.keys(updates),
+        metadata: {
+          updates: Object.keys(updates),
+        },
       });
 
       const result = await userService.updateProfile(user.uid, updates);
@@ -105,20 +100,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Log successful update
         LoggerUtils.logUserAction("user_profile_update_success", {
           userId: user.uid,
-          updates: Object.keys(updates),
+          metadata: {
+            updates: Object.keys(updates),
+          },
         });
 
         return createProviderSuccess(result.data);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update profile",
-          {
-            component: "UserProvider",
-            action: "updateUserProfile",
-            userId: user.uid,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update profile"
         );
 
         setError(standardError);
@@ -126,14 +117,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating profile",
-        {
-          component: "UserProvider",
-          action: "updateUserProfile",
-          userId: user.uid,
-        },
         error as Error
       );
 
@@ -147,14 +132,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    */
   const refreshUserProfile = async (): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "UserProvider",
-          action: "refreshUserProfile",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -181,14 +159,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return createProviderSuccess(undefined);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to refresh profile",
-          {
-            component: "UserProvider",
-            action: "refreshUserProfile",
-            userId: user.uid,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to refresh profile"
         );
 
         setError(standardError);
@@ -196,14 +168,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while refreshing profile",
-        {
-          component: "UserProvider",
-          action: "refreshUserProfile",
-          userId: user.uid,
-        },
         error as Error
       );
 
@@ -219,14 +185,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    */
   const refreshUserStats = async (): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "UserProvider",
-          action: "refreshUserStats",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -252,14 +211,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return createProviderSuccess(undefined);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to refresh statistics",
-          {
-            component: "UserProvider",
-            action: "refreshUserStats",
-            userId: user.uid,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to refresh statistics"
         );
 
         setError(standardError);
@@ -267,14 +220,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while refreshing statistics",
-        {
-          component: "UserProvider",
-          action: "refreshUserStats",
-          userId: user.uid,
-        },
         error as Error
       );
 
@@ -288,14 +235,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    */
   const updateUserStats = async (): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "UserProvider",
-          action: "updateUserStats",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -322,14 +262,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return createProviderSuccess(undefined);
       } else {
         // Handle service error
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update statistics",
-          {
-            component: "UserProvider",
-            action: "updateUserStats",
-            userId: user.uid,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update statistics"
         );
 
         setError(standardError);
@@ -337,14 +271,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     } catch (error) {
       // Handle unexpected errors
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating statistics",
-        {
-          component: "UserProvider",
-          action: "updateUserStats",
-          userId: user.uid,
-        },
         error as Error
       );
 
@@ -353,49 +281,50 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  // Set up user profile management
+  // Initialize user profile when user changes
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setUserProfile(null);
-      setUserStats(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    // Create or get user profile
     const initializeUserProfile = async (): Promise<void> => {
-      try {
-        const result = await userService.createProfileFromFirebaseUser(user);
+      if (!user) {
+        setUserProfile(null);
+        setUserStats(null);
+        setLoading(false);
+        setError(null);
+        return;
+      }
 
-        if (result.success && result.data) {
-          setUserProfile(result.data);
-          // Also load statistics
-          await refreshUserStats();
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Try to get existing profile
+        const profileResult = await userService.getProfile(user.uid);
+
+        if (profileResult.success && profileResult.data) {
+          // Profile exists, use it
+          setUserProfile(profileResult.data);
         } else {
-          const standardError = ErrorHandlerUtils.handleProviderError(
-            ProviderErrorType.INITIALIZATION_FAILED,
-            result.error?.message || "Failed to initialize user profile",
-            {
-              component: "UserProvider",
-              action: "initializeUserProfile",
-              userId: user.uid,
-            }
+          // Profile doesn't exist, create one from Firebase user
+          const createResult = await userService.createProfileFromFirebaseUser(
+            user
           );
-          setError(standardError);
+          if (createResult.success && createResult.data) {
+            setUserProfile(createResult.data);
+          } else {
+            const standardError = createSystemError(
+              createResult.error?.message || "Failed to create user profile"
+            );
+            setError(standardError);
+          }
+        }
+
+        // Load initial statistics
+        const statsResult = await userService.getUserStats(user.uid);
+        if (statsResult.success && statsResult.data) {
+          setUserStats(statsResult.data);
         }
       } catch (error) {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.INITIALIZATION_FAILED,
+        const standardError = createSystemError(
           "An unexpected error occurred while initializing user profile",
-          {
-            component: "UserProvider",
-            action: "initializeUserProfile",
-            userId: user.uid,
-          },
           error as Error
         );
         setError(standardError);
@@ -404,42 +333,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     };
 
-    // Set up real-time profile listener
-    try {
-      const unsubscribe = userService.subscribeToProfile(
-        user.uid,
-        (profile) => {
-          setUserProfile(profile);
-          setLoading(false);
-          setError(null);
-        }
-      );
-
-      initializeUserProfile();
-
-      return unsubscribe;
-    } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.SUBSCRIPTION_FAILED,
-        "Failed to initialize user profile subscription",
-        {
-          component: "UserProvider",
-          action: "subscribeToProfile",
-          userId: user.uid,
-        },
-        error as Error
-      );
-      setError(standardError);
-      setLoading(false);
-    }
-  }, [isAuthenticated, user]);
-
-  // Load user statistics when profile is available
-  useEffect(() => {
-    if (userProfile && user) {
-      refreshUserStats();
-    }
-  }, [userProfile, user]);
+    initializeUserProfile();
+  }, [user]);
 
   const value: UserContextType = {
     userProfile,
@@ -458,12 +353,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
 /**
  * Hook to access user context
- *
- * Provides access to the current user profile and user-related operations.
- * Must be used within a UserProvider component tree.
- *
- * @returns UserContextType - Current user context
- * @throws Error - If used outside of UserProvider
  */
 export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);

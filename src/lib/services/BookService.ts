@@ -7,6 +7,15 @@
 
 import { Timestamp } from "firebase/firestore";
 import {
+  ErrorBuilder,
+  ErrorCategory,
+  ErrorSeverity,
+  StandardError,
+  createNetworkError,
+  createSystemError,
+  createValidationError,
+} from "../error-handling";
+import {
   Book,
   canTransitionTo,
   validateProgress,
@@ -16,7 +25,6 @@ import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { IBookRepository, IEventRepository } from "../repositories/types";
 import { IBookService, ServiceResult } from "./types";
-import { ErrorHandlerUtils, ErrorBuilder, ErrorCategory, ErrorSeverity, StandardError } from "../error-handling";
 
 export class BookService implements IBookService {
   constructor(
@@ -38,31 +46,17 @@ export class BookService implements IBookService {
     }
 
     if (error.includes("Network error")) {
-      return new ErrorBuilder("Network error during repository operation")
-        .withCategory(ErrorCategory.NETWORK)
-        .withUserMessage("Network error. Please check your connection and try again.")
-        .withContext({ originalError: error })
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .retryable()
-        .build();
+      return createNetworkError("Network error during repository operation");
     }
 
     if (error.includes("not found")) {
-      return new ErrorBuilder("Book not found in repository")
-        .withCategory(ErrorCategory.VALIDATION)
-        .withUserMessage("Book not found")
-        .withContext({ originalError: error })
-        .withSeverity(ErrorSeverity.LOW)
-        .build();
+      return createValidationError(
+        "Book not found in repository",
+        "Book not found"
+      );
     }
 
-    return new ErrorBuilder(`Database error: ${error}`)
-      .withCategory(ErrorCategory.SYSTEM)
-      .withUserMessage("A database error occurred. Please try again.")
-      .withContext({ originalError: error })
-      .withSeverity(ErrorSeverity.MEDIUM)
-      .retryable()
-      .build();
+    return createSystemError(`Database error: ${error}`);
   }
 
   /**
@@ -70,31 +64,19 @@ export class BookService implements IBookService {
    */
   private validateBookData(book: Partial<Book>): StandardError | null {
     if (book.title !== undefined && book.title.trim().length === 0) {
-      return ErrorHandlerUtils.createValidationError(
-        "title",
-        "Book title cannot be empty"
-      );
+      return createValidationError("Book title cannot be empty");
     }
 
     if (book.author !== undefined && book.author.trim().length === 0) {
-      return ErrorHandlerUtils.createValidationError(
-        "author",
-        "Book author cannot be empty"
-      );
+      return createValidationError("Book author cannot be empty");
     }
 
     if (book.progress && !validateProgress(book.progress)) {
-      return ErrorHandlerUtils.createValidationError(
-        "progress",
-        "Invalid progress data"
-      );
+      return createValidationError("Invalid progress data");
     }
 
     if (book.rating !== undefined && !validateRating(book.rating)) {
-      return ErrorHandlerUtils.createValidationError(
-        "rating",
-        "Rating must be between 1 and 5"
-      );
+      return createValidationError("Rating must be between 1 and 5");
     }
 
     return null;
@@ -117,12 +99,10 @@ export class BookService implements IBookService {
 
       return { success: true, data: result.data };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to get book")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while getting the book")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to get book",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -141,12 +121,10 @@ export class BookService implements IBookService {
 
       return { success: true, data: result.data || [] };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to get user books")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while getting your books")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to get user books",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -168,12 +146,10 @@ export class BookService implements IBookService {
 
       return { success: true, data: result.data || [] };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to get books by state")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while filtering books")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to get books by state",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -209,12 +185,10 @@ export class BookService implements IBookService {
 
       return { success: true, data: result.data! };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to add book")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while adding the book")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to add book",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -246,18 +220,16 @@ export class BookService implements IBookService {
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to update book")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while updating the book")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to update book",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
 
   /**
-   * Update book progress with business logic
+   * Update book progress
    */
   async updateBookProgress(
     userId: string,
@@ -265,109 +237,104 @@ export class BookService implements IBookService {
     currentPage: number
   ): Promise<ServiceResult<void>> {
     try {
-      // Get current book state
-      const bookResult = await this.getBook(userId, bookId);
-      if (!bookResult.success || !bookResult.data) {
-        return { success: false, error: bookResult.error || new ErrorBuilder("Book not found")
-          .withCategory(ErrorCategory.VALIDATION)
-          .withUserMessage("Book not found")
-          .withSeverity(ErrorSeverity.LOW)
-          .build() };
+      // Validate progress
+      if (currentPage < 0) {
+        return {
+          success: false,
+          error: createValidationError("Current page cannot be negative"),
+        };
+      }
+
+      // Get current book to check state and validate progress
+      const bookResult = await this.bookRepository.getBook(userId, bookId);
+      if (!bookResult.success) {
+        const standardError = this.handleRepositoryError(bookResult.error!);
+        return { success: false, error: standardError };
       }
 
       const book = bookResult.data;
-      const totalPages = book.progress.totalPages || 0;
-
-      // Validate progress
-      if (currentPage < 0 || (totalPages > 0 && currentPage > totalPages)) {
-        return { success: false, error: ErrorHandlerUtils.createValidationError(
-          "currentPage",
-          "Invalid page number"
-        ) };
+      if (!book) {
+        return {
+          success: false,
+          error: createValidationError("Book not found"),
+        };
       }
 
-      // Determine if state should change based on progress
-      let newState = book.state;
-
-      // Auto-transition to in_progress if starting from not_started
-      if (book.state === "not_started" && currentPage > 0) {
-        newState = "in_progress";
-      }
-
-      // Auto-transition to finished if reaching the end
-      if (
-        book.state === "in_progress" &&
-        totalPages > 0 &&
-        currentPage >= totalPages
-      ) {
-        newState = "finished";
-      }
-
-      // Update progress
-      const progressUpdate: Partial<Book> = {
-        progress: {
-          ...book.progress,
-          currentPage: currentPage,
-        },
-      };
-
-      // Add timestamps for state changes
-      if (newState !== book.state) {
-        progressUpdate.state = newState;
-        if (newState === "in_progress") {
-          progressUpdate.startedAt = Timestamp.now();
-        } else if (newState === "finished") {
-          progressUpdate.finishedAt = Timestamp.now();
+      // Check if book is in a state that allows progress updates
+      if (book.state === "not_started") {
+        // Automatically transition to in_progress when progress is first made
+        const stateUpdateResult = await this.updateBookState(
+          userId,
+          bookId,
+          "in_progress",
+          "not_started"
+        );
+        if (!stateUpdateResult.success) {
+          return stateUpdateResult;
         }
       }
 
-      // Update book
-      const updateResult = await this.bookRepository.updateBook(
+      // Validate progress against total pages if available
+      if (book.progress?.totalPages && currentPage > book.progress.totalPages) {
+        return {
+          success: false,
+          error: createValidationError(
+            "Current page cannot exceed total pages"
+          ),
+        };
+      }
+
+      // Update progress
+      const progressUpdate = {
+        progress: {
+          currentPage,
+          totalPages: book.progress?.totalPages || 0,
+          lastUpdated: Timestamp.now(),
+        },
+      };
+
+      const result = await this.bookRepository.updateBook(
         userId,
         bookId,
         progressUpdate
       );
-      if (!updateResult.success) {
-        const standardError = this.handleRepositoryError(updateResult.error!);
+
+      if (!result.success) {
+        const standardError = this.handleRepositoryError(result.error!);
         return { success: false, error: standardError };
       }
 
       // Log progress update event
       await this.eventRepository.logEvent(userId, {
         type: "progress_update",
-        bookId: bookId,
+        bookId,
         data: {
-          previousPage: book.progress.currentPage || 0,
+          previousPage: book.progress?.currentPage || 0,
           newPage: currentPage,
         },
       });
 
-      // Log state change event if state changed
-      if (newState !== book.state) {
-        await this.eventRepository.logEvent(userId, {
-          type: "state_change",
-          bookId: bookId,
-          data: {
-            previousState: book.state,
-            newState: newState,
-          },
-        });
+      // Auto-transition to finished if book is completed
+      if (
+        book.progress?.totalPages &&
+        currentPage >= book.progress.totalPages &&
+        book.state === "in_progress"
+      ) {
+        await this.updateBookState(userId, bookId, "finished", "in_progress");
       }
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to update book progress")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while updating progress")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to update book progress",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
 
   /**
-   * Update book reading state with proper event logging
+   * Update book state
    */
   async updateBookState(
     userId: string,
@@ -379,13 +346,16 @@ export class BookService implements IBookService {
       // Get current book if currentState not provided
       let actualCurrentState = currentState;
       if (!actualCurrentState) {
-        const bookResult = await this.getBook(userId, bookId);
-        if (!bookResult.success || !bookResult.data) {
-          return { success: false, error: bookResult.error || new ErrorBuilder("Book not found")
-            .withCategory(ErrorCategory.VALIDATION)
-            .withUserMessage("Book not found")
-            .withSeverity(ErrorSeverity.LOW)
-            .build() };
+        const bookResult = await this.bookRepository.getBook(userId, bookId);
+        if (!bookResult.success) {
+          const standardError = this.handleRepositoryError(bookResult.error!);
+          return { success: false, error: standardError };
+        }
+        if (!bookResult.data) {
+          return {
+            success: false,
+            error: createValidationError("Book not found"),
+          };
         }
         actualCurrentState = bookResult.data.state;
       }
@@ -394,66 +364,50 @@ export class BookService implements IBookService {
       if (!canTransitionTo(actualCurrentState, newState)) {
         return {
           success: false,
-          error: ErrorHandlerUtils.createBusinessLogicError(
-            `Cannot transition from ${actualCurrentState} to ${newState}`,
-            `Cannot change book status from ${actualCurrentState} to ${newState}`,
-            { actualCurrentState, newState, bookId }
+          error: createValidationError(
+            `Cannot transition from ${actualCurrentState} to ${newState}`
           ),
         };
       }
 
-      // Prepare update data
-      const updateData: Partial<Book> = {
+      // Update book state
+      const updates: Partial<Book> = {
         state: newState,
+        updatedAt: Timestamp.now(),
       };
 
-      // Add timestamps for state changes
-      if (newState === "in_progress") {
-        updateData.startedAt = Timestamp.now();
-      } else if (newState === "finished") {
-        updateData.finishedAt = Timestamp.now();
-        // Set progress to 100% when finished
-        const bookResult = await this.getBook(userId, bookId);
-        if (bookResult.success && bookResult.data) {
-          updateData.progress = {
-            ...bookResult.data.progress,
-            currentPage:
-              bookResult.data.progress.totalPages ||
-              bookResult.data.progress.currentPage ||
-              0,
-          };
-        }
+      // Set finishedAt timestamp if transitioning to finished
+      if (newState === "finished") {
+        updates.finishedAt = Timestamp.now();
       }
 
-      // Update book
-      const updateResult = await this.bookRepository.updateBook(
+      const result = await this.bookRepository.updateBook(
         userId,
         bookId,
-        updateData
+        updates
       );
-      if (!updateResult.success) {
-        const standardError = this.handleRepositoryError(updateResult.error!);
+
+      if (!result.success) {
+        const standardError = this.handleRepositoryError(result.error!);
         return { success: false, error: standardError };
       }
 
       // Log state change event
       await this.eventRepository.logEvent(userId, {
         type: "state_change",
-        bookId: bookId,
+        bookId,
         data: {
           previousState: actualCurrentState,
-          newState: newState,
+          newState,
         },
       });
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to update book state")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while updating book status")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to update book state",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -467,59 +421,46 @@ export class BookService implements IBookService {
     rating: number
   ): Promise<ServiceResult<void>> {
     try {
+      // Validate rating
       if (!validateRating(rating)) {
-        return { success: false, error: ErrorHandlerUtils.createValidationError(
-          "rating",
-          "Rating must be between 1 and 5"
-        ) };
+        return {
+          success: false,
+          error: createValidationError("Rating must be between 1 and 5"),
+        };
       }
 
-      // Get current book to verify it's finished
-      const bookResult = await this.getBook(userId, bookId);
-      if (!bookResult.success || !bookResult.data) {
-        return { success: false, error: bookResult.error || new ErrorBuilder("Book not found")
-          .withCategory(ErrorCategory.VALIDATION)
-          .withUserMessage("Book not found")
-          .withSeverity(ErrorSeverity.LOW)
-          .build() };
-      }
+      // Update book rating
+      const updates: Partial<Book> = {
+        rating,
+        updatedAt: Timestamp.now(),
+      };
 
-      if (bookResult.data.state !== "finished") {
-        return { success: false, error: ErrorHandlerUtils.createBusinessLogicError(
-          "Cannot rate unfinished book",
-          "Can only rate finished books",
-          { bookId, currentState: bookResult.data.state }
-        ) };
-      }
-
-      // Update rating
-      const updateResult = await this.bookRepository.updateBook(
+      const result = await this.bookRepository.updateBook(
         userId,
         bookId,
-        { rating }
+        updates
       );
-      if (!updateResult.success) {
-        const standardError = this.handleRepositoryError(updateResult.error!);
+
+      if (!result.success) {
+        const standardError = this.handleRepositoryError(result.error!);
         return { success: false, error: standardError };
       }
 
       // Log rating event
       await this.eventRepository.logEvent(userId, {
         type: "rating_added",
-        bookId: bookId,
+        bookId,
         data: {
-          rating: rating,
+          rating,
         },
       });
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to update book rating")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while updating rating")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to update book rating",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -532,10 +473,6 @@ export class BookService implements IBookService {
     bookId: string
   ): Promise<ServiceResult<void>> {
     try {
-      // Delete book events first
-      await this.eventRepository.deleteBookEvents(userId, bookId);
-
-      // Delete book
       const result = await this.bookRepository.deleteBook(userId, bookId);
 
       if (!result.success) {
@@ -545,12 +482,10 @@ export class BookService implements IBookService {
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to delete book")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while deleting the book")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to delete book",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -573,37 +508,38 @@ export class BookService implements IBookService {
     books: Array<Omit<Book, "id" | "addedAt" | "updatedAt">>
   ): Promise<ServiceResult<string[]>> {
     try {
-      // Validate all books
+      const bookIds: string[] = [];
+      const errors: string[] = [];
+
       for (const book of books) {
-        const validationError = this.validateBookData(book);
-        if (validationError) {
-          return {
-            success: false,
-            error: new ErrorBuilder(`Invalid book data: ${validationError.userMessage}`)
-              .withCategory(ErrorCategory.VALIDATION)
-              .withUserMessage(`Invalid book data: ${validationError.userMessage}`)
-              .withSeverity(ErrorSeverity.LOW)
-              .withContext({ originalError: validationError })
-              .build(),
-          };
+        const result = await this.addBook(userId, book);
+        if (result.success && result.data) {
+          bookIds.push(result.data);
+        } else {
+          errors.push(
+            `Failed to import "${book.title}": ${
+              result.error?.userMessage || "Unknown error"
+            }`
+          );
         }
       }
 
-      const result = await this.bookRepository.importBooks(userId, books);
-
-      if (!result.success) {
-        const standardError = this.handleRepositoryError(result.error!);
-        return { success: false, error: standardError };
+      if (errors.length > 0 && bookIds.length === 0) {
+        // All imports failed
+        return {
+          success: false,
+          error: createSystemError(
+            `Failed to import books: ${errors.join(", ")}`
+          ),
+        };
       }
 
-      return { success: true, data: result.data! };
+      return { success: true, data: bookIds };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to import books")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while importing books")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to import books",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -619,34 +555,39 @@ export class BookService implements IBookService {
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[] {
-    let filtered = books;
+    let filteredBooks = [...books];
 
     // Apply search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (book) =>
-          book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const query = searchQuery.toLowerCase();
+      filteredBooks = filteredBooks.filter((book) => {
+        return (
+          book.title.toLowerCase().includes(query) ||
+          book.author.toLowerCase().includes(query) ||
+          book.genre?.toLowerCase().includes(query) ||
+          book.description?.toLowerCase().includes(query)
+        );
+      });
     }
 
     // Apply status filter
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((book) => book.state === filterStatus);
-    }
-
-    // Apply ownership filter
-    if (filterOwnership !== "all") {
-      filtered = filtered.filter((book) =>
-        filterOwnership === "owned" ? book.isOwned : !book.isOwned
+    if (filterStatus && filterStatus !== "all") {
+      filteredBooks = filteredBooks.filter(
+        (book) => book.state === filterStatus
       );
     }
 
+    // Apply ownership filter
+    if (filterOwnership && filterOwnership !== "all") {
+      filteredBooks = filteredBooks.filter((book) => {
+        return filterOwnership === "owned" ? book.isOwned : !book.isOwned;
+      });
+    }
+
     // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
+    filteredBooks.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
 
       switch (sortBy) {
         case "title":
@@ -657,9 +598,9 @@ export class BookService implements IBookService {
           aValue = a.author.toLowerCase();
           bValue = b.author.toLowerCase();
           break;
-        case "pages":
-          aValue = a.progress.totalPages || 0;
-          bValue = b.progress.totalPages || 0;
+        case "dateAdded":
+          aValue = a.addedAt.seconds;
+          bValue = b.addedAt.seconds;
           break;
         case "rating":
           aValue = a.rating || 0;
@@ -670,30 +611,20 @@ export class BookService implements IBookService {
           bValue = this.calculateProgress(b);
           break;
         default:
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
+          aValue = a.addedAt.seconds;
+          bValue = b.addedAt.seconds;
       }
 
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      } else {
-        return sortDirection === "asc"
-          ? (aValue as number) - (bValue as number)
-          : (bValue as number) - (aValue as number);
-      }
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
     });
 
-    return sorted;
+    return filteredBooks;
   }
 
   /**
    * Manual update book (bypasses state machine validation)
-   * 
-   * This function allows manual editing of all book data including state transitions
-   * that would normally be prevented by the state machine. Used for error correction
-   * and manual data management.
    */
   async updateBookManual(
     userId: string,
@@ -701,61 +632,21 @@ export class BookService implements IBookService {
     updates: Partial<Book>
   ): Promise<ServiceResult<void>> {
     try {
-      // Still validate basic data integrity but allow any state changes
       const validationError = this.validateBookData(updates);
       if (validationError) {
         return { success: false, error: validationError };
       }
 
-      // Get current book to prepare proper timestamp updates
-      const currentBookResult = await this.getBook(userId, bookId);
-      if (!currentBookResult.success || !currentBookResult.data) {
-        return { success: false, error: currentBookResult.error || new ErrorBuilder("Book not found")
-          .withCategory(ErrorCategory.VALIDATION)
-          .withUserMessage("Book not found")
-          .withSeverity(ErrorSeverity.LOW)
-          .build() };
-      }
+      // Add updatedAt timestamp
+      const finalUpdates = {
+        ...updates,
+        updatedAt: Timestamp.now(),
+      };
 
-      const currentBook = currentBookResult.data;
-      const updateData = { ...updates };
-
-      // Handle state-related timestamp updates
-      if (updates.state && updates.state !== currentBook.state) {
-        switch (updates.state) {
-          case "in_progress":
-            // Only set startedAt if transitioning from not_started
-            if (currentBook.state === "not_started") {
-              updateData.startedAt = Timestamp.now();
-            }
-            // Clear finishedAt if moving from finished back to in_progress
-            if (currentBook.state === "finished") {
-              updateData.finishedAt = undefined;
-            }
-            break;
-          case "finished":
-            // Set finishedAt if not already set
-            if (!currentBook.finishedAt) {
-              updateData.finishedAt = Timestamp.now();
-            }
-            // Ensure we have a startedAt timestamp
-            if (!currentBook.startedAt) {
-              updateData.startedAt = Timestamp.now();
-            }
-            break;
-          case "not_started":
-            // Clear both timestamps when resetting to not_started
-            updateData.startedAt = undefined;
-            updateData.finishedAt = undefined;
-            break;
-        }
-      }
-
-      // Update the book
       const result = await this.bookRepository.updateBook(
         userId,
         bookId,
-        updateData
+        finalUpdates
       );
 
       if (!result.success) {
@@ -763,26 +654,21 @@ export class BookService implements IBookService {
         return { success: false, error: standardError };
       }
 
-      // Log manual edit event (if state changed)
-      if (updates.state && updates.state !== currentBook.state) {
-        await this.eventRepository.logEvent(userId, {
-          bookId,
-          type: "state_change",
-          data: {
-            previousState: currentBook.state,
-            newState: updates.state,
-          },
-        });
-      }
+      // Log manual update event
+      await this.eventRepository.logEvent(userId, {
+        type: "state_change",
+        bookId,
+        data: {
+          note: `Manual update: ${Object.keys(updates).join(", ")}`,
+        },
+      });
 
       return { success: true };
     } catch (error) {
-      const standardError = new ErrorBuilder("Failed to update book")
-        .withCategory(ErrorCategory.SYSTEM)
-        .withUserMessage("An unexpected error occurred while updating the book")
-        .withOriginalError(error as Error)
-        .withSeverity(ErrorSeverity.MEDIUM)
-        .build();
+      const standardError = createSystemError(
+        "Failed to update book manually",
+        error as Error
+      );
       return { success: false, error: standardError };
     }
   }
@@ -791,14 +677,14 @@ export class BookService implements IBookService {
    * Calculate reading progress percentage
    */
   calculateProgress(book: Book): number {
-    if (book.state === "finished") return 100;
-    if (book.state === "not_started") return 0;
-
-    const { currentPage, totalPages } = book.progress;
-    if (currentPage && totalPages && totalPages > 0) {
-      return Math.round((currentPage / totalPages) * 100);
+    if (!book.progress?.totalPages || book.progress.totalPages === 0) {
+      return 0;
     }
-    return 0;
+
+    const currentPage = book.progress.currentPage || 0;
+    const totalPages = book.progress.totalPages;
+
+    return Math.round((currentPage / totalPages) * 100);
   }
 }
 

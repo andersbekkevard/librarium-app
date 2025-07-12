@@ -6,20 +6,38 @@ export const BRAND_COLORS = {
   primary: {
     bg: "bg-brand-primary",
     bgHover: "hover:bg-brand-primary-hover",
+    bgLight: "bg-brand-primary/10",
+    bgBlur: "bg-brand-primary/50",
     text: "text-brand-primary",
     border: "border-brand-primary",
+    borderLight: "border-brand-primary/20",
+    borderTop: "border-t-brand-primary/30",
+    gradientFrom: "from-brand-primary",
+    gradientTo: "to-brand-primary",
   },
   secondary: {
     bg: "bg-brand-secondary",
     bgHover: "hover:bg-brand-secondary-hover",
+    bgLight: "bg-brand-secondary/10",
+    bgBlur: "bg-brand-secondary/50",
     text: "text-brand-secondary",
     border: "border-brand-secondary",
+    borderLight: "border-brand-secondary/20",
+    borderTop: "border-t-brand-secondary/30",
+    gradientFrom: "from-brand-secondary",
+    gradientTo: "to-brand-secondary",
   },
   accent: {
     bg: "bg-brand-accent",
     bgHover: "hover:bg-brand-accent-hover",
+    bgLight: "bg-brand-accent/10",
+    bgBlur: "bg-brand-accent/50",
     text: "text-brand-accent",
     border: "border-brand-accent",
+    borderLight: "border-brand-accent/20",
+    borderTop: "border-t-brand-accent/30",
+    gradientFrom: "from-brand-accent",
+    gradientTo: "to-brand-accent",
   },
 } as const;
 
@@ -33,6 +51,7 @@ export const STATUS_COLORS = {
     text: "text-status-success",
     border: "border-status-success",
     borderLight: "border-status-success/20",
+    borderLeft: "border-l-status-success",
   },
   warning: {
     bg: "bg-status-warning",
@@ -40,6 +59,7 @@ export const STATUS_COLORS = {
     text: "text-status-warning",
     border: "border-status-warning",
     borderLight: "border-status-warning/20",
+    borderLeft: "border-l-status-warning",
   },
   error: {
     bg: "bg-status-error",
@@ -47,6 +67,7 @@ export const STATUS_COLORS = {
     text: "text-status-error",
     border: "border-status-error",
     borderLight: "border-status-error/20",
+    borderLeft: "border-l-status-error",
   },
   info: {
     bg: "bg-status-info",
@@ -54,6 +75,7 @@ export const STATUS_COLORS = {
     text: "text-status-info",
     border: "border-status-info",
     borderLight: "border-status-info/20",
+    borderLeft: "border-l-status-info",
   },
 } as const;
 

@@ -6,8 +6,8 @@
  */
 
 import { User } from "firebase/auth";
-import { Book, UserProfile } from "../models";
 import { StandardError } from "../error-handling";
+import { Book, UserProfile } from "../models";
 
 /**
  * Common service result type for operations that can fail
@@ -256,32 +256,4 @@ export interface BookStateTransition {
   toState: Book["state"];
   timestamp: Date;
   notes?: string;
-}
-
-/**
- * Service error types
- */
-export enum ServiceErrorType {
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
-  NOT_FOUND = "NOT_FOUND",
-  BUSINESS_RULE_VIOLATION = "BUSINESS_RULE_VIOLATION",
-  EXTERNAL_API_ERROR = "EXTERNAL_API_ERROR",
-  REPOSITORY_ERROR = "REPOSITORY_ERROR",
-  UNKNOWN_ERROR = "UNKNOWN_ERROR",
-}
-
-/**
- * Service error class
- */
-export class ServiceError extends Error {
-  constructor(
-    public type: ServiceErrorType,
-    message: string,
-    public details?: unknown,
-    public originalError?: Error
-  ) {
-    super(message);
-    this.name = "ServiceError";
-  }
 }

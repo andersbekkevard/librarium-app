@@ -8,12 +8,11 @@
  */
 
 import {
-  ErrorCategory,
   ErrorContext,
-  ErrorHandlerUtils,
   StandardError,
-  errorLogger,
+  createSystemError,
 } from "@/lib/error-handling";
+import { simpleErrorLogger } from "@/lib/error-logging";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { ErrorBoundaryFallback } from "./error-display";
 
@@ -53,14 +52,9 @@ export class ErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Convert the error to a standardized error
-    const standardError = ErrorHandlerUtils.handleGenericError(
-      error,
-      {
-        component: "ErrorBoundary",
-        action: "render",
-        timestamp: new Date(),
-      },
-      ErrorCategory.SYSTEM
+    const standardError = createSystemError(
+      `React Error Boundary: ${error.message}`,
+      error
     );
 
     return {
@@ -83,14 +77,13 @@ export class ErrorBoundary extends Component<
       },
     };
 
-    const standardError = ErrorHandlerUtils.handleGenericError(
-      error,
-      context,
-      ErrorCategory.SYSTEM
+    const standardError = createSystemError(
+      `React Error Boundary: ${error.message}`,
+      error
     );
 
     // Log the error
-    errorLogger.logError(standardError, context);
+    simpleErrorLogger.logError(standardError, context);
 
     // Update state with error info
     this.setState((prevState) => ({
@@ -211,6 +204,7 @@ export class AsyncErrorBoundary extends ErrorBoundary {
   }
 
   componentWillUnmount() {
+    // Clean up event listener
     window.removeEventListener(
       "unhandledrejection",
       this.handleUnhandledRejection
@@ -218,17 +212,25 @@ export class AsyncErrorBoundary extends ErrorBoundary {
   }
 
   private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    const error = event.reason;
-    const standardError = ErrorHandlerUtils.handleGenericError(
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        component: "AsyncErrorBoundary",
-        action: "unhandledRejection",
-        timestamp: new Date(),
-      },
-      ErrorCategory.SYSTEM
+    // Convert promise rejection to StandardError
+    const standardError = createSystemError(
+      `Unhandled Promise Rejection: ${event.reason}`,
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason))
     );
 
+    // Log the error
+    simpleErrorLogger.logError(standardError, {
+      component: "AsyncErrorBoundary",
+      action: "handleUnhandledRejection",
+      metadata: {
+        reason: event.reason,
+        promise: event.promise,
+      },
+    });
+
+    // Handle the error
     this.asyncErrorHandler(standardError);
 
     // Prevent the default browser error handling
@@ -237,23 +239,16 @@ export class AsyncErrorBoundary extends ErrorBoundary {
 }
 
 /**
- * Provider for error boundary context
+ * Provider component for error boundary context
  */
-const ErrorBoundaryContext = React.createContext<{
-  captureError: (error: Error) => void;
-  resetError: () => void;
-} | null>(null);
-
 export const ErrorBoundaryProvider: React.FC<{
   children: ReactNode;
   context?: ErrorContext;
 }> = ({ children, context }) => {
-  const { captureError, resetError } = useErrorBoundary();
-
   return (
-    <ErrorBoundaryContext.Provider value={{ captureError, resetError }}>
-      <ErrorBoundary context={context}>{children}</ErrorBoundary>
-    </ErrorBoundaryContext.Provider>
+    <ErrorBoundary context={context}>
+      <AsyncErrorBoundary context={context}>{children}</AsyncErrorBoundary>
+    </ErrorBoundary>
   );
 };
 
@@ -261,11 +256,6 @@ export const ErrorBoundaryProvider: React.FC<{
  * Hook to access error boundary context
  */
 export function useErrorBoundaryContext() {
-  const context = React.useContext(ErrorBoundaryContext);
-  if (!context) {
-    throw new Error(
-      "useErrorBoundaryContext must be used within an ErrorBoundaryProvider"
-    );
-  }
-  return context;
+  // This is a placeholder for potential future error boundary context
+  return {};
 }

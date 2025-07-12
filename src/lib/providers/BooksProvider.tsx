@@ -10,12 +10,12 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
-  ErrorHandlerUtils,
-  ProviderErrorType,
   ProviderResult,
   StandardError,
+  createAuthError,
   createProviderError,
   createProviderSuccess,
+  createSystemError,
 } from "../error-handling";
 import { LoggerUtils } from "../error-logging";
 import { Book } from "../models";
@@ -117,14 +117,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     book: Omit<Book, "id" | "addedAt" | "updatedAt">
   ): Promise<ProviderResult<string>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "addBook",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -135,8 +128,10 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       // Log user action
       LoggerUtils.logUserAction("book_add_attempt", {
         userId: user.uid,
-        bookTitle: book.title,
-        bookAuthor: book.author,
+        metadata: {
+          bookTitle: book.title,
+          bookAuthor: book.author,
+        },
       });
 
       const result = await bookService.addBook(user.uid, book);
@@ -149,35 +144,23 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         // Log successful addition
         LoggerUtils.logUserAction("book_add_success", {
           userId: user.uid,
-          bookId: result.data,
-          bookTitle: book.title,
+          metadata: {
+            bookId: result.data,
+            bookTitle: book.title,
+          },
         });
 
         return createProviderSuccess(result.data);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to add book",
-          {
-            component: "BooksProvider",
-            action: "addBook",
-            userId: user.uid,
-            metadata: { bookTitle: book.title },
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to add book"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while adding book",
-        {
-          component: "BooksProvider",
-          action: "addBook",
-          userId: user.uid,
-          metadata: { bookTitle: book.title },
-        },
         error as Error
       );
       setError(standardError);
@@ -193,15 +176,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     updates: Partial<Book>
   ): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "updateBook",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -213,7 +188,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       LoggerUtils.logUserAction("book_update_attempt", {
         userId: user.uid,
         bookId,
-        updates: Object.keys(updates),
+        metadata: {
+          updates: Object.keys(updates),
+        },
       });
 
       const result = await bookService.updateBook(user.uid, bookId, updates);
@@ -229,34 +206,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         LoggerUtils.logUserAction("book_update_success", {
           userId: user.uid,
           bookId,
-          updates: Object.keys(updates),
+          metadata: {
+            updates: Object.keys(updates),
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update book",
-          {
-            component: "BooksProvider",
-            action: "updateBook",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update book"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating book",
-        {
-          component: "BooksProvider",
-          action: "updateBook",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -265,22 +230,14 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
-   * Manually update book (bypasses state machine validation) with standardized error handling
+   * Manual update book with standardized error handling
    */
   const updateBookManual = async (
     bookId: string,
     updates: Partial<Book>
   ): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "updateBookManual",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -292,7 +249,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       LoggerUtils.logUserAction("book_manual_update_attempt", {
         userId: user.uid,
         bookId,
-        updates: Object.keys(updates),
+        metadata: {
+          updates: Object.keys(updates),
+        },
       });
 
       const result = await bookService.updateBookManual(
@@ -312,34 +271,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         LoggerUtils.logUserAction("book_manual_update_success", {
           userId: user.uid,
           bookId,
-          updates: Object.keys(updates),
+          metadata: {
+            updates: Object.keys(updates),
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update book",
-          {
-            component: "BooksProvider",
-            action: "updateBookManual",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update book manually"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "An unexpected error occurred while updating book",
-        {
-          component: "BooksProvider",
-          action: "updateBookManual",
-          userId: user.uid,
-          bookId,
-        },
+      const standardError = createSystemError(
+        "An unexpected error occurred while updating book manually",
         error as Error
       );
       setError(standardError);
@@ -355,15 +302,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     currentPage: number
   ): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "updateBookProgress",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -375,7 +314,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       LoggerUtils.logUserAction("book_progress_update_attempt", {
         userId: user.uid,
         bookId,
-        currentPage,
+        metadata: {
+          currentPage,
+        },
       });
 
       const result = await bookService.updateBookProgress(
@@ -386,41 +327,29 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics in case state changed
+        // Update user statistics
         await updateUserStats();
 
         // Log successful update
         LoggerUtils.logUserAction("book_progress_update_success", {
           userId: user.uid,
           bookId,
-          currentPage,
+          metadata: {
+            currentPage,
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update book progress",
-          {
-            component: "BooksProvider",
-            action: "updateBookProgress",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update book progress"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating book progress",
-        {
-          component: "BooksProvider",
-          action: "updateBookProgress",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -437,15 +366,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     currentState?: Book["state"]
   ): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "updateBookState",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -457,8 +378,10 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       LoggerUtils.logUserAction("book_state_update_attempt", {
         userId: user.uid,
         bookId,
-        newState,
-        currentState,
+        metadata: {
+          newState,
+          currentState,
+        },
       });
 
       const result = await bookService.updateBookState(
@@ -477,35 +400,23 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         LoggerUtils.logUserAction("book_state_update_success", {
           userId: user.uid,
           bookId,
-          newState,
-          currentState,
+          metadata: {
+            newState,
+            currentState,
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update book state",
-          {
-            component: "BooksProvider",
-            action: "updateBookState",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update book state"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating book state",
-        {
-          component: "BooksProvider",
-          action: "updateBookState",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -521,15 +432,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     rating: number
   ): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "updateBookRating",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -541,7 +444,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       LoggerUtils.logUserAction("book_rating_update_attempt", {
         userId: user.uid,
         bookId,
-        rating,
+        metadata: {
+          rating,
+        },
       });
 
       const result = await bookService.updateBookRating(
@@ -557,34 +462,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         LoggerUtils.logUserAction("book_rating_update_success", {
           userId: user.uid,
           bookId,
-          rating,
+          metadata: {
+            rating,
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to update book rating",
-          {
-            component: "BooksProvider",
-            action: "updateBookRating",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update book rating"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while updating book rating",
-        {
-          component: "BooksProvider",
-          action: "updateBookRating",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -593,19 +486,11 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
-   * Delete a book from the collection with standardized error handling
+   * Delete a book with standardized error handling
    */
   const deleteBook = async (bookId: string): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "deleteBook",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -634,29 +519,15 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to delete book",
-          {
-            component: "BooksProvider",
-            action: "deleteBook",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to delete book"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while deleting book",
-        {
-          component: "BooksProvider",
-          action: "deleteBook",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -665,18 +536,11 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
-   * Manually refresh books (for error recovery) with standardized error handling
+   * Manually refresh books with standardized error handling
    */
   const refreshBooks = async (): Promise<ProviderResult<void>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "refreshBooks",
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -698,32 +562,22 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         // Log successful refresh
         LoggerUtils.logUserAction("books_refresh_success", {
           userId: user.uid,
-          booksCount: result.data?.length || 0,
+          metadata: {
+            bookCount: result.data?.length || 0,
+          },
         });
 
         return createProviderSuccess(undefined);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to refresh books",
-          {
-            component: "BooksProvider",
-            action: "refreshBooks",
-            userId: user.uid,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to refresh books"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while refreshing books",
-        {
-          component: "BooksProvider",
-          action: "refreshBooks",
-          userId: user.uid,
-        },
         error as Error
       );
       setError(standardError);
@@ -734,21 +588,13 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
-   * Get a single book by ID with standardized error handling
+   * Get a single book with standardized error handling
    */
   const getBook = async (
     bookId: string
   ): Promise<ProviderResult<Book | null>> => {
     if (!user) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
-        "User not authenticated",
-        {
-          component: "BooksProvider",
-          action: "getBook",
-          bookId,
-        }
-      );
+      const standardError = createAuthError("User not authenticated");
       setError(standardError);
       return createProviderError(standardError);
     }
@@ -756,47 +602,20 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     try {
       setError(null);
 
-      // Log user action
-      LoggerUtils.logUserAction("book_get_attempt", {
-        userId: user.uid,
-        bookId,
-      });
-
       const result = await bookService.getBook(user.uid, bookId);
 
       if (result.success) {
-        // Log successful get
-        LoggerUtils.logUserAction("book_get_success", {
-          userId: user.uid,
-          bookId,
-          found: !!result.data,
-        });
-
         return createProviderSuccess(result.data || null);
       } else {
-        const standardError = ErrorHandlerUtils.handleProviderError(
-          ProviderErrorType.OPERATION_FAILED,
-          result.error?.message || "Failed to get book",
-          {
-            component: "BooksProvider",
-            action: "getBook",
-            userId: user.uid,
-            bookId,
-          }
+        const standardError = createSystemError(
+          result.error?.message || "Failed to get book"
         );
         setError(standardError);
         return createProviderError(standardError);
       }
     } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.OPERATION_FAILED,
+      const standardError = createSystemError(
         "An unexpected error occurred while getting book",
-        {
-          component: "BooksProvider",
-          action: "getBook",
-          userId: user.uid,
-          bookId,
-        },
         error as Error
       );
       setError(standardError);
@@ -805,7 +624,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
-   * Filter and sort books using service
+   * Filter and sort books
    */
   const filterAndSortBooks = (
     searchQuery: string,
@@ -814,24 +633,72 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[] => {
-    return bookService.filterAndSortBooks(
-      books,
-      searchQuery,
-      filterStatus,
-      filterOwnership,
-      sortBy,
-      sortDirection
-    );
+    try {
+      return bookService.filterAndSortBooks(
+        books,
+        searchQuery,
+        filterStatus,
+        filterOwnership,
+        sortBy,
+        sortDirection
+      );
+    } catch (error) {
+      const standardError = createSystemError(
+        "An unexpected error occurred while filtering books",
+        error as Error
+      );
+      setError(standardError);
+      return books; // Return original books on error
+    }
   };
 
   /**
-   * Calculate book progress using service
+   * Calculate book progress
    */
   const calculateBookProgress = (book: Book): number => {
-    return bookService.calculateProgress(book);
+    try {
+      return bookService.calculateProgress(book);
+    } catch (error) {
+      const standardError = createSystemError(
+        "An unexpected error occurred while calculating book progress",
+        error as Error
+      );
+      setError(standardError);
+      return 0; // Return 0 on error
+    }
   };
 
-  // Computed statistics
+  // Set up real-time subscription to user's books
+  useEffect(() => {
+    if (!user) {
+      setBooks([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const unsubscribe = bookService.subscribeToUserBooks(
+        user.uid,
+        (updatedBooks) => {
+          setBooks(updatedBooks);
+          setLoading(false);
+          setError(null);
+        }
+      );
+
+      return unsubscribe;
+    } catch (error) {
+      const standardError = createSystemError(
+        "Failed to subscribe to book updates",
+        error as Error
+      );
+      setError(standardError);
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Calculate computed statistics
   const totalBooks = books.length;
   const booksInProgress = books.filter(
     (book) => book.state === "in_progress"
@@ -842,46 +709,6 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   const booksNotStarted = books.filter(
     (book) => book.state === "not_started"
   ).length;
-
-  // Set up real-time listener for books
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setBooks([]);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Set up real-time books listener
-      const unsubscribe = bookService.subscribeToUserBooks(
-        user.uid,
-        (userBooks) => {
-          setBooks(userBooks);
-          setLoading(false);
-          setError(null);
-        }
-      );
-
-      return unsubscribe;
-    } catch (error) {
-      const standardError = ErrorHandlerUtils.handleProviderError(
-        ProviderErrorType.SUBSCRIPTION_FAILED,
-        "Failed to initialize books subscription",
-        {
-          component: "BooksProvider",
-          action: "subscribeToUserBooks",
-          userId: user.uid,
-        },
-        error as Error
-      );
-      setError(standardError);
-      setLoading(false);
-    }
-  }, [isAuthenticated, user]);
 
   const value: BooksContextType = {
     books,
@@ -912,12 +739,6 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
 /**
  * Hook to access books context
- *
- * Provides access to the current books collection and operations.
- * Must be used within a BooksProvider component tree.
- *
- * @returns BooksContextType - Current books context
- * @throws Error - If used outside of BooksProvider
  */
 export const useBooksContext = (): BooksContextType => {
   const context = useContext(BooksContext);
@@ -926,5 +747,3 @@ export const useBooksContext = (): BooksContextType => {
   }
   return context;
 };
-
-export default BooksProvider;

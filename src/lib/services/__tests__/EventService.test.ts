@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
-import { EventService, ActivityItem } from "../EventService";
-import { BookEvent, Book } from "../../models";
-import { IEventRepository, IBookRepository } from "../../repositories/types";
+import { Book, BookEvent } from "../../models";
+import { IBookRepository, IEventRepository } from "../../repositories/types";
+import { EventService } from "../EventService";
 
 // Mock Firebase
 jest.mock("../../firebase", () => ({
@@ -98,7 +98,10 @@ describe("EventService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    eventService = new EventService(mockEventRepository, mockBookRepository);
+    eventService = new EventService(
+      mockEventRepository as any,
+      mockBookRepository as any
+    );
   });
 
   describe("getRecentEvents", () => {
@@ -112,7 +115,10 @@ describe("EventService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockEvents);
-      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(testUserId, 10);
+      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(
+        testUserId,
+        10
+      );
     });
 
     it("should use default limit when not provided", async () => {
@@ -124,7 +130,10 @@ describe("EventService", () => {
       const result = await eventService.getRecentEvents(testUserId);
 
       expect(result.success).toBe(true);
-      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(testUserId, 10);
+      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(
+        testUserId,
+        10
+      );
     });
 
     it("should return empty array when no events", async () => {
@@ -142,7 +151,7 @@ describe("EventService", () => {
     it("should handle null data from repository", async () => {
       mockEventRepository.getRecentEvents.mockResolvedValue({
         success: true,
-        data: null,
+        data: undefined,
       });
 
       const result = await eventService.getRecentEvents(testUserId);
@@ -155,7 +164,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentEvents("");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("User ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "User ID is required",
+          category: "validation",
+          userMessage: "User ID is required",
+        })
+      );
       expect(mockEventRepository.getRecentEvents).not.toHaveBeenCalled();
     });
 
@@ -168,7 +183,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentEvents(testUserId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Database error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Database error",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
 
     it("should handle unexpected errors", async () => {
@@ -179,7 +200,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentEvents(testUserId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to get recent events",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
 
     it("should handle unknown errors", async () => {
@@ -188,7 +215,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentEvents(testUserId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Unknown error occurred");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to get recent events",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
   });
 
@@ -229,14 +262,23 @@ describe("EventService", () => {
       const result = await eventService.getRecentActivityItems(testUserId);
 
       expect(result.success).toBe(true);
-      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(testUserId, 5);
+      expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(
+        testUserId,
+        5
+      );
     });
 
     it("should validate user ID", async () => {
       const result = await eventService.getRecentActivityItems("");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("User ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "User ID is required",
+          category: "validation",
+          userMessage: "User ID is required",
+        })
+      );
     });
 
     it("should handle events fetch error", async () => {
@@ -248,7 +290,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentActivityItems(testUserId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Database error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Database error",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
 
     it("should handle missing book data", async () => {
@@ -312,7 +360,13 @@ describe("EventService", () => {
       const result = await eventService.getRecentActivityItems(testUserId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to get recent events",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
   });
 
@@ -336,14 +390,23 @@ describe("EventService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toBe("event-id");
-      expect(mockEventRepository.logEvent).toHaveBeenCalledWith(testUserId, testEvent);
+      expect(mockEventRepository.logEvent).toHaveBeenCalledWith(
+        testUserId,
+        testEvent
+      );
     });
 
     it("should validate user ID", async () => {
       const result = await eventService.logEvent("", testEvent);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("User ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "User ID is required",
+          category: "validation",
+          userMessage: "User ID is required",
+        })
+      );
       expect(mockEventRepository.logEvent).not.toHaveBeenCalled();
     });
 
@@ -353,10 +416,19 @@ describe("EventService", () => {
         bookId: "",
       };
 
-      const result = await eventService.logEvent(testUserId, eventWithoutBookId);
+      const result = await eventService.logEvent(
+        testUserId,
+        eventWithoutBookId
+      );
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Book ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Book ID is required",
+          category: "validation",
+          userMessage: "Book ID is required",
+        })
+      );
       expect(mockEventRepository.logEvent).not.toHaveBeenCalled();
     });
 
@@ -369,13 +441,19 @@ describe("EventService", () => {
       const result = await eventService.logEvent(testUserId, testEvent);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Database error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Database error",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
 
     it("should handle null data from repository", async () => {
       mockEventRepository.logEvent.mockResolvedValue({
         success: true,
-        data: null,
+        data: undefined,
       });
 
       const result = await eventService.logEvent(testUserId, testEvent);
@@ -385,12 +463,20 @@ describe("EventService", () => {
     });
 
     it("should handle unexpected errors", async () => {
-      mockEventRepository.logEvent.mockRejectedValue(new Error("Network error"));
+      mockEventRepository.logEvent.mockRejectedValue(
+        new Error("Network error")
+      );
 
       const result = await eventService.logEvent(testUserId, testEvent);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to log event",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
   });
 
@@ -415,7 +501,13 @@ describe("EventService", () => {
       const result = await eventService.getBookEvents("", testBookId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("User ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "User ID is required",
+          category: "validation",
+          userMessage: "User ID is required",
+        })
+      );
       expect(mockEventRepository.getBookEvents).not.toHaveBeenCalled();
     });
 
@@ -423,7 +515,13 @@ describe("EventService", () => {
       const result = await eventService.getBookEvents(testUserId, "");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Book ID is required");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Book ID is required",
+          category: "validation",
+          userMessage: "Book ID is required",
+        })
+      );
       expect(mockEventRepository.getBookEvents).not.toHaveBeenCalled();
     });
 
@@ -436,13 +534,19 @@ describe("EventService", () => {
       const result = await eventService.getBookEvents(testUserId, testBookId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Database error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Database error",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
 
     it("should handle null data from repository", async () => {
       mockEventRepository.getBookEvents.mockResolvedValue({
         success: true,
-        data: null,
+        data: undefined,
       });
 
       const result = await eventService.getBookEvents(testUserId, testBookId);
@@ -459,7 +563,13 @@ describe("EventService", () => {
       const result = await eventService.getBookEvents(testUserId, testBookId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to get book events",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
   });
 

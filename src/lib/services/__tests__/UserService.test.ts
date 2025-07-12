@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
+import { IBookRepository, IUserRepository } from "../../repositories/types";
 import { UserService } from "../UserService";
-import { IUserRepository, IBookRepository } from "../../repositories/types";
 
 // Mock Firebase
 jest.mock("../../firebase", () => ({
@@ -62,7 +62,10 @@ describe("UserService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    userService = new UserService(mockUserRepository, mockBookRepository);
+    userService = new UserService(
+      mockUserRepository as any,
+      mockBookRepository as any
+    );
   });
 
   describe("createProfileFromFirebaseUser", () => {
@@ -80,19 +83,53 @@ describe("UserService", () => {
         data: null,
       });
 
-      const result = await userService.createProfileFromFirebaseUser(invalidUser);
+      mockUserRepository.createProfile.mockResolvedValue({
+        success: true,
+        data: {
+          id: "test-user-id",
+          displayName: "Anonymous User",
+          email: "test@example.com",
+          emailVerified: true,
+          createdAt: mockTimestamp,
+          updatedAt: mockTimestamp,
+          lastSignInTime: "2023-01-01T00:00:00Z",
+          totalBooksRead: 0,
+          currentlyReading: 0,
+          booksInLibrary: 0,
+        },
+      });
 
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Display name cannot be empty");
+      const result = await userService.createProfileFromFirebaseUser(
+        invalidUser
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data?.displayName).toBe("Anonymous User");
     });
 
     it("should handle unexpected errors", async () => {
-      mockUserRepository.getProfile.mockRejectedValue(new Error("Unexpected error"));
+      mockUserRepository.getProfile.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
-      const result = await userService.createProfileFromFirebaseUser(mockFirebaseUser);
+      mockUserRepository.createProfile.mockResolvedValue({
+        success: false,
+        error: "Database error",
+      });
+
+      const result = await userService.createProfileFromFirebaseUser(
+        mockFirebaseUser
+      );
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Failed to create user profile");
+      expect(result.error).toEqual(
+        expect.objectContaining({
+          message: "Failed to create user profile",
+          category: "system",
+          userMessage: "An unexpected error occurred",
+        })
+      );
     });
   });
 });
