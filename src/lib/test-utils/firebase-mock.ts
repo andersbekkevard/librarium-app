@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
-import { Book, UserProfile } from "../models";
+import { Book, UserProfile } from "../models/models";
 
 // Mock Firebase Timestamp
 export const mockTimestamp = {

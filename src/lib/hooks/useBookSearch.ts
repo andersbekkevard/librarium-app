@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { API_CONFIG } from "../constants";
-import { StandardError, createNetworkError } from "../error-handling";
-import { GoogleBooksVolume, googleBooksApi } from "../google-books-api";
+import { GoogleBooksVolume, googleBooksApi } from "../api/google-books-api";
+import { API_CONFIG } from "../constants/constants";
+import { StandardError, createNetworkError } from "../errors/error-handling";
 
 export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];

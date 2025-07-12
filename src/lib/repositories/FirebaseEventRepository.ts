@@ -17,9 +17,9 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { EVENT_CONFIG } from "../constants";
-import { BookEvent } from "../models";
+import { db } from "../api/firebase";
+import { EVENT_CONFIG } from "../constants/constants";
+import { BookEvent } from "../models/models";
 import {
   IEventRepository,
   RepositoryError,
@@ -32,15 +32,17 @@ export class FirebaseEventRepository implements IEventRepository {
    * Filters out undefined values from data for Firebase compatibility
    * Firebase Firestore doesn't allow undefined values in documents
    */
-  private filterUndefinedValues<T extends Record<string, any>>(data: T): Partial<T> {
+  private filterUndefinedValues<T extends Record<string, any>>(
+    data: T
+  ): Partial<T> {
     const filtered: Partial<T> = {};
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined) {
         filtered[key as keyof T] = value;
       }
     });
-    
+
     return filtered;
   }
 

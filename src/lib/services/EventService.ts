@@ -5,10 +5,13 @@
  * transformation and event-related functionality.
  */
 
-import { BRAND_COLORS, STATUS_COLORS } from "../colors";
-import { EVENT_CONFIG } from "../constants";
-import { createSystemError, createValidationError } from "../error-handling";
-import { Book, BookEvent } from "../models";
+import { EVENT_CONFIG } from "../constants/constants";
+import { BRAND_COLORS, STATUS_COLORS } from "../design/colors";
+import {
+  createSystemError,
+  createValidationError,
+} from "../errors/error-handling";
+import { Book, BookEvent } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { ServiceResult } from "./types";

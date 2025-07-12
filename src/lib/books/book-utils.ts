@@ -4,8 +4,8 @@ import {
   getBestISBN,
   getBestThumbnail,
   GoogleBooksVolume,
-} from "./google-books-api";
-import { Book } from "./models";
+} from "../api/google-books-api";
+import { Book } from "../models/models";
 
 /**
  * Converts Google Books API volume to internal Book model
@@ -118,77 +118,6 @@ const convertManualEntryToBook = (formData: {
   return book;
 };
 
-const filterAndSortBooks = (
-  books: Book[],
-  query: string,
-  state: string,
-  ownership: string,
-  sortBy: string,
-  sortDirection: string
-): Book[] => {
-  let filteredBooks = books;
-
-  if (query) {
-    const lowerCaseQuery = query.toLowerCase();
-    filteredBooks = filteredBooks.filter(
-      (book) =>
-        book.title.toLowerCase().includes(lowerCaseQuery) ||
-        book.author.toLowerCase().includes(lowerCaseQuery) ||
-        book.description?.toLowerCase().includes(lowerCaseQuery)
-    );
-  }
-
-  if (state !== "all") {
-    filteredBooks = filteredBooks.filter((book) => book.state === state);
-  }
-
-  if (ownership !== "all") {
-    const isOwned = ownership === "owned";
-    filteredBooks = filteredBooks.filter((book) => book.isOwned === isOwned);
-  }
-
-  const sortedBooks = [...filteredBooks].sort((a, b): 1 | -1 | 0 => {
-    let compareA: string | number;
-    let compareB: string | number;
-
-    switch (sortBy) {
-      case "title":
-        compareA = a.title;
-        compareB = b.title;
-        break;
-      case "author":
-        compareA = a.author;
-        compareB = b.author;
-        break;
-      case "pages":
-        compareA = a.progress.totalPages;
-        compareB = b.progress.totalPages;
-        break;
-      case "rating":
-        compareA = a.rating || 0;
-        compareB = b.rating || 0;
-        break;
-      case "progress":
-        compareA = calculateBookProgress(a);
-        compareB = calculateBookProgress(b);
-        break;
-      default:
-        compareA = a.title;
-        compareB = b.title;
-    }
-
-    if (compareA < compareB) {
-      return sortDirection === "asc" ? -1 : 1;
-    }
-    if (compareA > compareB) {
-      return sortDirection === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
-
-  return sortedBooks;
-};
-
 const calculateBookProgress = (book: Book): number => {
   if (book.state === "finished") {
     return 100;
@@ -208,5 +137,4 @@ export {
   calculateBookProgress,
   convertGoogleBookToBook,
   convertManualEntryToBook,
-  filterAndSortBooks,
 };

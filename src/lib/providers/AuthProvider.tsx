@@ -17,8 +17,8 @@ import {
   createProviderError,
   createProviderSuccess,
   createSystemError,
-} from "../error-handling";
-import { LoggerUtils, simpleErrorLogger } from "../error-logging";
+} from "../errors/error-handling";
+import { LoggerUtils, simpleErrorLogger } from "../errors/error-logging";
 import { authService } from "../services/AuthService";
 
 /**

@@ -6,8 +6,8 @@
  * normal state machine constraints to fix errors or make corrections.
  */
 
-import { Book, ReadingState, isValidReadingState } from "./models";
-import { VALIDATION_CONFIG } from "./constants";
+import { VALIDATION_CONFIG } from "../constants/constants";
+import { Book, ReadingState, isValidReadingState } from "../models/models";
 
 /**
  * Validation result interface for consistent error reporting
@@ -31,11 +31,19 @@ export const validateEditedBook = (book: Partial<Book>): ValidationResult => {
   const errors: string[] = [];
 
   // Required fields validation
-  if (!book.title || typeof book.title !== "string" || book.title.trim() === "") {
+  if (
+    !book.title ||
+    typeof book.title !== "string" ||
+    book.title.trim() === ""
+  ) {
     errors.push("Title is required and cannot be empty");
   }
 
-  if (!book.author || typeof book.author !== "string" || book.author.trim() === "") {
+  if (
+    !book.author ||
+    typeof book.author !== "string" ||
+    book.author.trim() === ""
+  ) {
     errors.push("Author is required and cannot be empty");
   }
 
@@ -104,7 +112,9 @@ export const validateEditedBook = (book: Partial<Book>): ValidationResult => {
  * @param progress - Progress object to validate
  * @returns ValidationResult with validity status and error messages
  */
-export const validateProgressData = (progress: Book["progress"]): ValidationResult => {
+export const validateProgressData = (
+  progress: Book["progress"]
+): ValidationResult => {
   const errors: string[] = [];
 
   if (typeof progress.totalPages !== "number" || isNaN(progress.totalPages)) {
@@ -117,7 +127,10 @@ export const validateProgressData = (progress: Book["progress"]): ValidationResu
     errors.push("Current page must be a valid number");
   } else if (progress.currentPage < 0) {
     errors.push("Current page cannot be negative");
-  } else if (progress.totalPages && progress.currentPage > progress.totalPages) {
+  } else if (
+    progress.totalPages &&
+    progress.currentPage > progress.totalPages
+  ) {
     errors.push("Current page cannot exceed total pages");
   }
 
@@ -201,8 +214,13 @@ export const validateURL = (url: string): ValidationResult => {
   try {
     new URL(url);
     // Check if it's a reasonable image URL
-    if (!url.match(/\.(jpg|jpeg|png|gif|webp)$/i) && !url.includes("books.google.com")) {
-      errors.push("URL should point to an image file or be from a trusted source");
+    if (
+      !url.match(/\.(jpg|jpeg|png|gif|webp)$/i) &&
+      !url.includes("books.google.com")
+    ) {
+      errors.push(
+        "URL should point to an image file or be from a trusted source"
+      );
     }
   } catch {
     errors.push("Invalid URL format");
@@ -231,12 +249,16 @@ export const validatePublishedDate = (dateString: string): ValidationResult => {
   const yearMonth = /^\d{4}-\d{2}$/;
   const fullDate = /^\d{4}-\d{2}-\d{2}$/;
 
-  if (!yearOnly.test(dateString) && !yearMonth.test(dateString) && !fullDate.test(dateString)) {
+  if (
+    !yearOnly.test(dateString) &&
+    !yearMonth.test(dateString) &&
+    !fullDate.test(dateString)
+  ) {
     errors.push("Date must be in format YYYY, YYYY-MM, or YYYY-MM-DD");
   } else {
     const year = parseInt(dateString.substring(0, 4));
     const currentYear = new Date().getFullYear();
-    
+
     if (year < 1000 || year > currentYear + 1) {
       errors.push(`Year must be between 1000 and ${currentYear + 1}`);
     }
@@ -276,8 +298,13 @@ export const validateStringField = (
 
   if (required && (!value || value.trim() === "")) {
     errors.push(`${fieldName} is required`);
-  } else if (value && value.trim().length > VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH) {
-    errors.push(`${fieldName} cannot exceed ${VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH} characters`);
+  } else if (
+    value &&
+    value.trim().length > VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH
+  ) {
+    errors.push(
+      `${fieldName} cannot exceed ${VALIDATION_CONFIG.TEXT_LIMITS.DESCRIPTION_MAX_LENGTH} characters`
+    );
   }
 
   return {

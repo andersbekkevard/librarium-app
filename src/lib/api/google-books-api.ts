@@ -3,7 +3,7 @@
  * Handles all interactions with the Google Books API v1
  */
 
-import { API_CONFIG } from "./constants";
+import { API_CONFIG } from "../constants/constants";
 
 // Google Books API response interfaces
 export interface GoogleBooksVolumeInfo {
@@ -162,7 +162,7 @@ export class GoogleBooksApiService {
         urlParams.append(key, params[key]);
       }
     }
-    urlParams.append('key', this.apiKey);
+    urlParams.append("key", this.apiKey);
     return `${GOOGLE_BOOKS_API_BASE_URL}${endpoint}?${urlParams}`;
   }
 
@@ -337,7 +337,8 @@ export class GoogleBooksApiService {
 
     return this.searchBooks({
       query,
-      maxResults: params.maxResults || API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS,
+      maxResults:
+        params.maxResults || API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS,
       orderBy: params.orderBy,
       langRestrict: params.language,
     });

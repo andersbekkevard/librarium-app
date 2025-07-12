@@ -13,9 +13,9 @@ import {
   onAuthStateChanged,
   signInWithPopup,
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../api/firebase";
+import { ErrorHandlerUtils } from "../errors/error-handling";
 import { IAuthService, ServiceResult } from "./types";
-import { ErrorHandlerUtils } from "../error-handling";
 
 export class AuthService implements IAuthService {
   /**

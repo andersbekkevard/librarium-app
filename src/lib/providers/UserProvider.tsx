@@ -16,9 +16,9 @@ import {
   createProviderError,
   createProviderSuccess,
   createSystemError,
-} from "../error-handling";
-import { LoggerUtils } from "../error-logging";
-import { UserProfile } from "../models";
+} from "../errors/error-handling";
+import { LoggerUtils } from "../errors/error-logging";
+import { UserProfile } from "../models/models";
 import { userService } from "../services/UserService";
 import { UserStats } from "../services/types";
 import { useAuthContext } from "./AuthProvider";

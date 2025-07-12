@@ -1,12 +1,11 @@
 import { Timestamp } from "firebase/firestore";
+import { GoogleBooksVolume } from "../api/google-books-api";
 import {
   calculateBookProgress,
   convertGoogleBookToBook,
   convertManualEntryToBook,
-  filterAndSortBooks,
-} from "../book-utils";
-import { Book } from "../models";
-import { GoogleBooksVolume } from "../google-books-api";
+} from "../books/book-utils";
+import { Book } from "../models/models";
 
 // Mock Firebase Timestamp
 const mockTimestamp = {
@@ -134,7 +133,10 @@ describe("book-utils", () => {
 
   describe("convertGoogleBookToBook", () => {
     const mockGoogleBook: GoogleBooksVolume = {
+      kind: "books#volume",
       id: "google-book-id",
+      etag: "test-etag",
+      selfLink: "https://example.com/books/google-book-id",
       volumeInfo: {
         title: "The Great Gatsby",
         authors: ["F. Scott Fitzgerald"],
@@ -176,7 +178,10 @@ describe("book-utils", () => {
 
     it("should handle missing optional fields", () => {
       const minimalGoogleBook: GoogleBooksVolume = {
+        kind: "books#volume",
         id: "minimal-book-id",
+        etag: "test-etag",
+        selfLink: "https://example.com/books/minimal-book-id",
         volumeInfo: {
           title: "Minimal Book",
           authors: ["Unknown Author"],
@@ -201,7 +206,10 @@ describe("book-utils", () => {
 
     it("should handle empty categories array", () => {
       const bookWithEmptyCategories: GoogleBooksVolume = {
+        kind: "books#volume",
         id: "book-id",
+        etag: "test-etag",
+        selfLink: "https://example.com/books/book-id",
         volumeInfo: {
           title: "Book Title",
           authors: ["Author"],
@@ -215,7 +223,10 @@ describe("book-utils", () => {
 
     it("should handle undefined pageCount", () => {
       const bookWithoutPageCount: GoogleBooksVolume = {
+        kind: "books#volume",
         id: "book-id",
+        etag: "test-etag",
+        selfLink: "https://example.com/books/book-id",
         volumeInfo: {
           title: "Book Title",
           authors: ["Author"],
@@ -304,177 +315,6 @@ describe("book-utils", () => {
       expect(result1.id).not.toBe(result2.id);
       expect(result1.id).toMatch(/^manual-\d+-\d+(\.\d+)?$/);
       expect(result2.id).toMatch(/^manual-\d+-\d+(\.\d+)?$/);
-    });
-  });
-
-  describe("filterAndSortBooks", () => {
-    const mockBooks: Book[] = [
-      {
-        id: "1",
-        title: "JavaScript: The Good Parts",
-        author: "Douglas Crockford",
-        state: "finished",
-        progress: { currentPage: 200, totalPages: 200 },
-        isOwned: true,
-        rating: 4,
-        description: "A book about JavaScript programming",
-        addedAt: mockTimestamp,
-        updatedAt: mockTimestamp,
-      },
-      {
-        id: "2",
-        title: "Python Crash Course",
-        author: "Eric Matthes",
-        state: "in_progress",
-        progress: { currentPage: 150, totalPages: 300 },
-        isOwned: false,
-        rating: 5,
-        description: "A comprehensive Python tutorial",
-        addedAt: mockTimestamp,
-        updatedAt: mockTimestamp,
-      },
-      {
-        id: "3",
-        title: "Clean Code",
-        author: "Robert C. Martin",
-        state: "not_started",
-        progress: { currentPage: 0, totalPages: 400 },
-        isOwned: true,
-        description: "A handbook of agile software craftsmanship",
-        addedAt: mockTimestamp,
-        updatedAt: mockTimestamp,
-      },
-    ];
-
-    it("should filter books by title query", () => {
-      const result = filterAndSortBooks(mockBooks, "javascript", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].title).toBe("JavaScript: The Good Parts");
-    });
-
-    it("should filter books by author query", () => {
-      const result = filterAndSortBooks(mockBooks, "martin", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].author).toBe("Robert C. Martin");
-    });
-
-    it("should filter books by description query", () => {
-      const result = filterAndSortBooks(mockBooks, "python", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].title).toBe("Python Crash Course");
-    });
-
-    it("should filter books by state", () => {
-      const result = filterAndSortBooks(mockBooks, "", "finished", "all", "title", "asc");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].state).toBe("finished");
-    });
-
-    it("should filter books by ownership", () => {
-      const ownedResult = filterAndSortBooks(mockBooks, "", "all", "owned", "title", "asc");
-      const wishlistResult = filterAndSortBooks(mockBooks, "", "all", "wishlist", "title", "asc");
-
-      expect(ownedResult).toHaveLength(2);
-      expect(ownedResult.every(book => book.isOwned)).toBe(true);
-
-      expect(wishlistResult).toHaveLength(1);
-      expect(wishlistResult.every(book => !book.isOwned)).toBe(true);
-    });
-
-    it("should sort books by title ascending", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "title", "asc");
-
-      expect(result[0].title).toBe("Clean Code");
-      expect(result[1].title).toBe("JavaScript: The Good Parts");
-      expect(result[2].title).toBe("Python Crash Course");
-    });
-
-    it("should sort books by title descending", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "title", "desc");
-
-      expect(result[0].title).toBe("Python Crash Course");
-      expect(result[1].title).toBe("JavaScript: The Good Parts");
-      expect(result[2].title).toBe("Clean Code");
-    });
-
-    it("should sort books by author", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "author", "asc");
-
-      expect(result[0].author).toBe("Douglas Crockford");
-      expect(result[1].author).toBe("Eric Matthes");
-      expect(result[2].author).toBe("Robert C. Martin");
-    });
-
-    it("should sort books by pages", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "pages", "asc");
-
-      expect(result[0].progress.totalPages).toBe(200);
-      expect(result[1].progress.totalPages).toBe(300);
-      expect(result[2].progress.totalPages).toBe(400);
-    });
-
-    it("should sort books by rating", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "rating", "desc");
-
-      expect(result[0].rating).toBe(5);
-      expect(result[1].rating).toBe(4);
-      expect(result[2].rating).toBe(undefined);
-    });
-
-    it("should sort books by progress", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "progress", "desc");
-
-      expect(result[0].state).toBe("finished"); // 100% progress
-      expect(result[1].state).toBe("in_progress"); // 50% progress
-      expect(result[2].state).toBe("not_started"); // 0% progress
-    });
-
-    it("should combine filters and sorting", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "owned", "title", "asc");
-
-      expect(result).toHaveLength(2);
-      expect(result[0].title).toBe("Clean Code");
-      expect(result[1].title).toBe("JavaScript: The Good Parts");
-      expect(result.every(book => book.isOwned)).toBe(true);
-    });
-
-    it("should handle empty query", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(3);
-    });
-
-    it("should handle case insensitive search", () => {
-      const result = filterAndSortBooks(mockBooks, "JAVASCRIPT", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].title).toBe("JavaScript: The Good Parts");
-    });
-
-    it("should default to title sort for unknown sort field", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "unknown", "asc");
-
-      expect(result[0].title).toBe("Clean Code");
-      expect(result[1].title).toBe("JavaScript: The Good Parts");
-      expect(result[2].title).toBe("Python Crash Course");
-    });
-
-    it("should handle books with missing rating when sorting by rating", () => {
-      const result = filterAndSortBooks(mockBooks, "", "all", "all", "rating", "asc");
-
-      expect(result[0].rating).toBe(undefined);
-      expect(result[1].rating).toBe(4);
-      expect(result[2].rating).toBe(5);
-    });
-
-    it("should return empty array when no books match filters", () => {
-      const result = filterAndSortBooks(mockBooks, "nonexistent", "all", "all", "title", "asc");
-
-      expect(result).toHaveLength(0);
     });
   });
 });

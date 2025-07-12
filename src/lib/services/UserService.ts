@@ -15,8 +15,8 @@ import {
   createNetworkError,
   createSystemError,
   createValidationError,
-} from "../error-handling";
-import { Book, UserProfile } from "../models";
+} from "../errors/error-handling";
+import { Book, UserProfile } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
 import { IUserRepository } from "../repositories/types";

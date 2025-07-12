@@ -16,8 +16,8 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { UserProfile } from "../models";
+import { db } from "../api/firebase";
+import { UserProfile } from "../models/models";
 import {
   IUserRepository,
   RepositoryError,
@@ -30,15 +30,17 @@ export class FirebaseUserRepository implements IUserRepository {
    * Filters out undefined values from data for Firebase compatibility
    * Firebase Firestore doesn't allow undefined values in documents
    */
-  private filterUndefinedValues<T extends Record<string, any>>(data: T): Partial<T> {
+  private filterUndefinedValues<T extends Record<string, any>>(
+    data: T
+  ): Partial<T> {
     const filtered: Partial<T> = {};
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined) {
         filtered[key as keyof T] = value;
       }
     });
-    
+
     return filtered;
   }
 
