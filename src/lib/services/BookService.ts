@@ -6,7 +6,6 @@
  */
 
 import { calculateBookProgress } from "@/lib/books/book-utils";
-import { Timestamp } from "firebase/firestore";
 import {
   ErrorBuilder,
   ErrorCategory,
@@ -15,13 +14,14 @@ import {
   createNetworkError,
   createSystemError,
   createValidationError,
-} from "../error-handling";
+} from "@/lib/errors/error-handling";
 import {
   Book,
   canTransitionTo,
   validateProgress,
   validateRating,
-} from "../models";
+} from "@/lib/models/models";
+import { Timestamp } from "firebase/firestore";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { IBookRepository, IEventRepository } from "../repositories/types";
@@ -362,6 +362,12 @@ export class BookService implements IBookService {
       }
 
       // Validate state transition
+      if (!actualCurrentState) {
+        return {
+          success: false,
+          error: createValidationError("Current state is undefined"),
+        };
+      }
       if (!canTransitionTo(actualCurrentState, newState)) {
         return {
           success: false,
