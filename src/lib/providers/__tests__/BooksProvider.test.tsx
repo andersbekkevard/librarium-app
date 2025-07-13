@@ -5,14 +5,13 @@
  * including state management, CRUD operations, and real-time updates.
  */
 
-import React from "react";
+import { createMockBook } from "@/lib/test-utils/firebase-mock";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BooksProvider, useBooksContext } from "../BooksProvider";
-import { createMockBook } from "@/lib/test-utils/firebase-mock";
 
-// Mock services
+// Define the mock first
 const mockBookService = {
-  getUserBooks: jest.fn(),
+  getBooks: jest.fn(),
   addBook: jest.fn(),
   updateBook: jest.fn(),
   updateBookManual: jest.fn(),
@@ -38,8 +37,8 @@ jest.mock("../UserProvider", () => ({
 }));
 
 // Mock BookService
-jest.mock("../../services/BookService", () => ({
-  bookService: mockBookService,
+jest.mock("../../api/firebase", () => ({
+  // ...mocked exports as needed
 }));
 
 // Test component to consume books context
@@ -62,8 +61,8 @@ const TestComponent = () => {
       <div data-testid="loading">{loading ? "loading" : "not-loading"}</div>
       <div data-testid="error">{error?.message || "no-error"}</div>
       <div data-testid="book-count">{books.length}</div>
-      <div data-testid="books">{books.map(b => b.title).join(", ")}</div>
-      
+      <div data-testid="books">{books.map((b) => b.title).join(", ")}</div>
+
       <button
         data-testid="add-book"
         onClick={() =>
@@ -77,18 +76,15 @@ const TestComponent = () => {
       >
         Add Book
       </button>
-      
+
       <button
         data-testid="update-book"
         onClick={() => updateBook("book-1", { title: "Updated Title" })}
       >
         Update Book
       </button>
-      
-      <button
-        data-testid="delete-book"
-        onClick={() => deleteBook("book-1")}
-      >
+
+      <button data-testid="delete-book" onClick={() => deleteBook("book-1")}>
         Delete Book
       </button>
     </div>
@@ -135,7 +131,9 @@ describe("BooksProvider", () => {
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("not-loading");
       expect(screen.getByTestId("book-count")).toHaveTextContent("2");
-      expect(screen.getByTestId("books")).toHaveTextContent("Book One, Book Two");
+      expect(screen.getByTestId("books")).toHaveTextContent(
+        "Book One, Book Two"
+      );
     });
   });
 
@@ -153,12 +151,16 @@ describe("BooksProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("not-loading");
-      expect(screen.getByTestId("error")).toHaveTextContent("Failed to load books");
+      expect(screen.getByTestId("error")).toHaveTextContent(
+        "Failed to load books"
+      );
     });
   });
 
   it("should add a new book", async () => {
-    const mockBooks = [createMockBook({ id: "book-1", title: "Existing Book" })];
+    const mockBooks = [
+      createMockBook({ id: "book-1", title: "Existing Book" }),
+    ];
     const newBook = createMockBook({ id: "book-2", title: "New Book" });
 
     mockBookService.getUserBooks.mockResolvedValue({
@@ -200,7 +202,9 @@ describe("BooksProvider", () => {
   });
 
   it("should update an existing book", async () => {
-    const mockBooks = [createMockBook({ id: "book-1", title: "Original Title" })];
+    const mockBooks = [
+      createMockBook({ id: "book-1", title: "Original Title" }),
+    ];
 
     mockBookService.getUserBooks.mockResolvedValue({
       success: true,
@@ -234,7 +238,9 @@ describe("BooksProvider", () => {
   });
 
   it("should delete a book", async () => {
-    const mockBooks = [createMockBook({ id: "book-1", title: "Book to Delete" })];
+    const mockBooks = [
+      createMockBook({ id: "book-1", title: "Book to Delete" }),
+    ];
 
     mockBookService.getUserBooks.mockResolvedValue({
       success: true,
@@ -259,7 +265,10 @@ describe("BooksProvider", () => {
     deleteButton.click();
 
     await waitFor(() => {
-      expect(mockBookService.deleteBook).toHaveBeenCalledWith("test-user-id", "book-1");
+      expect(mockBookService.deleteBook).toHaveBeenCalledWith(
+        "test-user-id",
+        "book-1"
+      );
     });
   });
 
@@ -296,7 +305,9 @@ describe("BooksProvider", () => {
 
   it("should refresh books after operations", async () => {
     const mockBooks = [createMockBook({ id: "book-1", title: "Book One" })];
-    const updatedBooks = [createMockBook({ id: "book-1", title: "Updated Book" })];
+    const updatedBooks = [
+      createMockBook({ id: "book-1", title: "Updated Book" }),
+    ];
 
     mockBookService.getUserBooks
       .mockResolvedValueOnce({ success: true, data: mockBooks })

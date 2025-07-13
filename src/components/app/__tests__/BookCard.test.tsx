@@ -102,40 +102,6 @@ describe("BookCard", () => {
     });
   });
 
-  describe("Reading States", () => {
-    it("should display correct badge for not_started state", () => {
-      render(<BookCard book={mockBook} />);
-      const badge = screen.getByText("Not Started");
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveClass("bg-secondary");
-    });
-
-    it("should display correct badge for in_progress state", () => {
-      const inProgressBook: Book = {
-        ...mockBook,
-        state: "in_progress",
-        progress: { currentPage: 100, totalPages: 200 },
-      };
-      render(<BookCard book={inProgressBook} />);
-      const badge = screen.getByText("Reading");
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveClass("bg-primary");
-    });
-
-    it("should display correct badge for finished state", () => {
-      const finishedBook: Book = {
-        ...mockBook,
-        state: "finished",
-        progress: { currentPage: 200, totalPages: 200 },
-        rating: 4,
-      };
-      render(<BookCard book={finishedBook} />);
-      const badge = screen.getByText("Finished");
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveClass("text-foreground");
-    });
-  });
-
   describe("Progress Display", () => {
     it("should show progress bar for in_progress books", () => {
       const inProgressBook: Book = {

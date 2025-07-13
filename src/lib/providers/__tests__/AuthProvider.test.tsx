@@ -5,15 +5,15 @@
  * including user state management, loading states, and error handling.
  */
 
-import React from "react";
+import { createMockUser } from "@/lib/test-utils/firebase-mock";
 import { render, screen, waitFor } from "@testing-library/react";
 import { AuthProvider, useAuthContext } from "../AuthProvider";
-import { createMockUser } from "@/lib/test-utils/firebase-mock";
 
-// Mock Firebase Auth
-const mockOnAuthStateChanged = jest.fn();
+// Define the mocks first
 const mockSignOut = jest.fn();
+const mockOnAuthStateChanged = jest.fn();
 
+// Mock AuthService
 jest.mock("../../api/firebase", () => ({
   auth: {
     onAuthStateChanged: (callback: any) => mockOnAuthStateChanged(callback),
@@ -29,7 +29,7 @@ const TestComponent = () => {
     <div>
       <div data-testid="user">{user ? user.email : "no-user"}</div>
       <div data-testid="loading">{loading ? "loading" : "not-loading"}</div>
-      <div data-testid="error">{error || "no-error"}</div>
+      <div data-testid="error">{error?.message || "no-error"}</div>
       <button onClick={signOut} data-testid="signout-button">
         Sign Out
       </button>

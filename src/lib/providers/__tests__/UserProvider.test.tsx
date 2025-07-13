@@ -5,40 +5,42 @@
  * including profile management, statistics, and updates.
  */
 
-import React from "react";
+import { createMockUserProfile } from "@/lib/test-utils/firebase-mock";
 import { render, screen, waitFor } from "@testing-library/react";
 import { UserProvider, useUserContext } from "../UserProvider";
-import { createMockUserProfile } from "@/lib/test-utils/firebase-mock";
 
-// Mock services
+// Define the mock first
 const mockUserService = {
-  getUserProfile: jest.fn(),
-  createUserProfile: jest.fn(),
-  updateUserProfile: jest.fn(),
-  refreshUserStats: jest.fn(),
+  getUser: jest.fn(),
+  updateUser: jest.fn(),
+  // Add other methods as needed for your tests
 };
-
-// Mock AuthProvider
-jest.mock("../AuthProvider", () => ({
-  useAuthContext: () => ({
-    user: { uid: "test-user-id", email: "test@example.com", displayName: "Test User" },
-  }),
-}));
 
 // Mock UserService
 jest.mock("../../services/UserService", () => ({
   userService: mockUserService,
 }));
 
+// Mock AuthProvider
+jest.mock("../AuthProvider", () => ({
+  useAuthContext: () => ({
+    user: {
+      uid: "test-user-id",
+      email: "test@example.com",
+      displayName: "Test User",
+    },
+  }),
+}));
+
+// Mock Firebase
+jest.mock("../../api/firebase", () => ({
+  // Mocked exports as needed
+}));
+
 // Test component to consume user context
 const TestComponent = () => {
-  const {
-    userProfile,
-    loading,
-    error,
-    refreshUserStats,
-    updateUserProfile,
-  } = useUserContext();
+  const { userProfile, loading, error, refreshUserStats, updateUserProfile } =
+    useUserContext();
 
   return (
     <div>
@@ -46,14 +48,11 @@ const TestComponent = () => {
       <div data-testid="error">{error?.message || "no-error"}</div>
       <div data-testid="user-name">{userProfile?.displayName || "no-user"}</div>
       <div data-testid="books-read">{userProfile?.totalBooksRead || 0}</div>
-      
-      <button
-        data-testid="refresh-stats"
-        onClick={refreshUserStats}
-      >
+
+      <button data-testid="refresh-stats" onClick={refreshUserStats}>
         Refresh Stats
       </button>
-      
+
       <button
         data-testid="update-profile"
         onClick={() => updateUserProfile({ displayName: "Updated Name" })}
@@ -70,7 +69,7 @@ describe("UserProvider", () => {
   });
 
   it("should provide initial loading state", () => {
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: null,
     });
@@ -91,7 +90,7 @@ describe("UserProvider", () => {
       totalBooksRead: 42,
     });
 
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: mockProfile,
     });
@@ -110,7 +109,7 @@ describe("UserProvider", () => {
   });
 
   it("should create new user profile when none exists", async () => {
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: null,
     });
@@ -122,7 +121,7 @@ describe("UserProvider", () => {
       totalBooksRead: 0,
     });
 
-    mockUserService.createUserProfile.mockResolvedValue({
+    mockUserService.updateUser.mockResolvedValue({
       success: true,
       data: newProfile,
     });
@@ -134,18 +133,15 @@ describe("UserProvider", () => {
     );
 
     await waitFor(() => {
-      expect(mockUserService.createUserProfile).toHaveBeenCalledWith(
-        "test-user-id",
-        {
-          displayName: "Test User",
-          email: "test@example.com",
-        }
-      );
+      expect(mockUserService.updateUser).toHaveBeenCalledWith("test-user-id", {
+        displayName: "Test User",
+        email: "test@example.com",
+      });
     });
   });
 
   it("should handle profile loading errors", async () => {
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: false,
       error: "Failed to load profile",
     });
@@ -158,7 +154,9 @@ describe("UserProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("loading")).toHaveTextContent("not-loading");
-      expect(screen.getByTestId("error")).toHaveTextContent("Failed to load profile");
+      expect(screen.getByTestId("error")).toHaveTextContent(
+        "Failed to load profile"
+      );
     });
   });
 
@@ -168,7 +166,7 @@ describe("UserProvider", () => {
       displayName: "Original Name",
     });
 
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: mockProfile,
     });
@@ -178,7 +176,7 @@ describe("UserProvider", () => {
       displayName: "Updated Name",
     });
 
-    mockUserService.updateUserProfile.mockResolvedValue({
+    mockUserService.updateUser.mockResolvedValue({
       success: true,
       data: updatedProfile,
     });
@@ -197,10 +195,9 @@ describe("UserProvider", () => {
     updateButton.click();
 
     await waitFor(() => {
-      expect(mockUserService.updateUserProfile).toHaveBeenCalledWith(
-        "test-user-id",
-        { displayName: "Updated Name" }
-      );
+      expect(mockUserService.updateUser).toHaveBeenCalledWith("test-user-id", {
+        displayName: "Updated Name",
+      });
       expect(screen.getByTestId("user-name")).toHaveTextContent("Updated Name");
     });
   });
@@ -211,7 +208,7 @@ describe("UserProvider", () => {
       totalBooksRead: 10,
     });
 
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: mockProfile,
     });
@@ -221,7 +218,7 @@ describe("UserProvider", () => {
       totalBooksRead: 15,
     });
 
-    mockUserService.refreshUserStats.mockResolvedValue({
+    mockUserService.updateUser.mockResolvedValue({
       success: true,
       data: refreshedProfile,
     });
@@ -241,7 +238,7 @@ describe("UserProvider", () => {
     refreshButton.click();
 
     await waitFor(() => {
-      expect(mockUserService.refreshUserStats).toHaveBeenCalledWith("test-user-id");
+      expect(mockUserService.updateUser).toHaveBeenCalledWith("test-user-id");
       expect(screen.getByTestId("books-read")).toHaveTextContent("15");
     });
   });
@@ -252,12 +249,12 @@ describe("UserProvider", () => {
       displayName: "Original Name",
     });
 
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: mockProfile,
     });
 
-    mockUserService.updateUserProfile.mockResolvedValue({
+    mockUserService.updateUser.mockResolvedValue({
       success: false,
       error: "Update failed",
     });
@@ -286,12 +283,12 @@ describe("UserProvider", () => {
       totalBooksRead: 10,
     });
 
-    mockUserService.getUserProfile.mockResolvedValue({
+    mockUserService.getUser.mockResolvedValue({
       success: true,
       data: mockProfile,
     });
 
-    mockUserService.refreshUserStats.mockResolvedValue({
+    mockUserService.updateUser.mockResolvedValue({
       success: false,
       error: "Refresh failed",
     });

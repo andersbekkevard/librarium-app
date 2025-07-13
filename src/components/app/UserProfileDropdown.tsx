@@ -10,7 +10,6 @@ import {
   LogOut,
   Settings,
   Shield,
-  Target,
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -56,9 +55,11 @@ export const UserProfileDropdown: React.FC = () => {
     }
   };
 
-  const handleMenuItemClick = () => {
+  const handleMenuItemClick = (path?: string) => {
     setIsOpen(false);
-    // TODO: Implement navigation to respective pages
+    if (path) {
+      router.push(path);
+    }
   };
 
   const menuItems = [
@@ -74,12 +75,12 @@ export const UserProfileDropdown: React.FC = () => {
       icon: Settings,
       action: () => handleMenuItemClick(),
     },
-    {
-      id: "goals",
-      label: "Reading Goals",
-      icon: Target,
-      action: () => handleMenuItemClick(),
-    },
+    // {
+    //   id: "goals",
+    //   label: "Reading Goals",
+    //   icon: Target,
+    //   action: () => handleMenuItemClick(),
+    // },
     {
       id: "privacy",
       label: "Privacy Settings",
@@ -90,7 +91,7 @@ export const UserProfileDropdown: React.FC = () => {
       id: "activity",
       label: "Activity History",
       icon: Activity,
-      action: () => handleMenuItemClick(),
+      action: () => handleMenuItemClick("/activity-history"),
     },
     {
       id: "export",
