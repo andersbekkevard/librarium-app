@@ -19,63 +19,17 @@ import {
 import { db } from "../api/firebase";
 import { UserProfile } from "../models/models";
 import {
-  IUserRepository,
-  RepositoryError,
-  RepositoryErrorType,
-  RepositoryResult,
-} from "./types";
+  filterUndefinedValues,
+  handleFirebaseError,
+} from "./firebase-repository-utils";
+import { IUserRepository, RepositoryResult } from "./types";
 
 export class FirebaseUserRepository implements IUserRepository {
-  /**
-   * Filters out undefined values from data for Firebase compatibility
-   * Firebase Firestore doesn't allow undefined values in documents
-   */
-  private filterUndefinedValues<T extends Record<string, any>>(
-    data: T
-  ): Partial<T> {
-    const filtered: Partial<T> = {};
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        filtered[key as keyof T] = value;
-      }
-    });
-
-    return filtered;
-  }
-
   /**
    * Get user profile document reference
    */
   private getUserProfileRef(userId: string) {
     return doc(db, `users/${userId}/profile/main`);
-  }
-
-  /**
-   * Convert Firebase errors to repository errors
-   */
-  private handleFirebaseError(error: FirestoreError): RepositoryError {
-    if (error.code === "permission-denied") {
-      return new RepositoryError(
-        RepositoryErrorType.PERMISSION_DENIED,
-        "Access denied to user profile",
-        error
-      );
-    }
-
-    if (error.code === "unavailable" || error.code === "deadline-exceeded") {
-      return new RepositoryError(
-        RepositoryErrorType.NETWORK_ERROR,
-        "Network error accessing user profile",
-        error
-      );
-    }
-
-    return new RepositoryError(
-      RepositoryErrorType.UNKNOWN_ERROR,
-      `Database error: ${error.message}`,
-      error
-    );
   }
 
   /**
@@ -99,7 +53,10 @@ export class FirebaseUserRepository implements IUserRepository {
 
       return { success: true, data: profile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "user profile"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -122,7 +79,7 @@ export class FirebaseUserRepository implements IUserRepository {
       };
 
       // Filter out undefined values before sending to Firebase
-      const filteredProfileData = this.filterUndefinedValues(profileData);
+      const filteredProfileData = filterUndefinedValues(profileData);
 
       await setDoc(profileRef, filteredProfileData);
 
@@ -132,7 +89,10 @@ export class FirebaseUserRepository implements IUserRepository {
 
       return { success: true, data: createdProfile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "user profile"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -159,7 +119,7 @@ export class FirebaseUserRepository implements IUserRepository {
       };
 
       // Filter out undefined values before sending to Firebase
-      const filteredUpdateData = this.filterUndefinedValues(updateData);
+      const filteredUpdateData = filterUndefinedValues(updateData);
 
       await updateDoc(profileRef, filteredUpdateData);
 
@@ -170,7 +130,10 @@ export class FirebaseUserRepository implements IUserRepository {
 
       return { success: true, data: updatedProfile };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "user profile"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -184,7 +147,10 @@ export class FirebaseUserRepository implements IUserRepository {
       await deleteDoc(profileRef);
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "user profile"
+      );
       return { success: false, error: repoError.message };
     }
   }

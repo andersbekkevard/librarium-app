@@ -1,10 +1,10 @@
 import { Timestamp } from "firebase/firestore";
-import { Book, BookEvent } from "../../models";
+import { Book, BookEvent } from "../../models/models";
 import { IBookRepository, IEventRepository } from "../../repositories/types";
 import { EventService } from "../EventService";
 
 // Mock Firebase
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: {},
   auth: {},
   storage: {},

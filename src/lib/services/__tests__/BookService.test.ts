@@ -1,10 +1,10 @@
 import { Timestamp } from "firebase/firestore";
-import { BookService } from "../BookService";
-import { Book } from "../../models";
+import { Book } from "../../models/models";
 import { IBookRepository, IEventRepository } from "../../repositories/types";
+import { BookService } from "../BookService";
 
 // Mock Firebase
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: {},
   auth: {},
   storage: {},
@@ -41,6 +41,7 @@ const mockEventRepository: jest.Mocked<IEventRepository> = {
   getRecentEvents: jest.fn(),
   getBookEvents: jest.fn(),
   deleteBookEvents: jest.fn(),
+  getEventsByType: jest.fn(),
 };
 
 describe("BookService", () => {

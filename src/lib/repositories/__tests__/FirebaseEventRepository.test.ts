@@ -1,4 +1,5 @@
 import {
+  Timestamp,
   addDoc,
   collection,
   getDocs,
@@ -6,12 +7,10 @@ import {
   orderBy,
   query,
   where,
-  writeBatch,
-  Timestamp,
 } from "firebase/firestore";
+import { db } from "../../api/firebase";
+import { BookEvent } from "../../models/models";
 import { FirebaseEventRepository } from "../FirebaseEventRepository";
-import { BookEvent } from "../../models";
-import { db } from "../../firebase";
 
 // Mock Firebase Firestore
 jest.mock("firebase/firestore", () => ({
@@ -29,7 +28,7 @@ jest.mock("firebase/firestore", () => ({
 }));
 
 // Mock Firebase config
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: { app: { name: "mock-app" } }, // Mock db instance
   auth: {},
   storage: {},
@@ -50,7 +49,7 @@ describe("FirebaseEventRepository", () => {
 
   const mockEventData = {
     bookId: testBookId,
-    type: "state_change",
+    type: "state_change" as const,
     data: {
       previousState: "not_started",
       newState: "in_progress",
@@ -81,7 +80,10 @@ describe("FirebaseEventRepository", () => {
     it("should log event successfully", async () => {
       (addDoc as jest.Mock).mockResolvedValue(mockDocRef);
 
-      const result = await repository.logEvent(testUserId, mockEventData);
+      const result = await repository.logEvent(
+        testUserId,
+        mockEventData as BookEvent
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toBe(testEventId);
@@ -98,7 +100,11 @@ describe("FirebaseEventRepository", () => {
       const mockDocs = [
         {
           id: "event-1",
-          data: () => ({ ...mockEventData, userId: testUserId, timestamp: mockTimestamp }),
+          data: () => ({
+            ...mockEventData,
+            userId: testUserId,
+            timestamp: mockTimestamp,
+          }),
         },
       ];
       const mockSnapshot = { docs: mockDocs };

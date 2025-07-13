@@ -24,31 +24,12 @@ import {
 import { db } from "../api/firebase";
 import { Book } from "../models/models";
 import {
-  IBookRepository,
-  RepositoryError,
-  RepositoryErrorType,
-  RepositoryResult,
-} from "./types";
+  filterUndefinedValues,
+  handleFirebaseError,
+} from "./firebase-repository-utils";
+import { IBookRepository, RepositoryResult } from "./types";
 
 export class FirebaseBookRepository implements IBookRepository {
-  /**
-   * Filters out undefined values from data for Firebase compatibility
-   * Firebase Firestore doesn't allow undefined values in documents
-   */
-  private filterUndefinedValues<T extends Record<string, any>>(
-    data: T
-  ): Partial<T> {
-    const filtered: Partial<T> = {};
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        filtered[key as keyof T] = value;
-      }
-    });
-
-    return filtered;
-  }
-
   /**
    * Get user's books collection reference
    */
@@ -61,33 +42,6 @@ export class FirebaseBookRepository implements IBookRepository {
    */
   private getBookDocRef(userId: string, bookId: string) {
     return doc(db, `users/${userId}/books/${bookId}`);
-  }
-
-  /**
-   * Convert Firebase errors to repository errors
-   */
-  private handleFirebaseError(error: any): RepositoryError {
-    if (error.code === "permission-denied") {
-      return new RepositoryError(
-        RepositoryErrorType.PERMISSION_DENIED,
-        "Access denied to book collection",
-        error
-      );
-    }
-
-    if (error.code === "unavailable" || error.code === "deadline-exceeded") {
-      return new RepositoryError(
-        RepositoryErrorType.NETWORK_ERROR,
-        "Network error accessing book collection",
-        error
-      );
-    }
-
-    return new RepositoryError(
-      RepositoryErrorType.UNKNOWN_ERROR,
-      `Database error: ${error.message}`,
-      error
-    );
   }
 
   /**
@@ -112,7 +66,7 @@ export class FirebaseBookRepository implements IBookRepository {
 
       return { success: true, data: book };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -136,7 +90,7 @@ export class FirebaseBookRepository implements IBookRepository {
 
       return { success: true, data: books };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -167,7 +121,7 @@ export class FirebaseBookRepository implements IBookRepository {
 
       return { success: true, data: books };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -188,12 +142,12 @@ export class FirebaseBookRepository implements IBookRepository {
       };
 
       // Filter out undefined values before sending to Firebase
-      const filteredBookData = this.filterUndefinedValues(bookData);
+      const filteredBookData = filterUndefinedValues(bookData);
 
       const docRef = await addDoc(booksRef, filteredBookData);
       return { success: true, data: docRef.id };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -214,12 +168,12 @@ export class FirebaseBookRepository implements IBookRepository {
       };
 
       // Filter out undefined values before sending to Firebase
-      const filteredUpdateData = this.filterUndefinedValues(updateData);
+      const filteredUpdateData = filterUndefinedValues(updateData);
 
       await updateDoc(bookRef, filteredUpdateData);
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -236,7 +190,7 @@ export class FirebaseBookRepository implements IBookRepository {
       await deleteDoc(bookRef);
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -271,7 +225,7 @@ export class FirebaseBookRepository implements IBookRepository {
   }
 
   /**
-   * Batch operations for multiple books
+   * Batch update multiple books
    */
   async batchUpdateBooks(
     userId: string,
@@ -282,16 +236,20 @@ export class FirebaseBookRepository implements IBookRepository {
 
       updates.forEach(({ bookId, data }) => {
         const bookRef = this.getBookDocRef(userId, bookId);
-        batch.update(bookRef, {
+        const updateData = {
           ...data,
           updatedAt: Timestamp.now(),
-        });
+        };
+
+        // Filter out undefined values before sending to Firebase
+        const filteredUpdateData = filterUndefinedValues(updateData);
+        batch.update(bookRef, filteredUpdateData);
       });
 
       await batch.commit();
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }
@@ -305,28 +263,27 @@ export class FirebaseBookRepository implements IBookRepository {
   ): Promise<RepositoryResult<string[]>> {
     try {
       const batch = writeBatch(db);
+      const booksRef = this.getBooksCollectionRef(userId);
       const bookIds: string[] = [];
 
-      books.forEach((bookData) => {
-        const booksRef = this.getBooksCollectionRef(userId);
+      books.forEach((book) => {
         const bookRef = doc(booksRef);
-        const book = {
-          ...bookData,
+        const bookData = {
+          ...book,
           addedAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
         };
 
         // Filter out undefined values before sending to Firebase
-        const filteredBook = this.filterUndefinedValues(book);
-
-        batch.set(bookRef, filteredBook);
+        const filteredBookData = filterUndefinedValues(bookData);
+        batch.set(bookRef, filteredBookData);
         bookIds.push(bookRef.id);
       });
 
       await batch.commit();
       return { success: true, data: bookIds };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error);
+      const repoError = handleFirebaseError(error, "book collection");
       return { success: false, error: repoError.message };
     }
   }

@@ -1,11 +1,11 @@
 import { Timestamp } from "firebase/firestore";
-import { GoogleBooksVolume } from "../api/google-books-api";
+import { GoogleBooksVolume } from "../../api/google-books-api";
+import { Book } from "../../models/models";
 import {
   calculateBookProgress,
   convertGoogleBookToBook,
   convertManualEntryToBook,
-} from "../books/book-utils";
-import { Book } from "../models/models";
+} from "../book-utils";
 
 // Mock Firebase Timestamp
 const mockTimestamp = {

@@ -32,6 +32,8 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   context?: ErrorContext;
   className?: string;
+
+  onAsyncError?: (error: StandardError) => void;
 }
 
 /**

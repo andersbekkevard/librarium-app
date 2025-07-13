@@ -34,7 +34,7 @@ const AddBooksPageContent = () => {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [searchType, setSearchType] = useState<'title' | 'author'>('title');
+  const [searchType, setSearchType] = useState<"title" | "author">("title");
   const { searchResults, isSearching, error, search, clearError } =
     useBookSearch();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
@@ -73,7 +73,6 @@ const AddBooksPageContent = () => {
 
     try {
       const book = convertGoogleBookToBook(googleBook);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
 
       const result = await addBook(bookData);
@@ -120,7 +119,6 @@ const AddBooksPageContent = () => {
     setIsAdding(true);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...bookData } = book;
       const result = await addBook(bookData);
 
@@ -226,24 +224,24 @@ const AddBooksPageContent = () => {
                 <div className="flex gap-2">
                   <Button
                     type="button"
-                    variant={searchType === 'title' ? 'default' : 'outline'}
+                    variant={searchType === "title" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSearchType('title')}
+                    onClick={() => setSearchType("title")}
                     className="flex-1"
                   >
                     Search by Title
                   </Button>
                   <Button
                     type="button"
-                    variant={searchType === 'author' ? 'default' : 'outline'}
+                    variant={searchType === "author" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSearchType('author')}
+                    onClick={() => setSearchType("author")}
                     className="flex-1"
                   >
                     Search by Author
                   </Button>
                 </div>
-                
+
                 {/* Search Input */}
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -320,9 +318,7 @@ const AddBooksPageLoading = () => (
         <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
           Add Books
         </h1>
-        <p className="text-muted-foreground">
-          Loading search parameters...
-        </p>
+        <p className="text-muted-foreground">Loading search parameters...</p>
       </div>
     </div>
     <div className="flex items-center justify-center py-8">

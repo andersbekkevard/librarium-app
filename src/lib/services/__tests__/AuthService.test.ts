@@ -4,8 +4,8 @@ import {
   onAuthStateChanged,
   signInWithPopup,
 } from "firebase/auth";
-import { ErrorCategory } from "../../error-handling";
-import { auth } from "../../firebase";
+import { auth } from "../../api/firebase";
+import { ErrorCategory } from "../../errors/error-handling";
 import { AuthService } from "../AuthService";
 
 // Mock Firebase Auth functions
@@ -23,7 +23,7 @@ jest.mock("firebase/auth", () => {
 });
 
 // Mock Firebase app
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   auth: {
     currentUser: null,
   },

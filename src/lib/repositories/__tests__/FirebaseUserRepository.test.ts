@@ -1,15 +1,15 @@
 import {
+  Timestamp,
+  deleteDoc,
   doc,
   getDoc,
+  onSnapshot,
   setDoc,
   updateDoc,
-  deleteDoc,
-  onSnapshot,
-  Timestamp,
 } from "firebase/firestore";
+import { db } from "../../api/firebase";
+import { UserProfile } from "../../models/models";
 import { FirebaseUserRepository } from "../FirebaseUserRepository";
-import { UserProfile } from "../../models";
-import { db } from "../../firebase";
 
 // Mock Firebase Firestore
 jest.mock("firebase/firestore", () => ({
@@ -25,7 +25,7 @@ jest.mock("firebase/firestore", () => ({
 }));
 
 // Mock Firebase config
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: { app: { name: "mock-app" } }, // Mock db instance
   auth: {},
   storage: {},
@@ -120,7 +120,10 @@ describe("FirebaseUserRepository", () => {
     it("should create profile successfully", async () => {
       (setDoc as jest.Mock).mockResolvedValue(undefined);
 
-      const result = await repository.createProfile(testUserId, mockProfileData);
+      const result = await repository.createProfile(
+        testUserId,
+        mockProfileData
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual({
@@ -181,7 +184,10 @@ describe("FirebaseUserRepository", () => {
       const mockUnsubscribe = jest.fn();
       (onSnapshot as jest.Mock).mockReturnValue(mockUnsubscribe);
 
-      const unsubscribe = repository.subscribeToProfile(testUserId, mockCallback);
+      const unsubscribe = repository.subscribeToProfile(
+        testUserId,
+        mockCallback
+      );
 
       expect(unsubscribe).toBe(mockUnsubscribe);
       expect(onSnapshot).toHaveBeenCalledWith(

@@ -21,63 +21,17 @@ import { db } from "../api/firebase";
 import { EVENT_CONFIG } from "../constants/constants";
 import { BookEvent } from "../models/models";
 import {
-  IEventRepository,
-  RepositoryError,
-  RepositoryErrorType,
-  RepositoryResult,
-} from "./types";
+  filterUndefinedValues,
+  handleFirebaseError,
+} from "./firebase-repository-utils";
+import { IEventRepository, RepositoryResult } from "./types";
 
 export class FirebaseEventRepository implements IEventRepository {
-  /**
-   * Filters out undefined values from data for Firebase compatibility
-   * Firebase Firestore doesn't allow undefined values in documents
-   */
-  private filterUndefinedValues<T extends Record<string, any>>(
-    data: T
-  ): Partial<T> {
-    const filtered: Partial<T> = {};
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        filtered[key as keyof T] = value;
-      }
-    });
-
-    return filtered;
-  }
-
   /**
    * Get user's events collection reference
    */
   private getEventsCollectionRef(userId: string) {
     return collection(db, `users/${userId}/events`);
-  }
-
-  /**
-   * Convert Firebase errors to repository errors
-   */
-  private handleFirebaseError(error: FirestoreError): RepositoryError {
-    if (error.code === "permission-denied") {
-      return new RepositoryError(
-        RepositoryErrorType.PERMISSION_DENIED,
-        "Access denied to event collection",
-        error
-      );
-    }
-
-    if (error.code === "unavailable" || error.code === "deadline-exceeded") {
-      return new RepositoryError(
-        RepositoryErrorType.NETWORK_ERROR,
-        "Network error accessing event collection",
-        error
-      );
-    }
-
-    return new RepositoryError(
-      RepositoryErrorType.UNKNOWN_ERROR,
-      `Database error: ${error.message}`,
-      error
-    );
   }
 
   /**
@@ -96,12 +50,15 @@ export class FirebaseEventRepository implements IEventRepository {
       };
 
       // Filter out undefined values before sending to Firebase
-      const filteredEventData = this.filterUndefinedValues(eventData);
+      const filteredEventData = filterUndefinedValues(eventData);
 
       const docRef = await addDoc(eventsRef, filteredEventData);
       return { success: true, data: docRef.id };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -132,7 +89,10 @@ export class FirebaseEventRepository implements IEventRepository {
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -163,7 +123,10 @@ export class FirebaseEventRepository implements IEventRepository {
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -194,7 +157,10 @@ export class FirebaseEventRepository implements IEventRepository {
 
       return { success: true, data: events };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -223,7 +189,10 @@ export class FirebaseEventRepository implements IEventRepository {
       await batch.commit();
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }
@@ -248,7 +217,10 @@ export class FirebaseEventRepository implements IEventRepository {
       await batch.commit();
       return { success: true };
     } catch (error) {
-      const repoError = this.handleFirebaseError(error as FirestoreError);
+      const repoError = handleFirebaseError(
+        error as FirestoreError,
+        "event collection"
+      );
       return { success: false, error: repoError.message };
     }
   }

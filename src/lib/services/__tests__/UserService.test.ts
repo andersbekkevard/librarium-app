@@ -3,7 +3,7 @@ import { IBookRepository, IUserRepository } from "../../repositories/types";
 import { UserService } from "../UserService";
 
 // Mock Firebase
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: {},
   auth: {},
   storage: {},

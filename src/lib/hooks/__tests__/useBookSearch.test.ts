@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
-import { ErrorCategory } from "../../error-handling";
-import { GoogleBooksVolume, googleBooksApi } from "../../google-books-api";
+import { GoogleBooksVolume, googleBooksApi } from "../../api/google-books-api";
+import { ErrorCategory } from "../../errors/error-handling";
 import { useBookSearch } from "../useBookSearch";
 
 // Mock the Google Books API
-jest.mock("../../google-books-api", () => ({
+jest.mock("../../api/google-books-api", () => ({
   googleBooksApi: {
     search: jest.fn(),
   },

@@ -1,21 +1,16 @@
 import {
+  Timestamp,
   collection,
   doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
   getDoc,
+  getDocs,
+  orderBy,
   query,
   where,
-  orderBy,
-  onSnapshot,
-  Timestamp,
-  writeBatch,
 } from "firebase/firestore";
+import { db } from "../../api/firebase";
+import { Book } from "../../models/models";
 import { FirebaseBookRepository } from "../FirebaseBookRepository";
-import { Book } from "../../models";
-import { db } from "../../firebase";
 
 // Mock Firebase Firestore
 jest.mock("firebase/firestore", () => ({
@@ -37,7 +32,7 @@ jest.mock("firebase/firestore", () => ({
 }));
 
 // Mock Firebase config
-jest.mock("../../firebase", () => ({
+jest.mock("../../api/firebase", () => ({
   db: { app: { name: "mock-app" } }, // Mock db instance
   auth: {},
   storage: {},
@@ -107,7 +102,10 @@ describe("FirebaseBookRepository", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual({ id: testBookId, ...mockBookData });
-      expect(doc).toHaveBeenCalledWith(db, `users/${testUserId}/books/${testBookId}`);
+      expect(doc).toHaveBeenCalledWith(
+        db,
+        `users/${testUserId}/books/${testBookId}`
+      );
       expect(getDoc).toHaveBeenCalledWith(mockDocRef);
     });
   });
