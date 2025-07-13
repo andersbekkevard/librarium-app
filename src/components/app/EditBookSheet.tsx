@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +22,14 @@ import {
 } from "@/lib/books/book-validation";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import { AlertCircle, Save, Star, X } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  Star,
+  X,
+} from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -67,6 +68,9 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
 
   // Individual field errors for real-time validation
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  // Add local state for description expansion
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   /**
    * Updates form data and validates the specific field
@@ -307,29 +311,66 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
               )}
             </div>
 
-            <Accordion type="single" collapsible>
-              <AccordionItem value="description">
-                <AccordionTrigger>Description (Optional)</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2">
-                    <Textarea
-                      id="description"
-                      value={formData.description || ""}
-                      onChange={(e) =>
-                        updateFormField("description", e.target.value)
-                      }
-                      placeholder="Enter book description"
-                      rows={3}
-                    />
-                    {fieldErrors.description && (
-                      <p className="text-sm text-status-error">
-                        {fieldErrors.description[0]}
-                      </p>
+            {/* Description Field - Read more/less pattern */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              {!isDescriptionExpanded ? (
+                <>
+                  <div
+                    className="border border-input rounded-md px-3 py-2 bg-white dark:bg-input/30 text-muted-foreground text-sm leading-relaxed line-clamp-1 min-h-[3.85rem] transition-[color,box-shadow]"
+                    aria-label="Book description preview"
+                  >
+                    {formData.description || (
+                      <span className="italic text-muted-foreground">
+                        No description
+                      </span>
                     )}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                  {formData.description && formData.description.length > 60 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() => setIsDescriptionExpanded(true)}
+                      className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
+                      aria-label="Expand description to edit"
+                    >
+                      <ChevronDown className="h-4 w-4 mr-1" />
+                      Read more
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Textarea
+                    id="description"
+                    value={formData.description || ""}
+                    onChange={(e) =>
+                      updateFormField("description", e.target.value)
+                    }
+                    placeholder="Enter book description"
+                    rows={3}
+                    className="text-base"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() => setIsDescriptionExpanded(false)}
+                    className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
+                    aria-label="Collapse description field"
+                  >
+                    <ChevronUp className="h-4 w-4 mr-1" />
+                    Read less
+                  </Button>
+                </>
+              )}
+              {fieldErrors.description && (
+                <p className="text-sm text-status-error">
+                  {fieldErrors.description[0]}
+                </p>
+              )}
+            </div>
           </div>
 
           <Separator />

@@ -42,7 +42,7 @@ const getActivityText = (activity: ActivityItem): string => {
     case "added":
       return `Added ${bookTitle}`;
     case "progress":
-      return `Updated progress on ${bookTitle}${details ? ` ${details}` : ""}`;
+      return `Read ${details} in ${bookTitle}`;
     default:
       return `${bookTitle}`;
   }

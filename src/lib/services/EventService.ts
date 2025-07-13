@@ -339,12 +339,13 @@ export class EventService implements IEventService {
     baseItem: Omit<ActivityItem, "type" | "colorClass" | "details">
   ): ActivityItem {
     const { newPage } = event.data;
+    const pagesRead = newPage ? newPage - (event.data.previousPage || 0) : 0;
 
     return {
       ...baseItem,
       type: "progress",
       colorClass: STATUS_COLORS.info.bg,
-      details: newPage ? `page ${newPage}` : undefined,
+      details: pagesRead ? `${pagesRead} pages` : undefined,
     };
   }
 

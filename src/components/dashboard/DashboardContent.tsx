@@ -50,7 +50,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       setActivitiesError(null);
 
       try {
-        const result = await eventService.getRecentActivityItems(userId, 5);
+        const result = await eventService.getRecentActivityItems(userId, 6);
 
         if (result.success && result.data) {
           setActivities(result.data);
@@ -75,11 +75,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   }, [userId]);
 
   const handleViewAllCurrently = () => {
-    router.push('/library?filter=in_progress');
+    router.push("/library?filter=in_progress");
   };
 
   const handleViewAllRecent = () => {
-    router.push('/library?filter=finished');
+    router.push("/library?filter=finished");
   };
 
   return (
