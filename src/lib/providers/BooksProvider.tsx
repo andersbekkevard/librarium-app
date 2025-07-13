@@ -22,7 +22,6 @@ import { Book } from "@/lib/models/models";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { bookService } from "../services/BookService";
 import { useAuthContext } from "./AuthProvider";
-import { useUserContext } from "./UserProvider";
 
 /**
  * Books context type definition
@@ -104,7 +103,6 @@ interface BooksProviderProps {
 
 export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuthContext();
-  const { updateUserStats } = useUserContext();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<StandardError | null>(null);
@@ -144,8 +142,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success && result.data) {
         // Real-time listener will automatically update the books array
-        // Update user statistics
-        await updateUserStats();
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful addition
         LoggerUtils.logUserAction("book_add_success", {
@@ -203,10 +200,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics if state changed
-        if (updates.state) {
-          await updateUserStats();
-        }
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful update
         LoggerUtils.logUserAction("book_update_success", {
@@ -268,10 +262,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics if state changed
-        if (updates.state) {
-          await updateUserStats();
-        }
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful update
         LoggerUtils.logUserAction("book_manual_update_success", {
@@ -333,8 +324,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics
-        await updateUserStats();
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful update
         LoggerUtils.logUserAction("book_progress_update_success", {
@@ -399,8 +389,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics
-        await updateUserStats();
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful update
         LoggerUtils.logUserAction("book_state_update_success", {
@@ -514,8 +503,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
       if (result.success) {
         // Real-time listener will automatically update the books array
-        // Update user statistics
-        await updateUserStats();
+        // Stats will be updated automatically via UserProvider subscription
 
         // Log successful deletion
         LoggerUtils.logUserAction("book_delete_success", {

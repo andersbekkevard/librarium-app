@@ -15,7 +15,6 @@ export default function Dashboard() {
   const {
     userStats,
     loading: userStatsLoading,
-    refreshUserStats,
   } = useUserContext();
   const router = useRouter();
 
@@ -40,12 +39,7 @@ export default function Dashboard() {
     };
   }, [userStats]);
 
-  // Refresh stats when books change to get updated stats
-  useEffect(() => {
-    if (user && books) {
-      refreshUserStats();
-    }
-  }, [user, books]);
+  // Stats now update automatically via UserProvider subscription - no manual refresh needed
 
   // Route protection - redirect to landing if not authenticated
   useEffect(() => {

@@ -352,6 +352,91 @@ export class UserService implements IUserService {
   }
 
   /**
+   * Subscribe to real-time user statistics based on books and events
+   */
+  subscribeToUserStats(
+    userId: string,
+    callback: (stats: UserStats) => void
+  ): () => void {
+    let unsubscribeBooks: (() => void) | null = null;
+
+    // Set up books subscription to recalculate stats when books change
+    unsubscribeBooks = this.bookRepository.subscribeToUserBooks(
+      userId,
+      async (books) => {
+        // Calculate stats from current books
+        const stats = await this.calculateStatsFromBooks(books);
+        callback(stats);
+      }
+    );
+
+    // Return cleanup function
+    return () => {
+      if (unsubscribeBooks) {
+        unsubscribeBooks();
+      }
+    };
+  }
+
+  /**
+   * Calculate user statistics from books array
+   */
+  private async calculateStatsFromBooks(books: Book[]): Promise<UserStats> {
+    const finishedBooks = books.filter((book) => book.state === "finished");
+    const inProgressBooks = books.filter((book) => book.state === "in_progress");
+
+    // Calculate statistics
+    const totalPagesRead = finishedBooks.reduce(
+      (sum, book) => sum + (book.progress.totalPages || 0),
+      0
+    );
+
+    const ratingsSum = finishedBooks.reduce((sum, book) => {
+      return sum + (book.rating || 0);
+    }, 0);
+    const averageRating =
+      finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
+
+    const readingStreak = this.calculateReadingStreak(finishedBooks);
+
+    // Calculate books read this month and year
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+
+    const booksReadThisMonth = finishedBooks.filter((book) => {
+      if (!book.finishedAt) return false;
+      const finishedDate = book.finishedAt.toDate();
+      return (
+        finishedDate.getMonth() === thisMonth &&
+        finishedDate.getFullYear() === thisYear
+      );
+    }).length;
+
+    const booksReadThisYear = finishedBooks.filter((book) => {
+      if (!book.finishedAt) return false;
+      const finishedDate = book.finishedAt.toDate();
+      return finishedDate.getFullYear() === thisYear;
+    }).length;
+
+    const favoriteGenres = this.getFavoriteGenres(books);
+
+    const stats: UserStats = {
+      totalBooksRead: finishedBooks.length,
+      currentlyReading: inProgressBooks.length,
+      booksInLibrary: books.length,
+      totalPagesRead,
+      averageRating,
+      readingStreak,
+      booksReadThisMonth,
+      booksReadThisYear,
+      favoriteGenres,
+    };
+
+    return stats;
+  }
+
+  /**
    * Calculate reading streak (consecutive days with reading activity)
    */
   private calculateReadingStreak(finishedBooks: Book[]): number {

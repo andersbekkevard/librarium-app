@@ -331,12 +331,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             setError(standardError);
           }
         }
-
-        // Load initial statistics
-        const statsResult = await userService.getUserStats(user.uid);
-        if (statsResult.success && statsResult.data) {
-          setUserStats(statsResult.data);
-        }
       } catch (error) {
         const standardError = createSystemError(
           "An unexpected error occurred while initializing user profile",
@@ -349,6 +343,33 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     };
 
     initializeUserProfile();
+  }, [user]);
+
+  // Set up real-time statistics subscription
+  useEffect(() => {
+    if (!user) {
+      setUserStats(null);
+      return;
+    }
+
+    try {
+      // Subscribe to real-time stats calculation
+      const unsubscribeStats = userService.subscribeToUserStats(
+        user.uid,
+        (stats) => {
+          setUserStats(stats);
+          setError(null);
+        }
+      );
+
+      return unsubscribeStats;
+    } catch (error) {
+      const standardError = createSystemError(
+        "Failed to subscribe to user statistics",
+        error as Error
+      );
+      setError(standardError);
+    }
   }, [user]);
 
   const value: UserContextType = {
