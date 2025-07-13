@@ -22,14 +22,13 @@ interface SearchDropdownProps {
   className?: string;
 }
 
-// Single state enum to prevent timing issues
-type SearchState = "idle" | "searching" | "completed" | "error";
+// Search state enum
+type SearchState = "idle" | "searching" | "completed";
 
 interface SearchData {
   state: SearchState;
   query: string;
   results: Book[];
-  error?: string;
 }
 
 export const SearchDropdown: React.FC<SearchDropdownProps> = ({
@@ -39,7 +38,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Single atomic state for search
+  // Search state management
   const [searchData, setSearchData] = useState<SearchData>({
     state: "idle",
     query: "",
@@ -52,7 +51,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   const { searchBooks, books } = useBooksContext();
   const router = useRouter();
 
-  // Ref to track current search to avoid race conditions
+  // Search management refs
   const currentSearchRef = useRef<string>("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -74,35 +73,25 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     [books]
   );
 
-  // Main search function with forced re-renders
+  // Main search function
   const performSearch = useCallback(
     async (query: string) => {
       const trimmedQuery = query.trim();
 
-      console.log("🔍 Starting search for:", trimmedQuery);
-
       // Cancel any previous search
       if (abortControllerRef.current) {
-        console.log("🚫 Canceling previous search");
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
 
       // Check cache first
       if (searchCache[trimmedQuery]) {
-        console.log(
-          "✅ Using cached results for:",
-          trimmedQuery,
-          "Results:",
-          searchCache[trimmedQuery].length
-        );
 
         setSearchData({
           state: "completed",
           query: trimmedQuery,
           results: searchCache[trimmedQuery],
         });
-        console.log("✅ Using cached results");
         return;
       }
 
@@ -116,47 +105,28 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         query: trimmedQuery,
         results: [],
       });
-      console.log("🔄 Starting search");
 
       currentSearchRef.current = trimmedQuery;
 
       try {
         // Try service search first
-        console.log("🌐 Calling service search for:", trimmedQuery);
         const result = await searchBooks(trimmedQuery, 8);
 
         // Check if this search was aborted
         if (abortController.signal.aborted) {
-          console.log("🚫 Search was aborted for:", trimmedQuery);
           return;
         }
 
         // Check if this search is still current
         if (currentSearchRef.current !== trimmedQuery) {
-          console.log(
-            "❌ Search cancelled, query changed from",
-            trimmedQuery,
-            "to",
-            currentSearchRef.current
-          );
           return;
         }
 
         let results: Book[] = [];
         if (result.success) {
           results = result.data || [];
-          console.log(
-            "✅ Service search successful:",
-            results.length,
-            "results"
-          );
         } else {
-          console.log(
-            "⚠️ Service search failed, using local search:",
-            result.error
-          );
           results = performLocalSearch(trimmedQuery);
-          console.log("🏠 Local search found:", results.length, "results");
         }
 
         setSearchData({
@@ -164,43 +134,29 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           query: trimmedQuery,
           results: results,
         });
-        console.log(
-          "✅ Search completed with results:",
-          results.length
-        );
 
         // Update cache after state update
         setSearchCache((prev) => ({ ...prev, [trimmedQuery]: results }));
-        console.log("💾 Cached results for:", trimmedQuery);
       } catch (error: any) {
         // Check if error is due to cancellation
         if (error.name === "AbortError" || abortController.signal.aborted) {
-          console.log("🚫 Search aborted for:", trimmedQuery);
           return;
         }
 
-        console.error("💥 Search error:", error);
 
         // Check if search is still current
         if (currentSearchRef.current !== trimmedQuery) {
-          console.log("❌ Error handling cancelled, query changed");
           return;
         }
 
         // Fallback to local search - FORCED RE-RENDER
         const results = performLocalSearch(trimmedQuery);
-        console.log(
-          "🔄 Fallback local search found:",
-          results.length,
-          "results"
-        );
 
         setSearchData({
           state: "completed",
           query: trimmedQuery,
           results: results,
         });
-        console.log("✅ Fallback search completed");
 
         setSearchCache((prev) => ({ ...prev, [trimmedQuery]: results }));
       } finally {
@@ -219,7 +175,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   // Handle input changes with debouncing
   const handleInputChange = useCallback(
     (value: string) => {
-      console.log("📝 Input changed to:", value);
       setSearchQuery(value);
       setIsOpen(value.length > 0);
 
@@ -231,7 +186,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       const trimmedValue = value.trim();
 
       if (!trimmedValue) {
-        console.log("🧹 Clearing search state (empty input)");
         // Cancel any in-flight search
         if (abortControllerRef.current) {
           abortControllerRef.current.abort();
@@ -249,21 +203,17 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
       // Check cache immediately for instant results
       if (searchCache[trimmedValue]) {
-        console.log("⚡ Instant cache hit for:", trimmedValue);
         // Instant results from cache
         setSearchData({
           state: "completed",
           query: trimmedValue,
           results: searchCache[trimmedValue],
         });
-        console.log("⚡ Instant cache hit");
         return;
       }
 
       // Start search after debounce
-      console.log("⏱️ Starting 300ms debounce for:", trimmedValue);
       searchTimeoutRef.current = setTimeout(() => {
-        console.log("🚀 Debounce complete, starting search for:", trimmedValue);
         performSearch(trimmedValue);
       }, 300);
     },
@@ -285,7 +235,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   const handleBookSelect = useCallback(
     (book: Book) => {
-      console.log("📖 Book selected:", book.title);
       router.push(`/books/${book.id}`);
       setIsOpen(false);
       setSearchQuery("");
@@ -295,7 +244,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   );
 
   const handleAddBookSelect = useCallback(() => {
-    console.log("➕ Add book selected");
     const searchParams = new URLSearchParams();
     if (searchQuery.trim()) {
       searchParams.set("q", searchQuery.trim());
@@ -311,7 +259,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      console.log("⎋ Escape pressed, closing dropdown");
       // Cancel any in-flight search
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -357,32 +304,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         );
     }
   }, []);
-
-  // Debug logging for state changes
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔄 SearchDropdown State Update:");
-      console.log("  Query:", searchQuery);
-      console.log("  Search State:", searchData.state);
-      console.log("  Search Query:", searchData.query);
-      console.log("  Results Count:", searchData.results.length);
-      console.log("  Is Open:", isOpen);
-      console.log("  Cache Keys:", Object.keys(searchCache));
-      console.log("  Will render spinner:", searchData.state === "searching");
-      console.log("  Will render results:", searchData.state === "completed");
-    }
-  }, [searchQuery, searchData, isOpen, searchCache]);
-
-  console.log(
-    "🎨 RENDER - State:",
-    searchData.state,
-    "Results:",
-    searchData.results.length,
-    "Open:",
-    isOpen
-  );
-
-  // Removed dynamic key to maintain input focus during search operations
 
   return (
     <div className={cn("relative w-full", className)}>
