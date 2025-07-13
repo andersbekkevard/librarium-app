@@ -3,6 +3,7 @@ import type { Book } from "@/lib/models/models";
 import { cn } from "@/lib/utils/utils";
 import { CheckCircle, Clock, HelpCircle, LucideIcon, Play } from "lucide-react";
 import * as React from "react";
+import { Badge } from "./badge";
 
 interface ReadingStateBadgeProps {
   state: Book["state"];
@@ -86,18 +87,12 @@ export const ReadingStateBadge: React.FC<ReadingStateBadgeProps> = ({
   const IconComponent = config.icon;
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
-        config.classes,
-        className
-      )}
-    >
+    <Badge variant="outline" className={cn(config.classes, className)}>
       {showIcon && (
         <IconComponent className="h-3 w-3" data-testid={config.testId} />
       )}
       {config.label}
-    </span>
+    </Badge>
   );
 };
 

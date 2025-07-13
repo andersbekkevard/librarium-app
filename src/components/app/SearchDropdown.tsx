@@ -9,7 +9,8 @@ import {
   CommandList,
   CommandLoading,
 } from "@/components/ui/command";
-import { BRAND_COLORS, READING_STATE_COLORS, STATUS_COLORS } from "@/lib/design/colors";
+import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
@@ -86,7 +87,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
       // Check cache first
       if (searchCache[trimmedQuery]) {
-
         setSearchData({
           state: "completed",
           query: trimmedQuery,
@@ -142,7 +142,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         if (error.name === "AbortError" || abortController.signal.aborted) {
           return;
         }
-
 
         // Check if search is still current
         if (currentSearchRef.current !== trimmedQuery) {
@@ -274,62 +273,6 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     }
   }, []);
 
-  const formatAuthors = useCallback((author: string) => {
-    return author.length > 30 ? `${author.substring(0, 30)}...` : author;
-  }, []);
-
-  const formatTitle = useCallback((title: string) => {
-    return title.length > 40 ? `${title.substring(0, 40)}...` : title;
-  }, []);
-
-  // Get reading state colors and labels
-  const getReadingStateClasses = useCallback((state: Book["state"]) => {
-    switch (state) {
-      case "finished":
-        return cn(
-          READING_STATE_COLORS.finished.bg,
-          READING_STATE_COLORS.finished.text,
-          READING_STATE_COLORS.finished.border,
-          "px-2 py-1 rounded text-xs font-medium border"
-        );
-      case "in_progress":
-        return cn(
-          READING_STATE_COLORS.in_progress.bg,
-          READING_STATE_COLORS.in_progress.text,
-          READING_STATE_COLORS.in_progress.border,
-          "px-2 py-1 rounded text-xs font-medium border"
-        );
-      case "not_started":
-        return cn(
-          READING_STATE_COLORS.not_started.bg,
-          READING_STATE_COLORS.not_started.text,
-          READING_STATE_COLORS.not_started.border,
-          "px-2 py-1 rounded text-xs font-medium border"
-        );
-      default:
-        return cn(
-          READING_STATE_COLORS.not_started.bg,
-          READING_STATE_COLORS.not_started.text,
-          READING_STATE_COLORS.not_started.border,
-          "px-2 py-1 rounded text-xs font-medium border"
-        );
-    }
-  }, []);
-
-  // Get reading state label
-  const getReadingStateLabel = useCallback((state: Book["state"]) => {
-    switch (state) {
-      case "finished":
-        return "Finished";
-      case "in_progress":
-        return "Reading";
-      case "not_started":
-        return "Not Started";
-      default:
-        return "Not Started";
-    }
-  }, []);
-
   return (
     <div className={cn("relative w-full", className)}>
       <Command
@@ -395,20 +338,14 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm truncate">
-                            {formatTitle(book.title)}
+                            {book.title}
                           </div>
                           <div className="text-xs text-muted-foreground truncate">
-                            {formatAuthors(book.author)}
+                            {book.author}
                           </div>
                         </div>
                         <div className="flex-shrink-0">
-                          <div
-                            className={cn(
-                              getReadingStateClasses(book.state)
-                            )}
-                          >
-                            {getReadingStateLabel(book.state)}
-                          </div>
+                          <ReadingStateBadge state={book.state} />
                         </div>
                       </CommandItem>
                     ))}
