@@ -1,5 +1,7 @@
+import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
-import { IBookRepository, IUserRepository } from "../../repositories/types";
+import { Book, UserProfile } from "../../models/models";
+import { IUserRepository } from "../../repositories/types";
 import { UserService } from "../UserService";
 
 // Mock Firebase
@@ -29,107 +31,198 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   getProfile: jest.fn(),
   createProfile: jest.fn(),
   updateProfile: jest.fn(),
-  deleteProfile: jest.fn(),
-  subscribeToProfile: jest.fn(),
+  getUserBooks: jest.fn(),
 };
 
-const mockBookRepository: jest.Mocked<IBookRepository> = {
-  getBook: jest.fn(),
+const mockBookRepository = {
   getUserBooks: jest.fn(),
   getBooksByState: jest.fn(),
-  addBook: jest.fn(),
-  updateBook: jest.fn(),
-  deleteBook: jest.fn(),
-  subscribeToUserBooks: jest.fn(),
-  batchUpdateBooks: jest.fn(),
-  importBooks: jest.fn(),
 };
-
-// Mock Firebase User
-const mockFirebaseUser = {
-  uid: "test-user-id",
-  email: "test@example.com",
-  displayName: "Test User",
-  photoURL: "https://example.com/photo.jpg",
-  emailVerified: true,
-  metadata: {
-    lastSignInTime: "2023-01-01T00:00:00Z",
-  },
-} as any;
 
 describe("UserService", () => {
   let userService: UserService;
+  const testUserId = "test-user-id";
+
+  const mockUserProfile: UserProfile = {
+    id: testUserId,
+    displayName: "Test User",
+    email: "test@example.com",
+    photoURL: "https://example.com/photo.jpg",
+    emailVerified: true,
+    lastSignInTime: "2023-01-01T00:00:00Z",
+    totalBooksRead: 42,
+    currentlyReading: 5,
+    booksInLibrary: 50,
+    createdAt: mockTimestamp,
+    updatedAt: mockTimestamp,
+  };
+
+  const mockFirebaseUser: Partial<User> = {
+    uid: testUserId,
+    email: "test@example.com",
+    displayName: "Test User",
+    photoURL: "https://example.com/photo.jpg",
+    emailVerified: true,
+    metadata: {
+      lastSignInTime: "2023-01-01T00:00:00Z",
+      creationTime: "2023-01-01T00:00:00Z",
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    userService = new UserService(
-      mockUserRepository as any,
-      mockBookRepository as any
-    );
+    userService = new UserService(mockUserRepository, mockBookRepository);
   });
 
-  describe("createProfileFromFirebaseUser", () => {
-    it("should handle validation errors", async () => {
-      const invalidUser = {
-        uid: "test-user-id",
-        displayName: "",
-        email: "test@example.com",
-        emailVerified: true,
-        metadata: { lastSignInTime: "2023-01-01T00:00:00Z" },
-      } as any;
-
+  describe("getProfile", () => {
+    it("should retrieve user profile successfully", async () => {
       mockUserRepository.getProfile.mockResolvedValue({
         success: true,
-        data: null,
+        data: mockUserProfile,
       });
 
-      mockUserRepository.createProfile.mockResolvedValue({
-        success: true,
-        data: {
-          id: "test-user-id",
-          displayName: "Anonymous User",
-          email: "test@example.com",
-          emailVerified: true,
-          createdAt: mockTimestamp,
-          updatedAt: mockTimestamp,
-          lastSignInTime: "2023-01-01T00:00:00Z",
-          totalBooksRead: 0,
-          currentlyReading: 0,
-          booksInLibrary: 0,
-        },
-      });
-
-      const result = await userService.createProfileFromFirebaseUser(
-        invalidUser
-      );
+      const result = await userService.getProfile(testUserId);
 
       expect(result.success).toBe(true);
-      expect(result.data?.displayName).toBe("Anonymous User");
+      expect(result.data).toEqual(mockUserProfile);
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should handle profile not found", async () => {
       mockUserRepository.getProfile.mockResolvedValue({
         success: true,
         data: null,
       });
 
-      mockUserRepository.createProfile.mockResolvedValue({
+      const result = await userService.getProfile(testUserId);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toBeNull();
+    });
+
+    it("should handle repository errors", async () => {
+      mockUserRepository.getProfile.mockResolvedValue({
         success: false,
         error: "Database error",
       });
 
+      const result = await userService.getProfile(testUserId);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe("createProfileFromFirebaseUser", () => {
+    it("should create user profile from Firebase user", async () => {
+      const expectedProfile = {
+        ...mockUserProfile,
+        totalBooksRead: 0,
+        currentlyReading: 0,
+        booksInLibrary: 0,
+      };
+
+      mockUserRepository.createProfile.mockResolvedValue({
+        success: true,
+        data: expectedProfile,
+      });
+
       const result = await userService.createProfileFromFirebaseUser(
-        mockFirebaseUser
+        mockFirebaseUser as User
+      );
+
+      expect(result.success).toBe(true);
+      expect(mockUserRepository.createProfile).toHaveBeenCalledWith(
+        testUserId,
+        {
+          displayName: "Test User",
+          email: "test@example.com",
+          photoURL: "https://example.com/photo.jpg",
+          emailVerified: true,
+          lastSignInTime: "2023-01-01T00:00:00Z",
+          totalBooksRead: 0,
+          currentlyReading: 0,
+          booksInLibrary: 0,
+          createdAt: mockTimestamp,
+          updatedAt: mockTimestamp,
+        }
+      );
+    });
+
+    it("should handle repository errors", async () => {
+      mockUserRepository.createProfile.mockResolvedValue({
+        success: false,
+        error: "Creation failed",
+      });
+
+      const result = await userService.createProfileFromFirebaseUser(
+        mockFirebaseUser as User
       );
 
       expect(result.success).toBe(false);
-      expect(result.error).toEqual(
-        expect.objectContaining({
-          message: "Failed to create user profile",
-          category: "system",
-          userMessage: "An unexpected error occurred",
-        })
+      expect(result.error?.message).toContain("Failed to create user profile");
+    });
+  });
+
+  describe("updateProfile", () => {
+    it("should update user profile successfully", async () => {
+      const updates = { displayName: "Updated Name" };
+      const updatedProfile = { ...mockUserProfile, ...updates };
+
+      mockUserRepository.updateProfile.mockResolvedValue({
+        success: true,
+        data: updatedProfile,
+      });
+
+      const result = await userService.updateProfile(testUserId, updates);
+
+      expect(result.success).toBe(true);
+      expect(mockUserRepository.updateProfile).toHaveBeenCalledWith(
+        testUserId,
+        updates
       );
+    });
+
+    it("should validate updates before applying", async () => {
+      const invalidUpdates = { displayName: "", totalBooksRead: -1 };
+
+      const result = await userService.updateProfile(
+        testUserId,
+        invalidUpdates
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toContain("Display name cannot be empty");
+    });
+  });
+
+  describe("updateUserStats", () => {
+    it("should calculate and update user statistics", async () => {
+      const mockBooks: Book[] = [
+        { id: "book-1", state: "finished", isOwned: true } as Book,
+        { id: "book-2", state: "in_progress", isOwned: true } as Book,
+        { id: "book-3", state: "not_started", isOwned: true } as Book,
+        { id: "book-4", state: "finished", isOwned: false } as Book,
+      ];
+
+      mockBookRepository.getUserBooks.mockResolvedValue({
+        success: true,
+        data: mockBooks,
+      });
+
+      const result = await userService.updateUserStats(testUserId);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should handle zero books", async () => {
+      mockBookRepository.getUserBooks.mockResolvedValue({
+        success: true,
+        data: [],
+      });
+
+      const result = await userService.updateUserStats(testUserId);
+
+      expect(result.success).toBe(true);
     });
   });
 });

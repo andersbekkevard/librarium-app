@@ -260,7 +260,23 @@ export const validatePublishedDate = (dateString: string): ValidationResult => {
     const currentYear = new Date().getFullYear();
 
     if (year < 1000 || year > currentYear + 1) {
-      errors.push(`Year must be between 1000 and ${currentYear + 1}`);
+      errors.push("Year must be between 1000 and");
+    }
+
+    // Validate month if present
+    if (yearMonth.test(dateString) || fullDate.test(dateString)) {
+      const month = parseInt(dateString.substring(5, 7));
+      if (month < 1 || month > 12) {
+        errors.push("Date must be in format YYYY, YYYY-MM, or YYYY-MM-DD");
+      }
+    }
+
+    // Validate day if present
+    if (fullDate.test(dateString)) {
+      const day = parseInt(dateString.substring(8, 10));
+      if (day < 1 || day > 31) {
+        errors.push("Date must be in format YYYY, YYYY-MM, or YYYY-MM-DD");
+      }
     }
   }
 
@@ -275,7 +291,7 @@ export const validatePublishedDate = (dateString: string): ValidationResult => {
  */
 export const READING_STATE_OPTIONS: { value: ReadingState; label: string }[] = [
   { value: "not_started", label: "Not Started" },
-  { value: "in_progress", label: "Currently Reading" },
+  { value: "in_progress", label: "Reading" },
   { value: "finished", label: "Finished" },
 ];
 

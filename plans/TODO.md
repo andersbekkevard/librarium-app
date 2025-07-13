@@ -25,3 +25,4 @@
 
 ## Testing
 - [ ] Get full test coverage
+- "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";

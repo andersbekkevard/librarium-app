@@ -9,7 +9,7 @@ import {
   CommandList,
   CommandLoading,
 } from "@/components/ui/command";
-import { BRAND_COLORS, READING_STATE_COLORS } from "@/lib/design/colors";
+import { BRAND_COLORS, READING_STATE_COLORS, STATUS_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
@@ -282,26 +282,51 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     return title.length > 40 ? `${title.substring(0, 40)}...` : title;
   }, []);
 
-  // Get reading state colors
+  // Get reading state colors and labels
   const getReadingStateClasses = useCallback((state: Book["state"]) => {
     switch (state) {
       case "finished":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        return cn(
+          READING_STATE_COLORS.finished.bg,
+          READING_STATE_COLORS.finished.text,
+          READING_STATE_COLORS.finished.border,
+          "px-2 py-1 rounded text-xs font-medium border"
+        );
       case "in_progress":
         return cn(
           READING_STATE_COLORS.in_progress.bg,
-          READING_STATE_COLORS.in_progress.text
+          READING_STATE_COLORS.in_progress.text,
+          READING_STATE_COLORS.in_progress.border,
+          "px-2 py-1 rounded text-xs font-medium border"
         );
       case "not_started":
         return cn(
           READING_STATE_COLORS.not_started.bg,
-          READING_STATE_COLORS.not_started.text
+          READING_STATE_COLORS.not_started.text,
+          READING_STATE_COLORS.not_started.border,
+          "px-2 py-1 rounded text-xs font-medium border"
         );
       default:
         return cn(
           READING_STATE_COLORS.not_started.bg,
-          READING_STATE_COLORS.not_started.text
+          READING_STATE_COLORS.not_started.text,
+          READING_STATE_COLORS.not_started.border,
+          "px-2 py-1 rounded text-xs font-medium border"
         );
+    }
+  }, []);
+
+  // Get reading state label
+  const getReadingStateLabel = useCallback((state: Book["state"]) => {
+    switch (state) {
+      case "finished":
+        return "Finished";
+      case "in_progress":
+        return "Reading";
+      case "not_started":
+        return "Not Started";
+      default:
+        return "Not Started";
     }
   }, []);
 
@@ -379,11 +404,10 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                         <div className="flex-shrink-0">
                           <div
                             className={cn(
-                              "px-2 py-1 rounded text-xs font-medium",
                               getReadingStateClasses(book.state)
                             )}
                           >
-                            {book.state.replace("_", " ")}
+                            {getReadingStateLabel(book.state)}
                           </div>
                         </div>
                       </CommandItem>

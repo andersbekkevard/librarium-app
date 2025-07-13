@@ -100,6 +100,14 @@
   --status-warning: oklch(0.8 0.15 85); /* Yellow */
   --status-error: oklch(0.65 0.2 25); /* Red */
   --status-info: oklch(0.7 0.15 220); /* Blue */
+  
+  /* Reading State Colors */
+  --reading-finished-bg: oklch(0.94 0.05 142.5);
+  --reading-finished-text: oklch(0.36 0.12 142.5);
+  --reading-finished-border: oklch(0.85 0.08 142.5);
+  --reading-in-progress-bg: oklch(0.55 0.25 240 / 0.1);
+  --reading-in-progress-text: oklch(0.55 0.25 240);
+  --reading-in-progress-border: oklch(0.55 0.25 240);
 }
 
 .dark {
@@ -150,6 +158,14 @@
   --status-warning: oklch(0.85 0.15 85); /* Brighter yellow */
   --status-error: oklch(0.75 0.2 25); /* Brighter red */
   --status-info: oklch(0.8 0.15 220); /* Brighter blue */
+
+  /* Reading State Colors - Dark mode variants */
+  --reading-finished-bg: oklch(0.2 0.08 142.5);
+  --reading-finished-text: oklch(0.85 0.1 142.5);
+  --reading-finished-border: oklch(0.3 0.1 142.5);
+  --reading-in-progress-bg: oklch(0.7 0.25 240 / 0.15);
+  --reading-in-progress-text: oklch(0.7 0.25 240);
+  --reading-in-progress-border: oklch(0.7 0.25 240);
 }
 
 @layer base {

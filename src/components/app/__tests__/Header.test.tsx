@@ -6,8 +6,17 @@ jest.mock('@/lib/providers/AuthProvider', () => ({
   useAuthContext: jest.fn(),
 }))
 
-jest.mock('../UserProfileDropdown', () => () => <div data-testid="profile" />)
-jest.mock('../SearchDropdown', () => () => <div data-testid="search" />)
+jest.mock('../UserProfileDropdown', () => {
+  const MockUserProfileDropdown = () => <div data-testid="profile" />
+  MockUserProfileDropdown.displayName = 'MockUserProfileDropdown'
+  return MockUserProfileDropdown
+})
+
+jest.mock('../SearchDropdown', () => {
+  const MockSearchDropdown = () => <div data-testid="search" />
+  MockSearchDropdown.displayName = 'MockSearchDropdown'
+  return MockSearchDropdown
+})
 
 const mockUseAuth = useAuthContext as jest.Mock
 

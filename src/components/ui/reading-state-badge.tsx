@@ -1,7 +1,8 @@
+import { READING_STATE_COLORS } from "@/lib/design/colors";
 import type { Book } from "@/lib/models/models";
+import { cn } from "@/lib/utils/utils";
 import { CheckCircle, Clock, HelpCircle, LucideIcon, Play } from "lucide-react";
 import * as React from "react";
-import { Badge } from "./badge";
 
 interface ReadingStateBadgeProps {
   state: Book["state"];
@@ -11,8 +12,8 @@ interface ReadingStateBadgeProps {
 
 interface BadgeConfig {
   label: string;
-  variant: "default" | "secondary" | "outline";
   icon: LucideIcon;
+  classes: string;
 }
 
 const READING_STATE_CONFIG: Record<
@@ -21,28 +22,48 @@ const READING_STATE_CONFIG: Record<
 > = {
   not_started: {
     label: "Not Started",
-    variant: "secondary",
     icon: Clock,
+    classes: cn(
+      READING_STATE_COLORS.not_started.bg,
+      READING_STATE_COLORS.not_started.text,
+      READING_STATE_COLORS.not_started.border,
+      "border"
+    ),
     testId: "clock-icon",
   },
   in_progress: {
     label: "Reading",
-    variant: "default",
     icon: Play,
+    classes: cn(
+      READING_STATE_COLORS.in_progress.bg,
+      READING_STATE_COLORS.in_progress.text,
+      READING_STATE_COLORS.in_progress.border,
+      "border"
+    ),
     testId: "play-icon",
   },
   finished: {
     label: "Finished",
-    variant: "outline",
     icon: CheckCircle,
+    classes: cn(
+      READING_STATE_COLORS.finished.bg,
+      READING_STATE_COLORS.finished.text,
+      READING_STATE_COLORS.finished.border,
+      "border"
+    ),
     testId: "check-circle-icon",
   },
 };
 
 const UNKNOWN_STATE_CONFIG: BadgeConfig & { testId: string } = {
   label: "Unknown",
-  variant: "outline",
   icon: HelpCircle,
+  classes: cn(
+    READING_STATE_COLORS.not_started.bg,
+    READING_STATE_COLORS.not_started.text,
+    READING_STATE_COLORS.not_started.border,
+    "border"
+  ),
   testId: "unknown-icon",
 };
 
@@ -65,12 +86,18 @@ export const ReadingStateBadge: React.FC<ReadingStateBadgeProps> = ({
   const IconComponent = config.icon;
 
   return (
-    <Badge variant={config.variant} className={className}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
+        config.classes,
+        className
+      )}
+    >
       {showIcon && (
         <IconComponent className="h-3 w-3" data-testid={config.testId} />
       )}
       {config.label}
-    </Badge>
+    </span>
   );
 };
 

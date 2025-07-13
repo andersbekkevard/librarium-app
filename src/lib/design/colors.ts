@@ -98,19 +98,19 @@ export const STAR_RATING_COLORS = {
  */
 export const READING_STATE_COLORS = {
   not_started: {
-    bg: "bg-secondary",
-    text: "text-secondary-foreground",
-    border: "border-secondary",
+    bg: "bg-[var(--secondary)]",
+    text: "text-[var(--secondary-foreground)]",
+    border: "border-[var(--secondary)]",
   },
   in_progress: {
-    bg: "bg-brand-primary/10",
-    text: "text-brand-primary",
-    border: "border-brand-primary/20",
+    bg: "bg-[var(--reading-in-progress-bg)]",
+    text: "text-[var(--reading-in-progress-text)]",
+    border: "border-[var(--reading-in-progress-border)]",
   },
   finished: {
-    bg: "bg-muted",
-    text: "text-muted-foreground",
-    border: "border-muted",
+    bg: "bg-[var(--reading-finished-bg)]",
+    text: "text-[var(--reading-finished-text)]",
+    border: "border-[var(--reading-finished-border)]",
   },
 } as const;
 
