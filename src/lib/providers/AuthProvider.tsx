@@ -5,16 +5,26 @@
  *
  * Simplified to only manage authentication state using AuthService.
  * User profile management has been moved to UserProvider.
+ * Now uses standardized error handling with ProviderResult pattern.
  */
 
 import { User } from "firebase/auth";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  ProviderResult,
+  StandardError,
+  createAuthError,
+  createProviderError,
+  createProviderSuccess,
+  createSystemError,
+} from "../errors/error-handling";
+import { LoggerUtils, simpleErrorLogger } from "../errors/error-logging";
 import { authService } from "../services/AuthService";
 
 /**
  * Authentication context type definition
  *
- * Simplified to only handle authentication state
+ * Simplified to only handle authentication state with standardized error handling
  */
 interface AuthContextType {
   /** Current Firebase user or null if not authenticated */
@@ -24,11 +34,13 @@ interface AuthContextType {
   /** Convenience boolean for authentication status */
   isAuthenticated: boolean;
   /** Function to sign in with Google */
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<ProviderResult<User>>;
   /** Function to sign out */
-  signOut: () => Promise<void>;
+  signOut: () => Promise<ProviderResult<void>>;
   /** Auth error if any */
-  error: string | null;
+  error: StandardError | null;
+  /** Function to clear the current error */
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,45 +54,106 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 }): React.ReactNode => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<StandardError | null>(null);
 
   /**
-   * Handle Google sign in
+   * Clears the current error state
    */
-  const signInWithGoogle = async (): Promise<void> => {
+  const clearError = (): void => {
+    setError(null);
+  };
+
+  /**
+   * Handle Google sign in with standardized error handling
+   */
+  const signInWithGoogle = async (): Promise<ProviderResult<User>> => {
     try {
       setError(null);
       setLoading(true);
 
+      // Log user action
+      LoggerUtils.logUserAction("auth_sign_in_google_attempt");
+
       const result = await authService.signInWithGoogle();
 
-      if (!result.success) {
-        setError(result.error || "Sign-in failed");
+      if (result.success && result.data) {
+        // Set user ID for logging context
+        simpleErrorLogger.setUserId(result.data.uid);
+
+        // Log successful sign-in
+        LoggerUtils.logUserAction("auth_sign_in_google_success", {
+          userId: result.data.uid,
+          metadata: {
+            email: result.data.email,
+          },
+        });
+
+        return createProviderSuccess(result.data);
+      } else {
+        // Handle service error
+        const standardError = createAuthError(
+          result.error?.message || "Sign-in failed",
+          result.error?.userMessage || "Failed to sign in with Google"
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
       }
-      // User state will be updated by the auth state listener
     } catch (error) {
-      setError("An unexpected error occurred during sign-in");
+      // Handle unexpected errors
+      const standardError = createSystemError(
+        "An unexpected error occurred during sign-in",
+        error as Error
+      );
+
+      setError(standardError);
+      return createProviderError(standardError);
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * Handle sign out
+   * Handle sign out with standardized error handling
    */
-  const signOut = async (): Promise<void> => {
+  const signOut = async (): Promise<ProviderResult<void>> => {
     try {
       setError(null);
       setLoading(true);
 
+      // Log user action
+      LoggerUtils.logUserAction("auth_sign_out_attempt", {
+        userId: user?.uid,
+      });
+
       const result = await authService.signOut();
 
-      if (!result.success) {
-        setError(result.error || "Sign-out failed");
+      if (result.success) {
+        // Log successful sign-out
+        LoggerUtils.logUserAction("auth_sign_out_success", {
+          userId: user?.uid,
+        });
+
+        return createProviderSuccess(undefined);
+      } else {
+        // Handle service error
+        const standardError = createAuthError(
+          result.error?.message || "Sign-out failed",
+          result.error?.userMessage || "Failed to sign out"
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
       }
-      // User state will be updated by the auth state listener
     } catch (error) {
-      setError("An unexpected error occurred during sign-out");
+      // Handle unexpected errors
+      const standardError = createSystemError(
+        "An unexpected error occurred during sign-out",
+        error as Error
+      );
+
+      setError(standardError);
+      return createProviderError(standardError);
     } finally {
       setLoading(false);
     }
@@ -88,13 +161,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   // Set up authentication state listener
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged((firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-      setError(null);
-    });
+    try {
+      const unsubscribe = authService.onAuthStateChanged((firebaseUser) => {
+        setUser(firebaseUser);
+        setLoading(false);
+        setError(null);
 
-    return unsubscribe;
+        // Update logger context
+        if (firebaseUser) {
+          simpleErrorLogger.setUserId(firebaseUser.uid);
+          LoggerUtils.logUserAction("auth_state_changed", {
+            userId: firebaseUser.uid,
+            metadata: {
+              email: firebaseUser.email,
+              authenticated: true,
+            },
+          });
+        } else {
+          LoggerUtils.logUserAction("auth_state_changed", {
+            metadata: {
+              authenticated: false,
+            },
+          });
+        }
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      // Handle subscription errors
+      const standardError = createSystemError(
+        "Failed to initialize authentication state listener",
+        error as Error
+      );
+
+      setError(standardError);
+      setLoading(false);
+    }
   }, []);
 
   const value: AuthContextType = {
@@ -104,6 +206,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     signInWithGoogle,
     signOut,
     error,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

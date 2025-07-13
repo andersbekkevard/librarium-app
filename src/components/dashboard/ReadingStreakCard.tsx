@@ -14,7 +14,9 @@ export const ReadingStreakCard: React.FC<ReadingStreakCardProps> = ({
           <p className="text-sm font-medium text-white/80">
             Reading Streak
           </p>
-          <p className="text-2xl font-bold text-white">{streakDays} days</p>
+          <p className="text-2xl font-bold text-white">
+            {streakDays} {streakDays === 1 ? "day" : "days"}
+          </p>
           <p className="text-sm text-white/60 mt-1">{encouragementText}</p>
         </div>
         <div className="h-12 w-12 bg-white/10 rounded-full flex items-center justify-center">

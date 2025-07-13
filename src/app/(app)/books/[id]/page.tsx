@@ -3,7 +3,7 @@
 import BookDetailPage from "@/components/app/BookDetailPage";
 import Sidebar from "@/components/app/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Book } from "@/lib/models";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -45,9 +45,9 @@ export default function BookDetailRoute() {
       const fetchBook = async () => {
         setLoading(true);
         try {
-          const fetchedBook = await getBook(bookId);
-          if (fetchedBook) {
-            setBook(fetchedBook);
+          const result = await getBook(bookId);
+          if (result.success && result.data) {
+            setBook(result.data);
             setError(null);
           } else {
             setError("Book not found");
@@ -60,7 +60,7 @@ export default function BookDetailRoute() {
           setLoading(false);
         }
       };
-      
+
       fetchBook();
     }
   }, [isAuthenticated, user, bookId, books, booksLoading, getBook]);

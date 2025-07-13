@@ -7,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { Check } from "lucide-react";
 import Link from "next/link";
-import { BRAND_CLASSES } from "@/lib/colors";
 
 enum PopularPlan {
   NO = 0,
@@ -81,7 +81,7 @@ export const PricingSection = () => {
   return (
     <section id="pricing" className="container py-24 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Pricing
       </h2>
@@ -123,7 +123,7 @@ export const PricingSection = () => {
                 <div className="space-y-4">
                   {benefitList.map((benefit) => (
                     <span key={benefit} className="flex">
-                      <Check className={`${BRAND_CLASSES.primary.text} mr-2`} />
+                      <Check className={`${BRAND_COLORS.primary.text} mr-2`} />
                       <h3 className="text-sm">{benefit}</h3>
                     </span>
                   ))}
@@ -138,7 +138,7 @@ export const PricingSection = () => {
                   }
                   className={`w-full ${
                     popular === PopularPlan?.YES
-                      ? `${BRAND_CLASSES.primary.bg} hover:${BRAND_CLASSES.primary.bgHover}`
+                      ? `${BRAND_COLORS.primary.bg} hover:${BRAND_COLORS.primary.bgHover}`
                       : ""
                   }`}
                 >

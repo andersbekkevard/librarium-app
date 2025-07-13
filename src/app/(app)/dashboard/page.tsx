@@ -1,67 +1,51 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Book } from "@/lib/models";
-import { userService } from "@/lib/services";
 import Sidebar from "@/components/app/Sidebar";
-import { Loader2 } from "lucide-react";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import DashboardContent from "@/components/dashboard/DashboardContent";
+import { useUserContext } from "@/lib/providers/UserProvider";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalBooks: 0,
-    finishedBooks: 0,
-    totalPagesRead: 0,
-    currentlyReading: 0,
-    readingStreak: 0,
-  });
   const { loading, isAuthenticated, user } = useAuthContext();
   const { books, loading: booksLoading } = useBooksContext();
+  const {
+    userStats,
+    loading: userStatsLoading,
+    refreshUserStats,
+  } = useUserContext();
   const router = useRouter();
 
-  // Calculate stats using UserService when user and books change
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!user) return;
-      
-      try {
-        const result = await userService.getUserStats(user.uid);
-        if (result.success && result.data) {
-          setStats({
-            totalBooks: result.data.booksInLibrary,
-            finishedBooks: result.data.booksReadThisYear, // Use "Read This Year" for the second stat
-            totalPagesRead: result.data.totalPagesRead,
-            currentlyReading: result.data.currentlyReading,
-            readingStreak: result.data.readingStreak,
-          });
-        } else {
-          // Reset stats on error
-          setStats({
-            totalBooks: 0,
-            finishedBooks: 0,
-            totalPagesRead: 0,
-            currentlyReading: 0,
-            readingStreak: 0,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user stats:', error);
-        // Reset stats on error
-        setStats({
-          totalBooks: 0,
-          finishedBooks: 0,
-          totalPagesRead: 0,
-          currentlyReading: 0,
-          readingStreak: 0,
-        });
-      }
-    };
+  // Transform userStats to the format expected by DashboardContent
+  const stats = useMemo(() => {
+    if (!userStats) {
+      return {
+        totalBooks: 0,
+        finishedBooks: 0,
+        totalPagesRead: 0,
+        currentlyReading: 0,
+        readingStreak: 0,
+      };
+    }
 
-    fetchStats();
-  }, [user, books]); // Re-fetch when books change to get updated stats
+    return {
+      totalBooks: userStats.booksInLibrary,
+      finishedBooks: userStats.booksReadThisYear, // Use "Read This Year" for the second stat
+      totalPagesRead: userStats.totalPagesRead,
+      currentlyReading: userStats.currentlyReading,
+      readingStreak: userStats.readingStreak,
+    };
+  }, [userStats]);
+
+  // Refresh stats when books change to get updated stats
+  useEffect(() => {
+    if (user && books) {
+      refreshUserStats();
+    }
+  }, [user, books]);
 
   // Route protection - redirect to landing if not authenticated
   useEffect(() => {
@@ -70,8 +54,8 @@ export default function Dashboard() {
     }
   }, [loading, isAuthenticated, router]);
 
-  // Show loading while checking auth or loading books
-  if (loading || booksLoading) {
+  // Show loading while checking auth, loading books, or loading user stats
+  if (loading || booksLoading || userStatsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -104,7 +88,7 @@ export default function Dashboard() {
   };
 
   const handleAddBookClick = () => {
-    router.push('/add-books');
+    router.push("/add-books");
   };
 
   return (
@@ -117,7 +101,7 @@ export default function Dashboard() {
         <DashboardContent
           books={books}
           stats={stats}
-          userId={user?.uid || ''}
+          userId={user?.uid || ""}
           onEdit={handleEdit}
           onUpdateProgress={handleUpdateProgress}
           onBookClick={handleBookClick}

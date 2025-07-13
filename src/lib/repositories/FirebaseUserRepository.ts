@@ -16,8 +16,8 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { UserProfile } from "../models";
+import { db } from "../api/firebase";
+import { UserProfile } from "../models/models";
 import {
   IUserRepository,
   RepositoryError,
@@ -26,6 +26,24 @@ import {
 } from "./types";
 
 export class FirebaseUserRepository implements IUserRepository {
+  /**
+   * Filters out undefined values from data for Firebase compatibility
+   * Firebase Firestore doesn't allow undefined values in documents
+   */
+  private filterUndefinedValues<T extends Record<string, any>>(
+    data: T
+  ): Partial<T> {
+    const filtered: Partial<T> = {};
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) {
+        filtered[key as keyof T] = value;
+      }
+    });
+
+    return filtered;
+  }
+
   /**
    * Get user profile document reference
    */
@@ -103,7 +121,10 @@ export class FirebaseUserRepository implements IUserRepository {
         updatedAt: Timestamp.now(),
       };
 
-      await setDoc(profileRef, profileData);
+      // Filter out undefined values before sending to Firebase
+      const filteredProfileData = this.filterUndefinedValues(profileData);
+
+      await setDoc(profileRef, filteredProfileData);
 
       const createdProfile: UserProfile = {
         ...profileData,
@@ -137,7 +158,10 @@ export class FirebaseUserRepository implements IUserRepository {
         updatedAt: Timestamp.now(),
       };
 
-      await updateDoc(profileRef, updateData);
+      // Filter out undefined values before sending to Firebase
+      const filteredUpdateData = this.filterUndefinedValues(updateData);
+
+      await updateDoc(profileRef, filteredUpdateData);
 
       const updatedProfile: UserProfile = {
         ...currentProfile.data,

@@ -5,8 +5,9 @@
  * a clean interface for the presentation layer.
  */
 
+import { StandardError } from "@/lib/errors/error-handling";
+import { Book, UserProfile } from "@/lib/models/models";
 import { User } from "firebase/auth";
-import { Book, UserProfile } from "../models";
 
 /**
  * Common service result type for operations that can fail
@@ -14,7 +15,7 @@ import { Book, UserProfile } from "../models";
 export interface ServiceResult<T> {
   success: boolean;
   data?: T;
-  error?: string;
+  error?: StandardError;
 }
 
 /**
@@ -141,6 +142,15 @@ export interface IBookService {
   ): Promise<ServiceResult<void>>;
 
   /**
+   * Manual update book (bypasses state machine validation)
+   */
+  updateBookManual(
+    userId: string,
+    bookId: string,
+    updates: Partial<Book>
+  ): Promise<ServiceResult<void>>;
+
+  /**
    * Update book progress with business logic
    */
   updateBookProgress(
@@ -190,6 +200,15 @@ export interface IBookService {
   ): Promise<ServiceResult<string[]>>;
 
   /**
+   * Search books in user's library
+   */
+  searchBooks(
+    userId: string,
+    searchQuery: string,
+    maxResults?: number
+  ): Promise<ServiceResult<Book[]>>;
+
+  /**
    * Filter and sort books
    */
   filterAndSortBooks(
@@ -200,11 +219,6 @@ export interface IBookService {
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[];
-
-  /**
-   * Calculate reading progress percentage
-   */
-  calculateProgress(book: Book): number;
 }
 
 /**
@@ -246,32 +260,4 @@ export interface BookStateTransition {
   toState: Book["state"];
   timestamp: Date;
   notes?: string;
-}
-
-/**
- * Service error types
- */
-export enum ServiceErrorType {
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
-  NOT_FOUND = "NOT_FOUND",
-  BUSINESS_RULE_VIOLATION = "BUSINESS_RULE_VIOLATION",
-  EXTERNAL_API_ERROR = "EXTERNAL_API_ERROR",
-  REPOSITORY_ERROR = "REPOSITORY_ERROR",
-  UNKNOWN_ERROR = "UNKNOWN_ERROR",
-}
-
-/**
- * Service error class
- */
-export class ServiceError extends Error {
-  constructor(
-    public type: ServiceErrorType,
-    message: string,
-    public details?: unknown,
-    public originalError?: Error
-  ) {
-    super(message);
-    this.name = "ServiceError";
-  }
 }

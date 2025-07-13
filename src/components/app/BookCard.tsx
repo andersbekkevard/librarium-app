@@ -1,65 +1,22 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Star } from "lucide-react";
-import { Book } from "@/lib/models";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
+import { StarRating } from "@/components/ui/star-rating";
+import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
+import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { cn } from "@/lib/utils/utils";
+import { BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
 interface BookCardProps {
   book: Book;
   onBookClick?: (bookId: string) => void;
 }
 // Helper functions
-
-const getReadingStateBadge = (state: Book["state"]) => {
-  switch (state) {
-    case "not_started":
-      return {
-        label: "Not Started",
-        className: "bg-slate-50 text-slate-500 border-slate-200",
-      };
-    case "in_progress":
-      return {
-        label: "Reading",
-        className:
-          "bg-brand-primary/10 text-brand-primary border-brand-primary/20",
-      };
-    case "finished":
-      return {
-        label: "Finished",
-        className: "bg-slate-800/10 text-slate-800 border-slate-800/20",
-      };
-    default:
-      return {
-        label: "Unknown",
-        className: "bg-muted text-muted-foreground border-border",
-      };
-  }
-};
-
-
-const StarRating = ({ rating }: { rating: number }) => {
-  return (
-    <div className="flex items-center gap-1">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          className={cn(
-            "h-3 w-3",
-            i < rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "fill-muted text-muted-foreground"
-          )}
-        />
-      ))}
-      <span className="ml-1 text-xs text-muted-foreground">{rating}/5</span>
-    </div>
-  );
-};
 
 const ProgressBar = ({
   value,
@@ -78,20 +35,16 @@ const ProgressBar = ({
   );
 };
 
-export const BookCard: React.FC<BookCardProps> = ({
-  book,
-  onBookClick,
-}) => {
+export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   const router = useRouter();
   const { calculateBookProgress } = useBooksContext();
-  const badgeInfo = getReadingStateBadge(book.state);
   const progress = calculateBookProgress(book);
 
   const handleCardClick = () => {
     if (onBookClick) {
       onBookClick(book.id);
     } else {
-      router.push(`/book/${book.id}`);
+      router.push(`/books/${book.id}`);
     }
   };
 
@@ -99,7 +52,12 @@ export const BookCard: React.FC<BookCardProps> = ({
 
   return (
     <Card
-      className="w-full max-w-sm h-48 overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
+      className={cn(
+        UI_CONFIG.CARD.WIDTH,
+        UI_CONFIG.CARD.HEIGHT,
+        "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
+      )}
+      style={{ transitionDuration: `${TIMING_CONFIG.ANIMATION.STANDARD}ms` }}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -149,12 +107,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             >
               {genre}
             </Badge>
-            <Badge
-              variant="outline"
-              className={cn("text-xs px-2 py-0.5 border", badgeInfo.className)}
-            >
-              {badgeInfo.label}
-            </Badge>
+            <ReadingStateBadge state={book.state} />
           </div>
 
           {/* Progress/Rating Section */}
@@ -177,7 +130,7 @@ export const BookCard: React.FC<BookCardProps> = ({
               )}
 
             {book.state === "finished" && book.rating && (
-              <StarRating rating={book.rating} />
+              <StarRating rating={book.rating} size="sm" />
             )}
           </div>
         </div>

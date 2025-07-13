@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 
 enum ProService {
   YES = 1,
@@ -18,25 +18,25 @@ const serviceList: ServiceProps[] = [
     title: "Google Books Integration",
     pro: 0,
     description:
-      "Automatically fetch book metadata, covers, and descriptions. Search millions of books and add them to your library instantly.",
+      "Search millions of books and automatically fetch metadata, covers, and descriptions. Add books to your library with one click.",
+  },
+  {
+    title: "Firebase Authentication",
+    pro: 0,
+    description:
+      "Secure Google sign-in with cloud synchronization across all your devices. Your library stays up-to-date everywhere.",
   },
   {
     title: "Advanced Reading Analytics",
     pro: 1,
     description:
-      "Get detailed insights into your reading patterns, speed, and preferences with comprehensive analytics and data visualization.",
+      "Detailed insights into your reading patterns, speed, and preferences with comprehensive data visualization. Coming soon!",
   },
   {
-    title: "Book Club Features",
+    title: "Social Reading Features",
     pro: 1,
     description:
-      "Create and join reading groups, participate in discussions, and share reading progress with fellow book enthusiasts.",
-  },
-  {
-    title: "Smart Reading Reminders",
-    pro: 1,
-    description:
-      "Set custom reading goals and receive intelligent notifications to help you maintain consistent reading habits.",
+      "Share books with friends, join reading groups, and discover what fellow readers are enjoying. In development!",
   },
 ];
 
@@ -44,16 +44,16 @@ export const ServicesSection = () => {
   return (
     <section id="services" className="container py-24 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Integrations
       </h2>
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Powerful Reading Tools
+        Current & Planned Integrations
       </h2>
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-16">
-        Connect with your favorite book platforms and unlock advanced features
-        to enhance your reading journey.
+        Essential integrations are live now, with advanced features and social
+        capabilities coming in future releases.
       </h3>
       <div className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20">
         {serviceList.map(({ title, description, pro }) => (
@@ -67,7 +67,7 @@ export const ServicesSection = () => {
                 {pro === ProService.YES && (
                   <Badge
                     variant="secondary"
-                    className={`${BRAND_CLASSES.primary.bg} text-primary-foreground`}
+                    className={`${BRAND_COLORS.primary.bg} text-primary-foreground`}
                   >
                     PRO
                   </Badge>

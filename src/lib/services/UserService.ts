@@ -7,17 +7,20 @@
 
 import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
-import { Book, UserProfile } from "../models";
+import {
+  ErrorBuilder,
+  ErrorCategory,
+  ErrorSeverity,
+  StandardError,
+  createNetworkError,
+  createSystemError,
+  createValidationError,
+} from "../errors/error-handling";
+import { Book, UserProfile } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
 import { IUserRepository } from "../repositories/types";
-import {
-  IUserService,
-  ServiceError,
-  ServiceErrorType,
-  ServiceResult,
-  UserStats,
-} from "./types";
+import { IUserService, ServiceResult, UserStats } from "./types";
 
 export class UserService implements IUserService {
   constructor(
@@ -26,38 +29,32 @@ export class UserService implements IUserService {
   ) {}
 
   /**
-   * Convert repository errors to service errors
+   * Convert repository errors to standard errors
    */
-  private handleRepositoryError(error: string): ServiceError {
+  private handleRepositoryError(error: string): StandardError {
     if (error.includes("Access denied")) {
-      return new ServiceError(
-        ServiceErrorType.AUTHORIZATION_ERROR,
-        "You don't have permission to access this user profile",
-        error
-      );
+      return new ErrorBuilder("Repository access denied")
+        .withCategory(ErrorCategory.AUTHORIZATION)
+        .withUserMessage(
+          "You don't have permission to access this user profile"
+        )
+        .withContext({ originalError: error })
+        .withSeverity(ErrorSeverity.HIGH)
+        .build();
     }
 
     if (error.includes("Network error")) {
-      return new ServiceError(
-        ServiceErrorType.EXTERNAL_API_ERROR,
-        "Network error. Please check your connection and try again.",
-        error
-      );
+      return createNetworkError("Network error during repository operation");
     }
 
     if (error.includes("not found")) {
-      return new ServiceError(
-        ServiceErrorType.NOT_FOUND,
-        "User profile not found",
-        error
+      return createValidationError(
+        "User profile not found in repository",
+        "User profile not found"
       );
     }
 
-    return new ServiceError(
-      ServiceErrorType.REPOSITORY_ERROR,
-      `Database error: ${error}`,
-      error
-    );
+    return createSystemError(`Database error: ${error}`);
   }
 
   /**
@@ -65,46 +62,33 @@ export class UserService implements IUserService {
    */
   private validateUserProfileData(
     profile: Partial<UserProfile>
-  ): ServiceError | null {
+  ): StandardError | null {
     if (
       profile.displayName !== undefined &&
       profile.displayName.trim().length === 0
     ) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
-        "Display name cannot be empty"
-      );
+      return createValidationError("Display name cannot be empty");
     }
 
     if (profile.email !== undefined && profile.email.trim().length === 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
-        "Email cannot be empty"
-      );
+      return createValidationError("Email cannot be empty");
     }
 
     if (profile.totalBooksRead !== undefined && profile.totalBooksRead < 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
-        "Total books read cannot be negative"
-      );
+      return createValidationError("Total books read cannot be negative");
     }
 
     if (
       profile.currentlyReading !== undefined &&
       profile.currentlyReading < 0
     ) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
+      return createValidationError(
         "Currently reading count cannot be negative"
       );
     }
 
     if (profile.booksInLibrary !== undefined && profile.booksInLibrary < 0) {
-      return new ServiceError(
-        ServiceErrorType.VALIDATION_ERROR,
-        "Books in library count cannot be negative"
-      );
+      return createValidationError("Books in library count cannot be negative");
     }
 
     return null;
@@ -118,13 +102,17 @@ export class UserService implements IUserService {
       const result = await this.userRepository.getProfile(userId);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { success: false, error: "Failed to get user profile" };
+      const standardError = createSystemError(
+        "Failed to get user profile",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -167,7 +155,7 @@ export class UserService implements IUserService {
 
       const validationError = this.validateUserProfileData(newProfile);
       if (validationError) {
-        return { success: false, error: validationError.message };
+        throw validationError;
       }
 
       const result = await this.userRepository.createProfile(
@@ -176,13 +164,17 @@ export class UserService implements IUserService {
       );
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        throw standardError;
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { success: false, error: "Failed to create user profile" };
+      const standardError = createSystemError(
+        "Failed to create user profile",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -196,19 +188,23 @@ export class UserService implements IUserService {
     try {
       const validationError = this.validateUserProfileData(updates);
       if (validationError) {
-        return { success: false, error: validationError.message };
+        return { success: false, error: validationError };
       }
 
       const result = await this.userRepository.updateProfile(userId, updates);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { success: false, error: "Failed to update user profile" };
+      const standardError = createSystemError(
+        "Failed to update user profile",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -220,13 +216,17 @@ export class UserService implements IUserService {
       const result = await this.userRepository.deleteProfile(userId);
 
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: "Failed to delete user profile" };
+      const standardError = createSystemError(
+        "Failed to delete user profile",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -237,13 +237,11 @@ export class UserService implements IUserService {
     try {
       const booksResult = await this.bookRepository.getUserBooks(userId);
       if (!booksResult.success) {
-        return {
-          success: false,
-          error: "Failed to get user books for statistics",
-        };
+        const standardError = this.handleRepositoryError(booksResult.error!);
+        return { success: false, error: standardError };
       }
 
-      const books = booksResult.data!;
+      const books = booksResult.data || [];
       const stats = {
         totalBooksRead: books.filter((book) => book.state === "finished")
           .length,
@@ -253,15 +251,18 @@ export class UserService implements IUserService {
       };
 
       const result = await this.userRepository.updateProfile(userId, stats);
-
       if (!result.success) {
-        const serviceError = this.handleRepositoryError(result.error!);
-        return { success: false, error: serviceError.message };
+        const standardError = this.handleRepositoryError(result.error!);
+        return { success: false, error: standardError };
       }
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: "Failed to update user statistics" };
+      const standardError = createSystemError(
+        "Failed to update user stats",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -272,66 +273,58 @@ export class UserService implements IUserService {
     try {
       const booksResult = await this.bookRepository.getUserBooks(userId);
       if (!booksResult.success) {
-        return {
-          success: false,
-          error: "Failed to get user books for statistics",
-        };
+        const standardError = this.handleRepositoryError(booksResult.error!);
+        return { success: false, error: standardError };
       }
 
-      const books = booksResult.data!;
+      const books = booksResult.data || [];
       const finishedBooks = books.filter((book) => book.state === "finished");
-      const currentlyReadingBooks = books.filter(
+      const inProgressBooks = books.filter(
         (book) => book.state === "in_progress"
       );
 
-      // Calculate total pages read
+      // Calculate statistics
       const totalPagesRead = finishedBooks.reduce(
-        (total, book) => total + (book.progress.totalPages || 0),
+        (sum, book) => sum + (book.progress.totalPages || 0),
         0
       );
 
-      // Calculate average rating
-      const booksWithRatings = finishedBooks.filter((book) => book.rating);
+      const ratingsSum = finishedBooks.reduce((sum, book) => {
+        return sum + (book.rating || 0);
+      }, 0);
       const averageRating =
-        booksWithRatings.length > 0
-          ? booksWithRatings.reduce(
-              (sum, book) => sum + (book.rating || 0),
-              0
-            ) / booksWithRatings.length
-          : 0;
+        finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
 
-      // Calculate reading streak (simplified - books finished in consecutive days)
       const readingStreak = this.calculateReadingStreak(finishedBooks);
 
-      // Get favorite genres
-      const favoriteGenres = this.getFavoriteGenres(books);
-
-      // Calculate monthly/yearly stats
+      // Calculate books read this month and year
       const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
 
       const booksReadThisMonth = finishedBooks.filter((book) => {
         if (!book.finishedAt) return false;
         const finishedDate = book.finishedAt.toDate();
         return (
-          finishedDate.getMonth() === currentMonth &&
-          finishedDate.getFullYear() === currentYear
+          finishedDate.getMonth() === thisMonth &&
+          finishedDate.getFullYear() === thisYear
         );
       }).length;
 
       const booksReadThisYear = finishedBooks.filter((book) => {
         if (!book.finishedAt) return false;
         const finishedDate = book.finishedAt.toDate();
-        return finishedDate.getFullYear() === currentYear;
+        return finishedDate.getFullYear() === thisYear;
       }).length;
+
+      const favoriteGenres = this.getFavoriteGenres(books);
 
       const stats: UserStats = {
         totalBooksRead: finishedBooks.length,
-        currentlyReading: currentlyReadingBooks.length,
+        currentlyReading: inProgressBooks.length,
         booksInLibrary: books.length,
-        totalPagesRead: Math.round(totalPagesRead),
-        averageRating: Math.round(averageRating * 10) / 10,
+        totalPagesRead,
+        averageRating,
         readingStreak,
         booksReadThisMonth,
         booksReadThisYear,
@@ -340,7 +333,11 @@ export class UserService implements IUserService {
 
       return { success: true, data: stats };
     } catch (error) {
-      return { success: false, error: "Failed to calculate user statistics" };
+      const standardError = createSystemError(
+        "Failed to get user stats",
+        error as Error
+      );
+      return { success: false, error: standardError };
     }
   }
 
@@ -355,45 +352,57 @@ export class UserService implements IUserService {
   }
 
   /**
-   * Calculate reading streak (simplified implementation)
+   * Calculate reading streak (consecutive days with reading activity)
    */
   private calculateReadingStreak(finishedBooks: Book[]): number {
     if (finishedBooks.length === 0) return 0;
 
-    // Sort books by finish date
+    // Sort books by finish date (most recent first)
     const sortedBooks = finishedBooks
       .filter((book) => book.finishedAt)
-      .sort(
-        (a, b) =>
-          b.finishedAt!.toDate().getTime() - a.finishedAt!.toDate().getTime()
-      );
+      .sort((a, b) => b.finishedAt!.seconds - a.finishedAt!.seconds);
 
     if (sortedBooks.length === 0) return 0;
 
-    // Simple implementation: return number of books finished in last 30 days
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    let streak = 0;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
 
-    return sortedBooks.filter(
-      (book) => book.finishedAt!.toDate() >= thirtyDaysAgo
-    ).length;
+    for (const book of sortedBooks) {
+      const finishedDate = book.finishedAt!.toDate();
+      finishedDate.setHours(0, 0, 0, 0);
+
+      const daysDifference = Math.floor(
+        (currentDate.getTime() - finishedDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysDifference <= 1) {
+        streak++;
+        currentDate = finishedDate;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
   }
 
   /**
-   * Get favorite genres based on book collection
+   * Get favorite genres based on reading history
    */
   private getFavoriteGenres(books: Book[]): string[] {
-    const genreCounts: Record<string, number> = {};
+    const genreCounts = new Map<string, number>();
 
     books.forEach((book) => {
       if (book.genre) {
-        genreCounts[book.genre] = (genreCounts[book.genre] || 0) + 1;
+        genreCounts.set(book.genre, (genreCounts.get(book.genre) || 0) + 1);
       }
     });
 
-    return Object.entries(genreCounts)
+    // Sort by count and return top 3
+    return Array.from(genreCounts.entries())
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
+      .slice(0, 3)
       .map(([genre]) => genre);
   }
 }

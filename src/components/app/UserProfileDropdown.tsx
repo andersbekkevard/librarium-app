@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
 import {
-  User,
-  Settings,
-  Target,
-  Shield,
   Activity,
+  ChevronRight,
   Download,
   HelpCircle,
   LogOut,
-  ChevronRight,
+  Settings,
+  Shield,
+  Target,
+  User,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export const UserProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,8 +47,9 @@ export const UserProfileDropdown: React.FC = () => {
       setIsOpen(false);
       // Redirect to landing page after successful logout
       router.push("/");
-    } catch {
-      // Error is handled by the AuthProvider
+    } catch (error) {
+      // Error is handled by the AuthProvider, but log locally and show alert
+      console.error("Error signing out:", error);
       alert("An unexpected error occurred while signing out");
     } finally {
       setIsSigningOut(false);

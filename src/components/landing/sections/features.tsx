@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Book, Users, BarChart3, Search, Target } from "lucide-react";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
+import { BarChart3, Book, Search, Star, Users } from "lucide-react";
 
 interface FeaturesProps {
   icon: React.ReactElement;
@@ -13,37 +13,37 @@ const featureList: FeaturesProps[] = [
     icon: <Book className="w-6 h-6" />,
     title: "Reading Progress",
     description:
-      "Track your reading progress page by page, set reading goals, and maintain detailed reading history for every book.",
+      "Track your reading progress page by page with three simple states: not started, in progress, and finished.",
   },
   {
     icon: <Book className="w-6 h-6" />,
     title: "Personal Library",
     description:
-      "Organize your book collection with custom shelves, tags, and categories. Never lose track of what you own or want to read.",
-  },
-  {
-    icon: <Users className="w-6 h-6" />,
-    title: "Social Reading",
-    description:
-      "Share books with friends, join reading groups, and discover what fellow readers are enjoying.",
-  },
-  {
-    icon: <BarChart3 className="w-6 h-6" />,
-    title: "Reading Analytics",
-    description:
-      "Visualize your reading habits with detailed statistics, trends, and insights about your literary journey.",
+      "Organize your book collection with basic filtering by reading state and ownership. Search and sort your books easily.",
   },
   {
     icon: <Search className="w-6 h-6" />,
     title: "Book Discovery",
     description:
-      "Find your next great read with intelligent recommendations based on your reading history and preferences.",
+      "Search millions of books through Google Books API and automatically populate details like covers, pages, and descriptions.",
   },
   {
-    icon: <Target className="w-6 h-6" />,
-    title: "Reading Goals",
+    icon: <BarChart3 className="w-6 h-6" />,
+    title: "Basic Statistics",
     description:
-      "Set and track annual reading goals, challenge yourself with new genres, and celebrate your achievements.",
+      "View essential reading stats on your dashboard: total books, finished books, pages read, and current reading count.",
+  },
+  {
+    icon: <Star className="w-6 h-6" />,
+    title: "Book Ratings",
+    description:
+      "Rate finished books with a 1-5 star system to remember your favorites and track your reading preferences.",
+  },
+  {
+    icon: <Users className="w-6 h-6" />,
+    title: "Coming Soon",
+    description:
+      "Social reading features, advanced analytics, reading goals, and custom shelves are planned for future releases.",
   },
 ];
 
@@ -51,18 +51,17 @@ export const FeaturesSection = () => {
   return (
     <section id="features" className="container py-24 sm:py-32">
       <h2
-        className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
       >
         Features
       </h2>
 
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Everything You Need for Reading
+        Essential Reading Tools
       </h2>
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        From tracking your progress to discovering your next favorite book,
-        Librarium provides all the tools you need for an enriched reading
-        experience.
+        Core features are ready now, with advanced capabilities planned for
+        future releases. Start tracking your reading journey today.
       </h3>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {featureList.map(({ icon, title, description }) => (
@@ -70,9 +69,9 @@ export const FeaturesSection = () => {
             <Card className="h-full bg-background border-0 shadow-none">
               <CardHeader className="flex flex-col justify-center items-center">
                 <div
-                  className={`${BRAND_CLASSES.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
+                  className={`${BRAND_COLORS.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
                 >
-                  <div className={BRAND_CLASSES.primary.text}>{icon}</div>
+                  <div className={BRAND_COLORS.primary.text}>{icon}</div>
                 </div>
 
                 <CardTitle className="text-center">{title}</CardTitle>

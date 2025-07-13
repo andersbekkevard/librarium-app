@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Book, TrendingUp, Users2, Sparkles } from "lucide-react";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
+import { Book, Sparkles, TrendingUp, Users2 } from "lucide-react";
 
 interface BenefitsProps {
   icon: React.ReactElement;
@@ -11,27 +11,27 @@ interface BenefitsProps {
 const benefitList: BenefitsProps[] = [
   {
     icon: <Book className="w-8 h-8" />,
-    title: "Never Lose Track",
+    title: "Stay Organized",
     description:
-      "Keep all your books organized in one place. Know exactly what you've read, what you're reading, and what's on your wishlist.",
+      "Keep all your books in one place with basic organization. Filter by reading state and ownership to find what you need.",
   },
   {
     icon: <TrendingUp className="w-8 h-8" />,
     title: "Track Your Progress",
     description:
-      "Monitor your reading habits, set goals, and see your improvement over time with detailed analytics and insights.",
-  },
-  {
-    icon: <Users2 className="w-8 h-8" />,
-    title: "Connect with Readers",
-    description:
-      "Join a community of book lovers, share recommendations, and discover new books through social reading features.",
+      "Monitor your reading with simple page-by-page tracking and see basic statistics about your reading habits.",
   },
   {
     icon: <Sparkles className="w-8 h-8" />,
-    title: "Smart Recommendations",
+    title: "Easy Book Discovery",
     description:
-      "Get personalized book suggestions based on your reading history, preferences, and what similar readers are enjoying.",
+      "Search millions of books through Google Books API and add them to your library with automatic metadata.",
+  },
+  {
+    icon: <Users2 className="w-8 h-8" />,
+    title: "More Features Coming",
+    description:
+      "Community features, advanced analytics, reading goals, and personalized recommendations are in development.",
   },
 ];
 
@@ -41,17 +41,16 @@ export const BenefitsSection = () => {
       <div className="grid lg:grid-cols-2 place-items-center lg:gap-24">
         <div>
           <h2
-            className={`text-lg ${BRAND_CLASSES.primary.text} mb-2 tracking-wider`}
+            className={`text-lg ${BRAND_COLORS.primary.text} mb-2 tracking-wider`}
           >
             Benefits
           </h2>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Why Choose Librarium?
+            Start Your Reading Journey
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Transform your reading experience with tools designed for serious
-            book lovers. From casual readers to voracious bibliophiles,
-            Librarium adapts to your reading style.
+            Get started with essential reading tools that work today. Simple,
+            effective book tracking with a roadmap for exciting features ahead.
           </p>
         </div>
 
@@ -63,7 +62,7 @@ export const BenefitsSection = () => {
             >
               <CardHeader>
                 <div className="flex justify-between">
-                  <div className={`${BRAND_CLASSES.primary.text} mb-6`}>
+                  <div className={`${BRAND_COLORS.primary.text} mb-6`}>
                     {icon}
                   </div>
                   <span className="text-5xl text-muted-foreground/15 font-medium transition-all delay-75 group-hover/number:text-muted-foreground/30">

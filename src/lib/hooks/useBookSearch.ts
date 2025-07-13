@@ -1,17 +1,19 @@
 import { useCallback, useState } from "react";
-import { GoogleBooksVolume, googleBooksApi } from "../google-books-api";
+import { GoogleBooksVolume, googleBooksApi } from "../api/google-books-api";
+import { API_CONFIG } from "../constants/constants";
+import { StandardError, createNetworkError } from "../errors/error-handling";
 
 export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];
   isSearching: boolean;
-  error: string | null;
-  search: (query: string, maxResults?: number) => Promise<void>;
+  error: StandardError | null;
+  search: (query: string, maxResults?: number, searchType?: 'title' | 'author' | 'general') => Promise<void>;
   clearResults: () => void;
   clearError: () => void;
 } => {
   const [searchResults, setSearchResults] = useState<GoogleBooksVolume[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<StandardError | null>(null);
 
   /**
    * Handles book search using Google Books API
@@ -21,33 +23,57 @@ export const useBookSearch = (): {
    *
    * @param query - Search query string
    * @param maxResults - Maximum number of results to return (default: 20)
+   * @param searchType - Type of search: 'title', 'author', or 'general' (default: 'general')
    *
    * @example
    * const { search } = useBookSearch();
-   * await search("javascript programming");
+   * await search("javascript programming", 20, 'title');
    */
-  const search = useCallback(async (query: string, maxResults: number = 20) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+  const search = useCallback(
+    async (
+      query: string,
+      maxResults: number = API_CONFIG.SEARCH.DEFAULT_LIMIT,
+      searchType: 'title' | 'author' | 'general' = 'general'
+    ) => {
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
+      }
 
-    setIsSearching(true);
-    setError(null);
+      setIsSearching(true);
+      setError(null);
 
-    try {
-      const results = await googleBooksApi.search(query, maxResults);
-      setSearchResults(results);
-    } catch (err) {
-      console.error("Error searching books:", err);
-      setError(
-        "Failed to search books. Please check your internet connection and try again."
-      );
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+      try {
+        let results: GoogleBooksVolume[];
+        
+        switch (searchType) {
+          case 'title':
+            results = await googleBooksApi.searchByTitle(query, maxResults);
+            break;
+          case 'author':
+            results = await googleBooksApi.searchByAuthor(query, maxResults);
+            break;
+          case 'general':
+          default:
+            results = await googleBooksApi.search(query, maxResults);
+            break;
+        }
+        
+        setSearchResults(results);
+      } catch (err) {
+        console.error("Error searching books:", err);
+        const standardError = createNetworkError(
+          "Failed to search books",
+          "Failed to search books. Please check your internet connection and try again."
+        );
+        setError(standardError);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    []
+  );
 
   /**
    * Clears search results and error state

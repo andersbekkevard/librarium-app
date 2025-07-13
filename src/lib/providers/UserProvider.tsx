@@ -5,16 +5,32 @@
  *
  * Manages user profile state and provides user-related operations.
  * Separated from AuthProvider to follow single responsibility principle.
+ * Now uses standardized error handling with ProviderResult pattern.
  */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { UserProfile } from "../models";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  ProviderResult,
+  StandardError,
+  createAuthError,
+  createProviderError,
+  createProviderSuccess,
+  createSystemError,
+} from "../errors/error-handling";
+import { LoggerUtils } from "../errors/error-logging";
+import { UserProfile } from "../models/models";
 import { userService } from "../services/UserService";
 import { UserStats } from "../services/types";
 import { useAuthContext } from "./AuthProvider";
 
 /**
- * User context type definition
+ * User context type definition with standardized error handling
  */
 interface UserContextType {
   /** Current user profile or null if not available */
@@ -24,15 +40,19 @@ interface UserContextType {
   /** Whether user profile is loading */
   loading: boolean;
   /** Error message if any operation fails */
-  error: string | null;
+  error: StandardError | null;
   /** Function to update user profile */
-  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateUserProfile: (
+    updates: Partial<UserProfile>
+  ) => Promise<ProviderResult<UserProfile>>;
   /** Function to refresh user profile */
-  refreshUserProfile: () => Promise<void>;
+  refreshUserProfile: () => Promise<ProviderResult<void>>;
   /** Function to refresh user statistics */
-  refreshUserStats: () => Promise<void>;
+  refreshUserStats: () => Promise<ProviderResult<void>>;
   /** Function to update user statistics */
-  updateUserStats: () => Promise<void>;
+  updateUserStats: () => Promise<ProviderResult<void>>;
+  /** Function to clear the current error */
+  clearError: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -46,158 +66,290 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<StandardError | null>(null);
 
   /**
-   * Update user profile
+   * Clears the current error state
    */
-  const updateUserProfile = async (
-    updates: Partial<UserProfile>
-  ): Promise<void> => {
-    if (!user) {
-      setError("User not authenticated");
-      return;
-    }
+  const clearError = useCallback((): void => {
+    setError(null);
+  }, []);
 
-    try {
-      setError(null);
-      const result = await userService.updateProfile(user.uid, updates);
-
-      if (result.success) {
-        setUserProfile(result.data!);
-      } else {
-        setError(result.error || "Failed to update profile");
+  /**
+   * Update user profile with standardized error handling
+   */
+  const updateUserProfile = useCallback(
+    async (
+      updates: Partial<UserProfile>
+    ): Promise<ProviderResult<UserProfile>> => {
+      if (!user) {
+        const standardError = createAuthError("User not authenticated");
+        setError(standardError);
+        return createProviderError(standardError);
       }
-    } catch (error) {
-      setError("An unexpected error occurred while updating profile");
-    }
-  };
+
+      try {
+        setError(null);
+
+        // Log user action
+        LoggerUtils.logUserAction("user_profile_update_attempt", {
+          userId: user.uid,
+          metadata: {
+            updates: Object.keys(updates),
+          },
+        });
+
+        const result = await userService.updateProfile(user.uid, updates);
+
+        if (result.success && result.data) {
+          setUserProfile(result.data);
+
+          // Log successful update
+          LoggerUtils.logUserAction("user_profile_update_success", {
+            userId: user.uid,
+            metadata: {
+              updates: Object.keys(updates),
+            },
+          });
+
+          return createProviderSuccess(result.data);
+        } else {
+          // Handle service error
+          const standardError = createSystemError(
+            result.error?.message || "Failed to update profile"
+          );
+
+          setError(standardError);
+          return createProviderError(standardError);
+        }
+      } catch (error) {
+        // Handle unexpected errors
+        const standardError = createSystemError(
+          "An unexpected error occurred while updating profile",
+          error as Error
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
+      }
+    },
+    [user]
+  );
 
   /**
-   * Refresh user profile from server
+   * Refresh user profile from server with standardized error handling
    */
-  const refreshUserProfile = async (): Promise<void> => {
+  const refreshUserProfile = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
-      setError("User not authenticated");
-      return;
+      const standardError = createAuthError("User not authenticated");
+      setError(standardError);
+      return createProviderError(standardError);
     }
 
     try {
       setError(null);
       setLoading(true);
+
+      // Log user action
+      LoggerUtils.logUserAction("user_profile_refresh_attempt", {
+        userId: user.uid,
+      });
+
       const result = await userService.getProfile(user.uid);
 
       if (result.success) {
         setUserProfile(result.data || null);
+
+        // Log successful refresh
+        LoggerUtils.logUserAction("user_profile_refresh_success", {
+          userId: user.uid,
+        });
+
+        return createProviderSuccess(undefined);
       } else {
-        setError(result.error || "Failed to refresh profile");
+        // Handle service error
+        const standardError = createSystemError(
+          result.error?.message || "Failed to refresh profile"
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
       }
     } catch (error) {
-      setError("An unexpected error occurred while refreshing profile");
+      // Handle unexpected errors
+      const standardError = createSystemError(
+        "An unexpected error occurred while refreshing profile",
+        error as Error
+      );
+
+      setError(standardError);
+      return createProviderError(standardError);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   /**
-   * Refresh user statistics
+   * Refresh user statistics with standardized error handling
    */
-  const refreshUserStats = async (): Promise<void> => {
+  const refreshUserStats = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
-      setError("User not authenticated");
-      return;
+      const standardError = createAuthError("User not authenticated");
+      setError(standardError);
+      return createProviderError(standardError);
     }
 
     try {
       setError(null);
+
+      // Log user action
+      LoggerUtils.logUserAction("user_stats_refresh_attempt", {
+        userId: user.uid,
+      });
+
       const result = await userService.getUserStats(user.uid);
 
-      if (result.success) {
-        setUserStats(result.data!);
+      if (result.success && result.data) {
+        setUserStats(result.data);
+
+        // Log successful refresh
+        LoggerUtils.logUserAction("user_stats_refresh_success", {
+          userId: user.uid,
+        });
+
+        return createProviderSuccess(undefined);
       } else {
-        setError(result.error || "Failed to refresh statistics");
+        // Handle service error
+        const standardError = createSystemError(
+          result.error?.message || "Failed to refresh statistics"
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
       }
     } catch (error) {
-      setError("An unexpected error occurred while refreshing statistics");
+      // Handle unexpected errors
+      const standardError = createSystemError(
+        "An unexpected error occurred while refreshing statistics",
+        error as Error
+      );
+
+      setError(standardError);
+      return createProviderError(standardError);
     }
-  };
+  }, [user]);
 
   /**
-   * Update user statistics
+   * Update user statistics with standardized error handling
    */
-  const updateUserStats = async (): Promise<void> => {
+  const updateUserStats = useCallback(async (): Promise<
+    ProviderResult<void>
+  > => {
     if (!user) {
-      setError("User not authenticated");
-      return;
+      const standardError = createAuthError("User not authenticated");
+      setError(standardError);
+      return createProviderError(standardError);
     }
 
     try {
       setError(null);
+
+      // Log user action
+      LoggerUtils.logUserAction("user_stats_update_attempt", {
+        userId: user.uid,
+      });
+
       const result = await userService.updateUserStats(user.uid);
 
       if (result.success) {
         // Refresh stats after update
         await refreshUserStats();
+
+        // Log successful update
+        LoggerUtils.logUserAction("user_stats_update_success", {
+          userId: user.uid,
+        });
+
+        return createProviderSuccess(undefined);
       } else {
-        setError(result.error || "Failed to update statistics");
+        // Handle service error
+        const standardError = createSystemError(
+          result.error?.message || "Failed to update statistics"
+        );
+
+        setError(standardError);
+        return createProviderError(standardError);
       }
     } catch (error) {
-      setError("An unexpected error occurred while updating statistics");
-    }
-  };
+      // Handle unexpected errors
+      const standardError = createSystemError(
+        "An unexpected error occurred while updating statistics",
+        error as Error
+      );
 
-  // Set up user profile management
+      setError(standardError);
+      return createProviderError(standardError);
+    }
+  }, [user, refreshUserStats]);
+
+  // Initialize user profile when user changes
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setUserProfile(null);
-      setUserStats(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    // Create or get user profile
     const initializeUserProfile = async (): Promise<void> => {
-      try {
-        const result = await userService.createProfileFromFirebaseUser(user);
+      if (!user) {
+        setUserProfile(null);
+        setUserStats(null);
+        setLoading(false);
+        setError(null);
+        return;
+      }
 
-        if (result.success) {
-          setUserProfile(result.data!);
-          // Also load statistics
-          await refreshUserStats();
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Try to get existing profile
+        const profileResult = await userService.getProfile(user.uid);
+
+        if (profileResult.success && profileResult.data) {
+          // Profile exists, use it
+          setUserProfile(profileResult.data);
         } else {
-          setError(result.error || "Failed to initialize user profile");
+          // Profile doesn't exist, create one from Firebase user
+          const createResult = await userService.createProfileFromFirebaseUser(
+            user
+          );
+          if (createResult.success && createResult.data) {
+            setUserProfile(createResult.data);
+          } else {
+            const standardError = createSystemError(
+              createResult.error?.message || "Failed to create user profile"
+            );
+            setError(standardError);
+          }
+        }
+
+        // Load initial statistics
+        const statsResult = await userService.getUserStats(user.uid);
+        if (statsResult.success && statsResult.data) {
+          setUserStats(statsResult.data);
         }
       } catch (error) {
-        setError(
-          "An unexpected error occurred while initializing user profile"
+        const standardError = createSystemError(
+          "An unexpected error occurred while initializing user profile",
+          error as Error
         );
+        setError(standardError);
       } finally {
         setLoading(false);
       }
     };
 
-    // Set up real-time profile listener
-    const unsubscribe = userService.subscribeToProfile(user.uid, (profile) => {
-      setUserProfile(profile);
-      setLoading(false);
-      setError(null);
-    });
-
     initializeUserProfile();
-
-    return unsubscribe;
-  }, [isAuthenticated, user]);
-
-  // Load user statistics when profile is available
-  useEffect(() => {
-    if (userProfile && user) {
-      refreshUserStats();
-    }
-  }, [userProfile, user]);
+  }, [user]);
 
   const value: UserContextType = {
     userProfile,
@@ -208,6 +360,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     refreshUserProfile,
     refreshUserStats,
     updateUserStats,
+    clearError,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
@@ -215,12 +368,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
 /**
  * Hook to access user context
- *
- * Provides access to the current user profile and user-related operations.
- * Must be used within a UserProvider component tree.
- *
- * @returns UserContextType - Current user context
- * @throws Error - If used outside of UserProvider
  */
 export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);
@@ -229,5 +376,3 @@ export const useUserContext = (): UserContextType => {
   }
   return context;
 };
-
-export default UserProvider;

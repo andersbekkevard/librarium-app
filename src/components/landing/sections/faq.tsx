@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BRAND_CLASSES } from "@/lib/colors";
+import { BRAND_COLORS } from "@/lib/design/colors";
 
 interface FAQProps {
   question: string;
@@ -16,31 +16,31 @@ const FAQList: FAQProps[] = [
   {
     question: "Is Librarium free to use?",
     answer:
-      "Yes! Librarium offers a generous free tier that allows you to track up to 50 books with basic features. You can upgrade to Reader Pro for unlimited books and advanced analytics.",
+      "Yes! Librarium is currently completely free to use. All current features are available at no cost. Future premium features may be introduced as the app grows.",
     value: "item-1",
   },
   {
-    question: "Can I import my existing book data?",
+    question: "What can I do with Librarium right now?",
     answer:
-      "Absolutely! You can import your books from Goodreads, CSV files, or manually search and add books using our Google Books integration. We make it easy to get started with your existing library.",
+      "You can build your personal library, track reading progress page-by-page, search and add books via Google Books API, rate finished books, and view basic reading statistics on your dashboard.",
     value: "item-2",
   },
   {
     question: "How does reading progress tracking work?",
     answer:
-      "Simply update your current page number as you read, or mark books as 'started' and 'finished'. Librarium automatically calculates your reading speed, time spent reading, and provides insights into your reading habits.",
+      "Simply update your current page number as you read. Books progress through three states: not started, in progress, and finished. Your dashboard shows real-time stats about your reading habits.",
     value: "item-3",
   },
   {
     question: "Is my reading data private and secure?",
     answer:
-      "Your privacy is our priority. All your reading data is securely stored and encrypted. You control who can see your reading activity and can make your profile private at any time.",
+      "Yes, your privacy is our priority. All your reading data is securely stored in Firebase with encryption. Only you can access your personal library and reading data.",
     value: "item-4",
   },
   {
-    question: "Can I use Librarium offline?",
+    question: "What features are coming next?",
     answer:
-      "Librarium works best with an internet connection for syncing and book discovery. However, you can view your library and update reading progress offline - changes will sync when you're back online.",
+      "We're working on advanced analytics, reading goals, social features, custom shelves, and AI-powered recommendations. The app is actively being developed with regular updates.",
     value: "item-5",
   },
 ];
@@ -50,7 +50,7 @@ export const FAQSection = () => {
     <section id="faq" className="container mx-auto md:w-[700px] py-24 sm:py-32">
       <div className="text-center mb-8">
         <h2
-          className={`text-lg ${BRAND_CLASSES.primary.text} text-center mb-2 tracking-wider`}
+          className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
           FAQS
         </h2>

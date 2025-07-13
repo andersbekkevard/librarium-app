@@ -6,7 +6,7 @@
  */
 
 import { Unsubscribe } from "firebase/firestore";
-import { Book, BookEvent, UserProfile } from "../models";
+import { Book, BookEvent, UserProfile } from "../models/models";
 
 /**
  * Common repository result type for operations that can fail

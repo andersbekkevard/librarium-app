@@ -13,48 +13,16 @@ import {
   onAuthStateChanged,
   signInWithPopup,
 } from "firebase/auth";
-import { auth } from "../firebase";
-import {
-  IAuthService,
-  ServiceError,
-  ServiceErrorType,
-  ServiceResult,
-} from "./types";
+import { auth } from "../api/firebase";
+import { ErrorHandlerUtils } from "../errors/error-handling";
+import { IAuthService, ServiceResult } from "./types";
 
 export class AuthService implements IAuthService {
   /**
-   * Convert auth errors to service errors
+   * Convert auth errors to standard errors
    */
-  private handleAuthError(error: AuthError): ServiceError {
-    if (error.code === "auth/popup-blocked") {
-      return new ServiceError(
-        ServiceErrorType.EXTERNAL_API_ERROR,
-        "Popup was blocked by your browser. Please allow popups and try again.",
-        error
-      );
-    }
-
-    if (error.code === "auth/popup-closed-by-user") {
-      return new ServiceError(
-        ServiceErrorType.EXTERNAL_API_ERROR,
-        "Sign-in was cancelled. Please try again.",
-        error
-      );
-    }
-
-    if (error.code === "auth/network-request-failed") {
-      return new ServiceError(
-        ServiceErrorType.EXTERNAL_API_ERROR,
-        "Network error. Please check your connection and try again.",
-        error
-      );
-    }
-
-    return new ServiceError(
-      ServiceErrorType.UNKNOWN_ERROR,
-      `Authentication error: ${error.message}`,
-      error
-    );
+  private handleAuthError(error: AuthError) {
+    return ErrorHandlerUtils.handleFirebaseAuthError(error);
   }
 
   /**
@@ -70,8 +38,8 @@ export class AuthService implements IAuthService {
       const result = await signInWithPopup(auth, provider);
       return { success: true, data: result.user };
     } catch (error) {
-      const serviceError = this.handleAuthError(error as AuthError);
-      return { success: false, error: serviceError.message };
+      const standardError = this.handleAuthError(error as AuthError);
+      return { success: false, error: standardError };
     }
   }
 
@@ -83,8 +51,8 @@ export class AuthService implements IAuthService {
       await firebaseSignOut(auth);
       return { success: true };
     } catch (error) {
-      const serviceError = this.handleAuthError(error as AuthError);
-      return { success: false, error: serviceError.message };
+      const standardError = this.handleAuthError(error as AuthError);
+      return { success: false, error: standardError };
     }
   }
 

@@ -17,8 +17,9 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { BookEvent } from "../models";
+import { db } from "../api/firebase";
+import { EVENT_CONFIG } from "../constants/constants";
+import { BookEvent } from "../models/models";
 import {
   IEventRepository,
   RepositoryError,
@@ -27,6 +28,24 @@ import {
 } from "./types";
 
 export class FirebaseEventRepository implements IEventRepository {
+  /**
+   * Filters out undefined values from data for Firebase compatibility
+   * Firebase Firestore doesn't allow undefined values in documents
+   */
+  private filterUndefinedValues<T extends Record<string, any>>(
+    data: T
+  ): Partial<T> {
+    const filtered: Partial<T> = {};
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) {
+        filtered[key as keyof T] = value;
+      }
+    });
+
+    return filtered;
+  }
+
   /**
    * Get user's events collection reference
    */
@@ -76,7 +95,10 @@ export class FirebaseEventRepository implements IEventRepository {
         timestamp: Timestamp.now(),
       };
 
-      const docRef = await addDoc(eventsRef, eventData);
+      // Filter out undefined values before sending to Firebase
+      const filteredEventData = this.filterUndefinedValues(eventData);
+
+      const docRef = await addDoc(eventsRef, filteredEventData);
       return { success: true, data: docRef.id };
     } catch (error) {
       const repoError = this.handleFirebaseError(error as FirestoreError);
@@ -120,7 +142,7 @@ export class FirebaseEventRepository implements IEventRepository {
    */
   async getRecentEvents(
     userId: string,
-    eventLimit: number = 10
+    eventLimit: number = EVENT_CONFIG.RECENT_EVENTS_LIMIT
   ): Promise<RepositoryResult<BookEvent[]>> {
     try {
       const eventsRef = this.getEventsCollectionRef(userId);

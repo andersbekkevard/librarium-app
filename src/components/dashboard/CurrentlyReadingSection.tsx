@@ -1,7 +1,8 @@
-import { BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import BookCard from "@/components/app/BookCard";
-import { Book } from "@/lib/models";
+import { Button } from "@/components/ui/button";
+import { UI_CONFIG } from "@/lib/constants/constants";
+import { Book } from "@/lib/models/models";
+import { BookOpen } from "lucide-react";
 
 interface CurrentlyReadingSectionProps {
   books: Book[];
@@ -12,13 +13,15 @@ interface CurrentlyReadingSectionProps {
   maxBooks?: number;
 }
 
-export const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = ({
+export const CurrentlyReadingSection: React.FC<
+  CurrentlyReadingSectionProps
+> = ({
   books,
   onEdit,
   onUpdateProgress,
   onBookClick,
   onViewAll,
-  maxBooks = 4,
+  maxBooks = UI_CONFIG.DASHBOARD.CURRENTLY_READING_LIMIT,
 }) => {
   const currentlyReadingBooks = books
     .filter((book) => book.state === "in_progress")
@@ -42,23 +45,17 @@ export const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = (
             </Button>
           )}
         </div>
-        
+
         {currentlyReadingBooks.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {currentlyReadingBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onBookClick={onBookClick}
-              />
+              <BookCard key={book.id} book={book} onBookClick={onBookClick} />
             ))}
           </div>
         ) : (
           <div className="text-center py-8">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">
-              No books currently reading
-            </p>
+            <p className="text-muted-foreground">No books currently reading</p>
           </div>
         )}
       </div>
