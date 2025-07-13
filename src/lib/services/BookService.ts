@@ -208,10 +208,16 @@ export class BookService implements IBookService {
         return { success: false, error: validationError };
       }
 
+      // Add updatedAt timestamp
+      const finalUpdates = {
+        ...updates,
+        updatedAt: Timestamp.now(),
+      };
+
       const result = await this.bookRepository.updateBook(
         userId,
         bookId,
-        updates
+        finalUpdates
       );
 
       if (!result.success) {

@@ -321,15 +321,15 @@ describe("BookService", () => {
     });
 
     it("should handle book not found", async () => {
-      mockBookRepository.getBook.mockResolvedValue({
-        success: true,
-        data: null,
+      mockBookRepository.updateBook.mockResolvedValue({
+        success: false,
+        error: "Book not found",
       });
 
       const result = await bookService.updateBook(testUserId, testBookId, { title: "New Title" });
 
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("Book not found");
+      expect(result.error?.message).toContain("Book not found in repository");
     });
 
     it("should handle repository errors", async () => {
@@ -375,8 +375,11 @@ describe("BookService", () => {
         testUserId,
         testBookId,
         expect.objectContaining({
-          progress: { currentPage: 100, totalPages: 200 },
-          updatedAt: mockTimestamp,
+          progress: { 
+            currentPage: 100, 
+            totalPages: 200, 
+            lastUpdated: mockTimestamp 
+          },
         })
       );
     });
@@ -414,12 +417,15 @@ describe("BookService", () => {
       const result = await bookService.updateBookProgress(testUserId, testBookId, 50);
 
       expect(result.success).toBe(true);
-      expect(mockBookRepository.updateBook).toHaveBeenCalledWith(
+      // Should call updateBook twice: once for state, once for progress
+      expect(mockBookRepository.updateBook).toHaveBeenCalledTimes(2);
+      expect(mockBookRepository.updateBook).toHaveBeenNthCalledWith(
+        1,
         testUserId,
         testBookId,
         expect.objectContaining({
           state: "in_progress",
-          startedAt: mockTimestamp,
+          updatedAt: mockTimestamp,
         })
       );
     });
@@ -523,10 +529,6 @@ describe("BookService", () => {
     });
 
     it("should handle invalid state transitions", async () => {
-      mockBookRepository.updateBook.mockResolvedValue({
-        success: true,
-      });
-
       const result = await bookService.updateBookState(
         testUserId,
         testBookId,
@@ -534,7 +536,8 @@ describe("BookService", () => {
         "not_started"
       );
 
-      expect(result.success).toBe(true); // Manual updates allow any transition
+      expect(result.success).toBe(false); // State machine enforces valid transitions
+      expect(result.error?.message).toContain("Cannot transition from not_started to finished");
     });
   });
 
@@ -580,15 +583,15 @@ describe("BookService", () => {
     });
 
     it("should handle book not found", async () => {
-      mockBookRepository.getBook.mockResolvedValue({
-        success: true,
-        data: null,
+      mockBookRepository.updateBook.mockResolvedValue({
+        success: false,
+        error: "Book not found",
       });
 
       const result = await bookService.updateBookRating(testUserId, testBookId, 4);
 
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("Book not found");
+      expect(result.error?.message).toContain("Book not found in repository");
     });
   });
 

@@ -3,7 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Calendar, ChevronDown, ChevronUp, Hash } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Hash,
+  Tag,
+} from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -52,6 +59,13 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
               <span className="text-muted-foreground">
                 {book.progress.totalPages}
               </span>
+            </div>
+          )}
+          {book.genre && (
+            <div className="flex items-center gap-2 text-sm">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Genre:</span>
+              <span className="text-muted-foreground">{book.genre}</span>
             </div>
           )}
         </div>

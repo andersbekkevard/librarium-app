@@ -103,7 +103,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
           <div className="flex flex-wrap gap-1.5">
             <Badge
               variant="outline"
-              className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-border/40"
+              className="text-xs px-2 py-0.5 bg-muted/40 text-muted-foreground border-border/40"
             >
               {genre}
             </Badge>

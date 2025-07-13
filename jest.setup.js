@@ -1,4 +1,27 @@
 import "@testing-library/jest-dom";
+import { configure } from "@testing-library/react";
+
+// Configure testing library with shorter timeouts
+configure({
+  asyncUtilTimeout: 2000, // Reduce from default 5000ms to 2000ms
+  asyncWrapper: async (cb) => {
+    try {
+      await cb();
+    } catch (error) {
+      // Re-throw with more helpful error message for timeouts
+      if (error.message?.includes("Timed out")) {
+        throw new Error(
+          `Test timed out after 2000ms. This usually means:\n` +
+          `1. A mock is not properly set up to call callbacks immediately\n` +
+          `2. An async operation is taking too long\n` +
+          `3. A loading state is not changing as expected\n\n` +
+          `Original error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  },
+});
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY = "test-api-key";

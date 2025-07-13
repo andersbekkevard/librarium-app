@@ -9,18 +9,20 @@ import { createMockUser } from "@/lib/test-utils/firebase-mock";
 import { render, screen, waitFor } from "@testing-library/react";
 import { AuthProvider, useAuthContext } from "../AuthProvider";
 
-// Define the mocks first
-const mockSignOut = jest.fn();
-const mockOnAuthStateChanged = jest.fn();
-
 // Mock AuthService
-jest.mock("../../api/firebase", () => ({
-  auth: {
-    onAuthStateChanged: (callback: any) => mockOnAuthStateChanged(callback),
-    signOut: mockSignOut,
-    currentUser: null,
+jest.mock("../../services/AuthService", () => ({
+  authService: {
+    signInWithGoogle: jest.fn(),
+    signOut: jest.fn(),
+    onAuthStateChanged: jest.fn(),
   },
 }));
+
+// Get references to the mocked functions
+const { authService } = require("../../services/AuthService");
+const mockSignInWithGoogle = authService.signInWithGoogle as jest.Mock;
+const mockSignOut = authService.signOut as jest.Mock;
+const mockOnAuthStateChanged = authService.onAuthStateChanged as jest.Mock;
 
 // Test component to consume auth context
 const TestComponent = () => {
@@ -40,14 +42,15 @@ const TestComponent = () => {
 describe("AuthProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSignInWithGoogle.mockClear();
     mockOnAuthStateChanged.mockClear();
     mockSignOut.mockClear();
   });
 
   it("should provide initial loading state", () => {
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      // Simulate async auth check
-      setTimeout(() => callback(null), 100);
+      // Simulate async auth check - use shorter timeout
+      setTimeout(() => callback(null), 10);
       return jest.fn(); // Return unsubscribe function
     });
 
@@ -69,7 +72,7 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 100);
+      setTimeout(() => callback(mockUser), 10);
       return jest.fn();
     });
 
@@ -128,11 +131,11 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 100);
+      setTimeout(() => callback(mockUser), 10);
       return jest.fn();
     });
 
-    mockSignOut.mockResolvedValue(undefined);
+    mockSignOut.mockResolvedValue({ success: true });
 
     render(
       <AuthProvider>
@@ -157,11 +160,11 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 100);
+      setTimeout(() => callback(mockUser), 10);
       return jest.fn();
     });
 
-    mockSignOut.mockRejectedValue(new Error("Sign out failed"));
+    mockSignOut.mockResolvedValue({ success: false, error: { message: "Sign out failed" } });
 
     render(
       <AuthProvider>
