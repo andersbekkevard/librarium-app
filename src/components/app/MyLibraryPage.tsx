@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 
@@ -17,26 +17,29 @@ type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
 interface MyLibraryPageProps {
   searchQuery?: string;
   onBookClick?: (bookId: string) => void;
+  filterStatus: string;
+  filterOwnership: string;
+  sortBy: string;
+  sortDirection: SortDirection;
+  viewMode: ViewMode;
 }
 
 export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   searchQuery = "",
   onBookClick,
+  filterStatus,
+  filterOwnership,
+  sortBy,
+  sortDirection,
+  viewMode,
 }) => {
   const { books, loading, error, refreshBooks, filterAndSortBooks } =
     useBooksContext();
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [sortBy, setSortBy] = useState<SortOption>("title");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
-  const [filterOwnership, setFilterOwnership] = useState<string>("all");
 
-  const clearFilters = () => {
-    setFilterStatus("all");
-    setFilterOwnership("all");
-    setSortBy("title");
-    setSortDirection("asc");
-  };
+  const activeFiltersCount = [
+    filterStatus !== "all",
+    filterOwnership !== "all",
+  ].filter(Boolean).length;
 
   // Filter and sort books using the service function
   const filteredAndSortedBooks = useMemo(() => {
@@ -56,43 +59,16 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     filterAndSortBooks,
   ]);
 
-  const activeFiltersCount = [
-    filterStatus !== "all",
-    filterOwnership !== "all",
-  ].filter(Boolean).length;
-
-  /**
-   * Toggles sort direction or changes sort field
-   *
-   * If clicking the same sort option, toggles between asc/desc.
-   * If clicking a different option, switches to that field with asc direction.
-   * Used by sort buttons in the UI.
-   *
-   * @param option - Sort field to toggle/switch to
-   */
-  const toggleSort = (option: SortOption) => {
-    if (sortBy === option) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(option);
-      setSortDirection("asc");
-    }
-  };
 
   return (
     <div className="p-6 space-y-6">
       <LibraryControls
         searchQuery={searchQuery}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        filterStatus={filterStatus}
-        onFilterStatusChange={setFilterStatus}
+        filterStatus={filterStatus as FilterStatus}
         filterOwnership={filterOwnership}
-        onFilterOwnershipChange={setFilterOwnership}
-        sortBy={sortBy}
+        sortBy={sortBy as SortOption}
         sortDirection={sortDirection}
-        onSortChange={toggleSort}
-        onClearFilters={clearFilters}
         filteredCount={filteredAndSortedBooks.length}
         totalCount={books.length}
       />
@@ -104,7 +80,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
         loading={loading}
         error={error?.message ?? null}
         onRefresh={refreshBooks}
-        onClearFilters={clearFilters}
+        onClearFilters={() => { /* Handled by URL routing */ }}
         activeFiltersCount={activeFiltersCount}
       />
     </div>

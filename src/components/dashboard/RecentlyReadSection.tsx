@@ -1,6 +1,7 @@
 import BookCard from "@/components/app/BookCard";
 import { Button } from "@/components/ui/button";
 import { UI_CONFIG } from "@/lib/constants/constants";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { BookOpen } from "lucide-react";
 
@@ -36,7 +37,7 @@ export const RecentlyReadSection: React.FC<RecentlyReadSectionProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-brand-primary hover:text-brand-primary-hover"
+              className={`${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text}`}
               onClick={onViewAll}
             >
               View All

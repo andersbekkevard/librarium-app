@@ -1,6 +1,7 @@
 import { StandardError, createSystemError } from "@/lib/errors/error-handling";
 import { Book } from "@/lib/models/models";
 import { ActivityItem, eventService } from "@/lib/services/EventService";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import CurrentlyReadingSection from "./CurrentlyReadingSection";
 import DashboardHeader from "./DashboardHeader";
@@ -33,6 +34,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onUpdateProgress,
   onBookClick,
 }) => {
+  const router = useRouter();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [activitiesError, setActivitiesError] = useState<StandardError | null>(
@@ -73,11 +75,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   }, [userId]);
 
   const handleViewAllCurrently = () => {
-    // TODO: Navigate to library with "currently reading" filter
+    router.push('/library?filter=in_progress');
   };
 
   const handleViewAllRecent = () => {
-    // TODO: Navigate to library with "finished" filter
+    router.push('/library?filter=finished');
   };
 
   return (

@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import MyLibraryPage from "@/components/app/MyLibraryPage";
 import Sidebar from "@/components/app/Sidebar";
 
-export default function LibraryPage() {
-  const [searchQuery] = useState("");
+function LibraryContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  
+  const searchQuery = searchParams.get("search") || "";
+  const filterStatus = searchParams.get("filter") || "all";
+  const filterOwnership = searchParams.get("ownership") || "all";
+  const sortBy = searchParams.get("sort") || "title";
+  const sortDirection = searchParams.get("direction") || "asc";
+  const viewMode = searchParams.get("view") || "grid";
 
   const handleBookClick = (bookId: string) => {
     router.push(`/books/${bookId}`);
@@ -24,8 +32,21 @@ export default function LibraryPage() {
         <MyLibraryPage
           searchQuery={searchQuery}
           onBookClick={handleBookClick}
+          filterStatus={filterStatus}
+          filterOwnership={filterOwnership}
+          sortBy={sortBy}
+          sortDirection={sortDirection as "asc" | "desc"}
+          viewMode={viewMode as "grid" | "list"}
         />
       </div>
     </div>
+  );
+}
+
+export default function LibraryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background">Loading...</div>}>
+      <LibraryContent />
+    </Suspense>
   );
 }
