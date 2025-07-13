@@ -19,7 +19,7 @@ jest.mock("../../services/AuthService", () => ({
 }));
 
 // Get references to the mocked functions
-const { authService } = require("../../services/AuthService");
+import { authService } from "../../services/AuthService";
 const mockSignInWithGoogle = authService.signInWithGoogle as jest.Mock;
 const mockSignOut = authService.signOut as jest.Mock;
 const mockOnAuthStateChanged = authService.onAuthStateChanged as jest.Mock;

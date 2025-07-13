@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { GenreBadge } from "@/components/ui/genre-badge";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { calculateBookProgress } from "@/lib/books/book-utils";
@@ -76,6 +77,10 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   Wishlist
                 </Badge>
               )}
+            </div>
+
+            <div>
+              {book.genre && <GenreBadge genre={book.genre} />}
             </div>
 
             <div className="flex items-center justify-center">

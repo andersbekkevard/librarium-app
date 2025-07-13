@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { GenreBadge } from "@/components/ui/genre-badge";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
@@ -101,12 +102,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
 
           {/* Genre and Status Badges */}
           <div className="flex flex-wrap gap-1.5">
-            <Badge
-              variant="outline"
-              className="text-xs px-2 py-0.5 bg-muted/40 text-muted-foreground border-border/40"
-            >
-              {genre}
-            </Badge>
+            <GenreBadge genre={genre} />
             <ReadingStateBadge state={book.state} />
           </div>
 

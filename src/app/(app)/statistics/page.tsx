@@ -70,19 +70,20 @@ export default function StatisticsPage() {
   const genreData = useMemo(() => {
     if (!books.length) return [];
 
+    // Brand-inspired color palette with better contrast - alternating between light and dark
     const genreColors = [
-      "hsl(var(--brand-primary))",
-      "hsl(var(--brand-accent))",
-      "hsl(var(--status-success))",
-      "hsl(var(--status-warning))",
-      "hsl(var(--status-info))",
-      "hsl(var(--status-error))",
-      "#8b5cf6", // Purple
-      "#f59e0b", // Amber
-      "#10b981", // Emerald
-      "#ef4444", // Red
-      "#06b6d4", // Cyan
-      "#84cc16"  // Lime
+      "oklch(0.55 0.25 240)",    // Brand primary - vibrant blue (medium)
+      "oklch(0.35 0.12 225)",    // Very dark blue-grey (dark)
+      "oklch(0.75 0.18 250)",    // Light purple-blue (light)
+      "oklch(0.45 0.15 230)",    // Deep blue (medium-dark)
+      "oklch(0.8 0.15 245)",     // Very light blue (very light)
+      "oklch(0.4 0.05 220)",     // Brand secondary - dark blue-grey (dark)
+      "oklch(0.7 0.2 240)",      // Brand accent - light blue (light)
+      "oklch(0.3 0.08 220)",     // Almost black blue-grey (very dark)
+      "oklch(0.85 0.1 240)",     // Pale blue (very light)
+      "oklch(0.5 0.18 235)",     // Darker medium blue (medium)
+      "oklch(0.6 0.08 220)",     // Medium blue-grey (medium-dark)
+      "oklch(0.65 0.22 240)"     // Medium blue (medium-light)
     ];
 
     const genreCounts = books.reduce((acc, book) => {
@@ -96,7 +97,7 @@ export default function StatisticsPage() {
         name,
         value,
         percentage: Math.round((value / books.length) * 100),
-        fill: genreColors[index % genreColors.length]
+        fill: name === 'Unknown' ? "oklch(0.85 0.01 240)" : genreColors[index % genreColors.length] // Light grey for Unknown
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8); // Show top 8 genres for pie chart

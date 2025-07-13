@@ -1,3 +1,5 @@
+// TODO Fix Skipped Tests, either remove them or fix class
+
 /**
  * Tests for BooksProvider
  *
@@ -5,8 +7,9 @@
  * including state management, CRUD operations, and real-time updates.
  */
 
+import { StandardError } from "@/lib/errors/error-handling";
 import { createMockBook } from "@/lib/test-utils/firebase-mock";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { BooksProvider, useBooksContext } from "../BooksProvider";
 
 // Mock BookService
@@ -26,7 +29,7 @@ jest.mock("../../services/BookService", () => ({
 }));
 
 // Get references to the mocked functions
-const { bookService } = require("../../services/BookService");
+import { bookService } from "../../services/BookService";
 const mockBookService = bookService as jest.Mocked<typeof bookService>;
 
 // Mock AuthProvider
@@ -73,6 +76,10 @@ const TestComponent = () => {
             author: "New Author",
             state: "not_started",
             isOwned: true,
+            progress: {
+              currentPage: 0,
+              totalPages: 0,
+            },
           })
         }
       >
@@ -96,13 +103,15 @@ const TestComponent = () => {
 describe("BooksProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Set up default mock for subscribeToUserBooks with stable implementation
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      // Call callback synchronously to avoid act() issues
-      callback([]);
-      return jest.fn(); // Return unsubscribe function
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        // Call callback synchronously to avoid act() issues
+        callback([]);
+        return jest.fn(); // Return unsubscribe function
+      }
+    );
   });
 
   it.skip("should provide initial loading state", () => {
@@ -129,10 +138,12 @@ describe("BooksProvider", () => {
     ];
 
     // Mock the subscription to call with mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     render(
       <BooksProvider>
@@ -175,10 +186,12 @@ describe("BooksProvider", () => {
     ];
 
     // Mock the subscription to call with initial mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     mockBookService.addBook.mockResolvedValue({
       success: true,
@@ -214,10 +227,12 @@ describe("BooksProvider", () => {
     ];
 
     // Mock the subscription to call with initial mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     mockBookService.updateBook.mockResolvedValue({
       success: true,
@@ -251,10 +266,12 @@ describe("BooksProvider", () => {
     ];
 
     // Mock the subscription to call with initial mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     mockBookService.deleteBook.mockResolvedValue({
       success: true,
@@ -285,14 +302,16 @@ describe("BooksProvider", () => {
     const mockBooks = [createMockBook({ id: "book-1", title: "Book One" })];
 
     // Mock the subscription to call with initial mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     mockBookService.updateBook.mockResolvedValue({
       success: false,
-      error: "Update failed",
+      error: { message: "Update failed" } as StandardError,
     });
 
     render(
@@ -306,7 +325,7 @@ describe("BooksProvider", () => {
     });
 
     const updateButton = screen.getByTestId("update-book");
-    
+
     await act(async () => {
       updateButton.click();
     });
@@ -320,10 +339,12 @@ describe("BooksProvider", () => {
     const mockBooks = [createMockBook({ id: "book-1", title: "Book One" })];
 
     // Mock the subscription to call with initial mock data synchronously
-    mockBookService.subscribeToUserBooks.mockImplementation((userId, callback) => {
-      callback(mockBooks);
-      return jest.fn();
-    });
+    mockBookService.subscribeToUserBooks.mockImplementation(
+      (userId, callback) => {
+        callback(mockBooks);
+        return jest.fn();
+      }
+    );
 
     mockBookService.updateBook.mockResolvedValue({ success: true });
 
