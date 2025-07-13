@@ -210,6 +210,22 @@ export const validateRating = (rating: number): boolean => {
 };
 
 /**
+ * ActivityItem represents a transformed view of BookEvent for dashboard display.
+ *
+ * This interface provides a simplified, UI-friendly representation of reading
+ * activities that can be displayed in the dashboard and activity history.
+ */
+export interface ActivityItem {
+  id: string; // Event ID
+  type: "finished" | "started" | "rated" | "added" | "progress";
+  bookTitle: string; // Book title for display
+  bookId: string; // Reference to the book
+  details?: string; // Additional details (e.g., "5 stars", "20 pages")
+  timestamp: Date; // When the activity occurred
+  colorClass: string; // Tailwind class for visual indicator
+}
+
+/**
  * Constants for the reading state machine
  */
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookEvent } from "@/lib/models/models";
+import { BookEvent, ActivityItem } from "@/lib/models/models";
 import { eventService } from "@/lib/services/EventService";
 import React, {
   ReactNode,
@@ -13,9 +13,12 @@ import { useAuthContext } from "./AuthProvider";
 
 interface EventsContextType {
   events: BookEvent[];
+  activities: ActivityItem[];
   loading: boolean;
+  activitiesLoading: boolean;
   error: string | null;
   refreshEvents: () => Promise<void>;
+  refreshActivities: () => Promise<void>;
   getEventsByType: (type: BookEvent["type"]) => BookEvent[];
   getEventsByDateRange: (startDate: Date, endDate: Date) => BookEvent[];
   getEventsByBookId: (bookId: string) => BookEvent[];
@@ -29,7 +32,9 @@ interface EventsProviderProps {
 
 export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
   const [events, setEvents] = useState<BookEvent[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuthContext();
 
@@ -57,6 +62,30 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshActivities = async () => {
+    if (!user?.uid) {
+      setActivities([]);
+      setActivitiesLoading(false);
+      return;
+    }
+
+    setActivitiesLoading(true);
+    setError(null);
+
+    try {
+      const result = await eventService.getRecentActivityItems(user.uid, 6); // Get recent activities for dashboard
+      if (result.success && result.data) {
+        setActivities(result.data);
+      } else {
+        setError(typeof result.error === 'string' ? result.error : "Failed to load activities");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
   const getEventsByType = (type: BookEvent["type"]) => {
     return events.filter((event) => event.type === type);
   };
@@ -75,17 +104,23 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
   useEffect(() => {
     if (user?.uid) {
       refreshEvents();
+      refreshActivities();
     } else {
       setEvents([]);
+      setActivities([]);
       setLoading(false);
+      setActivitiesLoading(false);
     }
   }, [user?.uid]);
 
   const value: EventsContextType = {
     events,
+    activities,
     loading,
+    activitiesLoading,
     error,
     refreshEvents,
+    refreshActivities,
     getEventsByType,
     getEventsByDateRange,
     getEventsByBookId,

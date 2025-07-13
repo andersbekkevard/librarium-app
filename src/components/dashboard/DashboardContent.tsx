@@ -1,8 +1,7 @@
-import { StandardError, createSystemError } from "@/lib/errors/error-handling";
 import { Book } from "@/lib/models/models";
-import { ActivityItem, eventService } from "@/lib/services/EventService";
+import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { createSystemError } from "@/lib/errors/error-handling";
 import CurrentlyReadingSection from "./CurrentlyReadingSection";
 import DashboardHeader from "./DashboardHeader";
 import RecentActivitySection from "./RecentActivitySection";
@@ -35,44 +34,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onBookClick,
 }) => {
   const router = useRouter();
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [activitiesLoading, setActivitiesLoading] = useState(true);
-  const [activitiesError, setActivitiesError] = useState<StandardError | null>(
-    null
-  );
-
-  // Fetch recent activities
-  useEffect(() => {
-    const fetchRecentActivity = async () => {
-      if (!userId) return;
-
-      setActivitiesLoading(true);
-      setActivitiesError(null);
-
-      try {
-        const result = await eventService.getRecentActivityItems(userId, 6);
-
-        if (result.success && result.data) {
-          setActivities(result.data);
-        } else {
-          const standardError =
-            result.error || createSystemError("Failed to load recent activity");
-          setActivitiesError(standardError);
-        }
-      } catch (error) {
-        const standardError = createSystemError(
-          "Failed to load recent activity",
-          error as Error
-        );
-        setActivitiesError(standardError);
-        console.error("Error fetching recent activity:", error);
-      } finally {
-        setActivitiesLoading(false);
-      }
-    };
-
-    fetchRecentActivity();
-  }, [userId]);
+  const { activities, activitiesLoading, error: activitiesError } = useEventsContext();
 
   const handleViewAllCurrently = () => {
     router.push("/library?filter=in_progress");
@@ -100,7 +62,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         <RecentActivitySection
           activities={activities}
           loading={activitiesLoading}
-          error={activitiesError}
+          error={activitiesError ? createSystemError(activitiesError) : null}
         />
       </div>
 

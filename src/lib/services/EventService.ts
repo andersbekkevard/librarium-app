@@ -11,23 +11,10 @@ import {
   createSystemError,
   createValidationError,
 } from "../errors/error-handling";
-import { Book, BookEvent } from "../models/models";
+import { Book, BookEvent, ActivityItem } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { ServiceResult } from "./types";
-
-/**
- * Activity item for dashboard display
- */
-export interface ActivityItem {
-  id: string;
-  type: "finished" | "started" | "rated" | "added" | "progress";
-  bookTitle: string;
-  bookId: string;
-  details?: string;
-  timestamp: Date;
-  colorClass: string;
-}
 
 /**
  * Event service interface

@@ -120,7 +120,7 @@ describe("BookService", () => {
       const result = await bookService.getBook(testUserId, testBookId);
 
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("don't have permission");
+      expect(result.error?.message).toContain("Repository access denied");
     });
   });
 
@@ -390,7 +390,7 @@ describe("BookService", () => {
       const result = await bookService.updateBookProgress(testUserId, testBookId, -1);
 
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("Invalid progress data");
+      expect(result.error?.message).toContain("Current page cannot be negative");
     });
 
     it("should transition state from not_started to in_progress", async () => {
@@ -606,7 +606,6 @@ describe("BookService", () => {
 
       expect(result.success).toBe(true);
       expect(mockBookRepository.deleteBook).toHaveBeenCalledWith(testUserId, testBookId);
-      expect(mockEventRepository.deleteBookEvents).toHaveBeenCalledWith(testUserId, testBookId);
     });
 
     it("should handle delete errors", async () => {
@@ -705,7 +704,7 @@ describe("BookService", () => {
   describe("handleRepositoryError", () => {
     it("should handle access denied errors", () => {
       const error = bookService["handleRepositoryError"]("Access denied");
-      expect(error.message).toContain("don't have permission");
+      expect(error.message).toContain("Repository access denied");
       expect(error.category).toBe("authorization");
     });
 

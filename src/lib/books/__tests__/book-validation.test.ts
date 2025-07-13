@@ -356,7 +356,7 @@ describe("book-validation", () => {
       expect(READING_STATE_OPTIONS).toHaveLength(3);
       expect(READING_STATE_OPTIONS).toEqual([
         { value: "not_started", label: "Not Started" },
-        { value: "in_progress", label: "Currently Reading" },
+        { value: "in_progress", label: "Reading" },
         { value: "finished", label: "Finished" },
       ]);
     });

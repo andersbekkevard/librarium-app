@@ -1,7 +1,7 @@
 import { ErrorAlert } from "@/components/ui/error-display";
 import { TIMING_CONFIG } from "@/lib/constants/constants";
 import { StandardError } from "@/lib/errors/error-handling";
-import { ActivityItem } from "@/lib/services/EventService";
+import { ActivityItem } from "@/lib/models/models";
 
 interface RecentActivitySectionProps {
   activities?: ActivityItem[];

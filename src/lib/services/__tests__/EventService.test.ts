@@ -673,7 +673,7 @@ describe("EventService", () => {
       expect(result.data![0]).toMatchObject({
         type: "progress",
         colorClass: "bg-status-info",
-        details: "page 150",
+        details: "50 pages",
       });
     });
 

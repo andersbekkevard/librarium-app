@@ -7,6 +7,7 @@ describe("colors", () => {
         bg: "bg-brand-primary",
         bgHover: "hover:bg-brand-primary-hover",
         bgLight: "bg-brand-primary/10",
+        bgLightDark: "dark:bg-brand-primary/20",
         bgBlur: "bg-brand-primary/50",
         text: "text-brand-primary",
         border: "border-brand-primary",
@@ -44,25 +45,25 @@ describe("colors", () => {
   describe("READING_STATE_COLORS", () => {
     it("should map not_started to secondary brand color", () => {
       expect(colors.READING_STATE_COLORS.not_started).toEqual({
-        bg: "bg-secondary",
-        text: "text-secondary-foreground",
-        border: "border-secondary",
+        bg: "bg-[var(--secondary)]",
+        text: "text-[var(--secondary-foreground)]",
+        border: "border-[var(--secondary)]",
       });
     });
 
     it("should map in_progress to primary brand color with light background", () => {
       expect(colors.READING_STATE_COLORS.in_progress).toEqual({
-        bg: "bg-brand-primary/10",
-        text: "text-brand-primary",
-        border: "border-brand-primary/20",
+        bg: "bg-[var(--reading-in-progress-bg)]",
+        text: "text-[var(--reading-in-progress-text)]",
+        border: "border-[var(--reading-in-progress-border)]",
       });
     });
 
     it("should map finished to muted color", () => {
       expect(colors.READING_STATE_COLORS.finished).toEqual({
-        bg: "bg-muted",
-        text: "text-muted-foreground",
-        border: "border-muted",
+        bg: "bg-[var(--reading-finished-bg)]",
+        text: "text-[var(--reading-finished-text)]",
+        border: "border-[var(--reading-finished-border)]",
       });
     });
   });

@@ -74,7 +74,7 @@ jest.mock("firebase/app", () => mockFirebaseApp);
 jest.mock("firebase/storage", () => mockStorage);
 
 // Mock the firebase.ts config file
-jest.mock("../../api/firebase", () => ({
+jest.mock("@/lib/api/firebase", () => ({
   db: mockFirestore, // Use the mocked firestore
   auth: mockAuth, // Use the mocked auth
   storage: mockStorage, // Use the mocked storage
