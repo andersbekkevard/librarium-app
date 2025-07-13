@@ -7,6 +7,7 @@ export const BRAND_COLORS = {
     bg: "bg-brand-primary",
     bgHover: "hover:bg-brand-primary-hover",
     bgLight: "bg-brand-primary/10",
+    bgLightDark: "dark:bg-brand-primary/20",
     bgBlur: "bg-brand-primary/50",
     text: "text-brand-primary",
     border: "border-brand-primary",

@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 interface SearchDropdownProps {
   placeholder?: string;
   className?: string;
+  closeOnClickOutside?: boolean;
 }
 
 // Search state enum
@@ -35,6 +36,7 @@ interface SearchData {
 export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   placeholder = "Search books, authors, or genres...",
   className,
+  closeOnClickOutside = true, // NEW
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +58,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   const currentSearchRef = useRef<string>("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null); // NEW
 
   // Local search function
   const performLocalSearch = useCallback(
@@ -232,6 +235,29 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     };
   }, []);
 
+  // Outside click handler
+  useEffect(() => {
+    if (!isOpen || !closeOnClickOutside) return;
+    const handleClick = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+        setSearchQuery("");
+        setSearchData({ state: "idle", query: "", results: [] });
+        currentSearchRef.current = "";
+        // Cancel any in-flight search
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+        if (searchTimeoutRef.current) {
+          clearTimeout(searchTimeoutRef.current);
+        }
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isOpen, closeOnClickOutside]);
+
   const handleBookSelect = useCallback(
     (book: Book) => {
       router.push(`/books/${book.id}`);
@@ -274,7 +300,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   }, []);
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div ref={rootRef} className={cn("relative w-full", className)}>
       <Command
         onKeyDown={handleKeyDown}
         className="rounded-lg border border-border bg-popover shadow-md"

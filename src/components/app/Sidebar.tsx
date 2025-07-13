@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import {
   Plus,
   Home,
@@ -45,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4 border-b border-border">
         <Button
           onClick={handleAddBook}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground border-0"
+          className={`w-full ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-primary-foreground border-0`}
           size="sm"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -66,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   href={item.href}
                   className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? "bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary dark:text-brand-primary border-l-4 border-brand-primary"
+                      ? `${BRAND_COLORS.primary.bgLight} ${BRAND_COLORS.primary.bgLightDark} ${BRAND_COLORS.primary.text} ${BRAND_COLORS.primary.border} border-l-4`
                       : "text-foreground hover:bg-muted"
                   }`}
                 >
