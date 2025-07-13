@@ -16,8 +16,9 @@ import {
   createSystemError,
   createValidationError,
 } from "../errors/error-handling";
-import { Book, UserProfile } from "../models/models";
+import { Book, BookEvent, UserProfile } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
+import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
 import { IUserRepository } from "../repositories/types";
 import { IUserService, ServiceResult, UserStats } from "./types";
@@ -25,7 +26,8 @@ import { IUserService, ServiceResult, UserStats } from "./types";
 export class UserService implements IUserService {
   constructor(
     private userRepository: IUserRepository = firebaseUserRepository,
-    private bookRepository = firebaseBookRepository
+    private bookRepository = firebaseBookRepository,
+    private eventRepository = firebaseEventRepository
   ) {}
 
   /**
@@ -360,13 +362,23 @@ export class UserService implements IUserService {
   ): () => void {
     let unsubscribeBooks: (() => void) | null = null;
 
-    // Set up books subscription to recalculate stats when books change
+    // Set up books subscription and fetch events when books change
     unsubscribeBooks = this.bookRepository.subscribeToUserBooks(
       userId,
       async (books) => {
-        // Calculate stats from current books
-        const stats = await this.calculateStatsFromBooks(books);
-        callback(stats);
+        try {
+          // Fetch latest events when books change
+          const eventsResult = await this.eventRepository.getRecentEvents(userId, 1000);
+          const events = eventsResult.success ? eventsResult.data || [] : [];
+          
+          // Calculate stats from current books and events
+          const stats = await this.calculateStatsFromBooksAndEvents(books, events);
+          callback(stats);
+        } catch {
+          // Fallback to books-only calculation if events fetch fails
+          const stats = await this.calculateStatsFromBooks(books);
+          callback(stats);
+        }
       }
     );
 
@@ -379,7 +391,67 @@ export class UserService implements IUserService {
   }
 
   /**
-   * Calculate user statistics from books array
+   * Calculate user statistics from books and events
+   */
+  private async calculateStatsFromBooksAndEvents(books: Book[], events: BookEvent[]): Promise<UserStats> {
+    const finishedBooks = books.filter((book) => book.state === "finished");
+    const inProgressBooks = books.filter((book) => book.state === "in_progress");
+
+    // Calculate total pages read from progress events (more accurate)
+    const progressEvents = events.filter(event => event.type === 'progress_update');
+    const totalPagesRead = progressEvents.reduce((sum, event) => {
+      const pagesRead = (event.data.newPage || 0) - (event.data.previousPage || 0);
+      return sum + Math.max(0, pagesRead);
+    }, 0);
+
+    // Calculate ratings
+    const ratingsSum = finishedBooks.reduce((sum, book) => {
+      return sum + (book.rating || 0);
+    }, 0);
+    const averageRating =
+      finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
+
+    const readingStreak = this.calculateReadingStreak(finishedBooks);
+
+    // Calculate books read this month and year
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+
+    const booksReadThisMonth = finishedBooks.filter((book) => {
+      if (!book.finishedAt) return false;
+      const finishedDate = book.finishedAt.toDate();
+      return (
+        finishedDate.getMonth() === thisMonth &&
+        finishedDate.getFullYear() === thisYear
+      );
+    }).length;
+
+    const booksReadThisYear = finishedBooks.filter((book) => {
+      if (!book.finishedAt) return false;
+      const finishedDate = book.finishedAt.toDate();
+      return finishedDate.getFullYear() === thisYear;
+    }).length;
+
+    const favoriteGenres = this.getFavoriteGenres(books);
+
+    const stats: UserStats = {
+      totalBooksRead: finishedBooks.length,
+      currentlyReading: inProgressBooks.length,
+      booksInLibrary: books.length,
+      totalPagesRead,
+      averageRating,
+      readingStreak,
+      booksReadThisMonth,
+      booksReadThisYear,
+      favoriteGenres,
+    };
+
+    return stats;
+  }
+
+  /**
+   * Calculate user statistics from books array (legacy method)
    */
   private async calculateStatsFromBooks(books: Book[]): Promise<UserStats> {
     const finishedBooks = books.filter((book) => book.state === "finished");
