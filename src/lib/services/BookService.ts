@@ -683,6 +683,10 @@ export class BookService implements IBookService {
           aValue = a.author.toLowerCase();
           bValue = b.author.toLowerCase();
           break;
+        case "pages":
+          aValue = a.progress?.totalPages || 0;
+          bValue = b.progress?.totalPages || 0;
+          break;
         case "dateAdded":
           aValue = a.addedAt.seconds;
           bValue = b.addedAt.seconds;
