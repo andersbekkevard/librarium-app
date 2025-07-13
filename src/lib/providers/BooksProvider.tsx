@@ -72,6 +72,11 @@ interface BooksContextType {
   refreshBooks: () => Promise<ProviderResult<void>>;
   /** Function to get a single book by ID */
   getBook: (bookId: string) => Promise<ProviderResult<Book | null>>;
+  /** Function to search books in user's library */
+  searchBooks: (
+    searchQuery: string,
+    maxResults?: number
+  ) => Promise<ProviderResult<Book[]>>;
   /** Function to filter and sort books */
   filterAndSortBooks: (
     searchQuery: string,
@@ -625,6 +630,47 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   };
 
   /**
+   * Search books in user's library
+   */
+  const searchBooks = async (
+    searchQuery: string,
+    maxResults?: number
+  ): Promise<ProviderResult<Book[]>> => {
+    if (!user) {
+      const standardError = createAuthError("User not authenticated");
+      setError(standardError);
+      return createProviderError(standardError);
+    }
+
+    try {
+      setError(null);
+
+      const result = await bookService.searchBooks(
+        user.uid,
+        searchQuery,
+        maxResults
+      );
+
+      if (result.success) {
+        return createProviderSuccess(result.data || []);
+      } else {
+        const standardError = createSystemError(
+          result.error?.message || "Failed to search books"
+        );
+        setError(standardError);
+        return createProviderError(standardError);
+      }
+    } catch (error) {
+      const standardError = createSystemError(
+        "An unexpected error occurred while searching books",
+        error as Error
+      );
+      setError(standardError);
+      return createProviderError(standardError);
+    }
+  };
+
+  /**
    * Filter and sort books
    */
   const filterAndSortBooks = (
@@ -724,6 +770,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     deleteBook,
     refreshBooks,
     getBook,
+    searchBooks,
     filterAndSortBooks,
     calculateBookProgress: calculateBookProgressWrapper,
     clearError,

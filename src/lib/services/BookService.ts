@@ -552,6 +552,78 @@ export class BookService implements IBookService {
   }
 
   /**
+   * Search books in user's library
+   */
+  async searchBooks(
+    userId: string,
+    searchQuery: string,
+    maxResults: number = 10
+  ): Promise<ServiceResult<Book[]>> {
+    try {
+      if (!searchQuery.trim()) {
+        return { success: true, data: [] };
+      }
+
+      // Get user's books
+      const booksResult = await this.getUserBooks(userId);
+      if (!booksResult.success) {
+        return { success: false, error: booksResult.error };
+      }
+
+      const books = booksResult.data || [];
+      const query = searchQuery.toLowerCase();
+
+      // Filter books that match the search query
+      const filteredBooks = books.filter((book) => {
+        return (
+          book.title.toLowerCase().includes(query) ||
+          book.author.toLowerCase().includes(query) ||
+          book.genre?.toLowerCase().includes(query) ||
+          book.description?.toLowerCase().includes(query)
+        );
+      });
+
+      // Sort by relevance (exact matches first, then partial matches)
+      const sortedBooks = filteredBooks.sort((a, b) => {
+        const aTitle = a.title.toLowerCase();
+        const bTitle = b.title.toLowerCase();
+        const aAuthor = a.author.toLowerCase();
+        const bAuthor = b.author.toLowerCase();
+
+        // Exact title matches first
+        if (aTitle === query && bTitle !== query) return -1;
+        if (bTitle === query && aTitle !== query) return 1;
+
+        // Exact author matches next
+        if (aAuthor === query && bAuthor !== query) return -1;
+        if (bAuthor === query && aAuthor !== query) return 1;
+
+        // Title starts with query
+        if (aTitle.startsWith(query) && !bTitle.startsWith(query)) return -1;
+        if (bTitle.startsWith(query) && !aTitle.startsWith(query)) return 1;
+
+        // Author starts with query
+        if (aAuthor.startsWith(query) && !bAuthor.startsWith(query)) return -1;
+        if (bAuthor.startsWith(query) && !aAuthor.startsWith(query)) return 1;
+
+        // Default to alphabetical by title
+        return aTitle.localeCompare(bTitle);
+      });
+
+      // Limit results
+      const limitedBooks = sortedBooks.slice(0, maxResults);
+
+      return { success: true, data: limitedBooks };
+    } catch (error) {
+      const standardError = createSystemError(
+        "Failed to search books",
+        error as Error
+      );
+      return { success: false, error: standardError };
+    }
+  }
+
+  /**
    * Filter and sort books
    */
   filterAndSortBooks(

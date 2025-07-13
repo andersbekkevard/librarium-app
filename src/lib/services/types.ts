@@ -200,6 +200,15 @@ export interface IBookService {
   ): Promise<ServiceResult<string[]>>;
 
   /**
+   * Search books in user's library
+   */
+  searchBooks(
+    userId: string,
+    searchQuery: string,
+    maxResults?: number
+  ): Promise<ServiceResult<Book[]>>;
+
+  /**
    * Filter and sort books
    */
   filterAndSortBooks(

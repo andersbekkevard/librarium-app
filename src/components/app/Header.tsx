@@ -5,25 +5,17 @@ import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { Bell, Book, Loader2, Search } from "lucide-react";
-import { useState } from "react";
+import { Bell, Book, Loader2 } from "lucide-react";
+import SearchDropdown from "./SearchDropdown";
 
 interface HeaderProps {
-  onSearch?: (query: string) => void;
   notificationCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onSearch,
   notificationCount = UI_CONFIG.DEFAULT_NOTIFICATION_COUNT,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
   const { loading } = useAuthContext();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch?.(searchQuery);
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-background border-b border-border px-6 py-4 z-50">
@@ -38,16 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Search Bar */}
         <div className="flex-1 max-w-2xl mx-8 h-full flex items-center">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search books, authors, or genres..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-foreground placeholder-muted-foreground"
-            />
-          </form>
+          <SearchDropdown placeholder="Search books, authors, or genres..." />
         </div>
 
         {/* Right Side - Theme Toggle & User Profile */}

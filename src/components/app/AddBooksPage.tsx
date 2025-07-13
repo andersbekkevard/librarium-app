@@ -1,8 +1,9 @@
 "use client";
 
 import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 
@@ -29,7 +30,9 @@ import { ErrorAlert } from "@/components/ui/error-display";
 export const AddBooksPage = () => {
   const { user } = useAuthContext();
   const { addBook } = useBooksContext();
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialSearchQuery = searchParams.get("q") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const { searchResults, isSearching, error, search, clearError } =
     useBookSearch();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
@@ -37,6 +40,13 @@ export const AddBooksPage = () => {
     Array<{ id: string; title: string; author: string }>
   >([]);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Initialize search if query parameter is provided
+  useEffect(() => {
+    if (initialSearchQuery.trim()) {
+      search(initialSearchQuery);
+    }
+  }, [initialSearchQuery, search]);
 
   /**
    * Adds a book from Google Books API to user's library
