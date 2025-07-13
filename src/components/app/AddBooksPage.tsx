@@ -3,7 +3,7 @@
 import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 
@@ -28,7 +28,7 @@ import { SearchResults } from "./books/SearchResults";
 // Error handling components
 import { ErrorAlert } from "@/components/ui/error-display";
 
-export const AddBooksPage = () => {
+const AddBooksPageContent = () => {
   const { user } = useAuthContext();
   const { addBook } = useBooksContext();
   const searchParams = useSearchParams();
@@ -309,6 +309,34 @@ export const AddBooksPage = () => {
         </TabsContent>
       </Tabs>
     </div>
+  );
+};
+
+// Loading component for Suspense fallback
+const AddBooksPageLoading = () => (
+  <div className="p-6 space-y-6">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+          Add Books
+        </h1>
+        <p className="text-muted-foreground">
+          Loading search parameters...
+        </p>
+      </div>
+    </div>
+    <div className="flex items-center justify-center py-8">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    </div>
+  </div>
+);
+
+// Main component with Suspense boundary
+export const AddBooksPage = () => {
+  return (
+    <Suspense fallback={<AddBooksPageLoading />}>
+      <AddBooksPageContent />
+    </Suspense>
   );
 };
 
