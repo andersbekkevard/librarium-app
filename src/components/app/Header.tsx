@@ -3,6 +3,7 @@
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
 import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { Bell, Book, Loader2 } from "lucide-react";
@@ -22,10 +23,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center h-10">
         {/* Logo Section - Fixed width to match sidebar exactly */}
         <div className="flex items-center space-x-2 h-full w-64 px-6">
-          <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-            <Book className="h-4 w-4 text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-foreground">Librarium</h1>
+          <Link href="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
+              <Book className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground">Librarium</h1>
+          </Link>
         </div>
 
         {/* Search Bar - Starts right after sidebar */}
