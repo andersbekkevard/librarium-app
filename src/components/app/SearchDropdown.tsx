@@ -7,6 +7,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandLoading,
 } from "@/components/ui/command";
 import { BRAND_COLORS, READING_STATE_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
@@ -15,7 +16,6 @@ import { cn } from "@/lib/utils/utils";
 import { BookOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 
 interface SearchDropdownProps {
   placeholder?: string;
@@ -97,15 +97,12 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           searchCache[trimmedQuery].length
         );
 
-        // FORCED RE-RENDER: Use flushSync to ensure immediate DOM update
-        flushSync(() => {
-          setSearchData({
-            state: "completed",
-            query: trimmedQuery,
-            results: searchCache[trimmedQuery],
-          });
+        setSearchData({
+          state: "completed",
+          query: trimmedQuery,
+          results: searchCache[trimmedQuery],
         });
-        console.log("💪 Forced re-render for cached results");
+        console.log("✅ Using cached results");
         return;
       }
 
@@ -113,15 +110,13 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
-      // Start search - FORCED RE-RENDER
-      flushSync(() => {
-        setSearchData({
-          state: "searching",
-          query: trimmedQuery,
-          results: [],
-        });
+      // Start search
+      setSearchData({
+        state: "searching",
+        query: trimmedQuery,
+        results: [],
       });
-      console.log("💪 Forced re-render for searching state");
+      console.log("🔄 Starting search");
 
       currentSearchRef.current = trimmedQuery;
 
@@ -164,16 +159,13 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           console.log("🏠 Local search found:", results.length, "results");
         }
 
-        // FORCED RE-RENDER: Critical update with immediate DOM sync
-        flushSync(() => {
-          setSearchData({
-            state: "completed",
-            query: trimmedQuery,
-            results: results,
-          });
+        setSearchData({
+          state: "completed",
+          query: trimmedQuery,
+          results: results,
         });
         console.log(
-          "💪 Forced re-render for completed results:",
+          "✅ Search completed with results:",
           results.length
         );
 
@@ -203,14 +195,12 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           "results"
         );
 
-        flushSync(() => {
-          setSearchData({
-            state: "completed",
-            query: trimmedQuery,
-            results: results,
-          });
+        setSearchData({
+          state: "completed",
+          query: trimmedQuery,
+          results: results,
         });
-        console.log("💪 Forced re-render for fallback results");
+        console.log("✅ Fallback search completed");
 
         setSearchCache((prev) => ({ ...prev, [trimmedQuery]: results }));
       } finally {
@@ -247,13 +237,11 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           abortControllerRef.current.abort();
           abortControllerRef.current = null;
         }
-        // Clear search state when input is empty - FORCED RE-RENDER
-        flushSync(() => {
-          setSearchData({
-            state: "idle",
-            query: "",
-            results: [],
-          });
+        // Clear search state when input is empty
+        setSearchData({
+          state: "idle",
+          query: "",
+          results: [],
         });
         currentSearchRef.current = "";
         return;
@@ -262,15 +250,13 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       // Check cache immediately for instant results
       if (searchCache[trimmedValue]) {
         console.log("⚡ Instant cache hit for:", trimmedValue);
-        // FORCED RE-RENDER: Instant results from cache
-        flushSync(() => {
-          setSearchData({
-            state: "completed",
-            query: trimmedValue,
-            results: searchCache[trimmedValue],
-          });
+        // Instant results from cache
+        setSearchData({
+          state: "completed",
+          query: trimmedValue,
+          results: searchCache[trimmedValue],
         });
-        console.log("💪 Forced re-render for instant cache hit");
+        console.log("⚡ Instant cache hit");
         return;
       }
 
@@ -396,11 +382,14 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     isOpen
   );
 
+  // Removed dynamic key to maintain input focus during search operations
+
   return (
     <div className={cn("relative w-full", className)}>
       <Command
         onKeyDown={handleKeyDown}
         className="rounded-lg border border-border bg-popover shadow-md"
+        shouldFilter={false}
       >
         <CommandInput
           placeholder={placeholder}
@@ -411,26 +400,32 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
         {isOpen && (
           <CommandList className="absolute top-full left-0 right-0 max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50 mt-1">
-            {/* Show spinner while searching */}
+            {/* Show CMDK loading state while searching */}
             {searchData.state === "searching" && (
-              <div className="flex items-center justify-center p-6">
-                <div
-                  className={cn(
-                    "animate-spin rounded-full h-5 w-5 border-b-2",
-                    BRAND_COLORS.primary.border
-                  )}
-                ></div>
-                <span className="ml-3 text-sm text-muted-foreground">
-                  Searching your library...
-                </span>
-              </div>
+              <CommandLoading>
+                <div className="flex items-center justify-center p-6">
+                  <div
+                    className={cn(
+                      "animate-spin rounded-full h-5 w-5 border-b-2",
+                      BRAND_COLORS.primary.border
+                    )}
+                  ></div>
+                  <span className="ml-3 text-sm text-muted-foreground">
+                    Searching your library...
+                  </span>
+                </div>
+              </CommandLoading>
             )}
 
             {/* Show results only when search is completed */}
             {searchData.state === "completed" && (
               <>
                 {searchData.results.length === 0 ? (
-                  <CommandEmpty>No books found in your library.</CommandEmpty>
+                  <CommandEmpty>
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                      No books found in your library.
+                    </div>
+                  </CommandEmpty>
                 ) : (
                   <CommandGroup heading="Your Books">
                     {searchData.results.map((book) => (
@@ -482,8 +477,8 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                       <div className="border-t border-border" />
                     )}
                     <CommandGroup>
-                      <div
-                        onClick={handleAddBookSelect}
+                      <CommandItem
+                        onSelect={handleAddBookSelect}
                         className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent"
                       >
                         <div className="flex-shrink-0">
@@ -508,7 +503,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                             Search for books to add to your library
                           </div>
                         </div>
-                      </div>
+                      </CommandItem>
                     </CommandGroup>
                   </>
                 )}

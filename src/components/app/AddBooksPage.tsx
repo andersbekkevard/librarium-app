@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,7 @@ export const AddBooksPage = () => {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [searchType, setSearchType] = useState<'title' | 'author'>('title');
   const { searchResults, isSearching, error, search, clearError } =
     useBookSearch();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
@@ -44,9 +46,9 @@ export const AddBooksPage = () => {
   // Initialize search if query parameter is provided
   useEffect(() => {
     if (initialSearchQuery.trim()) {
-      search(initialSearchQuery);
+      search(initialSearchQuery, undefined, searchType);
     }
-  }, [initialSearchQuery, search]);
+  }, [initialSearchQuery, search, searchType]);
 
   /**
    * Adds a book from Google Books API to user's library
@@ -145,13 +147,13 @@ export const AddBooksPage = () => {
   React.useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchQuery.trim()) {
-        search(searchQuery);
+        search(searchQuery, undefined, searchType);
       }
       // Note: clearResults is handled by the hook when search is called with empty query
     }, TIMING_CONFIG.SEARCH_DEBOUNCE_MS); // Debounce time for API calls
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, search]);
+  }, [searchQuery, search, searchType]);
 
   // Clear error when user starts typing
   React.useEffect(() => {
@@ -219,14 +221,39 @@ export const AddBooksPage = () => {
               <CardTitle>Search Books</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by title, author, or ISBN..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="space-y-3">
+                {/* Search Type Toggle */}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={searchType === 'title' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSearchType('title')}
+                    className="flex-1"
+                  >
+                    Search by Title
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={searchType === 'author' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSearchType('author')}
+                    className="flex-1"
+                  >
+                    Search by Author
+                  </Button>
+                </div>
+                
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={`Search by ${searchType}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               {isSearching && (

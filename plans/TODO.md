@@ -3,7 +3,7 @@
 
 
 ## Nice-to-have feature
-- [ ] Align search bar properly, and integrate it with actual functionality
+- [X] Align search bar properly, and integrate it with actual functionality
 - [ ] Improve search (fzf, etc)
 
 

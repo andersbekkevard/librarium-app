@@ -18,23 +18,23 @@ export const Header: React.FC<HeaderProps> = ({
   const { loading } = useAuthContext();
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-background border-b border-border px-6 py-4 z-50">
-      <div className="flex items-center justify-between h-10">
-        {/* Logo Section */}
-        <div className="flex items-center space-x-2 h-full">
+    <header className="fixed top-0 left-0 right-0 bg-background border-b border-border py-4 z-50">
+      <div className="flex items-center h-10">
+        {/* Logo Section - Fixed width to match sidebar exactly */}
+        <div className="flex items-center space-x-2 h-full w-64 px-6">
           <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
             <Book className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-xl font-bold text-foreground">Librarium</h1>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-8 h-full flex items-center">
+        {/* Search Bar - Starts right after sidebar */}
+        <div className="flex-1 max-w-2xl mr-8 h-full flex items-center justify-start">
           <SearchDropdown placeholder="Search books, authors, or genres..." />
         </div>
 
         {/* Right Side - Theme Toggle & User Profile */}
-        <div className="flex items-center space-x-4 h-full">
+        <div className="flex items-center space-x-4 h-full ml-auto pr-6">
           {/* Theme Toggle */}
           <ToggleTheme />
 

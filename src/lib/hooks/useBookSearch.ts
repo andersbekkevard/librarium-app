@@ -7,7 +7,7 @@ export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];
   isSearching: boolean;
   error: StandardError | null;
-  search: (query: string, maxResults?: number) => Promise<void>;
+  search: (query: string, maxResults?: number, searchType?: 'title' | 'author' | 'general') => Promise<void>;
   clearResults: () => void;
   clearError: () => void;
 } => {
@@ -23,15 +23,17 @@ export const useBookSearch = (): {
    *
    * @param query - Search query string
    * @param maxResults - Maximum number of results to return (default: 20)
+   * @param searchType - Type of search: 'title', 'author', or 'general' (default: 'general')
    *
    * @example
    * const { search } = useBookSearch();
-   * await search("javascript programming");
+   * await search("javascript programming", 20, 'title');
    */
   const search = useCallback(
     async (
       query: string,
-      maxResults: number = API_CONFIG.SEARCH.DEFAULT_LIMIT
+      maxResults: number = API_CONFIG.SEARCH.DEFAULT_LIMIT,
+      searchType: 'title' | 'author' | 'general' = 'general'
     ) => {
       if (!query.trim()) {
         setSearchResults([]);
@@ -42,7 +44,21 @@ export const useBookSearch = (): {
       setError(null);
 
       try {
-        const results = await googleBooksApi.search(query, maxResults);
+        let results: GoogleBooksVolume[];
+        
+        switch (searchType) {
+          case 'title':
+            results = await googleBooksApi.searchByTitle(query, maxResults);
+            break;
+          case 'author':
+            results = await googleBooksApi.searchByAuthor(query, maxResults);
+            break;
+          case 'general':
+          default:
+            results = await googleBooksApi.search(query, maxResults);
+            break;
+        }
+        
         setSearchResults(results);
       } catch (err) {
         console.error("Error searching books:", err);
