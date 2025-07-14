@@ -1,7 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND_COLORS } from "@/lib/design/colors";
-import { useScrollAnimation, useStaggeredScrollAnimation } from "@/lib/hooks/useScrollAnimation";
+import {
+  useScrollAnimation,
+  useStaggeredScrollAnimation,
+} from "@/lib/hooks/useScrollAnimation";
 
 enum ProService {
   YES = 1,
@@ -42,14 +45,19 @@ const serviceList: ServiceProps[] = [
 ];
 
 export const ServicesSection = () => {
-  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { elementRef: cardsRef, visibleItems } = useStaggeredScrollAnimation(serviceList.length);
+  const { elementRef: headerRef, isVisible: headerVisible } =
+    useScrollAnimation();
+  const { elementRef: cardsRef, visibleItems } = useStaggeredScrollAnimation(
+    serviceList.length
+  );
 
   return (
     <section id="services" className="container py-24 sm:py-32">
-      <div 
-        ref={headerRef}
-        className={`text-center mb-16 scroll-fade-in-up ${headerVisible ? 'animate' : ''}`}
+      <div
+        ref={headerRef as React.RefObject<HTMLDivElement>}
+        className={`text-center mb-16 scroll-fade-in-up ${
+          headerVisible ? "animate" : ""
+        }`}
       >
         <h2
           className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
@@ -64,14 +72,19 @@ export const ServicesSection = () => {
           capabilities coming in future releases.
         </h3>
       </div>
-      
-      <div ref={cardsRef} className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20">
+
+      <div
+        ref={cardsRef as React.RefObject<HTMLDivElement>}
+        className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20"
+      >
         {serviceList.map(({ title, description, pro }, index) => (
           <Card
             key={title}
-            className={`bg-muted/60 dark:bg-card h-full relative hover-lift scroll-fade-in-up ${visibleItems[index] ? 'animate' : ''}`}
-            style={{ 
-              transitionDelay: visibleItems[index] ? `${index * 200}ms` : '0ms' 
+            className={`bg-muted/60 dark:bg-card h-full relative hover-lift scroll-fade-in-up ${
+              visibleItems[index] ? "animate" : ""
+            }`}
+            style={{
+              transitionDelay: visibleItems[index] ? `${index * 200}ms` : "0ms",
             }}
           >
             <CardHeader className="pb-2">
@@ -80,9 +93,15 @@ export const ServicesSection = () => {
                 {pro === ProService.YES && (
                   <Badge
                     variant="secondary"
-                    className={`${BRAND_COLORS.primary.bg} text-primary-foreground scroll-bounce-in ${visibleItems[index] ? 'animate' : ''}`}
-                    style={{ 
-                      transitionDelay: visibleItems[index] ? `${(index * 200) + 400}ms` : '0ms' 
+                    className={`${
+                      BRAND_COLORS.primary.bg
+                    } text-primary-foreground scroll-bounce-in ${
+                      visibleItems[index] ? "animate" : ""
+                    }`}
+                    style={{
+                      transitionDelay: visibleItems[index]
+                        ? `${index * 200 + 400}ms`
+                        : "0ms",
                     }}
                   >
                     PRO
