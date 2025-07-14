@@ -18,6 +18,7 @@
   - [ ] Create profile pages, settings etc etc
 - [ ] Add shelf/collection functionality
 - [ ] Color code genres in separate database
+- [ ] Implement barcode scanner
 
 ## Design/Architectural changes
 - [ ] Clean the codebase, extract components where possible
@@ -37,4 +38,4 @@
 
 ## *Next Step*
 - [ ] Implement a small "progress summary" with LLM in Statistics and/or Dashboard page
-- [ ] 
+- [ ] Make dynamic and mobile friendly (with collapsable navbar)
