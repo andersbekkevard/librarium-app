@@ -60,14 +60,14 @@ export const HeroSection = () => {
     <section className="container w-full">
       <div className="grid place-items-center lg:max-w-screen-xl gap-8 mx-auto py-20 md:py-32">
         <div className="text-center space-y-8">
-          <Badge variant="outline" className="text-sm py-2">
+          <Badge variant="outline" className="text-sm py-2 animate-fade-in-up">
             <span className={`mr-2 ${BRAND_COLORS.primary.text}`}>
               <Badge className={BRAND_COLORS.primary.bg}>MVP</Badge>
             </span>
             <span>Essential reading tools are ready!</span>
           </Badge>
 
-          <div className="max-w-screen-md mx-auto text-center text-4xl md:text-6xl font-bold">
+          <div className="max-w-screen-md mx-auto text-center text-4xl md:text-6xl font-bold animate-fade-in-up delay-200">
             <h1>
               Track Your
               <span
@@ -79,12 +79,12 @@ export const HeroSection = () => {
             </h1>
           </div>
 
-          <p className="max-w-screen-sm mx-auto text-xl text-muted-foreground">
+          <p className="max-w-screen-sm mx-auto text-xl text-muted-foreground animate-fade-in-up delay-300">
             Build your personal library, track reading progress, and discover
             new books. Start with the essentials - more features coming soon.
           </p>
 
-          <div className="space-y-4 md:space-y-0 md:space-x-4">
+          <div className="space-y-4 md:space-y-0 md:space-x-4 animate-fade-in-up delay-500">
             <Button
               onClick={handleGetStarted}
               disabled={isSigningIn}
@@ -93,7 +93,7 @@ export const HeroSection = () => {
                   ? "Go to your dashboard"
                   : "Sign in with Google to start reading"
               }
-              className={`w-5/6 md:w-1/4 font-bold group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover}`}
+              className={`w-5/6 md:w-1/4 font-bold group/arrow hover-scale ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover}`}
             >
               {showSuccess ? (
                 <>✓ Welcome! Redirecting...</>
@@ -118,7 +118,7 @@ export const HeroSection = () => {
             <Button
               asChild
               variant="secondary"
-              className="w-5/6 md:w-1/4 font-bold"
+              className="w-5/6 md:w-1/4 font-bold hover-scale"
             >
               <Link href="/dashboard">Explore Features</Link>
             </Button>
@@ -127,7 +127,7 @@ export const HeroSection = () => {
           {/* Error Message */}
           {authError && (
             <div
-              className={`mt-4 p-3 ${STATUS_COLORS.error.bgLight} border ${STATUS_COLORS.error.borderLight} rounded-lg`}
+              className={`mt-4 p-3 ${STATUS_COLORS.error.bgLight} border ${STATUS_COLORS.error.borderLight} rounded-lg animate-slide-in-down`}
               role="alert"
             >
               <p className={`text-sm ${STATUS_COLORS.error.text} text-center`}>
@@ -139,7 +139,7 @@ export const HeroSection = () => {
           {/* Success Message */}
           {showSuccess && (
             <div
-              className={`mt-4 p-3 ${STATUS_COLORS.success.bgLight} ${STATUS_COLORS.success.borderLight} rounded-lg`}
+              className={`mt-4 p-3 ${STATUS_COLORS.success.bgLight} ${STATUS_COLORS.success.borderLight} rounded-lg animate-slide-in-down`}
               role="status"
             >
               <p
@@ -151,14 +151,14 @@ export const HeroSection = () => {
           )}
         </div>
 
-        <div className="relative group mt-24">
+        <div className="relative group mt-24 animate-scale-in delay-700">
           <div
             className={`absolute top-2 lg:-top-8 left-1/2 transform -translate-x-1/2 w-[90%] mx-auto h-24 lg:h-80 ${BRAND_COLORS.primary.bgBlur} rounded-full blur-3xl`}
           ></div>
           <Image
             width={1200}
             height={1200}
-            className={`w-full md:w-[1200px] mx-auto rounded-lg relative border border-t-2 border-secondary ${BRAND_COLORS.primary.borderTop}`}
+            className={`w-full md:w-[1200px] mx-auto rounded-lg relative border border-t-2 border-secondary ${BRAND_COLORS.primary.borderTop} hover-lift`}
             src={
               theme === "light"
                 ? "/images/hero-image-light.jpg"

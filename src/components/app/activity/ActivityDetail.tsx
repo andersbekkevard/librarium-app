@@ -1,16 +1,16 @@
-import React from "react";
-import { BookEvent, Book } from "@/lib/models/models";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Book, BookEvent } from "@/lib/models/models";
 import { format, formatDistanceToNow } from "date-fns";
 import {
-  CheckCircle2,
-  Star,
-  BookOpen,
   ArrowRight,
-  MessageSquare,
+  BookOpen,
+  CheckCircle2,
   Clock,
+  MessageSquare,
+  Star,
 } from "lucide-react";
+import React from "react";
 
 interface ActivityDetailProps {
   event: BookEvent;
@@ -59,7 +59,10 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         const { previousState, newState } = event.data;
         if (newState === "finished") {
           return "Finished Reading";
-        } else if (newState === "in_progress" && previousState === "not_started") {
+        } else if (
+          newState === "in_progress" &&
+          previousState === "not_started"
+        ) {
           return "Started Reading";
         } else if (newState === "not_started") {
           return "Added to Library";
@@ -69,7 +72,9 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
       case "progress_update":
         const { previousPage, newPage } = event.data;
         const pagesRead = newPage ? newPage - (previousPage || 0) : 0;
-        return `${pagesRead > 0 ? `Read ${pagesRead} more pages` : "Updated progress"}`;
+        return `${
+          pagesRead > 0 ? `Read ${pagesRead} pages` : "Updated progress"
+        }`;
       case "rating_added":
         return `Rated ${event.data.rating || 0} stars`;
       case "note_added":
@@ -94,7 +99,9 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
       case "progress_update":
         details.push({
           label: "Progress",
-          value: `${event.data.newPage || 0} / ${book?.progress.totalPages || "?"} pages`,
+          value: `${event.data.newPage || 0} / ${
+            book?.progress.totalPages || "?"
+          } pages`,
         });
         if (event.data.previousPage && event.data.newPage) {
           const pagesRead = event.data.newPage - event.data.previousPage;
@@ -131,9 +138,7 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <div
-              className={`p-2 rounded-lg border ${getEventColor(
-                event.type
-              )}`}
+              className={`p-2 rounded-lg border ${getEventColor(event.type)}`}
             >
               {getEventIcon(event.type)}
             </div>

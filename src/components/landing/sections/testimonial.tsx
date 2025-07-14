@@ -1,6 +1,7 @@
 "use client";
 
 import { BRAND_COLORS } from "@/lib/design/colors";
+import { useScrollAnimation } from "@/lib/hooks/useScrollAnimation";
 
 interface ReviewProps {
   image: string;
@@ -62,9 +63,18 @@ const reviewList: ReviewProps[] = [
 ];
 
 export const TestimonialSection = () => {
+  const { elementRef: headerRef, isVisible: headerVisible } =
+    useScrollAnimation();
+  const { elementRef: cardRef, isVisible: cardVisible } = useScrollAnimation();
+
   return (
     <section id="testimonials" className="container py-24 sm:py-32">
-      <div className="text-center mb-8">
+      <div
+        ref={headerRef as React.RefObject<HTMLDivElement>}
+        className={`text-center mb-8 scroll-fade-in-up ${
+          headerVisible ? "animate" : ""
+        }`}
+      >
         <h2
           className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
@@ -81,15 +91,37 @@ export const TestimonialSection = () => {
         </h3>
       </div>
 
-      <div className="bg-muted/50 dark:bg-card rounded-lg p-8 text-center">
+      <div
+        ref={cardRef as React.RefObject<HTMLDivElement>}
+        className={`bg-muted/50 dark:bg-card rounded-lg p-8 text-center hover-lift scroll-scale-in ${
+          cardVisible ? "animate" : ""
+        }`}
+      >
         <div className="max-w-2xl mx-auto">
-          <h3 className="text-2xl font-bold mb-4">Be Part of the Journey</h3>
-          <p className="text-lg text-muted-foreground mb-6">
+          <h3
+            className={`text-2xl font-bold mb-4 scroll-fade-in-up ${
+              cardVisible ? "animate" : ""
+            }`}
+            style={{ transitionDelay: cardVisible ? "200ms" : "0ms" }}
+          >
+            Be Part of the Journey
+          </h3>
+          <p
+            className={`text-lg text-muted-foreground mb-6 scroll-fade-in-up ${
+              cardVisible ? "animate" : ""
+            }`}
+            style={{ transitionDelay: cardVisible ? "400ms" : "0ms" }}
+          >
             Librarium is a work in progress, built for readers who want simple,
             effective book tracking. Your feedback helps us build the features
             that matter most to you.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+          <div
+            className={`flex flex-wrap justify-center gap-4 text-sm text-muted-foreground scroll-fade-in-up ${
+              cardVisible ? "animate" : ""
+            }`}
+            style={{ transitionDelay: cardVisible ? "600ms" : "0ms" }}
+          >
             <span>• Essential reading tools ready</span>
             <span>• Regular updates</span>
             <span>• Community-driven development</span>

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND_COLORS } from "@/lib/design/colors";
+import { useScrollAnimation, useStaggeredScrollAnimation } from "@/lib/hooks/useScrollAnimation";
 import { BarChart3, Book, Search, Star, Users } from "lucide-react";
 
 interface FeaturesProps {
@@ -48,28 +49,46 @@ const featureList: FeaturesProps[] = [
 ];
 
 export const FeaturesSection = () => {
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { elementRef: cardsRef, visibleItems } = useStaggeredScrollAnimation(featureList.length);
+
   return (
     <section id="features" className="container py-24 sm:py-32">
-      <h2
-        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
+      <div 
+        ref={headerRef}
+        className={`text-center mb-8 scroll-fade-in-up ${headerVisible ? 'animate' : ''}`}
       >
-        Features
-      </h2>
+        <h2
+          className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
+        >
+          Features
+        </h2>
 
-      <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Essential Reading Tools
-      </h2>
-      <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        Core features are ready now, with advanced capabilities planned for
-        future releases. Start tracking your reading journey today.
-      </h3>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {featureList.map(({ icon, title, description }) => (
-          <div key={title}>
-            <Card className="h-full bg-background border-0 shadow-none">
+        <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
+          Essential Reading Tools
+        </h2>
+        <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground">
+          Core features are ready now, with advanced capabilities planned for
+          future releases. Start tracking your reading journey today.
+        </h3>
+      </div>
+      
+      <div ref={cardsRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {featureList.map(({ icon, title, description }, index) => (
+          <div 
+            key={title} 
+            className={`scroll-fade-in-up ${visibleItems[index] ? 'animate' : ''}`}
+            style={{ 
+              transitionDelay: visibleItems[index] ? `${index * 150}ms` : '0ms' 
+            }}
+          >
+            <Card className="h-full bg-background border-0 shadow-none hover-lift">
               <CardHeader className="flex flex-col justify-center items-center">
                 <div
-                  className={`${BRAND_COLORS.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4`}
+                  className={`${BRAND_COLORS.primary.bg}/20 p-2 rounded-full ring-8 ring-brand-primary/10 mb-4 scroll-bounce-in ${visibleItems[index] ? 'animate' : ''}`}
+                  style={{ 
+                    transitionDelay: visibleItems[index] ? `${(index * 150) + 300}ms` : '0ms' 
+                  }}
                 >
                   <div className={BRAND_COLORS.primary.text}>{icon}</div>
                 </div>

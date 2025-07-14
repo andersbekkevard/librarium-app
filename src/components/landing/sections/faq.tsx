@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { BRAND_COLORS } from "@/lib/design/colors";
+import { useScrollAnimation, useStaggeredScrollAnimation } from "@/lib/hooks/useScrollAnimation";
 
 interface FAQProps {
   question: string;
@@ -46,9 +47,15 @@ const FAQList: FAQProps[] = [
 ];
 
 export const FAQSection = () => {
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { elementRef: accordionRef, visibleItems } = useStaggeredScrollAnimation(FAQList.length);
+
   return (
     <section id="faq" className="container mx-auto md:w-[700px] py-24 sm:py-32">
-      <div className="text-center mb-8">
+      <div 
+        ref={headerRef}
+        className={`text-center mb-8 scroll-fade-in-up ${headerVisible ? 'animate' : ''}`}
+      >
         <h2
           className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
@@ -60,9 +67,21 @@ export const FAQSection = () => {
         </h2>
       </div>
 
-      <Accordion type="single" collapsible className="AccordionRoot">
-        {FAQList.map(({ question, answer, value }) => (
-          <AccordionItem key={value} value={value}>
+      <Accordion 
+        ref={accordionRef}
+        type="single" 
+        collapsible 
+        className="AccordionRoot"
+      >
+        {FAQList.map(({ question, answer, value }, index) => (
+          <AccordionItem 
+            key={value} 
+            value={value} 
+            className={`hover-scale scroll-fade-in-up ${visibleItems[index] ? 'animate' : ''}`}
+            style={{ 
+              transitionDelay: visibleItems[index] ? `${index * 150}ms` : '0ms' 
+            }}
+          >
             <AccordionTrigger className="text-left">
               {question}
             </AccordionTrigger>

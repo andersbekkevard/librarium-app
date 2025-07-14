@@ -1,5 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND_COLORS } from "@/lib/design/colors";
+import {
+  useScrollAnimation,
+  useStaggeredScrollAnimation,
+} from "@/lib/hooks/useScrollAnimation";
 import { Book, Sparkles, TrendingUp, Users2 } from "lucide-react";
 
 interface BenefitsProps {
@@ -36,10 +40,25 @@ const benefitList: BenefitsProps[] = [
 ];
 
 export const BenefitsSection = () => {
+  const { elementRef: titleRef, isVisible: titleVisible } = useScrollAnimation({
+    threshold: 0.3,
+    rootMargin: "0px 0px -200px 0px",
+  });
+  const { elementRef: cardsRef, visibleItems } = useStaggeredScrollAnimation(
+    benefitList.length,
+    {
+      threshold: 0.3,
+      rootMargin: "0px 0px -150px 0px",
+    }
+  );
+
   return (
     <section id="benefits" className="container py-24 sm:py-32">
       <div className="grid lg:grid-cols-2 place-items-center lg:gap-24">
-        <div>
+        <div
+          ref={titleRef as React.RefObject<HTMLDivElement>}
+          className={`scroll-slide-in-left ${titleVisible ? "animate" : ""}`}
+        >
           <h2
             className={`text-lg ${BRAND_COLORS.primary.text} mb-2 tracking-wider`}
           >
@@ -54,15 +73,36 @@ export const BenefitsSection = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-4 w-full">
+        <div
+          ref={cardsRef as React.RefObject<HTMLDivElement>}
+          className="grid lg:grid-cols-2 gap-4 w-full"
+        >
           {benefitList.map(({ icon, title, description }, index) => (
             <Card
               key={title}
-              className={`bg-muted/50 dark:bg-card hover:bg-background transition-all delay-75 group/number`}
+              className={`bg-muted/50 dark:bg-card hover:bg-background transition-all delay-75 group/number hover-lift scroll-fade-in-up ${
+                visibleItems[index] ? "animate" : ""
+              }`}
+              style={{
+                transitionDelay: visibleItems[index]
+                  ? `${index * 150}ms`
+                  : "0ms",
+              }}
             >
               <CardHeader>
                 <div className="flex justify-between">
-                  <div className={`${BRAND_COLORS.primary.text} mb-6`}>
+                  <div
+                    className={`${
+                      BRAND_COLORS.primary.text
+                    } mb-6 scroll-bounce-in ${
+                      visibleItems[index] ? "animate" : ""
+                    }`}
+                    style={{
+                      transitionDelay: visibleItems[index]
+                        ? `${(index * 150) + 300}ms`
+                        : "0ms",
+                    }}
+                  >
                     {icon}
                   </div>
                   <span className="text-5xl text-muted-foreground/15 font-medium transition-all delay-75 group-hover/number:text-muted-foreground/30">

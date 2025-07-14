@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND_COLORS } from "@/lib/design/colors";
+import { useScrollAnimation, useStaggeredScrollAnimation } from "@/lib/hooks/useScrollAnimation";
 
 enum ProService {
   YES = 1,
@@ -41,25 +42,37 @@ const serviceList: ServiceProps[] = [
 ];
 
 export const ServicesSection = () => {
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { elementRef: cardsRef, visibleItems } = useStaggeredScrollAnimation(serviceList.length);
+
   return (
     <section id="services" className="container py-24 sm:py-32">
-      <h2
-        className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
+      <div 
+        ref={headerRef}
+        className={`text-center mb-16 scroll-fade-in-up ${headerVisible ? 'animate' : ''}`}
       >
-        Integrations
-      </h2>
-      <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Current & Planned Integrations
-      </h2>
-      <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-16">
-        Essential integrations are live now, with advanced features and social
-        capabilities coming in future releases.
-      </h3>
-      <div className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20">
-        {serviceList.map(({ title, description, pro }) => (
+        <h2
+          className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
+        >
+          Integrations
+        </h2>
+        <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
+          Current & Planned Integrations
+        </h2>
+        <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground">
+          Essential integrations are live now, with advanced features and social
+          capabilities coming in future releases.
+        </h3>
+      </div>
+      
+      <div ref={cardsRef} className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20">
+        {serviceList.map(({ title, description, pro }, index) => (
           <Card
             key={title}
-            className="bg-muted/60 dark:bg-card h-full relative"
+            className={`bg-muted/60 dark:bg-card h-full relative hover-lift scroll-fade-in-up ${visibleItems[index] ? 'animate' : ''}`}
+            style={{ 
+              transitionDelay: visibleItems[index] ? `${index * 200}ms` : '0ms' 
+            }}
           >
             <CardHeader className="pb-2">
               <div className="flex justify-between">
@@ -67,7 +80,10 @@ export const ServicesSection = () => {
                 {pro === ProService.YES && (
                   <Badge
                     variant="secondary"
-                    className={`${BRAND_COLORS.primary.bg} text-primary-foreground`}
+                    className={`${BRAND_COLORS.primary.bg} text-primary-foreground scroll-bounce-in ${visibleItems[index] ? 'animate' : ''}`}
+                    style={{ 
+                      transitionDelay: visibleItems[index] ? `${(index * 200) + 400}ms` : '0ms' 
+                    }}
                   >
                     PRO
                   </Badge>
