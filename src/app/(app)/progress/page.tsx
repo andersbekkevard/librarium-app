@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { BookOpen, TrendingUp, Calendar, Target } from "lucide-react";
 import Sidebar from "@/components/app/Sidebar";
+import { Target } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ProgressPage() {
   const router = useRouter();
@@ -14,102 +14,27 @@ export default function ProgressPage() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar onAddBookClick={handleAddBookClick} />
-      <div className="ml-64 p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Reading Progress
+      <div className="ml-64 flex items-center justify-center min-h-screen p-6">
+        <div className="bg-card border border-border rounded-2xl p-12 flex flex-col items-center w-full max-w-xl shadow-lg hover:shadow-xl transition-shadow gap-y-6">
+          <span className="text-sm text-muted-foreground mb-2 tracking-wide uppercase">
+            Feature Preview
+          </span>
+          <div className="bg-muted/50 rounded-full p-5 mb-4 ring-2 ring-brand-primary flex items-center justify-center">
+            <Target
+              className="h-10 w-10 text-brand-primary"
+              aria-hidden="true"
+            />
+          </div>
+          <h1 className="text-4xl font-extrabold text-foreground mb-2 text-center">
+            Personal Reading Goals
           </h1>
-          <p className="text-muted-foreground">
-            Track your reading journey and goals.
+          <p className="text-lg text-muted-foreground text-center mb-1">
+            Coming soon
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Reading Goals */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Target className="h-5 w-5 text-brand-primary mr-2" />
-              <h2 className="text-lg font-semibold text-foreground">
-                Reading Goals
-              </h2>
-            </div>
-            <div className="space-y-4">
-              <div className="p-4 bg-muted/30 rounded-lg">
-                <p className="text-sm text-muted-foreground">Books this year</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-2xl font-bold text-foreground">
-                    12 / 24
-                  </span>
-                  <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-brand-primary rounded-full"
-                      style={{ width: "50%" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 bg-muted/30 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Pages this month
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-2xl font-bold text-foreground">
-                    456 / 800
-                  </span>
-                  <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-status-success rounded-full"
-                      style={{ width: "57%" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Reading Streak */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <TrendingUp className="h-5 w-5 text-brand-primary mr-2" />
-              <h2 className="text-lg font-semibold text-foreground">
-                Reading Streak
-              </h2>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-foreground mb-2">12</div>
-              <p className="text-muted-foreground">days in a row</p>
-              <div className="mt-4 flex justify-center">
-                <div className="flex space-x-1">
-                  {[...Array(7)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        i < 5 ? "bg-brand-primary text-white" : "bg-muted"
-                      }`}
-                    >
-                      <BookOpen className="h-4 w-4" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Monthly Progress */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <Calendar className="h-5 w-5 text-brand-primary mr-2" />
-              <h2 className="text-lg font-semibold text-foreground">
-                Monthly Progress
-              </h2>
-            </div>
-            <div className="text-center py-8">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                Monthly progress tracking coming soon
-              </p>
-            </div>
-          </div>
+          <p className="text-base text-muted-foreground text-center opacity-80">
+            Track your personal reading goals and milestones here soon! Stay
+            tuned for updates.
+          </p>
         </div>
       </div>
     </div>
