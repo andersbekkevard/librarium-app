@@ -6,6 +6,8 @@
  */
 
 import {
+  CollectionReference,
+  DocumentData,
   FirestoreError,
   Timestamp,
   addDoc,
@@ -30,7 +32,9 @@ export class FirebaseEventRepository implements IEventRepository {
   /**
    * Get user's events collection reference
    */
-  private getEventsCollectionRef(userId: string) {
+  private getEventsCollectionRef(
+    userId: string
+  ): CollectionReference<DocumentData> {
     return collection(db, `users/${userId}/events`);
   }
 

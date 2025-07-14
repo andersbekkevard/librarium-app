@@ -6,6 +6,9 @@
  */
 
 import {
+  CollectionReference,
+  DocumentData,
+  DocumentReference,
   Timestamp,
   Unsubscribe,
   addDoc,
@@ -33,14 +36,19 @@ export class FirebaseBookRepository implements IBookRepository {
   /**
    * Get user's books collection reference
    */
-  private getBooksCollectionRef(userId: string) {
+  private getBooksCollectionRef(
+    userId: string
+  ): CollectionReference<DocumentData> {
     return collection(db, `users/${userId}/books`);
   }
 
   /**
    * Get book document reference
    */
-  private getBookDocRef(userId: string, bookId: string) {
+  private getBookDocRef(
+    userId: string,
+    bookId: string
+  ): DocumentReference<DocumentData> {
     return doc(db, `users/${userId}/books/${bookId}`);
   }
 
