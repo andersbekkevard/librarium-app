@@ -637,6 +637,7 @@ export class BookService implements IBookService {
     searchQuery: string,
     filterStatus: string,
     filterOwnership: string,
+    filterGenre: string,
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[] {
@@ -666,6 +667,13 @@ export class BookService implements IBookService {
     if (filterOwnership && filterOwnership !== "all") {
       filteredBooks = filteredBooks.filter((book) => {
         return filterOwnership === "owned" ? book.isOwned : !book.isOwned;
+      });
+    }
+
+    // Apply genre filter
+    if (filterGenre && filterGenre !== "all") {
+      filteredBooks = filteredBooks.filter((book) => {
+        return book.genre?.toLowerCase() === filterGenre.toLowerCase();
       });
     }
 

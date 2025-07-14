@@ -26,8 +26,12 @@ interface LibraryControlsProps {
   viewMode: ViewMode;
   filterStatus: FilterStatus;
   filterOwnership: string;
+  filterGenre: string;
   sortBy: SortOption;
   sortDirection: SortDirection;
+  
+  // Available genres
+  availableGenres: string[];
   
   // Results count
   filteredCount: number;
@@ -39,8 +43,10 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
   viewMode,
   filterStatus,
   filterOwnership,
+  filterGenre,
   sortBy,
   sortDirection,
+  availableGenres,
   filteredCount,
   totalCount,
 }) => {
@@ -50,6 +56,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
   const activeFiltersCount = [
     filterStatus !== "all",
     filterOwnership !== "all",
+    filterGenre !== "all",
   ].filter(Boolean).length;
 
   const updateURLParams = (updates: Record<string, string>) => {
@@ -148,6 +155,35 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
               </select>
             </div>
 
+            {/* Genre Filter - COMMENTED OUT FOR NOW
+                Features implemented but disabled:
+                - Filters books by genre from user's collection only
+                - Syncs with URL routing (?genre=Fiction)
+                - Auto-extracts unique genres from book collection
+                - Truncates long genre names for compact display
+                - Integrates with existing filter system
+                
+                To re-enable: uncomment this block and ensure filterGenre 
+                and availableGenres props are passed to LibraryControls
+            */}
+            {/* {availableGenres.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Genre:</span>
+                <select
+                  value={filterGenre}
+                  onChange={(e) => updateURLParams({ genre: e.target.value })}
+                  className="bg-background border border-input rounded-md px-3 py-1 text-sm w-24 max-w-24"
+                >
+                  <option value="all">All</option>
+                  {availableGenres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre.length > 8 ? `${genre.slice(0, 8)}...` : genre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )} */}
+
             {/* Sort Options */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Sort by:</span>
@@ -186,7 +222,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateURLParams({ filter: "all", ownership: "all", sort: "title", direction: "asc", view: "grid" })}
+                onClick={() => updateURLParams({ filter: "all", ownership: "all", genre: "all", sort: "title", direction: "asc", view: "grid" })}
                 className="flex items-center gap-1"
               >
                 <X className="h-3 w-3" />

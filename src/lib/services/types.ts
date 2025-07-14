@@ -216,6 +216,7 @@ export interface IBookService {
     searchQuery: string,
     filterStatus: string,
     filterOwnership: string,
+    filterGenre: string,
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[];

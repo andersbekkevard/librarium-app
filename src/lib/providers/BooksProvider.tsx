@@ -81,11 +81,14 @@ interface BooksContextType {
     searchQuery: string,
     filterStatus: string,
     filterOwnership: string,
+    filterGenre: string,
     sortBy: string,
     sortDirection: "asc" | "desc"
   ) => Book[];
   /** Function to calculate book progress */
   calculateBookProgress: (book: Book) => number;
+  /** Function to get unique genres from book collection */
+  getAvailableGenres: () => string[];
   /** Function to clear the current error */
   clearError: () => void;
   /** Computed statistics */
@@ -665,6 +668,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     searchQuery: string,
     filterStatus: string,
     filterOwnership: string,
+    filterGenre: string,
     sortBy: string,
     sortDirection: "asc" | "desc"
   ): Book[] => {
@@ -674,6 +678,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         searchQuery,
         filterStatus,
         filterOwnership,
+        filterGenre,
         sortBy,
         sortDirection
       );
@@ -700,6 +705,29 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       );
       setError(standardError);
       return 0; // Return 0 on error
+    }
+  };
+
+  /**
+   * Get unique genres from the user's book collection
+   */
+  const getAvailableGenres = (): string[] => {
+    try {
+      const genres = books
+        .map(book => book.genre)
+        .filter((genre): genre is string => genre !== undefined && genre !== null && genre.trim() !== "")
+        .map(genre => genre.trim())
+        .filter((genre, index, array) => array.indexOf(genre) === index) // Remove duplicates
+        .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })); // Case-insensitive sort
+      
+      return genres;
+    } catch (error) {
+      const standardError = createSystemError(
+        "An unexpected error occurred while getting available genres",
+        error as Error
+      );
+      setError(standardError);
+      return []; // Return empty array on error
     }
   };
 
@@ -761,6 +789,7 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
     searchBooks,
     filterAndSortBooks,
     calculateBookProgress: calculateBookProgressWrapper,
+    getAvailableGenres,
     clearError,
     totalBooks,
     booksInProgress,

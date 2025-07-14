@@ -94,10 +94,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
             const isBeforeProgress = item.id === "progress";
 
             return (
-              <>
+              <div key={item.id}>
                 {isBeforeProgress && (
                   <li
-                    key="coming-soon-separator"
                     aria-hidden="true"
                     className="my-2"
                   >
@@ -110,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
                     </div>
                   </li>
                 )}
-                <li key={item.id}>
+                <li>
                   <Link
                     href={item.href}
                     className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${getItemColors(
@@ -122,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
                     {item.label}
                   </Link>
                 </li>
-              </>
+              </div>
             );
           })}
         </ul>

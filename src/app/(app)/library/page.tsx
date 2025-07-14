@@ -13,6 +13,7 @@ function LibraryContent() {
   const searchQuery = searchParams.get("search") || "";
   const filterStatus = searchParams.get("filter") || "all";
   const filterOwnership = searchParams.get("ownership") || "all";
+  const filterGenre = searchParams.get("genre") || "all";
   const sortBy = searchParams.get("sort") || "title";
   const sortDirection = searchParams.get("direction") || "asc";
   const viewMode = searchParams.get("view") || "grid";
@@ -34,6 +35,7 @@ function LibraryContent() {
           onBookClick={handleBookClick}
           filterStatus={filterStatus}
           filterOwnership={filterOwnership}
+          filterGenre={filterGenre}
           sortBy={sortBy}
           sortDirection={sortDirection as "asc" | "desc"}
           viewMode={viewMode as "grid" | "list"}

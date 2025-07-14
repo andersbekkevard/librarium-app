@@ -10,6 +10,25 @@ import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { calculateBookProgress } from "@/lib/books/book-utils";
 import { Book } from "@/lib/models/models";
+import { cn } from "@/lib/utils/utils";
+
+// Progress Bar Component (same height as BookCard)
+const ProgressBar = ({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("w-full bg-muted rounded-full h-1.5", className)}>
+      <div
+        className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
+        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+      />
+    </div>
+  );
+};
 
 interface BookListItemProps {
   book: Book;
@@ -58,6 +77,21 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                 <User className="h-3 w-3" />
                 {book.author}
               </p>
+              {/* Progress bar for in_progress books, 10% shorter than title width */}
+              {book.state === "in_progress" && (
+                <div className="space-y-1 mt-4 w-[90%]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      {book.progress.currentPage} / {book.progress.totalPages}{" "}
+                      pages
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {calculateBookProgress(book)}%
+                    </span>
+                  </div>
+                  <ProgressBar value={calculateBookProgress(book)} />
+                </div>
+              )}
             </div>
 
             <div className="text-sm text-muted-foreground">
@@ -79,17 +113,15 @@ export const BookListItem: React.FC<BookListItemProps> = ({
               )}
             </div>
 
-            <div>
-              {book.genre && <GenreBadge genre={book.genre} />}
-            </div>
+            <div>{book.genre && <GenreBadge genre={book.genre} />}</div>
 
             <div className="flex items-center justify-center">
               <ReadingStateBadge state={book.state} />
             </div>
 
             <div className="flex items-center justify-between">
-              {/* Rating or Progress */}
-              <div className="flex items-center gap-1">
+              {/* Rating or other states */}
+              <div className="flex items-center gap-1 w-full">
                 {book.state === "finished" && book.rating ? (
                   <StarRating
                     rating={book.rating}
@@ -97,15 +129,11 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                     showText={false}
                     className="gap-0.5"
                   />
-                ) : book.state === "in_progress" ? (
-                  <div className="text-xs text-muted-foreground">
-                    {calculateBookProgress(book)}% complete
-                  </div>
-                ) : (
+                ) : book.state === "not_started" ? (
                   <div className="text-xs text-muted-foreground">
                     Not started
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

@@ -28,8 +28,10 @@ const setup = (
     viewMode: "grid" as const,
     filterStatus: "all" as const,
     filterOwnership: "all",
+    filterGenre: "all",
     sortBy: "title" as const,
     sortDirection: "asc" as const,
+    availableGenres: [],
     filteredCount: 5,
     totalCount: 10,
     searchQuery: "",
@@ -43,6 +45,7 @@ describe("LibraryControls", () => {
     mockPush.mockClear();
     mockSearchParams.delete("filter");
     mockSearchParams.delete("ownership");
+    mockSearchParams.delete("genre");
     mockSearchParams.delete("sort");
     mockSearchParams.delete("direction");
     mockSearchParams.delete("view");

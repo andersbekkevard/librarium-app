@@ -19,6 +19,7 @@ interface MyLibraryPageProps {
   onBookClick?: (bookId: string) => void;
   filterStatus: string;
   filterOwnership: string;
+  filterGenre: string;
   sortBy: string;
   sortDirection: SortDirection;
   viewMode: ViewMode;
@@ -29,24 +30,27 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   onBookClick,
   filterStatus,
   filterOwnership,
+  filterGenre,
   sortBy,
   sortDirection,
   viewMode,
 }) => {
-  const { books, loading, error, refreshBooks, filterAndSortBooks } =
+  const { books, loading, error, refreshBooks, filterAndSortBooks, getAvailableGenres } =
     useBooksContext();
 
   const activeFiltersCount = [
     filterStatus !== "all",
     filterOwnership !== "all",
+    filterGenre !== "all",
   ].filter(Boolean).length;
 
-  // Filter and sort books using the service function
+  // Filter and sort books using the provider function
   const filteredAndSortedBooks = useMemo(() => {
     return filterAndSortBooks(
       searchQuery,
       filterStatus,
       filterOwnership,
+      filterGenre,
       sortBy,
       sortDirection
     );
@@ -54,11 +58,11 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
     searchQuery,
     filterStatus,
     filterOwnership,
+    filterGenre,
     sortBy,
     sortDirection,
     filterAndSortBooks,
   ]);
-
 
   return (
     <div className="p-6 space-y-6">
@@ -67,8 +71,10 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
         viewMode={viewMode}
         filterStatus={filterStatus as FilterStatus}
         filterOwnership={filterOwnership}
+        filterGenre={filterGenre}
         sortBy={sortBy as SortOption}
         sortDirection={sortDirection}
+        availableGenres={getAvailableGenres()}
         filteredCount={filteredAndSortedBooks.length}
         totalCount={books.length}
       />
@@ -80,7 +86,9 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
         loading={loading}
         error={error?.message ?? null}
         onRefresh={refreshBooks}
-        onClearFilters={() => { /* Handled by URL routing */ }}
+        onClearFilters={() => {
+          /* Handled by URL routing */
+        }}
         activeFiltersCount={activeFiltersCount}
       />
     </div>
