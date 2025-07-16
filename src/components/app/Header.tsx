@@ -12,11 +12,13 @@ import SearchDropdown from "./SearchDropdown";
 interface HeaderProps {
   notificationCount?: number;
   onMenuClick?: () => void;
+  sidebarOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   notificationCount = UI_CONFIG.DEFAULT_NOTIFICATION_COUNT,
   onMenuClick,
+  sidebarOpen = false, // TODO: Can be used for menu icon state indication
 }) => {
   const { loading } = useAuthContext();
 
@@ -36,12 +38,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Logo Section - Fixed width to match sidebar on desktop, responsive on mobile */}
-        <div className="flex items-center space-x-2 h-full px-4 lg:w-64 lg:px-6">
+        <div className="flex items-center space-x-2 h-full px-2 lg:w-64 lg:px-6">
           <Link href="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
               <Book className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-foreground">Librarium</h1>
+            <h1 className="text-xl font-bold text-foreground hidden lg:block">Librarium</h1>
           </Link>
         </div>
 
@@ -51,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Side - Theme Toggle & User Profile */}
-        <div className="flex items-center space-x-2 lg:space-x-4 h-full ml-auto pr-4 lg:pr-6">
+        <div className="flex items-center space-x-1 lg:space-x-4 h-full ml-auto pr-4 lg:pr-6">
           {/* Theme Toggle */}
           <ToggleTheme />
 

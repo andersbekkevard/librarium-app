@@ -54,8 +54,8 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
     <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40",
-        // Mobile/tablet responsive dimensions with reasonable max-width
-        "h-32 md:h-40 w-full max-w-sm md:max-w-md",
+        // Mobile/tablet responsive dimensions with increased height for better content fit
+        "h-44 md:h-48 w-full max-w-sm md:max-w-md",
         // Desktop: restore original height but allow full width in grid
         `lg:${UI_CONFIG.CARD.HEIGHT} lg:w-full lg:max-w-none`
       )}
@@ -71,7 +71,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       }}
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
-      <CardContent className="p-3 h-full flex gap-3">
+      <CardContent className="p-4 h-full flex gap-4">
         {/* Book Cover - Responsive width, desktop uses original w-24 */}
         <div className="flex-shrink-0 w-20 md:w-24 lg:w-24 h-full">
           <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
@@ -92,27 +92,27 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
         {/* Book Information */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           {/* Title and Author */}
-          <div className="space-y-1">
-            <h3 className="font-semibold text-foreground text-sm leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
+          <div className="space-y-1.5">
+            <h3 className="font-semibold text-foreground text-sm md:text-base leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
               {book.title}
             </h3>
-            <p className="text-xs text-muted-foreground line-clamp-1">
+            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">
               by {book.author}
             </p>
           </div>
 
           {/* Genre and Status Badges */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 my-2">
             <GenreBadge genre={genre} />
             <ReadingStateBadge state={book.state} />
           </div>
 
           {/* Progress/Rating Section */}
-          <div className="mt-2">
+          <div className="mt-auto">
             {book.state === "in_progress" &&
               book.progress.currentPage &&
               book.progress.totalPages && (
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">
                       {book.progress.currentPage} / {book.progress.totalPages}{" "}

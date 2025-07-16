@@ -27,8 +27,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             action: "render",
           }}
         >
-          <div className="min-h-screen bg-background">
-            <Header onMenuClick={toggleSidebar} />
+          <div className="min-h-screen bg-background overflow-x-hidden">
+            <Header onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />
             
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
@@ -59,7 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             
             {/* Main content with responsive margins */}
-            <main className="pt-20 lg:ml-64">
+            <main className="pt-20 lg:ml-64 overflow-x-hidden">
               <ErrorBoundary
                 context={{
                   component: "AppMain",

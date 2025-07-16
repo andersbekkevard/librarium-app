@@ -51,7 +51,69 @@ export const BookListItem: React.FC<BookListItemProps> = ({
       onClick={handleCardClick}
     >
       <CardContent className="p-0">
-        <div className="flex gap-4 items-center">
+        {/* Mobile Layout - Vertical stacking */}
+        <div className="flex flex-col lg:hidden">
+          <div className="flex gap-4 items-start p-4">
+            {/* Cover Image */}
+            <div className="flex-shrink-0">
+              <div className="w-16 h-22 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
+                {book.coverImage ? (
+                  <img
+                    src={book.coverImage}
+                    alt={`${book.title} cover`}
+                    className="w-full h-full object-cover rounded"
+                  />
+                ) : (
+                  <BookOpen className="h-6 w-6 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm line-clamp-2 mb-1">
+                {book.title}
+              </h3>
+              <p className="text-xs text-muted-foreground mb-2">
+                by {book.author}
+              </p>
+              
+              {/* Badges */}
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <ReadingStateBadge state={book.state} />
+                {book.genre && <GenreBadge genre={book.genre} />}
+              </div>
+
+              {/* Progress bar for in_progress books */}
+              {book.state === "in_progress" && (
+                <div className="space-y-1 mb-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      {book.progress.currentPage} / {book.progress.totalPages} pages
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {calculateBookProgress(book)}%
+                    </span>
+                  </div>
+                  <ProgressBar value={calculateBookProgress(book)} />
+                </div>
+              )}
+
+              {/* Rating for finished books */}
+              {book.state === "finished" && book.rating && (
+                <StarRating
+                  rating={book.rating}
+                  size="sm"
+                  showText={false}
+                  className="gap-0.5"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout - Original grid layout */}
+        <div className="hidden lg:flex gap-4 items-center">
           {/* Cover Image */}
           <div className="flex-shrink-0 pl-3">
             <div className="w-20 h-28 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">

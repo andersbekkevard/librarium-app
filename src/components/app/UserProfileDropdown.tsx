@@ -127,7 +127,7 @@ export const UserProfileDropdown: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       {/* User Profile Button */}
       <div className="flex items-center space-x-3 h-full">
-        <div className="text-right flex flex-col justify-center h-full">
+        <div className="text-right flex-col justify-center h-full hidden lg:flex">
           <p className="text-sm font-medium text-foreground leading-tight">
             {displayName}
           </p>

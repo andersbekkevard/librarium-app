@@ -122,72 +122,48 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
             </div>
           )}
 
-          {/* Filters and Sorting */}
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Status:</span>
-              <select
-                value={filterStatus}
-                onChange={(e) =>
-                  updateURLParams({ filter: e.target.value })
-                }
-                className="bg-background border border-input rounded-md px-3 py-1 text-sm"
-              >
-                <option value="all">All</option>
-                <option value="not_started">Not Started</option>
-                <option value="in_progress">Reading</option>
-                <option value="finished">Finished</option>
-              </select>
-            </div>
+          {/* Mobile Layout - Vertical stacking */}
+          <div className="lg:hidden space-y-4">
+            {/* Filters Section */}
+            <div className="space-y-3">
+              <div className="flex flex-col space-y-2">
+                {/* Status Filter */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Status:</span>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) =>
+                      updateURLParams({ filter: e.target.value })
+                    }
+                    className="bg-background border border-input rounded-md px-3 py-1 text-sm min-w-[120px]"
+                  >
+                    <option value="all">All</option>
+                    <option value="not_started">Not Started</option>
+                    <option value="in_progress">Reading</option>
+                    <option value="finished">Finished</option>
+                  </select>
+                </div>
 
-            {/* Ownership Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Ownership:</span>
-              <select
-                value={filterOwnership}
-                onChange={(e) => updateURLParams({ ownership: e.target.value })}
-                className="bg-background border border-input rounded-md px-3 py-1 text-sm"
-              >
-                <option value="all">All Books</option>
-                <option value="owned">Owned</option>
-                <option value="wishlist">Wishlist</option>
-              </select>
-            </div>
-
-            {/* Genre Filter - COMMENTED OUT FOR NOW
-                Features implemented but disabled:
-                - Filters books by genre from user's collection only
-                - Syncs with URL routing (?genre=Fiction)
-                - Auto-extracts unique genres from book collection
-                - Truncates long genre names for compact display
-                - Integrates with existing filter system
-                
-                To re-enable: uncomment this block and ensure filterGenre 
-                and availableGenres props are passed to LibraryControls
-            */}
-            {/* {availableGenres.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Genre:</span>
-                <select
-                  value={filterGenre}
-                  onChange={(e) => updateURLParams({ genre: e.target.value })}
-                  className="bg-background border border-input rounded-md px-3 py-1 text-sm w-24 max-w-24"
-                >
-                  <option value="all">All</option>
-                  {availableGenres.map((genre) => (
-                    <option key={genre} value={genre}>
-                      {genre.length > 8 ? `${genre.slice(0, 8)}...` : genre}
-                    </option>
-                  ))}
-                </select>
+                {/* Ownership Filter */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Ownership:</span>
+                  <select
+                    value={filterOwnership}
+                    onChange={(e) => updateURLParams({ ownership: e.target.value })}
+                    className="bg-background border border-input rounded-md px-3 py-1 text-sm min-w-[120px]"
+                  >
+                    <option value="all">All Books</option>
+                    <option value="owned">Owned</option>
+                    <option value="wishlist">Wishlist</option>
+                  </select>
+                </div>
               </div>
-            )} */}
+            </div>
 
-            {/* Sort Options */}
-            <div className="flex items-center gap-2">
+            {/* Sort Options - Horizontal scroll on mobile */}
+            <div className="space-y-2">
               <span className="text-sm font-medium">Sort by:</span>
-              <div className="flex gap-1">
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                 {[
                   { key: "title" as const, label: "Title" },
                   { key: "author" as const, label: "Author" },
@@ -203,7 +179,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                       const newDirection = sortBy === key && sortDirection === "asc" ? "desc" : "asc";
                       updateURLParams({ sort: key, direction: newDirection });
                     }}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 whitespace-nowrap flex-shrink-0"
                   >
                     {label}
                     {sortBy === key &&
@@ -223,12 +199,123 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => updateURLParams({ filter: "all", ownership: "all", genre: "all", sort: "title", direction: "asc", view: "grid" })}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 w-full justify-center"
               >
                 <X className="h-3 w-3" />
                 Clear Filters ({activeFiltersCount})
               </Button>
             )}
+          </div>
+
+          {/* Desktop Layout - Original horizontal layout */}
+          <div className="hidden lg:block">
+            <div className="flex flex-wrap gap-4 items-center">
+              {/* Status Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Status:</span>
+                <select
+                  value={filterStatus}
+                  onChange={(e) =>
+                    updateURLParams({ filter: e.target.value })
+                  }
+                  className="bg-background border border-input rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="all">All</option>
+                  <option value="not_started">Not Started</option>
+                  <option value="in_progress">Reading</option>
+                  <option value="finished">Finished</option>
+                </select>
+              </div>
+
+              {/* Ownership Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Ownership:</span>
+                <select
+                  value={filterOwnership}
+                  onChange={(e) => updateURLParams({ ownership: e.target.value })}
+                  className="bg-background border border-input rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="all">All Books</option>
+                  <option value="owned">Owned</option>
+                  <option value="wishlist">Wishlist</option>
+                </select>
+              </div>
+
+              {/* Genre Filter - COMMENTED OUT FOR NOW
+                  Features implemented but disabled:
+                  - Filters books by genre from user's collection only
+                  - Syncs with URL routing (?genre=Fiction)
+                  - Auto-extracts unique genres from book collection
+                  - Truncates long genre names for compact display
+                  - Integrates with existing filter system
+                  
+                  To re-enable: uncomment this block and ensure filterGenre 
+                  and availableGenres props are passed to LibraryControls
+              */}
+              {/* {availableGenres.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Genre:</span>
+                  <select
+                    value={filterGenre}
+                    onChange={(e) => updateURLParams({ genre: e.target.value })}
+                    className="bg-background border border-input rounded-md px-3 py-1 text-sm w-24 max-w-24"
+                  >
+                    <option value="all">All</option>
+                    {availableGenres.map((genre) => (
+                      <option key={genre} value={genre}>
+                        {genre.length > 8 ? `${genre.slice(0, 8)}...` : genre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )} */}
+
+              {/* Sort Options */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Sort by:</span>
+                <div className="flex gap-1">
+                  {[
+                    { key: "title" as const, label: "Title" },
+                    { key: "author" as const, label: "Author" },
+                    { key: "pages" as const, label: "Pages" },
+                    { key: "rating" as const, label: "Rating" },
+                    { key: "progress" as const, label: "Progress" },
+                  ].map(({ key, label }) => (
+                    <Button
+                      key={key}
+                      variant={sortBy === key ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        const newDirection = sortBy === key && sortDirection === "asc" ? "desc" : "asc";
+                        updateURLParams({ sort: key, direction: newDirection });
+                      }}
+                      className="flex items-center gap-1"
+                    >
+                      {label}
+                      {sortBy === key &&
+                        (sortDirection === "asc" ? (
+                          <SortAsc className="h-3 w-3" />
+                        ) : (
+                          <SortDesc className="h-3 w-3" />
+                        ))}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              {activeFiltersCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateURLParams({ filter: "all", ownership: "all", genre: "all", sort: "title", direction: "asc", view: "grid" })}
+                  className="flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Clear Filters ({activeFiltersCount})
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

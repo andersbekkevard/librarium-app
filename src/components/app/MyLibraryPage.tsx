@@ -65,7 +65,7 @@ export const MyLibraryPage: React.FC<MyLibraryPageProps> = ({
   ]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 overflow-x-hidden">
       <LibraryControls
         searchQuery={searchQuery}
         viewMode={viewMode}
