@@ -77,7 +77,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
               <p className="text-xs text-muted-foreground mb-2">
                 by {book.author}
               </p>
-              
+
               {/* Badges */}
               <div className="flex flex-wrap gap-1.5 mb-2">
                 <ReadingStateBadge state={book.state} />
@@ -89,7 +89,8 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                 <div className="space-y-1 mb-2">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">
-                      {book.progress.currentPage} / {book.progress.totalPages} pages
+                      {book.progress.currentPage} / {book.progress.totalPages}{" "}
+                      pages
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {calculateBookProgress(book)}%
@@ -116,7 +117,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
         <div className="hidden lg:flex gap-4 items-center">
           {/* Cover Image */}
           <div className="flex-shrink-0 pl-3">
-            <div className="w-20 h-28 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
+            <div className="w-18 h-24 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
               {book.coverImage ? (
                 <img
                   src={book.coverImage}

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Grid,
-  List,
-  SortAsc,
-  SortDesc,
-  X,
-} from "lucide-react";
+import { Grid, List, SortAsc, SortDesc, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
@@ -21,7 +15,7 @@ type FilterStatus = "all" | "not_started" | "in_progress" | "finished";
 interface LibraryControlsProps {
   // Search
   searchQuery?: string;
-  
+
   // View mode
   viewMode: ViewMode;
   filterStatus: FilterStatus;
@@ -29,10 +23,10 @@ interface LibraryControlsProps {
   filterGenre: string;
   sortBy: SortOption;
   sortDirection: SortDirection;
-  
+
   // Available genres
   availableGenres: string[];
-  
+
   // Results count
   filteredCount: number;
   totalCount: number;
@@ -61,9 +55,14 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
 
   const updateURLParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === "all" || value === "title" || value === "asc" || value === "grid") {
+      if (
+        value === "all" ||
+        value === "title" ||
+        value === "asc" ||
+        value === "grid"
+      ) {
         // Remove default values to keep URLs clean
         params.delete(key);
       } else {
@@ -71,7 +70,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
       }
     });
 
-    const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+    const newUrl = `${window.location.pathname}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
     router.push(newUrl);
   };
 
@@ -109,7 +110,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
 
       {/* Controls */}
       <Card>
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="px-4 space-y-4">
           {/* Search info - controlled by header */}
           {searchQuery.trim() && (
             <div className="bg-muted/50 p-3 rounded-md">
@@ -149,7 +150,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                   <span className="text-sm font-medium">Ownership:</span>
                   <select
                     value={filterOwnership}
-                    onChange={(e) => updateURLParams({ ownership: e.target.value })}
+                    onChange={(e) =>
+                      updateURLParams({ ownership: e.target.value })
+                    }
                     className="bg-background border border-input rounded-md px-3 py-1 text-sm min-w-[120px]"
                   >
                     <option value="all">All Books</option>
@@ -176,7 +179,10 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                     variant={sortBy === key ? "default" : "outline"}
                     size="sm"
                     onClick={() => {
-                      const newDirection = sortBy === key && sortDirection === "asc" ? "desc" : "asc";
+                      const newDirection =
+                        sortBy === key && sortDirection === "asc"
+                          ? "desc"
+                          : "asc";
                       updateURLParams({ sort: key, direction: newDirection });
                     }}
                     className="flex items-center gap-1 whitespace-nowrap flex-shrink-0"
@@ -198,7 +204,16 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateURLParams({ filter: "all", ownership: "all", genre: "all", sort: "title", direction: "asc", view: "grid" })}
+                onClick={() =>
+                  updateURLParams({
+                    filter: "all",
+                    ownership: "all",
+                    genre: "all",
+                    sort: "title",
+                    direction: "asc",
+                    view: "grid",
+                  })
+                }
                 className="flex items-center gap-1 w-full justify-center"
               >
                 <X className="h-3 w-3" />
@@ -215,9 +230,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                 <span className="text-sm font-medium">Status:</span>
                 <select
                   value={filterStatus}
-                  onChange={(e) =>
-                    updateURLParams({ filter: e.target.value })
-                  }
+                  onChange={(e) => updateURLParams({ filter: e.target.value })}
                   className="bg-background border border-input rounded-md px-3 py-1 text-sm"
                 >
                   <option value="all">All</option>
@@ -232,7 +245,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                 <span className="text-sm font-medium">Ownership:</span>
                 <select
                   value={filterOwnership}
-                  onChange={(e) => updateURLParams({ ownership: e.target.value })}
+                  onChange={(e) =>
+                    updateURLParams({ ownership: e.target.value })
+                  }
                   className="bg-background border border-input rounded-md px-3 py-1 text-sm"
                 >
                   <option value="all">All Books</option>
@@ -286,7 +301,10 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                       variant={sortBy === key ? "default" : "outline"}
                       size="sm"
                       onClick={() => {
-                        const newDirection = sortBy === key && sortDirection === "asc" ? "desc" : "asc";
+                        const newDirection =
+                          sortBy === key && sortDirection === "asc"
+                            ? "desc"
+                            : "asc";
                         updateURLParams({ sort: key, direction: newDirection });
                       }}
                       className="flex items-center gap-1"
@@ -308,7 +326,16 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => updateURLParams({ filter: "all", ownership: "all", genre: "all", sort: "title", direction: "asc", view: "grid" })}
+                  onClick={() =>
+                    updateURLParams({
+                      filter: "all",
+                      ownership: "all",
+                      genre: "all",
+                      sort: "title",
+                      direction: "asc",
+                      view: "grid",
+                    })
+                  }
                   className="flex items-center gap-1"
                 >
                   <X className="h-3 w-3" />
