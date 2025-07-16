@@ -71,9 +71,9 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       }}
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
-      <CardContent className="p-4 h-full flex gap-4">
+      <CardContent className="px-4 h-full flex gap-4">
         {/* Book Cover - Responsive width, desktop uses original w-24 */}
-        <div className="flex-shrink-0 w-20 md:w-24 lg:w-24 h-full">
+        <div className="flex-shrink-0 w-20 md:w-24 lg:w-24">
           <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
             {book.coverImage ? (
               <img
