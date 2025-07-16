@@ -288,7 +288,14 @@ describe("BookCard", () => {
     it("should have proper card dimensions", () => {
       render(<BookCard book={mockBook} />);
       const card = screen.getByRole("button");
-      expect(card).toHaveClass("h-48");
+      expect(card).toHaveClass("h-32");
+      expect(card).toHaveClass("md:h-40");
+      expect(card).toHaveClass("lg:h-48");
+      expect(card).toHaveClass("w-full");
+      expect(card).toHaveClass("max-w-sm");
+      expect(card).toHaveClass("md:max-w-md");
+      expect(card).toHaveClass("lg:w-full");
+      expect(card).toHaveClass("lg:max-w-none");
     });
   });
 

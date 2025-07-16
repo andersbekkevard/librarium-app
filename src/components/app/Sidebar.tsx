@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
   };
 
   return (
-    <div className="fixed left-0 top-[72px] w-64 h-[calc(100vh-72px)] bg-background border-r border-border flex flex-col z-40">
+    <div className="w-64 h-full bg-background border-r border-border flex flex-col">
       {/* Add Book Button */}
       <div className="p-4 border-b border-border">
         <Button

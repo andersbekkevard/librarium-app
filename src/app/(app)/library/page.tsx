@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import MyLibraryPage from "@/components/app/MyLibraryPage";
-import Sidebar from "@/components/app/Sidebar";
 
 function LibraryContent() {
   const searchParams = useSearchParams();
@@ -22,26 +21,17 @@ function LibraryContent() {
     router.push(`/books/${bookId}`);
   };
 
-  const handleAddBookClick = () => {
-    router.push('/add-books');
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar onAddBookClick={handleAddBookClick} />
-      <div className="ml-64">
-        <MyLibraryPage
-          searchQuery={searchQuery}
-          onBookClick={handleBookClick}
-          filterStatus={filterStatus}
-          filterOwnership={filterOwnership}
-          filterGenre={filterGenre}
-          sortBy={sortBy}
-          sortDirection={sortDirection as "asc" | "desc"}
-          viewMode={viewMode as "grid" | "list"}
-        />
-      </div>
-    </div>
+    <MyLibraryPage
+      searchQuery={searchQuery}
+      onBookClick={handleBookClick}
+      filterStatus={filterStatus}
+      filterOwnership={filterOwnership}
+      filterGenre={filterGenre}
+      sortBy={sortBy}
+      sortDirection={sortDirection as "asc" | "desc"}
+      viewMode={viewMode as "grid" | "list"}
+    />
   );
 }
 

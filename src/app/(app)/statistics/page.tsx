@@ -1,6 +1,5 @@
 "use client";
 
-import Sidebar from "@/components/app/Sidebar";
 import {
   ChartContainer,
   ChartTooltip,
@@ -20,7 +19,6 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   Area,
@@ -34,14 +32,9 @@ import {
 } from "recharts";
 
 export default function StatisticsPage() {
-  const router = useRouter();
   const { userStats, loading: userLoading } = useUserContext();
   const { books, loading: booksLoading } = useBooksContext();
   const { events, loading: eventsLoading } = useEventsContext();
-
-  const handleAddBookClick = () => {
-    router.push("/add-books");
-  };
 
 
   // Calculate historical pages read data by genre for stacked area chart
@@ -169,17 +162,14 @@ export default function StatisticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Sidebar onAddBookClick={handleAddBookClick} />
-        <div className="ml-64 p-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-muted rounded w-1/4 mb-2"></div>
-            <div className="h-4 bg-muted rounded w-1/2 mb-6"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-muted rounded-lg"></div>
-              ))}
-            </div>
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/4 mb-2"></div>
+          <div className="h-4 bg-muted rounded w-1/2 mb-6"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted rounded-lg"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -187,9 +177,7 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar onAddBookClick={handleAddBookClick} />
-      <div className="ml-64 p-6">
+    <div className="p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Reading Analytics
@@ -585,6 +573,5 @@ export default function StatisticsPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
