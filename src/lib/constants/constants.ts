@@ -1,9 +1,9 @@
 /**
  * Application-wide constants and configuration values
- * 
+ *
  * This file centralizes all hardcoded values used throughout the application
  * to improve maintainability, consistency, and configurability.
- * 
+ *
  * @fileoverview Centralized constants for Librarium app configuration
  */
 
@@ -36,12 +36,12 @@ export const UI_CONFIG = {
      * Standard book card height in Tailwind classes
      * Provides consistent card sizing across the app
      */
-    HEIGHT: 'h-48',
-    
+    HEIGHT: "h-48",
+
     /**
      * Standard card width constraints
      */
-    WIDTH: 'w-full max-w-sm',
+    WIDTH: "w-full max-w-none",
   },
 
   /**
@@ -52,7 +52,7 @@ export const UI_CONFIG = {
      * Maximum books to show in "Currently Reading" section
      */
     CURRENTLY_READING_LIMIT: 4,
-    
+
     /**
      * Maximum books to show in "Recently Read" section
      */
@@ -77,12 +77,12 @@ export const UI_CONFIG = {
      * Navigation elements and dropdown menus
      */
     NAVIGATION: 10,
-    
+
     /**
      * Floating headers and sticky elements
      */
     HEADER: 40,
-    
+
     /**
      * Modal overlays and important floating content
      */
@@ -107,23 +107,23 @@ export const API_CONFIG = {
      * Default number of search results to fetch
      */
     DEFAULT_SEARCH_RESULTS: 10,
-    
+
     /**
      * Maximum allowed search results per request
      * Google Books API has a limit of 40 results per request
      */
     MAX_SEARCH_RESULTS: 40,
-    
+
     /**
      * Number of results for author search
      */
     AUTHOR_SEARCH_RESULTS: 5,
-    
+
     /**
      * Number of results for genre search
      */
     GENRE_SEARCH_RESULTS: 10,
-    
+
     /**
      * Number of results for recommendations
      */
@@ -153,12 +153,12 @@ export const EVENT_CONFIG = {
    * Default limit for recent events queries
    */
   RECENT_EVENTS_LIMIT: 10,
-  
+
   /**
    * Default limit for user activity queries
    */
   USER_ACTIVITY_LIMIT: 5,
-  
+
   /**
    * Maximum number of favorite genres to track
    */
@@ -187,17 +187,17 @@ export const TIMING_CONFIG = {
      * Fast transitions (hover effects, simple state changes)
      */
     FAST: 150,
-    
+
     /**
      * Standard transitions (component animations)
      */
     STANDARD: 200,
-    
+
     /**
      * Slow transitions (complex animations, page transitions)
      */
     SLOW: 300,
-    
+
     /**
      * Modal and overlay animations
      */
@@ -212,17 +212,17 @@ export const TIMING_CONFIG = {
      * Milliseconds in one minute
      */
     MINUTE_MS: 1000 * 60,
-    
+
     /**
      * Milliseconds in one hour
      */
     HOUR_MS: 1000 * 60 * 60,
-    
+
     /**
      * Milliseconds in one day
      */
     DAY_MS: 1000 * 60 * 60 * 24,
-    
+
     /**
      * Milliseconds in one week
      */
@@ -246,7 +246,7 @@ export const VALIDATION_CONFIG = {
      * Maximum characters for description fields
      */
     DESCRIPTION_MAX_LENGTH: 500,
-    
+
     /**
      * Maximum characters for note fields
      */
@@ -261,12 +261,12 @@ export const VALIDATION_CONFIG = {
      * Minimum page number
      */
     MIN_PAGE: 0,
-    
+
     /**
      * Minimum year for publication date
      */
     MIN_PUBLICATION_YEAR: 1000,
-    
+
     /**
      * Maximum year for publication date (current year)
      */
@@ -287,12 +287,12 @@ export const TEST_CONFIG = {
    * Default timeout for async operations in tests
    */
   DEFAULT_TIMEOUT_MS: 5000,
-  
+
   /**
    * Network delay simulation for loading states
    */
   NETWORK_DELAY_MS: 1000,
-  
+
   /**
    * Polling interval for test assertions
    */
@@ -315,16 +315,16 @@ export const LAYOUT_CONFIG = {
      * Width percentages for different screen sizes
      */
     WIDTH: {
-      MOBILE: '90%',
-      TABLET: '70%',
-      DESKTOP: '75%',
+      MOBILE: "90%",
+      TABLET: "70%",
+      DESKTOP: "75%",
     },
-    
+
     /**
      * Maximum width constraint
      */
-    MAX_WIDTH: 'max-w-screen-xl',
-    
+    MAX_WIDTH: "max-w-screen-xl",
+
     /**
      * Top offset from viewport
      */
@@ -338,8 +338,8 @@ export const LAYOUT_CONFIG = {
     /**
      * Vertical padding for hero sections
      */
-    HERO_PADDING_Y: 'py-20 md:py-32',
-    
+    HERO_PADDING_Y: "py-20 md:py-32",
+
     /**
      * Standard gap between elements
      */

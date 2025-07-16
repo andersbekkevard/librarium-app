@@ -54,10 +54,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
     <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40",
-        // Mobile/tablet responsive dimensions with increased height for better content fit
-        "h-44 md:h-48 w-full max-w-sm md:max-w-md",
-        // Desktop: restore original height but allow full width in grid
-        `lg:${UI_CONFIG.CARD.HEIGHT} lg:w-full lg:max-w-none`
+        /* — mobile / tablet: dynamic height with minimums — */
+        "min-h-44 md:min-h-48 w-full max-w-sm md:max-w-md",
+        /* — desktop (lg+): use fixed height with design tokens — */
+        `lg:${UI_CONFIG.CARD.WIDTH}`,
+        `lg:${UI_CONFIG.CARD.HEIGHT}`
       )}
       style={{ transitionDuration: `${TIMING_CONFIG.ANIMATION.STANDARD}ms` }}
       onClick={handleCardClick}
@@ -72,9 +73,9 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
       <CardContent className="p-4 h-full flex gap-4">
-        {/* Book Cover - Responsive width, desktop uses original w-24 */}
-        <div className="flex-shrink-0 w-20 md:w-24 lg:w-24 h-full">
-          <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
+        {/* Book Cover - Responsive width, improved height handling */}
+        <div className="flex-shrink-0 w-20 md:w-24 lg:w-24">
+          <div className="w-full h-32 md:h-36 lg:h-40 rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
             {book.coverImage ? (
               <img
                 src={book.coverImage}
@@ -89,10 +90,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
           </div>
         </div>
 
-        {/* Book Information */}
-        <div className="flex-1 flex flex-col justify-between min-w-0">
+        {/* Book Information - Improved layout with dynamic spacing */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* Title and Author */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 flex-shrink-0">
             <h3 className="font-semibold text-foreground text-sm md:text-base leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
               {book.title}
             </h3>
@@ -101,14 +102,17 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
             </p>
           </div>
 
-          {/* Genre and Status Badges */}
-          <div className="flex flex-wrap gap-1.5 my-2">
+          {/* Genre and Status Badges - Allow wrapping */}
+          <div className="flex flex-wrap gap-1.5 my-2 flex-shrink-0">
             <GenreBadge genre={genre} />
             <ReadingStateBadge state={book.state} />
           </div>
 
-          {/* Progress/Rating Section */}
-          <div className="mt-auto">
+          {/* Spacer to push progress/rating to bottom */}
+          <div className="flex-1 min-h-2"></div>
+
+          {/* Progress/Rating Section - Always visible at bottom */}
+          <div className="flex-shrink-0">
             {book.state === "in_progress" &&
               book.progress.currentPage &&
               book.progress.totalPages && (

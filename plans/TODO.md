@@ -5,6 +5,10 @@
 - [ ] Refine Landing animations
 - [ ] Animations for app
 
+## Mobile
+- [ ] Make new search bar functionality for mobile
+- [ ] Make even more Mobile native functionality
+
 
 ## Nice-to-have feature
 - [X] Align search bar properly, and integrate it with actual functionality

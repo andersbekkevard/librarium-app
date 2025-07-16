@@ -200,16 +200,19 @@ const AddBooksPageContent = () => {
       <Tabs defaultValue="search" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="search">
-            <Search className="h-4 w-4 mr-2" />
-            Search Online
+            <Search className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="inline sm:hidden">Search</span>
+            <span className="hidden sm:inline">Search Online</span>
           </TabsTrigger>
           <TabsTrigger value="manual">
-            <FileText className="h-4 w-4 mr-2" />
-            Manual Entry
+            <FileText className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="inline sm:hidden">Manual</span>
+            <span className="hidden sm:inline">Manual Entry</span>
           </TabsTrigger>
           <TabsTrigger value="scan">
-            <Camera className="h-4 w-4 mr-2" />
-            Scan Barcode
+            <Camera className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="inline sm:hidden">Scan</span>
+            <span className="hidden sm:inline">Scan Barcode</span>
           </TabsTrigger>
         </TabsList>
 

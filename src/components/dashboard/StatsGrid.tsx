@@ -1,6 +1,6 @@
-import { BookOpen, Star, Zap, TrendingUp } from "lucide-react";
-import StatCard from "./StatCard";
+import { BookOpen, Star, TrendingUp, Zap } from "lucide-react";
 import ReadingStreakCard from "./ReadingStreakCard";
+import StatCard from "./StatCard";
 
 interface Stats {
   totalBooks: number;
@@ -14,57 +14,64 @@ interface StatsGridProps {
   stats: Stats;
 }
 
-export const StatsGrid: React.FC<StatsGridProps> = ({
-  stats,
-}) => {
+export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
   return (
     <>
       {/* Mobile Layout - Single compact card */}
       <div className="block lg:hidden mb-8">
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Total Books */}
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-brand-primary/10 rounded-full flex items-center justify-center">
-                <BookOpen className="h-4 w-4 text-brand-primary" />
+            <div className="text-center p-3 bg-brand-primary/5 rounded-lg">
+              <div className="h-10 w-10 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <BookOpen className="h-5 w-5 text-brand-primary" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Books</p>
-                <p className="text-lg font-bold text-foreground">{stats.totalBooks}</p>
-              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {stats.totalBooks}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                Total Books
+              </p>
             </div>
 
             {/* Read This Year */}
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-status-success/10 rounded-full flex items-center justify-center">
-                <Star className="h-4 w-4 text-status-success fill-current" />
+            <div className="text-center p-3 bg-status-success/5 rounded-lg">
+              <div className="h-10 w-10 bg-status-success/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Star className="h-5 w-5 text-status-success fill-current" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Read This Year</p>
-                <p className="text-lg font-bold text-foreground">{stats.finishedBooks}</p>
-              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {stats.finishedBooks}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                Read This Year
+              </p>
             </div>
 
             {/* Pages This Month */}
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-brand-accent/10 rounded-full flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-brand-accent" />
+            <div className="text-center p-3 bg-brand-accent/5 rounded-lg">
+              <div className="h-10 w-10 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <TrendingUp className="h-5 w-5 text-brand-accent" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pages This Month</p>
-                <p className="text-lg font-bold text-foreground">{stats.totalPagesRead}</p>
-              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {stats.totalPagesRead}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                Pages This Month
+              </p>
             </div>
 
             {/* Reading Streak */}
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center">
-                <Zap className="h-4 w-4 text-white" />
+            <div className="text-center p-3 bg-gradient-to-br from-brand-primary/10 to-brand-accent/10 rounded-lg">
+              <div className="h-10 w-10 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center mx-auto mb-2">
+                <Zap className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Reading Streak</p>
-                <p className="text-lg font-bold text-foreground">{stats.readingStreak} days</p>
-              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {stats.readingStreak}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground mb-1">
+                Reading Streak
+              </p>
+              <p className="text-xs text-muted-foreground">days</p>
             </div>
           </div>
         </div>
@@ -81,7 +88,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
             iconColor="text-brand-primary"
             iconBgColor="bg-brand-primary/10"
           />
-          
+
           <StatCard
             title="Read This Year"
             value={stats.finishedBooks}
@@ -89,7 +96,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
             iconColor="text-status-success fill-current"
             iconBgColor="bg-status-success/10"
           />
-          
+
           <StatCard
             title="Pages This Month"
             value={stats.totalPagesRead}
@@ -100,7 +107,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
         </div>
 
         {/* Reading Streak */}
-        <ReadingStreakCard 
+        <ReadingStreakCard
           streakDays={stats.readingStreak}
           encouragementText="Keep it up!"
         />
