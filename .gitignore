@@ -166,8 +166,9 @@ styleguide/
 .scratch
 .history/
 .vscode-test/
-.claude
-.cursor
+.claude/
+.cursor/	
+.kiro/
 CLAUDE.md
 GEMINI.md
 AGENTS.md
