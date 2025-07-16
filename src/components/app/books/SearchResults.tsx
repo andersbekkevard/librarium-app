@@ -52,7 +52,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Book Cover */}
               <div className="flex-shrink-0 self-center sm:self-start">
-                <div className="w-20 h-28 sm:w-16 sm:h-24 bg-muted rounded flex items-center justify-center">
+                <div className="w-20 h-28 sm:w-24 sm:h-36 md:w-32 md:h-48 bg-muted rounded flex items-center justify-center">
                   {getBestThumbnail(book) ? (
                     <img
                       src={getBestThumbnail(book)}
