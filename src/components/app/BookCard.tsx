@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { GenreBadge } from "@/components/ui/genre-badge";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
@@ -54,9 +53,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   return (
     <Card
       className={cn(
-        UI_CONFIG.CARD.WIDTH,
-        UI_CONFIG.CARD.HEIGHT,
-        "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40"
+        "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40",
+        // Mobile/tablet responsive dimensions with reasonable max-width
+        "h-32 md:h-40 w-full max-w-sm md:max-w-md",
+        // Desktop: restore original height but allow full width in grid
+        `lg:${UI_CONFIG.CARD.HEIGHT} lg:w-full lg:max-w-none`
       )}
       style={{ transitionDuration: `${TIMING_CONFIG.ANIMATION.STANDARD}ms` }}
       onClick={handleCardClick}
@@ -71,8 +72,8 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       aria-label={`View details for ${book.title} by ${book.author}`}
     >
       <CardContent className="p-3 h-full flex gap-3">
-        {/* Book Cover - Takes up more space and full height */}
-        <div className="flex-shrink-0 w-24 h-full">
+        {/* Book Cover - Responsive width, desktop uses original w-24 */}
+        <div className="flex-shrink-0 w-20 md:w-24 lg:w-24 h-full">
           <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
             {book.coverImage ? (
               <img

@@ -1,21 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Heart, BookOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Sidebar from "@/components/app/Sidebar";
 
 export default function WishlistPage() {
-  const router = useRouter();
-
-  const handleAddBookClick = () => {
-    router.push('/add-books');
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar onAddBookClick={handleAddBookClick} />
-      <div className="ml-64 p-6">
+    <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">
           Wishlist
@@ -51,7 +41,6 @@ export default function WishlistPage() {
           </Button>
         </div>
       </div>
-    </div>
     </div>
   );
 }

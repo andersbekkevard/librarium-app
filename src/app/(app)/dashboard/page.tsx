@@ -1,5 +1,4 @@
 "use client";
-import Sidebar from "@/components/app/Sidebar";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
@@ -81,26 +80,14 @@ export default function Dashboard() {
     router.push(`/books/${bookId}`);
   };
 
-  const handleAddBookClick = () => {
-    router.push("/add-books");
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sidebar - Fixed Position under header */}
-      <Sidebar onAddBookClick={handleAddBookClick} />
-
-      {/* Main Content - Adjusted for both fixed header and sidebar */}
-      <main className="ml-64">
-        <DashboardContent
-          books={books}
-          stats={stats}
-          userId={user?.uid || ""}
-          onEdit={handleEdit}
-          onUpdateProgress={handleUpdateProgress}
-          onBookClick={handleBookClick}
-        />
-      </main>
-    </div>
+    <DashboardContent
+      books={books}
+      stats={stats}
+      userId={user?.uid || ""}
+      onEdit={handleEdit}
+      onUpdateProgress={handleUpdateProgress}
+      onBookClick={handleBookClick}
+    />
   );
 }

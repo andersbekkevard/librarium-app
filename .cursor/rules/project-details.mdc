@@ -1,0 +1,173 @@
+---
+alwaysApply: false
+---
+Project details
+
+## Directory Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── (app)/             # Protected dashboard routes
+│   │   ├── dashboard/     # Main dashboard with reading statistics
+│   │   ├── library/       # Book library management
+│   │   ├── add-books/     # Add new books interface
+│   │   ├── books/[id]/    # Individual book detail pages
+│   │   ├── progress/      # Reading progress tracking
+│   │   ├── statistics/    # Reading statistics and analytics
+│   │   └── wishlist/      # Wishlist management
+│   ├── (landing)/         # Public landing page
+│   └── layout.tsx         # Root layout with fonts (Geist Sans/Mono)
+├── components/
+│   ├── ui/                # Reusable UI components (Radix-based)
+│   │   ├── button.tsx     # Button component with variants
+│   │   ├── card.tsx       # Card component with proper styling
+│   │   ├── input.tsx      # Input component with validation
+│   │   └── ...            # Other UI primitives
+│   ├── app/               # Main application components
+│   │   ├── BookCard.tsx       # Book display component with progress
+│   │   ├── BookDetailPage.tsx # Detailed book view with tracking
+│   │   ├── Header.tsx         # App header with search functionality
+│   │   ├── MyLibraryPage.tsx  # Library interface with filtering
+│   │   ├── Sidebar.tsx        # Navigation sidebar
+│   │   └── UserProfileDropdown.tsx # User profile with statistics
+│   ├── dashboard/         # Dashboard-specific components
+│   │   ├── DashboardContent.tsx     # Main dashboard layout
+│   │   ├── StatsGrid.tsx            # Reading statistics grid
+│   │   ├── CurrentlyReadingSection.tsx # Currently reading books
+│   │   ├── ReadingStreakCard.tsx    # Reading streak display
+│   │   └── RecentActivitySection.tsx # Recent reading activity
+│   └── landing/           # Landing page sections
+├── lib/
+│   ├── models.ts          # Centralized data models (Book, UserProfile, BookEvent)
+│   ├── firebase.ts        # Firebase configuration and exports
+│   ├── colors.ts          # Centralized color system with brand colors
+│   ├── google-books-api.ts # Google Books API integration
+│   ├── book-utils.ts      # Book-related utility functions
+│   ├── providers/         # React context providers
+│   │   ├── AuthProvider.tsx   # Authentication context
+│   │   ├── BooksProvider.tsx  # Book data context with real-time updates
+│   │   ├── UserProvider.tsx   # User profile context
+│   │   └── AppProviders.tsx   # Combined providers wrapper
+│   ├── repositories/      # Data access layer
+│   │   ├── FirebaseBookRepository.ts  # Book data operations
+│   │   ├── FirebaseUserRepository.ts  # User data operations
+│   │   ├── FirebaseEventRepository.ts # Event logging operations
+│   │   └── types.ts              # Repository interfaces and types
+│   ├── services/          # Business logic layer
+│   │   ├── AuthService.ts     # Authentication business logic
+│   │   ├── BookService.ts     # Book management business logic
+│   │   ├── UserService.ts     # User management business logic
+│   │   ├── EventService.ts    # Event logging business logic
+│   │   └── types.ts           # Service interfaces and types
+│   └── hooks/             # Custom React hooks
+│       └── useBookSearch.ts   # Book search functionality
+└── styles/
+    └── colors.md          # Color system documentation
+```
+
+## Data Models
+
+All data models are centralized in `src/lib/models.ts` with comprehensive type safety:
+
+### Core Entities
+
+#### Book
+Complete book model with nested progress tracking:
+```typescript
+interface Book {
+  id: string;
+  title: string;
+  author: string;
+  state: "not_started" | "in_progress" | "finished";
+  progress: {
+    currentPage: number;
+    totalPages: number;
+  };
+  isOwned: boolean; // true = owned, false = wishlist
+  rating?: number; // 1-5 stars
+  // Metadata from Google Books API
+  isbn?: string;
+  coverImage?: string;
+  genre?: string;
+  publishedDate?: string;
+  description?: string;
+  // Timestamps
+  addedAt: Timestamp;
+  updatedAt: Timestamp;
+  startedAt?: Timestamp;
+  finishedAt?: Timestamp;
+}
+```
+
+#### UserProfile
+User data with reading statistics:
+```typescript
+interface UserProfile {
+  id: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  emailVerified: boolean;
+  lastSignInTime: string;
+  // Reading statistics
+  totalBooksRead: number;
+  currentlyReading: number;
+  booksInLibrary: number;
+  // Timestamps
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+```
+
+#### BookEvent
+Event logging for reading activities:
+```typescript
+interface BookEvent {
+  id: string;
+  bookId: string;
+  userId: string;
+  type: "state_change" | "progress_update" | "rating_added" | "note_added";
+  timestamp: Timestamp;
+  data: {
+    previousState?: Book["state"];
+    newState?: Book["state"];
+    previousPage?: number;
+    newPage?: number;
+    rating?: number;
+    note?: string;
+  };
+}
+```
+
+### Reading State Machine
+Books follow a strict state machine with validation:
+- **States**: `not_started` → `in_progress` → `finished`
+- **Validation**: `canTransitionTo()` function prevents invalid transitions
+- **Automatic Transitions**: Progress updates trigger state changes
+
+### Data Validation
+- Type guards: `isValidReadingState()`, `isValidEventType()`
+- Validation functions: `validateProgress()`, `validateRating()`
+- Business rules: `READING_STATE_TRANSITIONS` constant
+
+## Firebase Integration
+
+### Database Structure
+```
+users/{userId}/
+├── profile/
+│   └── main           # UserProfile document
+├── books/{bookId}/    # User's book collection
+└── events/{eventId}/  # Reading history and events
+```
+
+### Services Used
+- **Authentication**: Google OAuth with automatic UserProfile creation
+- **Firestore**: User-centric document structure with real-time listeners
+- **Storage**: Ready for file uploads (book cover images)
+
+### Real-time Updates
+- Repository layer manages Firestore subscriptions
+- Automatic state synchronization in providers
+- Optimistic updates for better UX
