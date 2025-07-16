@@ -4,11 +4,11 @@ import Sidebar from "@/components/app/Sidebar";
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
+import { createGenreColorMapping } from "@/lib/utils/genre-colors";
 import { eachMonthOfInterval, format, startOfMonth, subMonths } from "date-fns";
 import {
   Award,
@@ -43,9 +43,10 @@ export default function StatisticsPage() {
     router.push("/add-books");
   };
 
-  // Calculate historical pages read data
-  const historicalData = useMemo(() => {
-    if (!events.length) return [];
+
+  // Calculate historical pages read data by genre for stacked area chart
+  const historicalDataByGenre = useMemo(() => {
+    if (!events.length || !books.length) return [];
 
     const progressEvents = events.filter(
       (event) => event.type === "progress_update"
@@ -55,7 +56,20 @@ export default function StatisticsPage() {
       end: new Date(),
     });
 
-    return last12Months.map((month) => {
+    // Helper function to resolve genre from bookId
+    const resolveGenre = (bookId: string): string => {
+      const book = books.find(b => b.id === bookId);
+      return book?.genre || "Unknown";
+    };
+
+    // First, collect all unique genres from all events
+    const allGenres = new Set<string>();
+    progressEvents.forEach(event => {
+      const genre = resolveGenre(event.bookId);
+      allGenres.add(genre);
+    });
+
+    const monthlyData = last12Months.map((month) => {
       const monthStart = startOfMonth(month);
       const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 
@@ -64,39 +78,32 @@ export default function StatisticsPage() {
         return eventDate >= monthStart && eventDate <= monthEnd;
       });
 
-      const totalPages = monthEvents.reduce((sum, event) => {
-        const pagesRead =
-          (event.data.newPage || 0) - (event.data.previousPage || 0);
-        return sum + Math.max(0, pagesRead);
-      }, 0);
+      // Group events by genre and sum pages read
+      const genrePages = monthEvents.reduce((acc, event) => {
+        const genre = resolveGenre(event.bookId);
+        const pagesRead = Math.max(0, (event.data.newPage || 0) - (event.data.previousPage || 0));
+        acc[genre] = (acc[genre] || 0) + pagesRead;
+        return acc;
+      }, {} as Record<string, number>);
 
-      return {
+      // Ensure all genres have a value (0 if no data for that month)
+      const monthData: Record<string, number | string> = {
         month: format(month, "MMM yyyy"),
-        pages: totalPages,
-        books: new Set(monthEvents.map((e) => e.bookId)).size,
       };
+      
+      allGenres.forEach(genre => {
+        monthData[genre] = genrePages[genre] || 0;
+      });
+
+      return monthData;
     });
-  }, [events]);
+
+    return monthlyData;
+  }, [events, books]);
 
   // Calculate genre distribution for pie chart
   const genreData = useMemo(() => {
     if (!books.length) return [];
-
-    // Brand-inspired color palette with better contrast - alternating between light and dark
-    const genreColors = [
-      "oklch(0.55 0.25 240)", // Brand primary - vibrant blue (medium)
-      "oklch(0.35 0.12 225)", // Very dark blue-grey (dark)
-      "oklch(0.75 0.18 250)", // Light purple-blue (light)
-      "oklch(0.45 0.15 230)", // Deep blue (medium-dark)
-      "oklch(0.8 0.15 245)", // Very light blue (very light)
-      "oklch(0.4 0.05 220)", // Brand secondary - dark blue-grey (dark)
-      "oklch(0.7 0.2 240)", // Brand accent - light blue (light)
-      "oklch(0.3 0.08 220)", // Almost black blue-grey (very dark)
-      "oklch(0.85 0.1 240)", // Pale blue (very light)
-      "oklch(0.5 0.18 235)", // Darker medium blue (medium)
-      "oklch(0.6 0.08 220)", // Medium blue-grey (medium-dark)
-      "oklch(0.65 0.22 240)", // Medium blue (medium-light)
-    ];
 
     const genreCounts = books.reduce((acc, book) => {
       const genre = book.genre || "Unknown";
@@ -104,15 +111,16 @@ export default function StatisticsPage() {
       return acc;
     }, {} as Record<string, number>);
 
+    // Get all unique genres and create color mapping
+    const allGenres = Object.keys(genreCounts);
+    const genreColorMap = createGenreColorMapping(allGenres);
+
     return Object.entries(genreCounts)
-      .map(([name, value], index) => ({
+      .map(([name, value]) => ({
         name,
         value,
         percentage: Math.round((value / books.length) * 100),
-        fill:
-          name === "Unknown"
-            ? "oklch(0.85 0.01 240)"
-            : genreColors[index % genreColors.length], // Light grey for Unknown
+        fill: genreColorMap[name],
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8); // Show top 8 genres for pie chart
@@ -295,27 +303,82 @@ export default function StatisticsPage() {
                 Reading Activity Over Time
               </h2>
             </div>
-            {historicalData.length > 0 ? (
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                <AreaChart data={historicalData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} tickLine={false} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area
-                    type="monotone"
-                    dataKey="pages"
-                    stroke="var(--color-pages)"
-                    fill="var(--color-pages)"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ChartContainer>
+            {historicalDataByGenre.length > 0 ? (
+              (() => {
+                // Extract all unique genres from the data (excluding 'month' key)
+                const allGenres = new Set<string>();
+                historicalDataByGenre.forEach(monthData => {
+                  Object.keys(monthData).forEach(key => {
+                    if (key !== 'month') {
+                      allGenres.add(key);
+                    }
+                  });
+                });
+                const availableGenres = Array.from(allGenres).sort(); // Sort for consistent ordering
+                const genreColorMap = createGenreColorMapping(availableGenres);
+
+                return (
+                  <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                    <AreaChart data={historicalDataByGenre}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fontSize: 12 }}
+                        tickLine={false}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} tickLine={false} />
+                      <ChartTooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const totalPages = payload.reduce((sum, entry) => sum + (Number(entry.value) || 0), 0);
+                            return (
+                              <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                                <p className="font-medium text-foreground mb-2">{label}</p>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Total: {totalPages} pages
+                                </p>
+                                <div className="space-y-1">
+                                  {payload
+                                    .filter(entry => Number(entry.value) > 0) // Only show genres with pages read
+                                    .map((entry, index) => (
+                                    <div key={index} className="flex items-center justify-between">
+                                      <div className="flex items-center">
+                                        <div
+                                          className="w-3 h-3 rounded-full mr-2"
+                                          style={{ backgroundColor: entry.color }}
+                                        />
+                                        <span className="text-sm text-foreground">
+                                          {entry.dataKey}
+                                        </span>
+                                      </div>
+                                      <span className="text-sm font-medium text-foreground">
+                                        {entry.value} pages
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      {availableGenres.map(genre => (
+                        <Area
+                          key={genre}
+                          type="monotone"
+                          dataKey={genre}
+                          stackId="genres"
+                          stroke={genreColorMap[genre]}
+                          fill={genreColorMap[genre]}
+                          fillOpacity={0.2}
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </AreaChart>
+                  </ChartContainer>
+                );
+              })()
             ) : (
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                 <div className="text-center">
