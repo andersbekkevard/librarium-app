@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   onAddBookClick?: () => void;
+  onNavigate?: () => void;
   customColors?: {
     active: string;
     hover: string;
@@ -48,11 +49,12 @@ const sidebarItems = [
   //   { id: "wishlist", label: "Wishlist", icon: Heart, href: "/wishlist" },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick, onNavigate }) => {
   const pathname = usePathname();
 
   const handleAddBook = () => {
     onAddBookClick?.();
+    onNavigate?.();
   };
 
   const isActiveItem = (href: string) => {
@@ -112,6 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
                 <li>
                   <Link
                     href={item.href}
+                    onClick={onNavigate}
                     className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${getItemColors(
                       item,
                       isActive
@@ -131,6 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick }) => {
       <div className="p-4 border-t border-border mt-auto">
         <Link
           href="/settings"
+          onClick={onNavigate}
           className="w-full flex items-center px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors"
         >
           <div className="w-6 h-6 bg-muted-foreground rounded-full flex items-center justify-center mr-3">

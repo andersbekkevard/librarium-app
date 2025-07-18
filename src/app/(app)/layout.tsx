@@ -55,7 +55,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 `}
                 >
                   <div className="pt-[72px] h-full">
-                    <Sidebar onAddBookClick={handleAddBookClick} />
+                    <Sidebar onAddBookClick={handleAddBookClick} onNavigate={toggleSidebar} />
                   </div>
                 </div>
               </>

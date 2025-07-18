@@ -5,13 +5,13 @@ import {
   Building,
   Calendar,
   Check,
-  ExternalLink,
   Loader2,
   Plus,
   Search,
   Star,
 } from "lucide-react";
 import * as React from "react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,9 @@ import {
   formatAuthors,
   getBestThumbnail,
 } from "@/lib/api/google-books-api";
+import { BookPreviewDialog } from "./BookPreviewDialog";
+import { BookPreviewPage } from "./BookPreviewPage";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 interface SearchResultsProps {
   books: GoogleBooksVolume[];
@@ -35,6 +38,40 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   addedBooks,
   isAdding,
 }) => {
+  const [previewBook, setPreviewBook] = useState<GoogleBooksVolume | null>(
+    null
+  );
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const isMobile = useIsMobile();
+
+  const handlePreview = (book: GoogleBooksVolume) => {
+    setPreviewBook(book);
+    if (isMobile) {
+      setShowMobilePreview(true);
+    } else {
+      setIsPreviewOpen(true);
+    }
+  };
+
+  const handleBackFromPreview = () => {
+    setShowMobilePreview(false);
+    setPreviewBook(null);
+  };
+
+  // Show mobile preview page if on mobile and preview is open
+  if (isMobile && showMobilePreview && previewBook) {
+    return (
+      <BookPreviewPage
+        book={previewBook}
+        onBack={handleBackFromPreview}
+        onAddBook={onAddBook}
+        isAdding={isAdding}
+        isAdded={addedBooks.has(previewBook.id)}
+      />
+    );
+  }
+
   if (books.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -47,7 +84,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {books.map((book) => (
-        <Card key={book.id} className="overflow-hidden">
+        <Card
+          key={book.id}
+          className="overflow-hidden cursor-pointer hover:shadow-sm transition-shadow"
+          onClick={() => handlePreview(book)}
+        >
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Book Cover */}
@@ -128,11 +169,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 pt-1 sm:pt-2">
+                <div className="flex justify-center sm:justify-start pt-1 sm:pt-2">
                   <Button
                     size="default"
-                    className="flex-1 sm:flex-none h-10 sm:h-9"
-                    onClick={() => onAddBook(book)}
+                    className="w-full sm:w-24 lg:w-60 h-10 sm:h-9"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddBook(book);
+                    }}
                     disabled={addedBooks.has(book.id) || isAdding}
                   >
                     {addedBooks.has(book.id) ? (
@@ -148,18 +192,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     ) : (
                       <>
                         <Plus className="h-4 w-4 mr-1" />
-                        Add Book
+                        Add to Library
                       </>
                     )}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="default"
-                    className="flex-1 sm:flex-none h-10 sm:h-9"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    Preview
                   </Button>
                 </div>
               </div>
@@ -176,6 +211,18 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           </CardContent>
         </Card>
       ))}
+
+      {/* Preview Dialog - Desktop Only */}
+      {!isMobile && (
+        <BookPreviewDialog
+          book={previewBook}
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          onAddBook={onAddBook}
+          isAdding={isAdding}
+          isAdded={previewBook ? addedBooks.has(previewBook.id) : false}
+        />
+      )}
     </div>
   );
 };

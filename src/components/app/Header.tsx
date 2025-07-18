@@ -5,18 +5,16 @@ import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { Bell, Book, Loader2, Menu } from "lucide-react";
+import { Book, Loader2, Menu } from "lucide-react";
 import Link from "next/link";
 import SearchDropdown from "./SearchDropdown";
 
 interface HeaderProps {
-  notificationCount?: number;
   onMenuClick?: () => void;
   sidebarOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  notificationCount = UI_CONFIG.DEFAULT_NOTIFICATION_COUNT,
   onMenuClick,
   sidebarOpen = false, // TODO: Can be used for menu icon state indication
 }) => {
@@ -61,18 +59,6 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-1 lg:space-x-4 h-full ml-auto pr-4 lg:pr-6">
           {/* Theme Toggle */}
           <ToggleTheme />
-
-          {/* Notifications */}
-          <div className="relative">
-            <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
-              <Bell className="size-5" />
-            </Button>
-            {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-status-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {notificationCount}
-              </span>
-            )}
-          </div>
 
           {/* User Profile */}
           {loading ? (

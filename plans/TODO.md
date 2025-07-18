@@ -22,6 +22,8 @@
 
 ## Bigger feature
 - [ ] Add commenting on books
+  - [ ] Real time comment
+  - [ ] Let users commit a one time "review"
 - [ ] Improve user features
   - [ ] Allow for email/github/facebook sing in, and email/image management
   - [ ] Create profile pages, settings etc etc

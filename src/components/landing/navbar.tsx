@@ -73,19 +73,13 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <header className="shadow-inner bg-opacity-15 w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border border-secondary z-40 rounded-2xl flex justify-between items-center p-2 bg-card">
-      <Link href="/" className="font-bold text-lg flex items-center">
-        <Book
-          className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
-        />
-        Librarium
-      </Link>
       {/* <!-- Mobile --> */}
       <div className="flex items-center lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Menu
               onClick={() => setIsOpen(!isOpen)}
-              className="cursor-pointer lg:hidden"
+              className="cursor-pointer lg:hidden mr-3"
             />
           </SheetTrigger>
 
@@ -126,7 +120,25 @@ export const Navbar = () => {
             </SheetFooter>
           </SheetContent>
         </Sheet>
+        
+        <Link href="/" className="font-bold text-lg flex items-center">
+          <Book
+            className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
+          />
+          Librarium
+        </Link>
       </div>
+      
+      {/* <!-- Desktop Logo --> */}
+      <Link href="/" className="font-bold text-lg flex items-center lg:block hidden">
+        <Book
+          className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
+        />
+        Librarium
+      </Link>
+
+      {/* <!-- Mobile spacer --> */}
+      <div className="lg:hidden"></div>
 
       {/* <!-- Desktop --> */}
       <NavigationMenu className="hidden lg:block mx-auto">
