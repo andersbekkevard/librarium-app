@@ -130,7 +130,10 @@ export const Navbar = () => {
       </div>
 
       {/* <!-- Desktop Logo --> */}
-      <Link href="/" className="font-bold text-lg flex items-center lg:block">
+      <Link
+        href="/"
+        className="font-bold text-lg flex items-center hidden lg:block"
+      >
         <Book
           className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
         />
