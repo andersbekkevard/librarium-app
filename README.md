@@ -23,7 +23,7 @@ The application is in active development with the following functionality implem
 - **Reading Progress**: Track reading state (not started, in progress, finished) with page-level progress tracking
 - **Book Information**: Integration with Google Books API for automatic metadata retrieval
 - **Library Organization**: Filter and sort books by various criteria (title, author, reading state, ownership)
-- **Reading Statistics**: Basic statistics tracking on dashboard with visual displays
+- **Reading Statistics**: Detailed reading analytics with charts and goal tracking
 - **Service Layer Architecture**: Clean separation of concerns with repository pattern
 - **Event Logging**: Track reading activities and state changes
 - **Responsive Design**: Mobile-friendly interface with modern UI components
@@ -87,12 +87,11 @@ npm run dev
 
 ## Planned Features
 
-- **Enhanced Statistics**: Detailed reading analytics with charts and goal tracking
 - **Shelf System**: Custom shelves and collections for book organization
 - **Comments & Quotes**: Add notes, comments, and save favorite quotes
 - **Household Sharing**: Share books with family members and track lending
-- **Advanced Search**: Enhanced filtering and search capabilities
 - **LLM Integration**: AI-powered book recommendations and insights
+- **Advanced Search**: Enhanced filtering and search capabilities
 - **Import/Export**: Bulk import/export functionality
 
 ## Project Structure
@@ -100,25 +99,30 @@ npm run dev
 ```
 src/
 ├── app/
-│   ├── (app)/           # Authenticated app pages
-│   ├── (landing)/       # Public landing page
-│   ├── globals.css      # Global styles with custom color system
-│   └── layout.tsx       # Root layout
+│   ├── (app)/                # Authenticated app pages
+│   ├── (landing)/            # Public landing page
+│   ├── globals.css           # Global styles with custom color system
+│   └── layout.tsx            # Root layout
 ├── components/
-│   ├── app/             # App-specific components
-│   ├── dashboard/       # Dashboard components
-│   ├── landing/         # Landing page sections
-│   ├── ui/              # Reusable UI components (shadcn/ui)
-│   └── ...
+│   ├── app/                  # App-specific components (library, books, activity, book-detail, etc.)
+│   ├── dashboard/            # Dashboard components
+│   ├── landing/              # Landing page sections
+│   ├── ui/                   # Reusable UI components (shadcn/ui)
+│   └── icons/                # Icon components 
 ├── lib/
-│   ├── hooks/           # Custom React hooks
-│   ├── providers/       # Context providers
-│   ├── repositories/    # Data access layer
-│   ├── services/        # Business logic layer
-│   ├── models.ts        # TypeScript interfaces
-│   ├── colors.ts        # Centralized color system
-│   └── utils.ts         # Utility functions
-└── docs/                # Documentation
+│   ├── api/                  # API integrations (e.g., Google Books, Firebase)
+│   ├── books/                # Book utilities and validation
+│   ├── constants/            # Centralized constants
+│   ├── design/               # Color system and design tokens
+│   ├── errors/               # Error handling utilities
+│   ├── hooks/                # Custom React hooks
+│   ├── models/               # TypeScript interfaces and models
+│   ├── providers/            # Context providers
+│   ├── repositories/         # Data access layer
+│   ├── services/             # Business logic layer
+│   ├── test-utils/           # Testing utilities and mocks
+│   └── utils/                # General utility functions
+└── __tests__/                # E2E and setup tests
 ```
 
 ## Development

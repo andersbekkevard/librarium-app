@@ -1,13 +1,18 @@
 # TODO.md
 
 ## UI
-- [ ] Land on coloring for BookDetailsPage (states, genres etc), and extract to globals.css
 - [ ] Refine Landing animations
 - [ ] Animations for app
+- [ ] Accesibility for dark mode
+- [ ] Rethink all colors?
+- [ ] Change two philosophy black and blue secondary color scheme
+- [ ] tweakCN?
+- [ ] Let more of the description text in 	searchResult be visible
+- [ ] Make preview show some kind of book details page in preview with more info
 
 ## Mobile
 - [ ] Make new search bar functionality for mobile
-- [ ] Make even more Mobile native functionality
+- [ ] Add even more Mobile native functionality
 
 
 ## Nice-to-have feature

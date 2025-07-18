@@ -75,7 +75,7 @@ export const ServicesSection = () => {
 
       <div
         ref={cardsRef as React.RefObject<HTMLDivElement>}
-        className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-20"
+        className="grid lg:grid-cols-2 gap-4 w-full lg:gap-x-4"
       >
         {serviceList.map(({ title, description, pro }, index) => (
           <Card

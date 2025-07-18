@@ -1,6 +1,5 @@
 "use client";
 
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { useScrollAnimation } from "@/lib/hooks/useScrollAnimation";
 
 interface ReviewProps {
@@ -75,11 +74,11 @@ export const TestimonialSection = () => {
           headerVisible ? "animate" : ""
         }`}
       >
-        <h2
+        {/* <h2
           className={`text-lg ${BRAND_COLORS.primary.text} text-center mb-2 tracking-wider`}
         >
           Testimonials
-        </h2>
+        </h2> */}
 
         <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
           Early Access Preview
