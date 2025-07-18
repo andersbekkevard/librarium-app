@@ -1,9 +1,9 @@
 "use client";
 
 import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 
@@ -28,13 +28,21 @@ import { SearchResults } from "./books/SearchResults";
 // Error handling components
 import { ErrorAlert } from "@/components/ui/error-display";
 
-const AddBooksPageContent = () => {
+interface AddBooksPageContentProps {
+  searchQuery: string;
+  searchType: "title" | "author";
+  activeTab: "search" | "manual" | "scan";
+}
+
+const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
+  searchQuery,
+  searchType,
+  activeTab,
+}) => {
   const { user } = useAuthContext();
   const { addBook } = useBooksContext();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const initialSearchQuery = searchParams.get("q") || "";
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [searchType, setSearchType] = useState<"title" | "author">("title");
   const { searchResults, isSearching, error, search, clearError } =
     useBookSearch();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
@@ -42,13 +50,42 @@ const AddBooksPageContent = () => {
     Array<{ id: string; title: string; author: string }>
   >([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const updateURLParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (
+        value === "search" ||
+        value === "title" ||
+        value === ""
+      ) {
+        // Remove default values to keep URLs clean
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    const newUrl = `${window.location.pathname}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    router.push(newUrl);
+  };
+
+  // Sync local search query with URL parameter
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
 
   // Initialize search if query parameter is provided
   useEffect(() => {
-    if (initialSearchQuery.trim()) {
-      search(initialSearchQuery, undefined, searchType);
+    if (searchQuery.trim()) {
+      search(searchQuery, undefined, searchType);
     }
-  }, [initialSearchQuery, search, searchType]);
+  }, [searchQuery, search, searchType]);
 
   /**
    * Adds a book from Google Books API to user's library
@@ -73,7 +110,7 @@ const AddBooksPageContent = () => {
 
     try {
       const book = convertGoogleBookToBook(googleBook);
-      const { id, ...bookData } = book;
+      const { id: _id, ...bookData } = book;
 
       const result = await addBook(bookData);
 
@@ -119,7 +156,7 @@ const AddBooksPageContent = () => {
     setIsAdding(true);
 
     try {
-      const { id, ...bookData } = book;
+      const { id: _id, ...bookData } = book;
       const result = await addBook(bookData);
 
       if (result.success && result.data) {
@@ -141,24 +178,21 @@ const AddBooksPageContent = () => {
     }
   };
 
-  // Debounced search effect
-  React.useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (searchQuery.trim()) {
-        search(searchQuery, undefined, searchType);
-      }
-      // Note: clearResults is handled by the hook when search is called with empty query
-    }, TIMING_CONFIG.SEARCH_DEBOUNCE_MS); // Debounce time for API calls
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, search, searchType]);
-
   // Clear error when user starts typing
   React.useEffect(() => {
     if (searchQuery.trim() && error) {
       clearError();
     }
   }, [searchQuery, error, clearError]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="p-6 space-y-6">
@@ -197,19 +231,19 @@ const AddBooksPageContent = () => {
       )}
 
       {/* Main Content */}
-      <Tabs defaultValue="search" className="w-full">
+      <Tabs value={activeTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="search">
+          <TabsTrigger value="search" onClick={() => updateURLParams({ tab: "search" })}>
             <Search className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Search</span>
             <span className="hidden sm:inline">Search Online</span>
           </TabsTrigger>
-          <TabsTrigger value="manual">
+          <TabsTrigger value="manual" onClick={() => updateURLParams({ tab: "manual" })}>
             <FileText className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Manual</span>
             <span className="hidden sm:inline">Manual Entry</span>
           </TabsTrigger>
-          <TabsTrigger value="scan">
+          <TabsTrigger value="scan" onClick={() => updateURLParams({ tab: "scan" })}>
             <Camera className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Scan</span>
             <span className="hidden sm:inline">Scan Barcode</span>
@@ -229,7 +263,7 @@ const AddBooksPageContent = () => {
                     type="button"
                     variant={searchType === "title" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSearchType("title")}
+                    onClick={() => updateURLParams({ type: "title" })}
                     className="flex-1"
                   >
                     Search by Title
@@ -238,7 +272,7 @@ const AddBooksPageContent = () => {
                     type="button"
                     variant={searchType === "author" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSearchType("author")}
+                    onClick={() => updateURLParams({ type: "author" })}
                     className="flex-1"
                   >
                     Search by Author
@@ -250,8 +284,21 @@ const AddBooksPageContent = () => {
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={`Search by ${searchType}...`}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={localSearchQuery}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setLocalSearchQuery(value);
+                      
+                      // Clear existing timer
+                      if (debounceTimerRef.current) {
+                        clearTimeout(debounceTimerRef.current);
+                      }
+                      
+                      // Set new timer for debounced URL update
+                      debounceTimerRef.current = setTimeout(() => {
+                        updateURLParams({ q: value });
+                      }, TIMING_CONFIG.SEARCH_DEBOUNCE_MS);
+                    }}
                     className="pl-10"
                   />
                 </div>
@@ -313,30 +360,15 @@ const AddBooksPageContent = () => {
   );
 };
 
-// Loading component for Suspense fallback
-const AddBooksPageLoading = () => (
-  <div className="p-6 space-y-6">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-          Add Books
-        </h1>
-        <p className="text-muted-foreground">Loading search parameters...</p>
-      </div>
-    </div>
-    <div className="flex items-center justify-center py-8">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
-  </div>
-);
+interface AddBooksPageProps {
+  searchQuery: string;
+  searchType: "title" | "author";
+  activeTab: "search" | "manual" | "scan";
+}
 
-// Main component with Suspense boundary
-export const AddBooksPage = () => {
-  return (
-    <Suspense fallback={<AddBooksPageLoading />}>
-      <AddBooksPageContent />
-    </Suspense>
-  );
+// Main component - no longer needs Suspense since it's handled in the page route
+export const AddBooksPage: React.FC<AddBooksPageProps> = (props) => {
+  return <AddBooksPageContent {...props} />;
 };
 
 export default AddBooksPage;
