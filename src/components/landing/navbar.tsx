@@ -120,7 +120,7 @@ export const Navbar = () => {
             </SheetFooter>
           </SheetContent>
         </Sheet>
-        
+
         <Link href="/" className="font-bold text-lg flex items-center">
           <Book
             className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
@@ -128,9 +128,9 @@ export const Navbar = () => {
           Librarium
         </Link>
       </div>
-      
+
       {/* <!-- Desktop Logo --> */}
-      <Link href="/" className="font-bold text-lg flex items-center lg:block hidden">
+      <Link href="/" className="font-bold text-lg flex items-center lg:block">
         <Book
           className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
         />

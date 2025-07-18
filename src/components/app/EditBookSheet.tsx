@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -28,6 +36,7 @@ import {
   ChevronUp,
   Save,
   Star,
+  Trash2,
   X,
 } from "lucide-react";
 import * as React from "react";
@@ -37,15 +46,19 @@ interface EditBookSheetProps {
   book: Book;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onBookDeleted?: () => void;
 }
 
 export const EditBookSheet: React.FC<EditBookSheetProps> = ({
   book,
   open,
   onOpenChange,
+  onBookDeleted,
 }) => {
-  const { updateBookManual, error } = useBooksContext();
+  const { updateBookManual, deleteBook, error } = useBooksContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Form state
@@ -241,6 +254,25 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
       console.error("Error updating book:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  /**
+   * Handles book deletion with confirmation
+   */
+  const handleDeleteBook = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteBook(book.id);
+      if (result.success) {
+        setShowDeleteDialog(false);
+        onOpenChange(false);
+        onBookDeleted?.();
+      }
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -562,6 +594,33 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
               </div>
             </div>
           </div>
+
+          <Separator />
+
+          {/* Danger Zone */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-status-error">Danger Zone</h3>
+            <div className="p-4 border border-status-error/20 rounded-lg bg-status-error/5">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-medium text-status-error mb-1">Delete Book</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Permanently delete this book from your library. This action cannot be undone.
+                  </p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isSubmitting || isDeleting}
+                  className="bg-status-error hover:bg-status-error/90 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Book
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <SheetFooter className="gap-2">
@@ -580,12 +639,45 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
             <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || isDeleting}>
             <Save className="h-4 w-4 mr-2" />
             {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-status-error">Delete Book</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;<strong>{book.title}</strong>&quot; by {book.author}?
+              <br />
+              <br />
+              This action cannot be undone. All reading progress, notes, and ratings will be permanently lost.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteBook}
+              disabled={isDeleting}
+              className="bg-status-error hover:bg-status-error/90 text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeleting ? "Deleting..." : "Delete Book"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 };

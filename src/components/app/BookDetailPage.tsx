@@ -151,6 +151,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         book={book}
         open={isEditSheetOpen}
         onOpenChange={setIsEditSheetOpen}
+        onBookDeleted={onBack}
       />
     </div>
   );
