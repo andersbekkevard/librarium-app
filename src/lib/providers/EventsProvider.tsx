@@ -4,6 +4,7 @@ import {
   ActivityItem,
   BookComment,
   BookEvent,
+  BookReview,
   ReadingState,
 } from "@/lib/models/models";
 import { eventService } from "@/lib/services/EventService";
@@ -22,6 +23,7 @@ interface EventsContextType {
   loading: boolean;
   activitiesLoading: boolean;
   commentsLoading: boolean;
+  reviewsLoading: boolean;
   error: string | null;
   refreshEvents: () => Promise<void>;
   refreshActivities: () => Promise<void>;
@@ -37,6 +39,11 @@ interface EventsContextType {
     currentPage: number
   ) => Promise<void>;
   getBookComments: (bookId: string) => BookComment[];
+
+  // Review-specific methods
+  addReview: (bookId: string, reviewText: string) => Promise<void>;
+  updateReview: (bookId: string, reviewText: string) => Promise<void>;
+  getBookReview: (bookId: string) => BookReview | null;
 }
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
@@ -51,6 +58,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuthContext();
 
@@ -190,6 +198,98 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     return comments;
   };
 
+  const addReview = async (bookId: string, reviewText: string) => {
+    if (!user?.uid) {
+      throw new Error("User not authenticated");
+    }
+
+    setReviewsLoading(true);
+    setError(null);
+
+    try {
+      const result = await eventService.addReview(
+        user.uid,
+        bookId,
+        reviewText
+      );
+
+      if (!result.success) {
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Failed to add review"
+        );
+        return;
+      }
+
+      // Refresh events and activities to include the new review
+      await Promise.all([refreshEvents(), refreshActivities()]);
+    } catch (err) {
+      setError("An unexpected error occurred while adding review");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const updateReview = async (bookId: string, reviewText: string) => {
+    if (!user?.uid) {
+      throw new Error("User not authenticated");
+    }
+
+    setReviewsLoading(true);
+    setError(null);
+
+    try {
+      const result = await eventService.updateReview(
+        user.uid,
+        bookId,
+        reviewText
+      );
+
+      if (!result.success) {
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Failed to update review"
+        );
+        return;
+      }
+
+      // Refresh events and activities to include the updated review
+      await Promise.all([refreshEvents(), refreshActivities()]);
+    } catch (err) {
+      setError("An unexpected error occurred while updating review");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const getBookReview = (bookId: string): BookReview | null => {
+    const reviewEvents = events.filter(
+      (event) => event.type === "review" && event.bookId === bookId
+    );
+
+    if (reviewEvents.length === 0) {
+      return null;
+    }
+
+    // Get the most recent review event (in case there are multiple from updates)
+    const reviewEvent = reviewEvents.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis())[0];
+
+    if (!reviewEvent.data.review) {
+      return null;
+    }
+
+    return {
+      id: reviewEvent.id,
+      bookId: reviewEvent.bookId,
+      userId: reviewEvent.userId,
+      text: reviewEvent.data.review,
+      createdAt: reviewEvent.data.reviewCreatedAt || reviewEvent.timestamp,
+      updatedAt: reviewEvent.data.reviewUpdatedAt || reviewEvent.timestamp,
+    };
+  };
+
   useEffect(() => {
     if (user?.uid) {
       refreshEvents();
@@ -208,6 +308,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     loading,
     activitiesLoading,
     commentsLoading,
+    reviewsLoading,
     error,
     refreshEvents,
     refreshActivities,
@@ -216,6 +317,9 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     getEventsByBookId,
     addComment,
     getBookComments,
+    addReview,
+    updateReview,
+    getBookReview,
   };
 
   return (

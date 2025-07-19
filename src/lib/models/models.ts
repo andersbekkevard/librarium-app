@@ -78,7 +78,7 @@ export interface BookEvent {
   userId: string; // Reference to the user
 
   // Event details
-  type: "state_change" | "progress_update" | "rating_added" | "comment";
+  type: "state_change" | "progress_update" | "rating_added" | "comment" | "review";
   timestamp: Timestamp; // When the event occurred
 
   // Event-specific data
@@ -98,6 +98,11 @@ export interface BookEvent {
     comment?: string;
     commentState?: ReadingState;
     commentPage?: number;
+
+    // For review events
+    review?: string;
+    reviewCreatedAt?: Timestamp;
+    reviewUpdatedAt?: Timestamp;
   };
 }
 
@@ -154,6 +159,7 @@ export const isValidEventType = (type: string): type is EventType => {
     "progress_update",
     "rating_added",
     "comment",
+    "review",
   ].includes(type);
 };
 
@@ -244,6 +250,21 @@ export interface BookComment {
 }
 
 /**
+ * BookReview represents a user review for UI consumption.
+ *
+ * This interface provides a simplified view of review events specifically
+ * designed for display in the review section and related UI components.
+ */
+export interface BookReview {
+  id: string; // Event ID
+  bookId: string; // Reference to the book
+  userId: string; // Reference to the user
+  text: string; // Review text content
+  createdAt: Timestamp; // When the review was created
+  updatedAt: Timestamp; // When the review was last updated
+}
+
+/**
  * Validates comment text content
  *
  * Ensures that comment text is within valid bounds (1-2000 characters).
@@ -295,6 +316,31 @@ export const validateCommentPage = (page: number, totalPages: number): boolean =
     return false;
   }
   return page >= 0 && page <= totalPages;
+};
+
+/**
+ * Validates review text content
+ *
+ * Ensures that review text is within valid bounds (10-5000 characters).
+ * Used by ReviewDialog and EventService when processing user reviews.
+ *
+ * @param review - Review text to validate
+ * @returns boolean - True if review is valid (10-5000 characters)
+ *
+ * @example
+ * const userReview = "This book was absolutely fantastic!";
+ * if (validateReview(userReview)) {
+ *   await addReview(bookId, userReview);
+ * } else {
+ *   showError("Review must be between 10 and 5000 characters");
+ * }
+ */
+export const validateReview = (review: string): boolean => {
+  if (typeof review !== "string") {
+    return false;
+  }
+  const trimmed = review.trim();
+  return trimmed.length >= 10 && trimmed.length <= 5000;
 };
 
 /**

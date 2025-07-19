@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, CheckCircle, Edit, Play, Star } from "lucide-react";
+import { BookOpen, CheckCircle, Edit, Play, Star, FileText } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -18,6 +18,8 @@ interface BookCoverProps {
   onMarkAsFinished: () => void;
   onEditBook: () => void;
   onRatingChange: (rating: number) => void;
+  onAddReview?: () => void;
+  hasExistingReview?: boolean;
   isUpdating: boolean;
 }
 
@@ -28,6 +30,8 @@ export const BookCover: React.FC<BookCoverProps> = ({
   onMarkAsFinished,
   onEditBook,
   onRatingChange,
+  onAddReview,
+  hasExistingReview = false,
   isUpdating,
 }) => {
   const [rating, setRating] = useState(book.rating || 0);
@@ -137,6 +141,17 @@ export const BookCover: React.FC<BookCoverProps> = ({
             >
               <CheckCircle className="h-4 w-4 mr-2" />
               Mark as Finished
+            </Button>
+          )}
+
+          {book.state === "finished" && !hasExistingReview && onAddReview && (
+            <Button
+              onClick={onAddReview}
+              disabled={isUpdating}
+              className="w-full bg-foreground hover:bg-foreground/90 text-background"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Add Review
             </Button>
           )}
 
