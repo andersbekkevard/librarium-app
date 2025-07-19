@@ -304,21 +304,21 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
                 </div>
               </div>
 
-              {isSearching && (
+              {isSearching ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   <span className="ml-2 text-muted-foreground">
                     Searching...
                   </span>
                 </div>
+              ) : (
+                <SearchResults
+                  books={searchResults}
+                  addedBooks={addedBooks}
+                  onAddBook={handleAddGoogleBook}
+                  isAdding={isAdding}
+                />
               )}
-
-              <SearchResults
-                books={searchResults}
-                addedBooks={addedBooks}
-                onAddBook={handleAddGoogleBook}
-                isAdding={isAdding}
-              />
             </CardContent>
           </Card>
         </TabsContent>

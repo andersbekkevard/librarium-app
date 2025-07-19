@@ -314,7 +314,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         />
 
         {isOpen && (
-          <CommandList className="absolute top-full left-0 right-0 max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50 mt-1">
+          <CommandList className="absolute top-full left-0 right-0 max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50 mt-4">
             {/* Show CMDK loading state while searching */}
             {searchData.state === "searching" && (
               <CommandLoading>
@@ -378,8 +378,8 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                   </CommandGroup>
                 )}
 
-                {/* Always show "Add book" option when search is complete */}
-                {searchQuery.trim() && (
+                {/* Show "Add book" option only when search is complete and not searching */}
+                {searchQuery.trim() && searchData.state === "completed" && (
                   <>
                     {searchData.results.length > 0 && (
                       <div className="border-t border-border" />

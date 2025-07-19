@@ -28,7 +28,7 @@ import {
   Tag,
 } from "lucide-react";
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface BookPreviewDialogProps {
   book: GoogleBooksVolume | null;
@@ -64,13 +64,13 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!open) return;
-      
+
       switch (event.key) {
-        case 'Escape':
+        case "Escape":
           onOpenChange(false);
           break;
-        case 'a':
-        case 'A':
+        case "a":
+        case "A":
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             if (onAddBook && book && !isAdded && !isAdding) {
@@ -82,8 +82,8 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
     };
 
     if (open) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
     }
   }, [open, onAddBook, book, isAdded, isAdding, onOpenChange, handleAddBook]);
 
@@ -101,12 +101,12 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden top-[15%] translate-y-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Book Preview</DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[85vh] p-0">
+        <div className="overflow-y-auto max-h-[80vh] p-0">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 pt-0">
             {/* Book Cover */}
             <div className="lg:col-span-1">
@@ -116,235 +116,244 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                     <div className="space-y-4">
                       {/* Cover Image */}
                       <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center mx-auto max-w-[200px] lg:max-w-none">
-                      {coverImage ? (
-                        <img
-                          src={coverImage}
-                          alt={book.volumeInfo.title}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      ) : (
-                        <BookOpen className="h-16 w-16 text-muted-foreground" />
-                      )}
-                    </div>
+                        {coverImage ? (
+                          <img
+                            src={coverImage}
+                            alt={book.volumeInfo.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <BookOpen className="h-16 w-16 text-muted-foreground" />
+                        )}
+                      </div>
 
-                    {/* Rating */}
-                    {book.volumeInfo.averageRating && (
-                      <div className="flex items-center justify-center gap-1">
-                        <Star className="h-4 w-4 fill-status-warning text-status-warning" />
-                        <span className="text-sm font-medium">
-                          {book.volumeInfo.averageRating}
-                        </span>
-                        {book.volumeInfo.ratingsCount && (
-                          <span className="text-xs text-muted-foreground">
-                            ({book.volumeInfo.ratingsCount} reviews)
+                      {/* Rating */}
+                      {book.volumeInfo.averageRating && (
+                        <div className="flex items-center justify-center gap-1">
+                          <Star className="h-4 w-4 fill-status-warning text-status-warning" />
+                          <span className="text-sm font-medium">
+                            {book.volumeInfo.averageRating}
                           </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="space-y-2">
-                      {onAddBook && (
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddBook();
-                          }}
-                          disabled={isAdding || isAdded}
-                          className="w-full"
-                          title="Add to Library (Ctrl+A)"
-                        >
-                          {isAdded ? (
-                            <>
-                              <BookOpen className="h-4 w-4 mr-2" />
-                              Added to Library
-                            </>
-                          ) : isAdding ? (
-                            <>
-                              <Plus className="h-4 w-4 mr-2 animate-spin" />
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add to Library
-                            </>
+                          {book.volumeInfo.ratingsCount && (
+                            <span className="text-xs text-muted-foreground">
+                              ({book.volumeInfo.ratingsCount} reviews)
+                            </span>
                           )}
-                        </Button>
+                        </div>
                       )}
 
-                      {/* External Links */}
+                      {/* Action Buttons */}
                       <div className="space-y-2">
-                        {book.volumeInfo.previewLink && (
+                        {onAddBook && (
                           <Button
-                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddBook();
+                            }}
+                            disabled={isAdding || isAdded}
                             className="w-full"
-                            onClick={() =>
-                              window.open(book.volumeInfo.previewLink, "_blank")
-                            }
+                            title="Add to Library (Ctrl+A)"
                           >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Preview on Google
+                            {isAdded ? (
+                              <>
+                                <BookOpen className="h-4 w-4 mr-2" />
+                                Added to Library
+                              </>
+                            ) : isAdding ? (
+                              <>
+                                <Plus className="h-4 w-4 mr-2 animate-spin" />
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add to Library
+                              </>
+                            )}
                           </Button>
                         )}
-                        {book.volumeInfo.infoLink && (
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={() =>
-                              window.open(book.volumeInfo.infoLink, "_blank")
-                            }
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            More Info
-                          </Button>
-                        )}
+
+                        {/* External Links */}
+                        <div className="space-y-2">
+                          {book.volumeInfo.previewLink && (
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() =>
+                                window.open(
+                                  book.volumeInfo.previewLink,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Preview on Google
+                            </Button>
+                          )}
+                          {book.volumeInfo.infoLink && (
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() =>
+                                window.open(book.volumeInfo.infoLink, "_blank")
+                              }
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              More Info
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
 
             {/* Book Details */}
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl sm:text-2xl">{book.volumeInfo.title}</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl">
+                    {book.volumeInfo.title}
+                  </CardTitle>
                   {book.volumeInfo.subtitle && (
                     <p className="text-base sm:text-lg text-muted-foreground">
                       {book.volumeInfo.subtitle}
                     </p>
                   )}
-                  <p className="text-base sm:text-lg text-muted-foreground">by {authors}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Book Metadata */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {publishedYear && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Published:</span>
-                      <span className="text-muted-foreground">
-                        {publishedYear}
-                      </span>
-                    </div>
-                  )}
-                  {book.volumeInfo.publisher && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Publisher:</span>
-                      <span className="text-muted-foreground">
-                        {book.volumeInfo.publisher}
-                      </span>
-                    </div>
-                  )}
-                  {book.volumeInfo.pageCount && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Pages:</span>
-                      <span className="text-muted-foreground">
-                        {book.volumeInfo.pageCount}
-                      </span>
-                    </div>
-                  )}
-                  {book.volumeInfo.industryIdentifiers && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Hash className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">ISBN:</span>
-                      <span className="text-muted-foreground">
-                        {book.volumeInfo.industryIdentifiers[0]?.identifier}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Categories */}
-                {book.volumeInfo.categories && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Tag className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Categories:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {book.volumeInfo.categories.map((category) => (
-                        <Badge key={category} variant="secondary">
-                          {category}
-                        </Badge>
-                      ))}
-                    </div>
+                  <p className="text-base sm:text-lg text-muted-foreground">
+                    by {authors}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Book Metadata */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {publishedYear && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Published:</span>
+                        <span className="text-muted-foreground">
+                          {publishedYear}
+                        </span>
+                      </div>
+                    )}
+                    {book.volumeInfo.publisher && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Publisher:</span>
+                        <span className="text-muted-foreground">
+                          {book.volumeInfo.publisher}
+                        </span>
+                      </div>
+                    )}
+                    {book.volumeInfo.pageCount && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Pages:</span>
+                        <span className="text-muted-foreground">
+                          {book.volumeInfo.pageCount}
+                        </span>
+                      </div>
+                    )}
+                    {book.volumeInfo.industryIdentifiers && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Hash className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">ISBN:</span>
+                        <span className="text-muted-foreground">
+                          {book.volumeInfo.industryIdentifiers[0]?.identifier}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
 
-                {/* Description */}
-                {book.volumeInfo.description && (
-                  <>
-                    <Separator />
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold">Description</h3>
-                      <div className="space-y-2">
-                        <div
-                          className={`text-muted-foreground text-sm leading-relaxed ${
-                            isDescriptionExpanded ? "" : "line-clamp-6"
-                          }`}
-                          dangerouslySetInnerHTML={{
-                            __html: book.volumeInfo.description,
-                          }}
-                        />
-                        {book.volumeInfo.description.length > 300 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={toggleDescription}
-                            className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
-                          >
-                            {isDescriptionExpanded ? (
-                              <>
-                                <ChevronUp className="h-4 w-4 mr-1" />
-                                Read less
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-4 w-4 mr-1" />
-                                Read more
-                              </>
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Additional Reading Information */}
-                {book.volumeInfo.readingModes && (
-                  <>
-                    <Separator />
+                  {/* Categories */}
+                  {book.volumeInfo.categories && (
                     <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">Reading Options</h3>
-                      <div className="flex gap-4 text-sm">
-                        {book.volumeInfo.readingModes.text && (
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-3 w-3" />
-                            Text available
-                          </span>
-                        )}
-                        {book.volumeInfo.readingModes.image && (
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-3 w-3" />
-                            Image available
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Categories:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {book.volumeInfo.categories.map((category) => (
+                          <Badge key={category} variant="secondary">
+                            {category}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+
+                  {/* Description */}
+                  {book.volumeInfo.description && (
+                    <>
+                      <Separator />
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold">Description</h3>
+                        <div className="space-y-2">
+                          <div
+                            className={`text-muted-foreground text-sm leading-relaxed ${
+                              isDescriptionExpanded ? "" : "line-clamp-6"
+                            }`}
+                            dangerouslySetInnerHTML={{
+                              __html: book.volumeInfo.description,
+                            }}
+                          />
+                          {book.volumeInfo.description.length > 300 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={toggleDescription}
+                              className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
+                            >
+                              {isDescriptionExpanded ? (
+                                <>
+                                  <ChevronUp className="h-4 w-4 mr-1" />
+                                  Read less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-4 w-4 mr-1" />
+                                  Read more
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Additional Reading Information */}
+                  {book.volumeInfo.readingModes && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold">
+                          Reading Options
+                        </h3>
+                        <div className="flex gap-4 text-sm">
+                          {book.volumeInfo.readingModes.text && (
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-3 w-3" />
+                              Text available
+                            </span>
+                          )}
+                          {book.volumeInfo.readingModes.image && (
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-3 w-3" />
+                              Image available
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
       </DialogContent>
     </Dialog>
   );
