@@ -16,7 +16,7 @@ interface CommentFormProps {
 
 /**
  * Comment input form component
- * 
+ *
  * Features:
  * - Textarea for comment input with character limit
  * - Auto-detection of current reading state and page
@@ -38,14 +38,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isValid) {
       setError("Comment must be between 1 and 2000 characters");
       return;
     }
 
     setError(null);
-    
+
     try {
       await onSubmit(comment.trim());
       setComment("");
@@ -59,7 +59,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       case "not_started":
         return { label: "Not Started", page: "Page 0" };
       case "in_progress":
-        return { label: "Currently Reading", page: `Page ${book.progress.currentPage}` };
+        return {
+          label: "Currently Reading",
+          page: `Page ${book.progress.currentPage}`,
+        };
       case "finished":
         return { label: "Finished", page: `Page ${book.progress.totalPages}` };
       default:
@@ -74,8 +77,11 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       <form onSubmit={handleSubmit}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
-          <MessageSquarePlus className="w-4 h-4 text-brand-secondary" />
-          <Label htmlFor="comment-input" className="text-sm font-medium text-gray-700">
+          <MessageSquarePlus className="w-4 h-4 text-foreground" />
+          <Label
+            htmlFor="comment-input"
+            className="text-sm font-medium text-gray-700"
+          >
             Add Comment
           </Label>
         </div>
@@ -91,13 +97,13 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             maxLength={maxLength}
             disabled={isSubmitting}
           />
-          
+
           {/* Character count */}
           <div className="flex justify-between items-center mt-1">
-            <span 
+            <span
               className={`text-xs ${
-                characterCount > maxLength * 0.9 
-                  ? "text-status-warning" 
+                characterCount > maxLength * 0.9
+                  ? "text-status-warning"
                   : "text-gray-500"
               }`}
             >
@@ -133,12 +139,12 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             <X className="w-3 h-3" />
             Cancel
           </Button>
-          
+
           <Button
             type="submit"
             size="sm"
             disabled={!isValid || isSubmitting}
-            className="flex items-center gap-1 bg-brand-secondary hover:bg-brand-secondary-hover"
+            className="flex items-center gap-1 bg-foreground hover:bg-foreground/90 text-background"
           >
             <MessageSquarePlus className="w-3 h-3" />
             {isSubmitting ? "Adding..." : "Add Comment"}

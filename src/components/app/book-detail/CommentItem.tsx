@@ -12,7 +12,7 @@ interface CommentItemProps {
 
 /**
  * Individual comment display component with timeline blob design
- * 
+ *
  * Features:
  * - Timeline blob design with connecting lines
  * - Displays comment text, timestamp, page number
@@ -48,11 +48,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       {!isLast && (
         <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-gray-200" />
       )}
-      
+
       {/* Timeline blob */}
       <div className="relative z-10 flex-shrink-0">
         <div className="w-8 h-8 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center shadow-sm">
-          <div className="w-3 h-3 bg-brand-secondary rounded-full" />
+          <div className="w-3 h-3 bg-brand-primary rounded-full" />
         </div>
       </div>
 
@@ -68,17 +68,21 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         {/* Comment metadata */}
         <div className="flex items-center gap-3 mt-2">
           <span className="text-xs text-gray-500">
-            {formatDistanceToNow(comment.timestamp.toDate(), { addSuffix: true })}
+            {formatDistanceToNow(comment.timestamp.toDate(), {
+              addSuffix: true,
+            })}
           </span>
-          
+
           <span className="text-xs text-gray-400">•</span>
-          
+
           <span className="text-xs text-gray-600">
             {formatPageDisplay(comment.currentPage, comment.readingState)}
           </span>
-          
-          <span 
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStateColor(comment.readingState)}`}
+
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStateColor(
+              comment.readingState
+            )}`}
           >
             {comment.readingState === "not_started" && "Not Started"}
             {comment.readingState === "in_progress" && "Reading"}
