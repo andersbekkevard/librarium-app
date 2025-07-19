@@ -31,7 +31,7 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return <BookOpen className="h-4 w-4" />;
       case "rating_added":
         return <Star className="h-4 w-4" />;
-      case "note_added":
+      case "comment":
         return <MessageSquare className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
@@ -46,7 +46,7 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return "bg-green-50 text-green-700 border-green-200";
       case "rating_added":
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "note_added":
+      case "comment":
         return "bg-purple-50 text-purple-700 border-purple-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
@@ -77,8 +77,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         }`;
       case "rating_added":
         return `Rated ${event.data.rating || 0} stars`;
-      case "note_added":
-        return "Added a note";
+      case "comment":
+        return "Added a comment";
       default:
         return "Activity updated";
     }
@@ -117,11 +117,11 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
           value: `${event.data.rating || 0} out of 5 stars`,
         });
         break;
-      case "note_added":
-        if (event.data.note) {
+      case "comment":
+        if (event.data.comment) {
           details.push({
-            label: "Note",
-            value: event.data.note,
+            label: "Comment",
+            value: event.data.comment,
           });
         }
         break;

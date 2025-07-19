@@ -1,6 +1,6 @@
 "use client";
 
-import { BookEvent, ActivityItem } from "@/lib/models/models";
+import { BookEvent, ActivityItem, BookComment, ReadingState } from "@/lib/models/models";
 import { eventService } from "@/lib/services/EventService";
 import React, {
   ReactNode,
@@ -16,12 +16,22 @@ interface EventsContextType {
   activities: ActivityItem[];
   loading: boolean;
   activitiesLoading: boolean;
+  commentsLoading: boolean;
   error: string | null;
   refreshEvents: () => Promise<void>;
   refreshActivities: () => Promise<void>;
   getEventsByType: (type: BookEvent["type"]) => BookEvent[];
   getEventsByDateRange: (startDate: Date, endDate: Date) => BookEvent[];
   getEventsByBookId: (bookId: string) => BookEvent[];
+  
+  // Comment-specific methods
+  addComment: (
+    bookId: string,
+    comment: string,
+    readingState: ReadingState,
+    currentPage: number
+  ) => Promise<void>;
+  getBookComments: (bookId: string) => BookComment[];
 }
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
@@ -35,6 +45,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [commentsLoading, setCommentsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuthContext();
 
@@ -101,6 +112,67 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     return events.filter((event) => event.bookId === bookId);
   };
 
+  const addComment = async (
+    bookId: string,
+    comment: string,
+    readingState: ReadingState,
+    currentPage: number
+  ) => {
+    if (!user?.uid) {
+      throw new Error("User not authenticated");
+    }
+
+    setCommentsLoading(true);
+    setError(null);
+
+    try {
+      const result = await eventService.addComment(
+        user.uid,
+        bookId,
+        comment,
+        readingState,
+        currentPage
+      );
+
+      if (!result.success) {
+        setError(typeof result.error === 'string' ? result.error : "Failed to add comment");
+        return;
+      }
+
+      // Refresh events and activities to include the new comment
+      await Promise.all([refreshEvents(), refreshActivities()]);
+    } catch (err) {
+      setError("An unexpected error occurred while adding comment");
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const getBookComments = (bookId: string): BookComment[] => {
+    const commentEvents = events.filter(
+      (event) => event.type === "comment" && event.bookId === bookId
+    );
+
+    const comments: BookComment[] = commentEvents
+      .map((event) => {
+        if (!event.data.comment) return null;
+        
+        return {
+          id: event.id,
+          bookId: event.bookId,
+          userId: event.userId,
+          text: event.data.comment,
+          readingState: event.data.commentState || "not_started",
+          currentPage: event.data.commentPage || 0,
+          timestamp: event.timestamp,
+        };
+      })
+      .filter((comment): comment is BookComment => comment !== null)
+      .sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis()); // Sort newest first
+
+    return comments;
+  };
+
   useEffect(() => {
     if (user?.uid) {
       refreshEvents();
@@ -118,12 +190,15 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     activities,
     loading,
     activitiesLoading,
+    commentsLoading,
     error,
     refreshEvents,
     refreshActivities,
     getEventsByType,
     getEventsByDateRange,
     getEventsByBookId,
+    addComment,
+    getBookComments,
   };
 
   return (

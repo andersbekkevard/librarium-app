@@ -78,7 +78,7 @@ export interface BookEvent {
   userId: string; // Reference to the user
 
   // Event details
-  type: "state_change" | "progress_update" | "rating_added" | "note_added";
+  type: "state_change" | "progress_update" | "rating_added" | "comment";
   timestamp: Timestamp; // When the event occurred
 
   // Event-specific data
@@ -94,8 +94,10 @@ export interface BookEvent {
     // For rating_added events
     rating?: number;
 
-    // For note_added events (future expansion)
-    note?: string;
+    // For comment events
+    comment?: string;
+    commentState?: ReadingState;
+    commentPage?: number;
   };
 }
 
@@ -151,7 +153,7 @@ export const isValidEventType = (type: string): type is EventType => {
     "state_change",
     "progress_update",
     "rating_added",
-    "note_added",
+    "comment",
   ].includes(type);
 };
 
@@ -217,13 +219,83 @@ export const validateRating = (rating: number): boolean => {
  */
 export interface ActivityItem {
   id: string; // Event ID
-  type: "finished" | "started" | "rated" | "added" | "progress";
+  type: "finished" | "started" | "rated" | "added" | "progress" | "commented";
   bookTitle: string; // Book title for display
   bookId: string; // Reference to the book
   details?: string; // Additional details (e.g., "5 stars", "20 pages")
   timestamp: Date; // When the activity occurred
   colorClass: string; // Tailwind class for visual indicator
 }
+
+/**
+ * BookComment represents a user comment on a book for UI consumption.
+ *
+ * This interface provides a simplified view of comment events specifically
+ * designed for display in the comments timeline and related UI components.
+ */
+export interface BookComment {
+  id: string; // Event ID
+  bookId: string; // Reference to the book
+  userId: string; // Reference to the user
+  text: string; // Comment text content
+  readingState: ReadingState; // Reading state when comment was made
+  currentPage: number; // Page number when comment was made
+  timestamp: Timestamp; // When the comment was created
+}
+
+/**
+ * Validates comment text content
+ *
+ * Ensures that comment text is within valid bounds (1-2000 characters).
+ * Used by CommentForm and EventService when processing user comments.
+ *
+ * @param comment - Comment text to validate
+ * @returns boolean - True if comment is valid (1-2000 characters)
+ *
+ * @example
+ * const userComment = "This book is amazing!";
+ * if (validateComment(userComment)) {
+ *   await addComment(bookId, userComment);
+ * } else {
+ *   showError("Comment must be between 1 and 2000 characters");
+ * }
+ */
+export const validateComment = (comment: string): boolean => {
+  if (typeof comment !== "string") {
+    return false;
+  }
+  const trimmed = comment.trim();
+  return trimmed.length >= 1 && trimmed.length <= 2000;
+};
+
+/**
+ * Validates comment page number
+ *
+ * Ensures that the page number is valid for the given book.
+ * Used when adding comments to verify the page context is correct.
+ *
+ * @param page - Page number to validate
+ * @param totalPages - Total pages in the book
+ * @returns boolean - True if page is valid (>= 0 and <= totalPages)
+ *
+ * @example
+ * const commentPage = 150;
+ * const book = { progress: { totalPages: 200 } };
+ * if (validateCommentPage(commentPage, book.progress.totalPages)) {
+ *   await addComment(bookId, comment, commentPage);
+ * } else {
+ *   showError("Invalid page number");
+ * }
+ */
+export const validateCommentPage = (page: number, totalPages: number): boolean => {
+  if (typeof page !== "number" || isNaN(page)) {
+    return false;
+  }
+  if (typeof totalPages !== "number" || isNaN(totalPages)) {
+    return false;
+  }
+  return page >= 0 && page <= totalPages;
+};
 
 /**
  * Constants for the reading state machine

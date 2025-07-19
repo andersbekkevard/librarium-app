@@ -79,10 +79,3 @@
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
 - [ ] 10. Implement comprehensive error handling and validation
-  - Add client-side comment validation (length, required fields)
-  - Implement proper error messages for all validation scenarios
-  - Add network error handling with retry functionality
-  - Ensure graceful degradation when comments fail to load
-  - Add proper loading states throughout comment workflow
-  - Write tests for all error scenarios and edge cases
-  - _Requirements: 1.3, 1.4, 1.5, 1.6, 5.5_
