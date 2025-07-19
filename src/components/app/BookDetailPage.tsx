@@ -5,6 +5,7 @@ import { STATUS_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { ArrowLeft } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
@@ -16,6 +17,8 @@ import { BookInfo } from "./book-detail/BookInfo";
 import { ProgressTracker } from "./book-detail/ProgressTracker";
 import { ReadingTimeline } from "./book-detail/ReadingTimeline";
 import { CommentsSection } from "./book-detail/CommentsSection";
+import { ReviewSection } from "./book-detail/ReviewSection";
+import { ReviewDialog } from "./book-detail/ReviewDialog";
 
 interface BookDetailPageProps {
   book: Book;
@@ -34,8 +37,19 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     calculateBookProgress,
     error,
   } = useBooksContext();
+  const { 
+    addReview,
+    updateReview,
+    getBookReview,
+    reviewsLoading,
+  } = useEventsContext();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isAddReviewDialogOpen, setIsAddReviewDialogOpen] = useState(false);
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+
+  // Get current review for the book
+  const currentReview = getBookReview(book.id);
 
   const handleUpdateProgress = async (currentPage: number) => {
     if (!user) return;
@@ -87,6 +101,29 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     }
   };
 
+  const handleAddReview = async (bookId: string, reviewText: string) => {
+    await addReview(bookId, reviewText);
+    setReviewRefreshKey(prev => prev + 1);
+  };
+
+  const handleUpdateReview = async (bookId: string, reviewText: string) => {
+    await updateReview(bookId, reviewText);
+    setReviewRefreshKey(prev => prev + 1);
+  };
+
+  const handleAddReviewClick = () => {
+    setIsAddReviewDialogOpen(true);
+  };
+
+  const handleReviewDialogClose = () => {
+    setIsAddReviewDialogOpen(false);
+  };
+
+  const handleReviewSaved = () => {
+    setIsAddReviewDialogOpen(false);
+    setReviewRefreshKey(prev => prev + 1);
+  };
+
   const progress = calculateBookProgress(book);
 
   return (
@@ -118,8 +155,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Book cover and basic info */}
-          <div className="lg:col-span-1">
+          {/* Left column: Book cover and reading timeline */}
+          <div className="lg:col-span-1 space-y-6">
             <BookCover
               book={book}
               progress={progress}
@@ -127,11 +164,15 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
               onMarkAsFinished={handleMarkAsFinished}
               onEditBook={() => setIsEditSheetOpen(true)}
               onRatingChange={handleRatingChange}
+              onAddReview={handleAddReviewClick}
+              hasExistingReview={!!currentReview}
               isUpdating={isUpdating}
             />
+            
+            <ReadingTimeline book={book} />
           </div>
 
-          {/* Book details and progress */}
+          {/* Right column: Book details, progress, review, and comments */}
           <div className="lg:col-span-2 space-y-6">
             <BookInfo book={book} />
 
@@ -142,7 +183,17 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
               isUpdating={isUpdating}
             />
 
-            <ReadingTimeline book={book} />
+            {/* Review Section - only shows when review exists */}
+            <ReviewSection
+              key={reviewRefreshKey}
+              book={book}
+              review={currentReview}
+              onAddReview={handleAddReview}
+              onUpdateReview={handleUpdateReview}
+              onReviewUpdated={() => setReviewRefreshKey(prev => prev + 1)}
+              isLoading={reviewsLoading}
+              error={error?.userMessage || null}
+            />
 
             <CommentsSection book={book} />
           </div>
@@ -155,6 +206,17 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
         open={isEditSheetOpen}
         onOpenChange={setIsEditSheetOpen}
         onBookDeleted={onBack}
+      />
+
+      {/* Add Review Dialog */}
+      <ReviewDialog
+        book={book}
+        open={isAddReviewDialogOpen}
+        onOpenChange={handleReviewDialogClose}
+        onReviewSaved={handleReviewSaved}
+        onAddReview={handleAddReview}
+        onUpdateReview={handleUpdateReview}
+        isSubmitting={reviewsLoading}
       />
     </div>
   );

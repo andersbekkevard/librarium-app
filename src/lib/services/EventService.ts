@@ -5,6 +5,7 @@
  * transformation and event-related functionality.
  */
 
+import { Timestamp } from "firebase/firestore";
 import { EVENT_CONFIG } from "../constants/constants";
 import { BRAND_COLORS, STATUS_COLORS } from "../design/colors";
 import {
@@ -16,9 +17,11 @@ import {
   BookEvent, 
   ActivityItem, 
   BookComment, 
+  BookReview,
   ReadingState,
   validateComment,
-  validateCommentPage
+  validateCommentPage,
+  validateReview
 } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
@@ -78,6 +81,32 @@ export interface IEventService {
     userId: string,
     bookId: string
   ): Promise<ServiceResult<BookComment[]>>;
+
+  /**
+   * Add a review for a finished book
+   */
+  addReview(
+    userId: string,
+    bookId: string,
+    reviewText: string
+  ): Promise<ServiceResult<string>>;
+
+  /**
+   * Update an existing review
+   */
+  updateReview(
+    userId: string,
+    bookId: string,
+    reviewText: string
+  ): Promise<ServiceResult<void>>;
+
+  /**
+   * Get review for a specific book
+   */
+  getBookReview(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<BookReview | null>>;
 }
 
 /**
@@ -407,6 +436,256 @@ export class EventService implements IEventService {
         error: createSystemError("Failed to get book comments", error as Error),
       };
     }
+  }
+
+  /**
+   * Add a review for a finished book
+   */
+  async addReview(
+    userId: string,
+    bookId: string,
+    reviewText: string
+  ): Promise<ServiceResult<string>> {
+    try {
+      // Validate inputs
+      if (!userId) {
+        return {
+          success: false,
+          error: createValidationError("User ID is required"),
+        };
+      }
+
+      if (!bookId) {
+        return {
+          success: false,
+          error: createValidationError("Book ID is required"),
+        };
+      }
+
+      if (!validateReview(reviewText)) {
+        return {
+          success: false,
+          error: createValidationError("Review must be between 10 and 5000 characters"),
+        };
+      }
+
+      // Get book to validate it's finished
+      const bookResult = await this.bookRepository.getBook(userId, bookId);
+      if (!bookResult.success || !bookResult.data) {
+        return {
+          success: false,
+          error: createValidationError("Book not found"),
+        };
+      }
+
+      const book = bookResult.data;
+      if (book.state !== "finished") {
+        return {
+          success: false,
+          error: createValidationError("Reviews can only be added to finished books"),
+        };
+      }
+
+      // Check if review already exists
+      const existingReviewResult = await this.getBookReview(userId, bookId);
+      if (existingReviewResult.success && existingReviewResult.data) {
+        return {
+          success: false,
+          error: createValidationError("A review already exists for this book. Use updateReview to modify it."),
+        };
+      }
+
+      // Create review event
+      const currentTime = Timestamp.now();
+      const event: Omit<BookEvent, "id" | "userId" | "timestamp"> = {
+        bookId,
+        type: "review",
+        data: {
+          review: reviewText.trim(),
+          reviewCreatedAt: currentTime,
+          reviewUpdatedAt: currentTime,
+        },
+      };
+
+      const result = await this.logEvent(userId, event);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: createSystemError(
+            typeof result.error === 'string' ? result.error : "Failed to add review"
+          ),
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data || "",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: createSystemError("Failed to add review", error as Error),
+      };
+    }
+  }
+
+  /**
+   * Update an existing review
+   */
+  async updateReview(
+    userId: string,
+    bookId: string,
+    reviewText: string
+  ): Promise<ServiceResult<void>> {
+    try {
+      // Validate inputs
+      if (!userId) {
+        return {
+          success: false,
+          error: createValidationError("User ID is required"),
+        };
+      }
+
+      if (!bookId) {
+        return {
+          success: false,
+          error: createValidationError("Book ID is required"),
+        };
+      }
+
+      if (!validateReview(reviewText)) {
+        return {
+          success: false,
+          error: createValidationError("Review must be between 10 and 5000 characters"),
+        };
+      }
+
+      // Get existing review
+      const existingReviewResult = await this.getBookReview(userId, bookId);
+      if (!existingReviewResult.success || !existingReviewResult.data) {
+        return {
+          success: false,
+          error: createValidationError("No existing review found to update"),
+        };
+      }
+
+      const existingReview = existingReviewResult.data;
+
+      // Create updated review event (we can't update events in place, so we create a new one)
+      const currentTime = Timestamp.now();
+      const updatedEvent: Omit<BookEvent, "id" | "userId" | "timestamp"> = {
+        bookId,
+        type: "review",
+        data: {
+          review: reviewText.trim(),
+          reviewCreatedAt: existingReview.createdAt,
+          reviewUpdatedAt: currentTime,
+        },
+      };
+
+      const result = await this.logEvent(userId, updatedEvent);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: createSystemError(
+            typeof result.error === 'string' ? result.error : "Failed to update review"
+          ),
+        };
+      }
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: createSystemError("Failed to update review", error as Error),
+      };
+    }
+  }
+
+  /**
+   * Get review for a specific book
+   */
+  async getBookReview(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<BookReview | null>> {
+    try {
+      if (!userId) {
+        return {
+          success: false,
+          error: createValidationError("User ID is required"),
+        };
+      }
+
+      if (!bookId) {
+        return {
+          success: false,
+          error: createValidationError("Book ID is required"),
+        };
+      }
+
+      // Get all events for the book
+      const eventsResult = await this.getBookEvents(userId, bookId);
+      if (!eventsResult.success || !eventsResult.data) {
+        return {
+          success: false,
+          error: eventsResult.error || createSystemError("Failed to fetch book events"),
+        };
+      }
+
+      // Find most recent review event (in case there are multiple from updates)
+      const reviewEvents = eventsResult.data.filter(event => event.type === "review");
+      if (reviewEvents.length === 0) {
+        return {
+          success: true,
+          data: null,
+        };
+      }
+
+      // Get the most recent review event
+      const reviewEvent = reviewEvents.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis())[0];
+
+      // Transform to BookReview
+      const review = this.transformEventToReview(reviewEvent);
+      if (!review) {
+        return {
+          success: true,
+          data: null,
+        };
+      }
+
+      return {
+        success: true,
+        data: review,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: createSystemError("Failed to get book review", error as Error),
+      };
+    }
+  }
+
+  /**
+   * Transform event to review
+   */
+  private transformEventToReview(event: BookEvent): BookReview | null {
+    if (event.type !== "review" || !event.data.review) {
+      return null;
+    }
+
+    return {
+      id: event.id,
+      bookId: event.bookId,
+      userId: event.userId,
+      text: event.data.review,
+      createdAt: event.data.reviewCreatedAt || event.timestamp,
+      updatedAt: event.data.reviewUpdatedAt || event.timestamp,
+    };
   }
 
   /**
