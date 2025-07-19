@@ -1,6 +1,11 @@
 "use client";
 
-import { BookEvent, ActivityItem, BookComment, ReadingState } from "@/lib/models/models";
+import {
+  ActivityItem,
+  BookComment,
+  BookEvent,
+  ReadingState,
+} from "@/lib/models/models";
 import { eventService } from "@/lib/services/EventService";
 import React, {
   ReactNode,
@@ -23,7 +28,7 @@ interface EventsContextType {
   getEventsByType: (type: BookEvent["type"]) => BookEvent[];
   getEventsByDateRange: (startDate: Date, endDate: Date) => BookEvent[];
   getEventsByBookId: (bookId: string) => BookEvent[];
-  
+
   // Comment-specific methods
   addComment: (
     bookId: string,
@@ -64,7 +69,11 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
       if (result.success && result.data) {
         setEvents(result.data);
       } else {
-        setError(typeof result.error === 'string' ? result.error : "Failed to load events");
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Failed to load events"
+        );
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -88,7 +97,11 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
       if (result.success && result.data) {
         setActivities(result.data);
       } else {
-        setError(typeof result.error === 'string' ? result.error : "Failed to load activities");
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Failed to load activities"
+        );
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -135,7 +148,11 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
       );
 
       if (!result.success) {
-        setError(typeof result.error === 'string' ? result.error : "Failed to add comment");
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Failed to add comment"
+        );
         return;
       }
 
@@ -156,7 +173,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     const comments: BookComment[] = commentEvents
       .map((event) => {
         if (!event.data.comment) return null;
-        
+
         return {
           id: event.id,
           bookId: event.bookId,

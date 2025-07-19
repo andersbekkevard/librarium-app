@@ -11,14 +11,14 @@ import {
   createSystemError,
   createValidationError,
 } from "../errors/error-handling";
-import { 
-  Book, 
-  BookEvent, 
-  ActivityItem, 
-  BookComment, 
+import {
+  ActivityItem,
+  Book,
+  BookComment,
+  BookEvent,
   ReadingState,
   validateComment,
-  validateCommentPage
+  validateCommentPage,
 } from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
@@ -304,7 +304,9 @@ export class EventService implements IEventService {
       if (!validateComment(comment)) {
         return {
           success: false,
-          error: createValidationError("Comment must be between 1 and 2000 characters"),
+          error: createValidationError(
+            "Comment must be between 1 and 2000 characters"
+          ),
         };
       }
 
@@ -342,7 +344,9 @@ export class EventService implements IEventService {
         return {
           success: false,
           error: createSystemError(
-            typeof result.error === 'string' ? result.error : "Failed to add comment"
+            typeof result.error === "string"
+              ? result.error
+              : "Failed to add comment"
           ),
         };
       }
@@ -386,14 +390,18 @@ export class EventService implements IEventService {
       if (!eventsResult.success || !eventsResult.data) {
         return {
           success: false,
-          error: eventsResult.error || createSystemError("Failed to fetch book events"),
+          error:
+            eventsResult.error ||
+            createSystemError("Failed to fetch book events"),
         };
       }
 
       // Filter comment events and transform to BookComment objects
-      const commentEvents = eventsResult.data.filter(event => event.type === "comment");
+      const commentEvents = eventsResult.data.filter(
+        (event) => event.type === "comment"
+      );
       const comments: BookComment[] = commentEvents
-        .map(event => this.transformEventToComment(event))
+        .map((event) => this.transformEventToComment(event))
         .filter((comment): comment is BookComment => comment !== null)
         .sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis()); // Sort newest first
 

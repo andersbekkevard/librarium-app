@@ -28,23 +28,50 @@ const formatTimeAgo = (timestamp: Date): string => {
   }
 };
 
-const getActivityText = (activity: ActivityItem): string => {
+const getActivityText = (activity: ActivityItem): React.ReactNode => {
   const bookTitle = activity.bookTitle;
   const details = activity.details;
 
   switch (activity.type) {
     case "finished":
-      return `Finished reading ${bookTitle}`;
+      return (
+        <>
+          Finished reading <span className="font-semibold">{bookTitle}</span>
+        </>
+      );
     case "started":
-      return `Started reading ${bookTitle}`;
+      return (
+        <>
+          Started reading <span className="font-semibold">{bookTitle}</span>
+        </>
+      );
     case "rated":
-      return `Rated ${bookTitle}${details ? ` ${details}` : ""}`;
+      return (
+        <>
+          Rated <span className="font-semibold">{bookTitle}</span>
+          {details ? ` ${details}` : ""}
+        </>
+      );
     case "added":
-      return `Added ${bookTitle}`;
+      return (
+        <>
+          Added <span className="font-semibold">{bookTitle}</span>
+        </>
+      );
     case "progress":
-      return `Read ${details} in ${bookTitle}`;
+      return (
+        <>
+          Read {details} in <span className="font-semibold">{bookTitle}</span>
+        </>
+      );
+    case "commented":
+      return (
+        <>
+          Commented on <span className="font-semibold">{bookTitle}</span>
+        </>
+      );
     default:
-      return `${bookTitle}`;
+      return <span className="font-semibold">{bookTitle}</span>;
   }
 };
 
