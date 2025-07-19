@@ -77,7 +77,7 @@ npm install
    - Create a Firestore database
    - Add your Firebase configuration to environment variables
 
-3. Run the development server:
+3. To run the development server:
 
 ```bash
 npm run dev
