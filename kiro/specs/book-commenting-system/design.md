@@ -311,14 +311,6 @@ const COMMENT_ERRORS = {
 └─────────────────────────────────────┘
 ```
 
-### Accessibility
-
-1. **Keyboard Navigation**: Full keyboard support for all interactions
-2. **Screen Readers**: Proper ARIA labels and descriptions
-3. **Focus Management**: Clear focus indicators and logical tab order
-4. **Color Contrast**: Meets WCAG 2.1 AA standards
-5. **Text Scaling**: Supports up to 200% text scaling
-
 ## Integration Points
 
 ### BookDetailPage Integration
@@ -363,43 +355,6 @@ const addComment = async (bookId: string, comment: string, ...) => {
   }
 };
 ```
-
-## Performance Considerations
-
-### Data Loading
-
-1. **Lazy Loading**: Comments loaded only when timeline is expanded
-2. **Caching**: Comments cached in EventsProvider state
-3. **Pagination**: Support for paginated comment loading (future enhancement)
-4. **Debouncing**: Comment form submission debounced to prevent duplicates
-
-### Memory Management
-
-1. **Event Filtering**: Comments filtered client-side from existing events
-2. **State Cleanup**: Comment state cleaned up when component unmounts
-3. **Memory Leaks**: Proper cleanup of event listeners and subscriptions
-
-### Network Optimization
-
-1. **Batch Operations**: Multiple comments can be loaded in single request
-2. **Compression**: Comment text compressed before storage
-3. **Offline Support**: Comments cached for offline viewing (future enhancement)
-
-## Security Considerations
-
-### Data Validation
-
-1. **Input Sanitization**: All comment text sanitized before storage
-2. **XSS Prevention**: Comments rendered with proper escaping
-3. **Length Limits**: Enforced both client and server-side
-4. **Rate Limiting**: Prevent comment spam (future enhancement)
-
-### Access Control
-
-1. **User Authentication**: Comments require authenticated user
-2. **Book Ownership**: Users can only comment on their own books
-3. **Data Isolation**: Comments isolated by user ID in Firestore
-4. **Privacy**: Comments are private to the book owner
 
 ## Future Enhancements
 

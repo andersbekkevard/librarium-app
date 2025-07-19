@@ -11,7 +11,15 @@ import {
   createSystemError,
   createValidationError,
 } from "../errors/error-handling";
-import { Book, BookEvent, ActivityItem } from "../models/models";
+import { 
+  Book, 
+  BookEvent, 
+  ActivityItem, 
+  BookComment, 
+  ReadingState,
+  validateComment,
+  validateCommentPage
+} from "../models/models";
 import { firebaseBookRepository } from "../repositories/FirebaseBookRepository";
 import { firebaseEventRepository } from "../repositories/FirebaseEventRepository";
 import { ServiceResult } from "./types";
@@ -51,6 +59,25 @@ export interface IEventService {
     userId: string,
     bookId: string
   ): Promise<ServiceResult<BookEvent[]>>;
+
+  /**
+   * Add a comment to a book
+   */
+  addComment(
+    userId: string,
+    bookId: string,
+    comment: string,
+    readingState: ReadingState,
+    currentPage: number
+  ): Promise<ServiceResult<string>>;
+
+  /**
+   * Get comments for a specific book
+   */
+  getBookComments(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<BookComment[]>>;
 }
 
 /**
@@ -249,6 +276,159 @@ export class EventService implements IEventService {
   }
 
   /**
+   * Add a comment to a book
+   */
+  async addComment(
+    userId: string,
+    bookId: string,
+    comment: string,
+    readingState: ReadingState,
+    currentPage: number
+  ): Promise<ServiceResult<string>> {
+    try {
+      // Validate inputs
+      if (!userId) {
+        return {
+          success: false,
+          error: createValidationError("User ID is required"),
+        };
+      }
+
+      if (!bookId) {
+        return {
+          success: false,
+          error: createValidationError("Book ID is required"),
+        };
+      }
+
+      if (!validateComment(comment)) {
+        return {
+          success: false,
+          error: createValidationError("Comment must be between 1 and 2000 characters"),
+        };
+      }
+
+      // Get book to validate page number
+      const bookResult = await this.bookRepository.getBook(userId, bookId);
+      if (!bookResult.success || !bookResult.data) {
+        return {
+          success: false,
+          error: createValidationError("Book not found"),
+        };
+      }
+
+      const book = bookResult.data;
+      if (!validateCommentPage(currentPage, book.progress.totalPages)) {
+        return {
+          success: false,
+          error: createValidationError("Invalid page number"),
+        };
+      }
+
+      // Create comment event
+      const event: Omit<BookEvent, "id" | "userId" | "timestamp"> = {
+        bookId,
+        type: "comment",
+        data: {
+          comment: comment.trim(),
+          commentState: readingState,
+          commentPage: currentPage,
+        },
+      };
+
+      const result = await this.logEvent(userId, event);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: createSystemError(
+            typeof result.error === 'string' ? result.error : "Failed to add comment"
+          ),
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data || "",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: createSystemError("Failed to add comment", error as Error),
+      };
+    }
+  }
+
+  /**
+   * Get comments for a specific book
+   */
+  async getBookComments(
+    userId: string,
+    bookId: string
+  ): Promise<ServiceResult<BookComment[]>> {
+    try {
+      if (!userId) {
+        return {
+          success: false,
+          error: createValidationError("User ID is required"),
+        };
+      }
+
+      if (!bookId) {
+        return {
+          success: false,
+          error: createValidationError("Book ID is required"),
+        };
+      }
+
+      // Get all events for the book
+      const eventsResult = await this.getBookEvents(userId, bookId);
+      if (!eventsResult.success || !eventsResult.data) {
+        return {
+          success: false,
+          error: eventsResult.error || createSystemError("Failed to fetch book events"),
+        };
+      }
+
+      // Filter comment events and transform to BookComment objects
+      const commentEvents = eventsResult.data.filter(event => event.type === "comment");
+      const comments: BookComment[] = commentEvents
+        .map(event => this.transformEventToComment(event))
+        .filter((comment): comment is BookComment => comment !== null)
+        .sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis()); // Sort newest first
+
+      return {
+        success: true,
+        data: comments,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: createSystemError("Failed to get book comments", error as Error),
+      };
+    }
+  }
+
+  /**
+   * Transform event to comment
+   */
+  private transformEventToComment(event: BookEvent): BookComment | null {
+    if (event.type !== "comment" || !event.data.comment) {
+      return null;
+    }
+
+    return {
+      id: event.id,
+      bookId: event.bookId,
+      userId: event.userId,
+      text: event.data.comment,
+      readingState: event.data.commentState || "not_started",
+      currentPage: event.data.commentPage || 0,
+      timestamp: event.timestamp,
+    };
+  }
+
+  /**
    * Transform event to activity item
    */
   private transformEventToActivityItem(
@@ -273,6 +453,8 @@ export class EventService implements IEventService {
         return this.transformProgressUpdateEvent(event, baseItem);
       case "rating_added":
         return this.transformRatingAddedEvent(event, baseItem);
+      case "comment":
+        return this.transformCommentEvent(event, baseItem);
       default:
         return null;
     }
@@ -350,6 +532,27 @@ export class EventService implements IEventService {
       type: "rated",
       colorClass: STATUS_COLORS.warning.bg,
       details: rating ? `${rating} stars` : undefined,
+    };
+  }
+
+  /**
+   * Transform comment event
+   */
+  private transformCommentEvent(
+    event: BookEvent,
+    baseItem: Omit<ActivityItem, "type" | "colorClass" | "details">
+  ): ActivityItem {
+    const { comment } = event.data;
+    const truncateText = (text: string, maxLength: number): string => {
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength).trim() + "...";
+    };
+
+    return {
+      ...baseItem,
+      type: "commented",
+      colorClass: BRAND_COLORS.secondary.bg,
+      details: comment ? truncateText(comment, 50) : undefined,
     };
   }
 }

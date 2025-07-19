@@ -15,6 +15,7 @@ import { BookCover } from "./book-detail/BookCover";
 import { BookInfo } from "./book-detail/BookInfo";
 import { ProgressTracker } from "./book-detail/ProgressTracker";
 import { ReadingTimeline } from "./book-detail/ReadingTimeline";
+import { CommentsSection } from "./book-detail/CommentsSection";
 
 interface BookDetailPageProps {
   book: Book;
@@ -142,6 +143,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
             />
 
             <ReadingTimeline book={book} />
+
+            <CommentsSection book={book} />
           </div>
         </div>
       </div>

@@ -751,14 +751,20 @@ export class BookService implements IBookService {
         return { success: false, error: standardError };
       }
 
-      // Log manual update event
-      await this.eventRepository.logEvent(userId, {
-        type: "state_change",
-        bookId,
-        data: {
-          note: `Manual update: ${Object.keys(updates).join(", ")}`,
-        },
-      });
+      // Get updated book for logging
+      const updatedBookResult = await this.bookRepository.getBook(userId, bookId);
+      if (updatedBookResult.success && updatedBookResult.data) {
+        // Log manual update event
+        await this.eventRepository.logEvent(userId, {
+          type: "comment",
+          bookId,
+          data: {
+            comment: `Manual update: ${Object.keys(updates).join(", ")}`,
+            commentState: updatedBookResult.data.state,
+            commentPage: updatedBookResult.data.progress.currentPage,
+          },
+        });
+      }
 
       return { success: true };
     } catch (error) {
