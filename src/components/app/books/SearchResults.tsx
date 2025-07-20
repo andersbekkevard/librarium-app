@@ -111,7 +111,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 <div className="w-20 h-28 sm:w-24 sm:h-36 md:w-32 md:h-48 bg-muted rounded flex items-center justify-center relative overflow-hidden">
                   {getBestThumbnail(book) ? (
                     <Image
-                      src={getBestThumbnail(book)}
+                      src={getBestThumbnail(book)!}
                       alt={book.volumeInfo.title}
                       fill
                       className="object-cover"
