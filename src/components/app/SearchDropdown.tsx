@@ -23,6 +23,8 @@ interface SearchDropdownProps {
   placeholder?: string;
   className?: string;
   closeOnClickOutside?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 // Search state enum
@@ -37,10 +39,22 @@ interface SearchData {
 export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   placeholder = "Search books, authors, or genres...",
   className,
-  closeOnClickOutside = true, // NEW
+  closeOnClickOutside = true,
+  isOpen: controlledIsOpen,
+  onOpenChange,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  // Use controlled state if provided, otherwise use internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = useCallback((open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  }, [onOpenChange]);
 
   // Search state management
   const [searchData, setSearchData] = useState<SearchData>({
@@ -59,7 +73,8 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   const currentSearchRef = useRef<string>("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null); // NEW
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Local search function
   const performLocalSearch = useCallback(
@@ -220,8 +235,15 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         performSearch(trimmedValue);
       }, 300);
     },
-    [searchCache, performSearch]
+    [searchCache, performSearch, setIsOpen]
   );
+
+  // Focus input when opened externally (e.g., via keyboard shortcut)
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
 
   // Cleanup timeout and abort controller on unmount
   useEffect(() => {
@@ -257,7 +279,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [isOpen, closeOnClickOutside]);
+  }, [isOpen, closeOnClickOutside, setIsOpen]);
 
   const handleBookSelect = useCallback(
     (book: Book) => {
@@ -266,7 +288,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       setSearchQuery("");
       setSearchData({ state: "idle", query: "", results: [] });
     },
-    [router]
+    [router, setIsOpen]
   );
 
   const handleAddBookSelect = useCallback(() => {
@@ -281,7 +303,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     setIsOpen(false);
     setSearchQuery("");
     setSearchData({ state: "idle", query: "", results: [] });
-  }, [router, searchQuery]);
+  }, [router, searchQuery, setIsOpen]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -298,7 +320,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       setSearchData({ state: "idle", query: "", results: [] });
       currentSearchRef.current = "";
     }
-  }, []);
+  }, [setIsOpen]);
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
@@ -308,6 +330,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         shouldFilter={false}
       >
         <CommandInput
+          ref={inputRef}
           placeholder={placeholder}
           value={searchQuery}
           onValueChange={handleInputChange}

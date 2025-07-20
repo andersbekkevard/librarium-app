@@ -3,9 +3,11 @@
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
 import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
+import { useCmdK } from "@/lib/hooks/useKeyboardShortcut";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { Book, Loader2, Menu } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import SearchDropdown from "./SearchDropdown";
 
 interface HeaderProps {
@@ -18,6 +20,12 @@ export const Header: React.FC<HeaderProps> = ({
   sidebarOpen = false, // TODO: Can be used for menu icon state indication
 }) => {
   const { loading } = useAuthContext();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Handle Cmd+K keyboard shortcut
+  useCmdK(() => {
+    setSearchOpen(true);
+  });
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-background border-b border-border py-4 z-70">
@@ -51,7 +59,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Search Bar - Responsive layout */}
         <div className="flex-1 max-w-2xl lg:max-w-none mr-4 lg:mr-8 h-full flex items-center justify-start">
-          <SearchDropdown placeholder="Search books, authors, or genres..." />
+          <SearchDropdown 
+            placeholder="Search books, authors, or genres..." 
+            isOpen={searchOpen}
+            onOpenChange={setSearchOpen}
+          />
         </div>
 
         {/* Right Side - Theme Toggle & User Profile */}
