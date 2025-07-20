@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Book } from "@/lib/models/models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,6 @@ interface Filters {
 
 interface ActivityFiltersProps {
   filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
   books: Book[];
   eventCount: number;
 }
@@ -28,32 +28,51 @@ const EVENT_TYPES = [
   { value: "progress_update", label: "Progress Updates" },
   { value: "rating_added", label: "Ratings Added" },
   { value: "comment", label: "Comments" },
+  { value: "review", label: "Reviews" },
   { value: "manual_update", label: "Manual Updates" },
+  { value: "delete_book", label: "Deleted Books" },
 ];
 
 export const ActivityFilters: React.FC<ActivityFiltersProps> = ({
   filters,
-  onFiltersChange,
   books,
   eventCount,
 }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const updateURLParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === "all" || value === "") {
+        // Remove default values to keep URLs clean
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    const newUrl = `${window.location.pathname}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    router.push(newUrl);
+  };
   const handleClearFilters = () => {
-    onFiltersChange({
+    updateURLParams({
       eventType: "all",
-      dateRange: {
-        start: null,
-        end: null,
-      },
+      startDate: "",
+      endDate: "",
       bookId: "all",
     });
   };
 
   const handleEventTypeChange = (value: string) => {
-    onFiltersChange({ ...filters, eventType: value });
+    updateURLParams({ eventType: value });
   };
 
   const handleBookChange = (value: string) => {
-    onFiltersChange({ ...filters, bookId: value });
+    updateURLParams({ bookId: value });
   };
 
 
@@ -76,14 +95,8 @@ export const ActivityFilters: React.FC<ActivityFiltersProps> = ({
   };
 
   const handleDateInputChange = (field: 'start' | 'end', value: string) => {
-    const date = value ? new Date(value) : null;
-    onFiltersChange({
-      ...filters,
-      dateRange: {
-        ...filters.dateRange,
-        [field]: date,
-      },
-    });
+    const paramKey = field === 'start' ? 'startDate' : 'endDate';
+    updateURLParams({ [paramKey]: value });
   };
 
   return (
