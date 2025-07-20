@@ -756,7 +756,7 @@ export class BookService implements IBookService {
       if (updatedBookResult.success && updatedBookResult.data) {
         // Log manual update event
         await this.eventRepository.logEvent(userId, {
-          type: "comment",
+          type: "manual_update",
           bookId,
           data: {
             comment: `Manual update: ${Object.keys(updates).join(", ")}`,

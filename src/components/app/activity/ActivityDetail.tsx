@@ -9,6 +9,7 @@ import {
   Clock,
   MessageSquare,
   Star,
+  Settings,
 } from "lucide-react";
 import React from "react";
 
@@ -33,6 +34,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return <Star className="h-4 w-4" />;
       case "comment":
         return <MessageSquare className="h-4 w-4" />;
+      case "manual_update":
+        return <Settings className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
@@ -48,6 +51,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
       case "comment":
         return "bg-purple-50 text-purple-700 border-purple-200";
+      case "manual_update":
+        return "bg-orange-50 text-orange-700 border-orange-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
@@ -79,6 +84,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return `Rated ${event.data.rating || 0} stars`;
       case "comment":
         return "Added a comment";
+      case "manual_update":
+        return "Manual book update";
       default:
         return "Activity updated";
     }
@@ -121,6 +128,14 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         if (event.data.comment) {
           details.push({
             label: "Comment",
+            value: event.data.comment,
+          });
+        }
+        break;
+      case "manual_update":
+        if (event.data.comment) {
+          details.push({
+            label: "Update Details",
             value: event.data.comment,
           });
         }

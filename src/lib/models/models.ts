@@ -78,7 +78,7 @@ export interface BookEvent {
   userId: string; // Reference to the user
 
   // Event details
-  type: "state_change" | "progress_update" | "rating_added" | "comment" | "review";
+  type: "state_change" | "progress_update" | "rating_added" | "comment" | "review" | "manual_update";
   timestamp: Timestamp; // When the event occurred
 
   // Event-specific data
@@ -160,6 +160,7 @@ export const isValidEventType = (type: string): type is EventType => {
     "rating_added",
     "comment",
     "review",
+    "manual_update",
   ].includes(type);
 };
 
@@ -225,7 +226,7 @@ export const validateRating = (rating: number): boolean => {
  */
 export interface ActivityItem {
   id: string; // Event ID
-  type: "finished" | "started" | "rated" | "added" | "progress" | "commented";
+  type: "finished" | "started" | "rated" | "added" | "progress" | "commented" | "manual_updated";
   bookTitle: string; // Book title for display
   bookId: string; // Reference to the book
   details?: string; // Additional details (e.g., "5 stars", "20 pages")

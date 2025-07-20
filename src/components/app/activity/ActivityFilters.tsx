@@ -27,7 +27,8 @@ const EVENT_TYPES = [
   { value: "state_change", label: "Status Changes" },
   { value: "progress_update", label: "Progress Updates" },
   { value: "rating_added", label: "Ratings Added" },
-  { value: "note_added", label: "Notes Added" },
+  { value: "comment", label: "Comments" },
+  { value: "manual_update", label: "Manual Updates" },
 ];
 
 export const ActivityFilters: React.FC<ActivityFiltersProps> = ({

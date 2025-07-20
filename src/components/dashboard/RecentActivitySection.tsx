@@ -61,7 +61,15 @@ const getActivityText = (activity: ActivityItem): React.ReactNode => {
     case "progress":
       return (
         <>
-          Read {details} in <span className="font-semibold">{bookTitle}</span>
+          {details &&
+            (() => {
+              const pagesMatch = details.match(/(-?\d+)\s*pages?/);
+              const pages = pagesMatch ? parseInt(pagesMatch[1], 10) : 0;
+              return pages > 0
+                ? `Read ${pages} pages in `
+                : `Unread ${Math.abs(pages)} pages in `;
+            })()}
+          <span className="font-semibold">{bookTitle}</span>
         </>
       );
     case "commented":

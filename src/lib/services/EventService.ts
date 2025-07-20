@@ -750,6 +750,8 @@ export class EventService implements IEventService {
         return this.transformRatingAddedEvent(event, baseItem);
       case "comment":
         return this.transformCommentEvent(event, baseItem);
+      case "manual_update":
+        return this.transformManualUpdateEvent(event, baseItem);
       default:
         return null;
     }
@@ -847,6 +849,27 @@ export class EventService implements IEventService {
       ...baseItem,
       type: "commented",
       colorClass: BRAND_COLORS.secondary.bg,
+      details: comment ? truncateText(comment, 50) : undefined,
+    };
+  }
+
+  /**
+   * Transform manual update event
+   */
+  private transformManualUpdateEvent(
+    event: BookEvent,
+    baseItem: Omit<ActivityItem, "type" | "colorClass" | "details">
+  ): ActivityItem {
+    const { comment } = event.data;
+    const truncateText = (text: string, maxLength: number): string => {
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength).trim() + "...";
+    };
+
+    return {
+      ...baseItem,
+      type: "manual_updated",
+      colorClass: STATUS_COLORS.warning.bg,
       details: comment ? truncateText(comment, 50) : undefined,
     };
   }
