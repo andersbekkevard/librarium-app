@@ -5,7 +5,7 @@
  * Coordinates between book, event, and user repositories.
  */
 
-import { calculateBookProgress } from "@/lib/books/book-utils";
+import { calculateBookProgress, convertGoogleBookToBook } from "@/lib/books/book-utils";
 import {
   ErrorBuilder,
   ErrorCategory,
@@ -15,6 +15,7 @@ import {
   createSystemError,
   createValidationError,
 } from "@/lib/errors/error-handling";
+import { googleBooksApi } from "@/lib/api/google-books-api";
 import {
   Book,
   canTransitionTo,
@@ -790,6 +791,96 @@ export class BookService implements IBookService {
     } catch (error) {
       const standardError = createSystemError(
         "Failed to update book manually",
+        error as Error
+      );
+      return { success: false, error: standardError };
+    }
+  }
+
+  /**
+   * Add a book from ISBN by searching Google Books API
+   * 
+   * Searches for book metadata using the provided ISBN and adds it to the user's
+   * collection. Uses the existing Google Books API integration and book conversion
+   * utilities to maintain consistency with other book addition methods.
+   * 
+   * @param userId - User ID who owns the book
+   * @param isbn - ISBN string (ISBN-10 or ISBN-13)
+   * @returns Promise<ServiceResult<string>> - Success with book ID or error
+   * 
+   * @example
+   * const result = await bookService.addBookFromISBN(userId, '9781234567890');
+   * if (result.success) {
+   *   console.log('Book added with ID:', result.data);
+   * }
+   */
+  async addBookFromISBN(
+    userId: string,
+    isbn: string
+  ): Promise<ServiceResult<string>> {
+    try {
+      if (!isbn || typeof isbn !== 'string' || isbn.trim().length === 0) {
+        return {
+          success: false,
+          error: createValidationError("ISBN is required", "Please provide a valid ISBN")
+        };
+      }
+
+      // Search for book using Google Books API
+      const books = await googleBooksApi.searchByISBN(isbn.trim(), 1);
+      
+      if (books.length === 0) {
+        return {
+          success: false,
+          error: createValidationError(
+            "Book not found for this ISBN",
+            "Book not found in our database. You can add it manually using the 'Manual Entry' tab."
+          )
+        };
+      }
+
+      // Convert Google Books volume to internal Book model
+      const book = convertGoogleBookToBook(books[0]);
+      const { id: _id, ...bookData } = book;
+      
+      // Add the book using existing addBook method
+      const addResult = await this.addBook(userId, bookData);
+      
+      if (!addResult.success) {
+        return addResult;
+      }
+
+      return {
+        success: true,
+        data: addResult.data
+      };
+    } catch (error) {
+      // Handle Google Books API errors
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit') || error.message.includes('quota')) {
+          return {
+            success: false,
+            error: createNetworkError("Search limit reached. Please try again in a few minutes.")
+          };
+        }
+        
+        if (error.message.includes('Network') || error.message.includes('connection')) {
+          return {
+            success: false,
+            error: createNetworkError("Network error. Please check your internet connection and try again.")
+          };
+        }
+        
+        if (error.message.includes('API key')) {
+          return {
+            success: false,
+            error: createSystemError("Book search service unavailable. Please try manual entry.")
+          };
+        }
+      }
+      
+      const standardError = createSystemError(
+        "Failed to add book from ISBN",
         error as Error
       );
       return { success: false, error: standardError };

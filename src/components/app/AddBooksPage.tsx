@@ -16,6 +16,7 @@ import { convertGoogleBookToBook } from "@/lib/books/book-utils";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { eventService } from "@/lib/services/EventService";
 
 // Google Books API integration
 import { GoogleBooksVolume } from "@/lib/api/google-books-api";
@@ -24,6 +25,7 @@ import { useBookSearch } from "@/lib/hooks/useBookSearch";
 // Extracted components
 import { ManualEntryForm } from "./books/ManualEntryForm";
 import { SearchResults } from "./books/SearchResults";
+import { BarcodeScanner } from "./books/BarcodeScanner";
 
 // Error handling components
 import { ErrorAlert } from "@/components/ui/error-display";
@@ -95,11 +97,19 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
    * Used by SearchResults component when user clicks "Add Book".
    *
    * @param googleBook - Google Books API volume to add
+   * @param scanningMetadata - Optional metadata if book was found via barcode scanning
    *
    * @example
    * await handleAddGoogleBook(searchResults[0]);
    */
-  const handleAddGoogleBook = async (googleBook: GoogleBooksVolume) => {
+  const handleAddGoogleBook = async (
+    googleBook: GoogleBooksVolume, 
+    scanningMetadata?: {
+      scanMethod: 'camera' | 'upload';
+      isbn: string;
+      scanStartTime: number;
+    }
+  ) => {
     if (!user) {
       // Authentication error - user should be redirected to login
       return;
@@ -125,6 +135,25 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
           },
           ...prev.slice(0, UI_CONFIG.RECENTLY_ADDED_BOOKS_LIMIT),
         ]);
+
+        // Log scanning event if book was added via barcode scanning
+        if (scanningMetadata) {
+          try {
+            const scanDuration = Date.now() - scanningMetadata.scanStartTime;
+            await eventService.logEvent(user.uid, {
+              type: "manual_update",
+              bookId: bookId,
+              data: {
+                comment: `Book added via barcode scanning (${scanningMetadata.scanMethod === 'camera' ? 'camera' : 'image upload'}, ISBN: ${scanningMetadata.isbn}, scan duration: ${Math.round(scanDuration/1000)}s)`,
+                commentState: book.state,
+                commentPage: book.progress.currentPage,
+              },
+            });
+          } catch (error) {
+            // Don't break the flow if event logging fails
+            console.warn('Failed to log scanning event:', error);
+          }
+        }
       }
     } catch (error) {
       // Error is handled by the BooksProvider, but log locally for debugging
@@ -343,15 +372,24 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
               <CardTitle>Scan Barcode</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">
-                  Barcode scanning feature coming soon!
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Use manual entry or search for now.
-                </p>
-              </div>
+              <BarcodeScanner
+                onBookFound={handleAddGoogleBook}
+                onError={(error) => {
+                  // For manual entry fallback, switch to manual tab
+                  if (error.includes('Manual Entry')) {
+                    updateURLParams({ tab: 'manual' });
+                  }
+                }}
+                onManualEntry={(isbn) => {
+                  // Switch to manual entry tab and potentially pre-fill ISBN
+                  updateURLParams({ tab: 'manual' });
+                  if (isbn) {
+                    // Could potentially pre-fill the ISBN in manual form
+                    // For now, just switch tabs
+                  }
+                }}
+                isAdding={isAdding}
+              />
             </CardContent>
           </Card>
         </TabsContent>
