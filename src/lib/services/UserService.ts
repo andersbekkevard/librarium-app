@@ -22,13 +22,51 @@ import { firebaseEventRepository } from "../repositories/FirebaseEventRepository
 import { firebaseUserRepository } from "../repositories/FirebaseUserRepository";
 import { IUserRepository } from "../repositories/types";
 import { IUserService, ServiceResult, UserStats } from "./types";
+import { BookService } from "./BookService";
 
 export class UserService implements IUserService {
+  private bookService: BookService;
+
   constructor(
     private userRepository: IUserRepository = firebaseUserRepository,
     private bookRepository = firebaseBookRepository,
     private eventRepository = firebaseEventRepository
-  ) {}
+  ) {
+    this.bookService = new BookService();
+  }
+
+  /**
+   * Create a default book for new users
+   */
+  private async createDefaultBook(userId: string): Promise<void> {
+    const defaultBook = {
+      title: "Fermat's Last Theorem",
+      author: "Simon Singh",
+      isbn: undefined,
+      genre: "Mathematics",
+      state: "not_started" as const,
+      progress: {
+        currentPage: 0,
+        totalPages: 396,
+      },
+      rating: undefined,
+      isOwned: false,
+      startedAt: undefined,
+      finishedAt: undefined,
+      description: "In 1963 a schoolboy browsing in his local library stumbled across a great mathematical problem: Fermat's Last Theorem, a puzzle that every child can now understand, but which has baffled mathematicians for over 300 years. Aged just ten, Andrew Wiles dreamed he would crack it.",
+      publishedDate: "1997",
+      coverImage: "http://books.google.com/books/content?id=wvAZAQAAIAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+      tags: undefined,
+      notes: "Welcome to your personal library! This is a sample book to get you started. Feel free to update your reading progress or add your own books.",
+    };
+
+    try {
+      await this.bookService.addBook(userId, defaultBook);
+    } catch (error) {
+      // Silently fail if default book creation fails - don't block user creation
+      console.warn("Failed to create default book for new user:", error);
+    }
+  }
 
   /**
    * Convert repository errors to standard errors
@@ -169,6 +207,9 @@ export class UserService implements IUserService {
         const standardError = this.handleRepositoryError(result.error!);
         throw standardError;
       }
+
+      // Create default book for new user (non-blocking)
+      await this.createDefaultBook(firebaseUser.uid);
 
       return { success: true, data: result.data };
     } catch (error) {

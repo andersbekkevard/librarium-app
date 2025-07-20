@@ -84,7 +84,8 @@ export interface BookEvent {
     | "rating_added"
     | "comment"
     | "review"
-    | "manual_update";
+    | "manual_update"
+    | "delete_book";
   timestamp: Timestamp; // When the event occurred
 
   // Event-specific data
@@ -109,6 +110,10 @@ export interface BookEvent {
     review?: string;
     reviewCreatedAt?: Timestamp;
     reviewUpdatedAt?: Timestamp;
+
+    // For delete_book events
+    deletedBookTitle?: string;
+    deletedBookAuthor?: string;
   };
 }
 
@@ -167,6 +172,7 @@ export const isValidEventType = (type: string): type is EventType => {
     "comment",
     "review",
     "manual_update",
+    "delete_book",
   ].includes(type);
 };
 
@@ -239,7 +245,8 @@ export interface ActivityItem {
     | "added"
     | "progress"
     | "commented"
-    | "manually_updated";
+    | "manually_updated"
+    | "deleted";
   bookTitle: string; // Book title for display
   bookId: string; // Reference to the book
   details?: string; // Additional details (e.g., "5 stars", "20 pages")

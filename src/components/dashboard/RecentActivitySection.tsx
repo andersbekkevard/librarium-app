@@ -78,6 +78,12 @@ const getActivityText = (activity: ActivityItem): React.ReactNode => {
           Commented on <span className="font-semibold">{bookTitle}</span>
         </>
       );
+    case "deleted":
+      return (
+        <>
+          Deleted <span className="font-semibold">{bookTitle}</span> from library
+        </>
+      );
     default:
       return <span className="font-semibold">{bookTitle}</span>;
   }
@@ -120,7 +126,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         {!loading && !error && activities.length > 0 && (
           <div className="space-y-4">
             {activities
-              .filter((activity) => activity.type !== "manually_updated")
+              .filter((activity) => activity.type !== "manually_updated" && activity.type !== "deleted")
               .map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div

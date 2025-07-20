@@ -486,12 +486,32 @@ export class BookService implements IBookService {
     bookId: string
   ): Promise<ServiceResult<void>> {
     try {
+      // Get book data before deletion for the event
+      const bookResult = await this.bookRepository.getBook(userId, bookId);
+      let bookTitle = "Unknown Book";
+      let bookAuthor = "Unknown Author";
+      
+      if (bookResult.success && bookResult.data) {
+        bookTitle = bookResult.data.title;
+        bookAuthor = bookResult.data.author;
+      }
+
       const result = await this.bookRepository.deleteBook(userId, bookId);
 
       if (!result.success) {
         const standardError = this.handleRepositoryError(result.error!);
         return { success: false, error: standardError };
       }
+
+      // Log book deletion event
+      await this.eventRepository.logEvent(userId, {
+        type: "delete_book",
+        bookId: bookId,
+        data: {
+          deletedBookTitle: bookTitle,
+          deletedBookAuthor: bookAuthor,
+        },
+      });
 
       return { success: true };
     } catch (error) {

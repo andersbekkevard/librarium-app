@@ -756,6 +756,8 @@ export class EventService implements IEventService {
         return this.transformCommentEvent(event, baseItem);
       case "manual_update":
         return this.transformManualUpdateEvent(event, baseItem);
+      case "delete_book":
+        return this.transformDeleteBookEvent(event, baseItem);
       default:
         return null;
     }
@@ -875,6 +877,24 @@ export class EventService implements IEventService {
       type: "manually_updated",
       colorClass: STATUS_COLORS.warning.bg,
       details: comment ? truncateText(comment, 50) : undefined,
+    };
+  }
+
+  /**
+   * Transform delete book event
+   */
+  private transformDeleteBookEvent(
+    event: BookEvent,
+    baseItem: Omit<ActivityItem, "type" | "colorClass" | "details">
+  ): ActivityItem {
+    const { deletedBookTitle, deletedBookAuthor } = event.data;
+
+    return {
+      ...baseItem,
+      bookTitle: deletedBookTitle || baseItem.bookTitle,
+      type: "deleted",
+      colorClass: STATUS_COLORS.error.bg,
+      details: deletedBookAuthor ? `by ${deletedBookAuthor}` : undefined,
     };
   }
 }

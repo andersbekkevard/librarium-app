@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Star,
   Settings,
+  Trash2,
 } from "lucide-react";
 import React from "react";
 
@@ -36,6 +37,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return <MessageSquare className="h-4 w-4" />;
       case "manual_update":
         return <Settings className="h-4 w-4" />;
+      case "delete_book":
+        return <Trash2 className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
@@ -53,6 +56,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return "bg-purple-50 text-purple-700 border-purple-200";
       case "manual_update":
         return "bg-orange-50 text-orange-700 border-orange-200";
+      case "delete_book":
+        return "bg-red-50 text-red-700 border-red-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
@@ -86,6 +91,8 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
         return "Added a comment";
       case "manual_update":
         return "Manual book update";
+      case "delete_book":
+        return "Deleted book from library";
       default:
         return "Activity updated";
     }
@@ -137,6 +144,20 @@ export const ActivityDetail: React.FC<ActivityDetailProps> = ({
           details.push({
             label: "Update Details",
             value: event.data.comment,
+          });
+        }
+        break;
+      case "delete_book":
+        if (event.data.deletedBookTitle) {
+          details.push({
+            label: "Book Title",
+            value: event.data.deletedBookTitle,
+          });
+        }
+        if (event.data.deletedBookAuthor) {
+          details.push({
+            label: "Author",
+            value: event.data.deletedBookAuthor,
           });
         }
         break;
