@@ -63,48 +63,51 @@ export const UserProfileDropdown: React.FC = () => {
     }
   };
 
-  const menuItems = [
+  const implementedMenuItems = [
+    {
+      id: "activity",
+      label: "Activity History",
+      icon: Activity,
+      action: () => handleMenuItemClick("/activity-history"),
+      implemented: true,
+    },
+  ];
+
+  const unimplementedMenuItems = [
     {
       id: "profile",
       label: "Profile Settings",
       icon: User,
       action: () => handleMenuItemClick(),
+      implemented: false,
     },
     {
       id: "account",
       label: "Account Settings",
       icon: Settings,
       action: () => handleMenuItemClick(),
+      implemented: false,
     },
-    // {
-    //   id: "goals",
-    //   label: "Reading Goals",
-    //   icon: Target,
-    //   action: () => handleMenuItemClick(),
-    // },
     {
       id: "privacy",
       label: "Privacy Settings",
       icon: Shield,
       action: () => handleMenuItemClick(),
-    },
-    {
-      id: "activity",
-      label: "Activity History",
-      icon: Activity,
-      action: () => handleMenuItemClick("/activity-history"),
+      implemented: false,
     },
     {
       id: "export",
       label: "Export Data",
       icon: Download,
       action: () => handleMenuItemClick(),
+      implemented: false,
     },
     {
       id: "help",
       label: "Help & Support",
       icon: HelpCircle,
       action: () => handleMenuItemClick(),
+      implemented: false,
     },
   ];
 
@@ -204,7 +207,8 @@ export const UserProfileDropdown: React.FC = () => {
 
           {/* Menu Items */}
           <div className="py-2">
-            {menuItems.map((item) => {
+            {/* Implemented Items */}
+            {implementedMenuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <button
@@ -219,6 +223,35 @@ export const UserProfileDropdown: React.FC = () => {
                     </span>
                   </div>
                   <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100" />
+                </button>
+              );
+            })}
+
+            {/* Coming Soon Spacer */}
+            <div className="flex items-center space-x-2 px-4 my-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground select-none uppercase tracking-wider">
+                Coming Soon
+              </span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            {/* Unimplemented Items */}
+            {unimplementedMenuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={item.action}
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 group cursor-default"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {item.label}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0" />
                 </button>
               );
             })}
