@@ -9,6 +9,7 @@
 - [ ] tweakCN?
 - [ ] Let more of the description text in 	searchResult be visible
 - [ ] Make preview show some kind of book details page in preview with more info
+- [ ] Make dark mode comments not look horrible
 
 ## Mobile
 - [ ] Make new search bar functionality for mobile
@@ -21,9 +22,10 @@
 - [ ] Split "Reading Activity Over Time" chart to split by genre
 
 ## Bigger feature
-- [ ] Add commenting on books
-  - [ ] Real time comment
-  - [ ] Let users commit a one time "review"
+- [X] Add commenting on books
+  - [X] Real time comment
+  - [X] Let users commit a one time "review"
+  - [ ] Refactor to link ratings with reviews
 - [ ] Improve user features
   - [ ] Allow for email/github/facebook sing in, and email/image management
   - [ ] Create profile pages, settings etc etc
