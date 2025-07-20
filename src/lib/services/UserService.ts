@@ -332,11 +332,12 @@ export class UserService implements IUserService {
         0
       );
 
-      const ratingsSum = finishedBooks.reduce((sum, book) => {
-        return sum + (book.rating || 0);
+      const booksWithRatings = finishedBooks.filter(book => book.rating !== undefined && book.rating !== null);
+      const ratingsSum = booksWithRatings.reduce((sum, book) => {
+        return sum + book.rating!;
       }, 0);
       const averageRating =
-        finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
+        booksWithRatings.length > 0 ? ratingsSum / booksWithRatings.length : 0;
 
       const readingStreak = this.calculateReadingStreak(finishedBooks);
 
@@ -446,11 +447,12 @@ export class UserService implements IUserService {
     }, 0);
 
     // Calculate ratings
-    const ratingsSum = finishedBooks.reduce((sum, book) => {
-      return sum + (book.rating || 0);
+    const booksWithRatings = finishedBooks.filter(book => book.rating !== undefined && book.rating !== null);
+    const ratingsSum = booksWithRatings.reduce((sum, book) => {
+      return sum + book.rating!;
     }, 0);
     const averageRating =
-      finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
+      booksWithRatings.length > 0 ? ratingsSum / booksWithRatings.length : 0;
 
     const readingStreak = this.calculateReadingStreak(finishedBooks);
 
@@ -504,11 +506,12 @@ export class UserService implements IUserService {
       0
     );
 
-    const ratingsSum = finishedBooks.reduce((sum, book) => {
-      return sum + (book.rating || 0);
+    const booksWithRatings = finishedBooks.filter(book => book.rating !== undefined && book.rating !== null);
+    const ratingsSum = booksWithRatings.reduce((sum, book) => {
+      return sum + book.rating!;
     }, 0);
     const averageRating =
-      finishedBooks.length > 0 ? ratingsSum / finishedBooks.length : 0;
+      booksWithRatings.length > 0 ? ratingsSum / booksWithRatings.length : 0;
 
     const readingStreak = this.calculateReadingStreak(finishedBooks);
 
