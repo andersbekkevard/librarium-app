@@ -24,16 +24,14 @@ describe("BookListItem", () => {
 
   it("renders title and author", () => {
     render(<BookListItem book={baseBook} />);
-    expect(screen.getByText(baseBook.title)).toBeInTheDocument();
-    expect(screen.getByText(baseBook.author)).toBeInTheDocument();
+    expect(screen.getAllByText(baseBook.title)).toHaveLength(2); // Mobile + Desktop
+    expect(screen.getByText(`by ${baseBook.author}`)).toBeInTheDocument();
   });
 
   it("calls onBookClick when clicked", () => {
     const onClick = jest.fn();
     render(<BookListItem book={baseBook} onBookClick={onClick} />);
-    const card = screen
-      .getByText(baseBook.title)
-      .closest('[data-slot="card"]') as HTMLElement;
+    const card = screen.getAllByText(baseBook.title)[0].closest('[data-slot="card"]') as HTMLElement;
     fireEvent.click(card);
     expect(onClick).toHaveBeenCalledWith(baseBook.id);
   });
@@ -44,7 +42,7 @@ describe("BookListItem", () => {
       progress: { currentPage: 50, totalPages: 100 },
     });
     render(<BookListItem book={book} />);
-    expect(screen.getByText("50 / 100 pages")).toBeInTheDocument();
+    expect(screen.getAllByText("50 / 100 pages")).toHaveLength(2); // Mobile + Desktop
   });
 
   it("shows rating for finished books", () => {
@@ -54,7 +52,7 @@ describe("BookListItem", () => {
       progress: { currentPage: 100, totalPages: 100 },
     });
     render(<BookListItem book={book} />);
-    expect(screen.getAllByTestId("star-icon")).toHaveLength(5);
+    expect(screen.getAllByTestId("star-icon")).toHaveLength(10); // 5 stars × 2 layouts
   });
 
   it("renders wishlist badge when not owned", () => {

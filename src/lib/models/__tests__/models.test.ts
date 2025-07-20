@@ -41,7 +41,10 @@ describe("Type Guards", () => {
       expect(isValidEventType("state_change")).toBe(true);
       expect(isValidEventType("progress_update")).toBe(true);
       expect(isValidEventType("rating_added")).toBe(true);
-      expect(isValidEventType("note_added")).toBe(true);
+      expect(isValidEventType("comment")).toBe(true);
+      expect(isValidEventType("review")).toBe(true);
+      expect(isValidEventType("manual_update")).toBe(true);
+      expect(isValidEventType("delete_book")).toBe(true);
     });
 
     it("should return false for invalid event types", () => {

@@ -13,10 +13,9 @@ are defined in constants.ts. There have recently crept in some hard coded consta
 
 
 ## Identify technical bloat
-this project has gone through major scaling the past week. when implementing functionality quickly technical debt can easily
-arise. either from bad implementation practice and architecture, inconsistency, general bloat and lacking centralization etc.
+This project has undergone major scaling over the past week. When implementing functionality quickly, technical debt can easily arise—whether from poor implementation practices, architectural issues, inconsistency, general bloat, or a lack of centralization.
 
-your task is to search the entire codebase and identify any technical debt and such issues with the current codebase that we
-ought to fix, and propose a fix for it. the project shall be scaleable, but shouldnt be overengineered. this is a startup scale
-project, not enterprise grade with uneccesary architectural bloat. the ideal project is lean, concise, clear separation of
-concern, and great reuse and centralization in the codebase
+Your task is to search the entire codebase and identify any technical debt or related issues that we should address, and propose fixes for them. The project should be scalable, but not overengineered. This is a startup-scale project, not enterprise-grade with unnecessary architectural bloat. The ideal project is lean, concise, has clear separation of concerns, and emphasizes great reuse and centralization throughout the codebase.
+
+## Test philosophy
+Testing ui directly, that is testing html, expecting different tailwind classes, etc etc is not necessary. The ui is iterated so oftenly, so that these tests are irrelevant. It is also obvious for me to see it if the css in the ui has broken, or something has an incorrect color.

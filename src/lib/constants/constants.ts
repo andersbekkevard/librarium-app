@@ -152,12 +152,12 @@ export const EVENT_CONFIG = {
   /**
    * Default limit for recent events queries
    */
-  RECENT_EVENTS_LIMIT: 10,
+  RECENT_EVENTS_LIMIT: 5,
 
   /**
    * Default limit for user activity queries
    */
-  USER_ACTIVITY_LIMIT: 10,
+  USER_ACTIVITY_LIMIT: 5,
 
   /**
    * Maximum number of favorite genres to track

@@ -132,7 +132,7 @@ describe("EventService", () => {
       expect(result.success).toBe(true);
       expect(mockEventRepository.getRecentEvents).toHaveBeenCalledWith(
         testUserId,
-        10
+        5
       );
     });
 

@@ -1,4 +1,3 @@
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { render, screen } from "@testing-library/react";
 import { Book, TrendingUp, Zap } from "lucide-react";
 import { StatCard } from "../StatCard";
@@ -32,29 +31,19 @@ describe("StatCard", () => {
     expect(icon).toBeInTheDocument();
   });
 
-  it("should apply default icon colors", () => {
-    render(<StatCard title="Total Books" value={125} icon={Book} />);
+  it("should handle zero values", () => {
+    render(<StatCard title="Zero Value" value={0} icon={Book} />);
 
-    const icon = screen.getByTestId("stat-card-icon");
-    expect(icon).toHaveClass(BRAND_COLORS.primary.text);
-    const iconContainer = icon.parentElement;
-    expect(iconContainer).toHaveClass(BRAND_COLORS.primary.bgLight);
+    expect(screen.getByText("Zero Value")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
   });
 
-  it("should apply custom icon colors when provided", () => {
-    render(
-      <StatCard
-        title="Custom Colors"
-        value="Test"
-        icon={Zap}
-        iconColor="text-red-500"
-        iconBgColor="bg-red-100"
-      />
-    );
+  it("should handle empty string values", () => {
+    render(<StatCard title="Empty String" value="" icon={Book} />);
 
-    const icon = screen.getByTestId("stat-card-icon");
-    expect(icon).toHaveClass("text-red-500");
-    const iconContainer = icon.parentElement;
-    expect(iconContainer).toHaveClass("bg-red-100");
+    expect(screen.getByText("Empty String")).toBeInTheDocument();
+    // Test functionality: component should render without crashing with empty value
+    const statCard = screen.getByText("Empty String").closest('div');
+    expect(statCard).toBeInTheDocument();
   });
-});
+})
