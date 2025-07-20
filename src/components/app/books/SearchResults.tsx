@@ -21,9 +21,9 @@ import {
   formatAuthors,
   getBestThumbnail,
 } from "@/lib/api/google-books-api";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import { BookPreviewDialog } from "./BookPreviewDialog";
 import { BookPreviewPage } from "./BookPreviewPage";
-import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 interface SearchResultsProps {
   books: GoogleBooksVolume[];
@@ -43,21 +43,24 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
-  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
+  const [clickPosition, setClickPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const isMobile = useIsMobile();
 
   const handlePreview = (book: GoogleBooksVolume, event?: React.MouseEvent) => {
     setPreviewBook(book);
-    
+
     // Capture click position for animation
     if (event && event.currentTarget) {
       const rect = event.currentTarget.getBoundingClientRect();
       setClickPosition({
         x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
+        y: rect.top + rect.height / 2,
       });
     }
-    
+
     if (isMobile) {
       setShowMobilePreview(true);
     } else {
@@ -100,7 +103,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           className="overflow-hidden cursor-pointer hover:shadow-sm transition-shadow"
           onClick={(e) => handlePreview(book, e)}
         >
-          <CardContent className="p-4">
+          <CardContent className="px-4 pt-4 pb-0">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Book Cover */}
               <div className="flex-shrink-0 self-center sm:self-start">
@@ -214,7 +217,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             {/* Description - Hidden on mobile, shown on larger screens */}
             {book.volumeInfo.description && (
               <div className="hidden sm:block mt-3 pt-3 border-t border-border">
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                <p className="text-sm text-muted-foreground line-clamp-3">
                   {book.volumeInfo.description}
                 </p>
               </div>

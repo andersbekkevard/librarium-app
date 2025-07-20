@@ -1,9 +1,8 @@
 # TODO.md
 
 ## UI
-- [ ] Refine Landing animations
+- [X] Refine Landing animations
 - [ ] Animations for app
-- [ ] Accesibility for dark mode
 - [ ] Rethink all colors?
 - [ ] Change two philosophy black and blue secondary color scheme
 - [ ] tweakCN?
