@@ -315,7 +315,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         />
 
         {isOpen && (
-          <CommandList className="absolute top-full left-0 right-0 md:absolute md:left-0 md:right-0 max-md:fixed max-md:left-4 max-md:right-4 max-md:top-[4.5rem] max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50 mt-4">
+          <CommandList className="absolute top-full left-0 right-0 md:absolute md:left-0 md:right-0 max-md:fixed max-md:left-12 max-md:right-12 max-md:top-[3.5rem] max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50">
             {/* Show CMDK loading state while searching */}
             {searchData.state === "searching" && (
               <CommandLoading>
