@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-display";
 import { googleBooksApi, GoogleBooksVolume } from "@/lib/api/google-books-api";
 import { ErrorBuilder, ErrorCategory, ErrorSeverity } from "@/lib/errors/error-handling";
-import { extractISBN, validateISBN } from "@/lib/utils/isbn-utils";
+import { extractISBN } from "@/lib/utils/isbn-utils";
 import { handleScanningError as handleError } from "@/lib/utils/scanning-errors";
-import { canScanBarcodes, generateCompatibilityReport } from "@/lib/utils/browser-compatibility";
-import { CameraScanner } from "./CameraScanner";
+import { canScanBarcodes, generateCompatibilityReport, isIOSSafari, isIOS, isIOSChrome, isMediaDevicesAvailable } from "@/lib/utils/browser-compatibility";
+import { SafeCameraScanner } from "./SafeCameraScanner";
 import { ImageUploader } from "./ImageUploader";
-import { BookPreviewDialog } from "./BookPreviewDialog";
+import { BookPreviewCard } from "./BookPreviewCard";
 
 /**
  * BarcodeScanner Component
@@ -81,10 +81,9 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [status, setStatus] = useState<ScanStatus>('idle');
   const [foundBook, setFoundBook] = useState<GoogleBooksVolume | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [showBookDialog, setShowBookDialog] = useState(false);
   const [detectedISBN, setDetectedISBN] = useState<string | null>(null);
   const [scanStartTime, setScanStartTime] = useState<number>(0);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  // Debug info is logged to console but not displayed in production UI
   const [compatibility, setCompatibility] = useState<{
     camera: boolean;
     upload: boolean;
@@ -96,7 +95,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
     console.log('BarcodeScanner:', logMessage, data || '');
-    setDebugInfo(prev => [...prev.slice(-4), logMessage]); // Keep last 5 logs
   }, []);
 
   // Check browser compatibility on mount
@@ -111,13 +109,22 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           camera: compat.camera,
           upload: compat.upload,
           reasons: compat.reasons,
-          browserInfo: report.browser
+          browserInfo: report.browser,
+          isIOSSafari: isIOSSafari(),
+          isMediaDevicesAvailable: isMediaDevicesAvailable()
         });
         
         setCompatibility(compat);
         
+        // Proactive fallback for iOS devices with MediaDevices issues
+        if (isIOS() && !isMediaDevicesAvailable()) {
+          const browserType = isIOSChrome() ? 'iOS Chrome' : 'iOS Safari';
+          debugLog(`${browserType} detected with MediaDevices API unavailable - forcing upload mode`);
+          setMode('upload');
+          setLocalError(`Camera scanning is not supported on this iOS device (${browserType}). Please use image upload instead.`);
+        }
         // Switch to upload mode if camera not supported
-        if (!compat.camera && compat.upload && mode === 'camera') {
+        else if (!compat.camera && compat.upload && mode === 'camera') {
           debugLog('Auto-switching to upload mode due to camera incompatibility');
           setMode('upload');
         }
@@ -129,6 +136,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         
       } catch (error) {
         debugLog('Compatibility check failed', error);
+        // Fallback for iOS when even compatibility checking fails
+        if (isIOS()) {
+          const browserType = isIOSChrome() ? 'iOS Chrome' : 'iOS Safari';
+          debugLog(`${browserType} compatibility check failed - defaulting to upload mode`);
+          setMode('upload');
+          setLocalError(`Camera access may not be available on ${browserType}. Please use image upload to scan barcodes.`);
+        }
       }
     };
     
@@ -169,16 +183,9 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       // Store detected ISBN for potential manual entry fallback
       setDetectedISBN(isbn);
       
-      // Validate ISBN checksum
-      debugLog('Validating ISBN checksum');
-      if (!validateISBN(isbn)) {
-        debugLog('ISBN validation failed', { isbn });
-        setLocalError('Invalid ISBN detected. Please try scanning again or use manual entry.');
-        setStatus('error');
-        return;
-      }
-      
-      debugLog('ISBN validation passed, searching for book');
+      // For scanning use cases, skip strict validation and let Google Books API decide
+      // This allows for more permissive handling of real-world barcodes
+      debugLog('Searching for book with detected barcode');
       
       // Search for book using Google Books API
       const books = await googleBooksApi.searchByISBN(isbn, 1);
@@ -190,7 +197,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       if (books.length === 0) {
         debugLog('No books found in database');
-        setLocalError('Book not found in our database. You can add it manually using the &quot;Manual Entry&quot; tab.');
+        setLocalError('Book not found in our database. You can add it manually using the "Manual Entry" tab.');
         setStatus('error');
         return;
       }
@@ -202,7 +209,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       });
       setFoundBook(books[0]);
       setStatus('success');
-      setShowBookDialog(true);
       
     } catch (error) {
       debugLog('Error during book search', { 
@@ -227,15 +233,15 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   /**
    * Add the found book to user's library
    */
-  const handleAddBook = () => {
-    if (foundBook && detectedISBN) {
+  const handleAddBook = (book: GoogleBooksVolume) => {
+    if (book && detectedISBN) {
       // Pass scanning metadata to parent for event logging
-      onBookFound(foundBook, {
+      onBookFound(book, {
         scanMethod: mode,
         isbn: detectedISBN,
         scanStartTime: scanStartTime
       });
-      setShowBookDialog(false);
+      // Keep the preview visible but mark as added
     }
   };
 
@@ -246,7 +252,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     setStatus('idle');
     setLocalError(null);
     setFoundBook(null);
-    setShowBookDialog(false);
     setDetectedISBN(null);
     setScanStartTime(0);
   };
@@ -311,21 +316,37 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       {/* Compatibility Warnings */}
       {compatibility && compatibility.reasons && compatibility.reasons.length > 0 && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-          <p className="font-medium mb-1">Browser Compatibility Issues:</p>
+          <p className="font-medium mb-1">
+            {isIOS() ? `iOS ${isIOSChrome() ? 'Chrome' : 'Safari'} Camera Limitations:` : 'Browser Compatibility Issues:'}
+          </p>
           <ul className="text-xs space-y-1">
             {compatibility.reasons.map((reason, i) => (
               <li key={i}>• {reason}</li>
             ))}
           </ul>
+          {isIOS() && (
+            <div className="mt-2 pt-2 border-t border-amber-300 text-xs">
+              <p className="font-medium">💡 For iOS devices:</p>
+              <ul className="mt-1 space-y-1">
+                <li>• Use the &quot;Upload Image&quot; option instead</li>
+                <li>• Take a clear photo of the barcode first</li>
+                <li>• Ensure good lighting and focus</li>
+                {isIOSChrome() && (
+                  <li>• Chrome on iOS has the same camera limitations as Safari</li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
       {/* Scanning Interface */}
       {mode === 'camera' ? (
-        <CameraScanner
+        <SafeCameraScanner
           onBarcodeDetected={handleBarcodeDetected}
           onError={handleScanningError}
           paused={status === 'success'}
+          onSwitchToUpload={() => setMode('upload')}
         />
       ) : (
         <ImageUploader
@@ -350,31 +371,28 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
       {/* Success State - Book Found */}
       {status === 'success' && foundBook && (
-        <div className="text-center space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="text-center space-y-2">
             <h3 className="text-lg font-semibold text-green-600">Book Found!</h3>
             <p className="text-sm text-muted-foreground">
-              {foundBook.volumeInfo.title} by {foundBook.volumeInfo.authors?.join(', ') || 'Unknown Author'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Click &quot;View Details&quot; to see full information and add to your library
+              Review the details below and add to your library
             </p>
           </div>
           
-          <div className="flex gap-3 justify-center">
-            <Button
-              onClick={() => setShowBookDialog(true)}
-              variant="default"
-            >
-              View Details
-            </Button>
+          <BookPreviewCard
+            book={foundBook}
+            onAddBook={handleAddBook}
+            isAdding={isAdding}
+          />
+          
+          <div className="flex justify-center">
             <Button
               variant="outline"
               onClick={resetScanning}
               disabled={isAdding}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              Scan Another
+              Scan Another Book
             </Button>
           </div>
         </div>
@@ -418,14 +436,29 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       {status === 'idle' && !localError && (
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
-            💡 <strong>Scanning Tips:</strong>
+            💡 <strong>{mode === 'camera' ? 'Camera Scanning Tips:' : 'Image Upload Tips:'}</strong>
           </p>
-          <ul className="text-xs text-muted-foreground space-y-1">
-            <li>• Ensure good lighting for best results</li>
-            <li>• Hold the device steady when scanning</li>
-            <li>• Make sure the entire barcode is visible</li>
-            <li>• Try different angles if scanning fails</li>
-          </ul>
+          {mode === 'camera' ? (
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• Ensure good lighting for best results</li>
+              <li>• Hold the device steady when scanning</li>
+              <li>• Make sure the entire barcode is visible</li>
+              <li>• Try different angles if scanning fails</li>
+              {isIOS() && (
+                <li>• <strong>iOS users:</strong> Try &quot;Upload Image&quot; if camera doesn&apos;t work</li>
+              )}
+            </ul>
+          ) : (
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• Take a clear, well-lit photo of the barcode</li>
+              <li>• Ensure the barcode is in focus and readable</li>
+              <li>• Crop the image to include just the barcode if possible</li>
+              <li>• JPG, PNG, and WebP formats are supported</li>
+              {isIOS() && (
+                <li>• <strong>Perfect for iOS devices!</strong> Works reliably on Safari and Chrome</li>
+              )}
+            </ul>
+          )}
         </div>
       )}
 
@@ -437,14 +470,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         {status === 'idle' && 'Ready to scan. Point camera at barcode or upload an image.'}
       </div>
 
-      {/* Book Preview Dialog */}
-      <BookPreviewDialog
-        book={foundBook}
-        open={showBookDialog}
-        onOpenChange={setShowBookDialog}
-        onAddBook={handleAddBook}
-        isAdding={isAdding}
-      />
     </div>
   );
 };

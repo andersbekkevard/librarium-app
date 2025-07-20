@@ -7,13 +7,33 @@
 
 /**
  * Check if the browser supports camera access
+ * Enhanced to handle various browser quirks and mobile Safari issues
  */
 export function isCameraSupported(): boolean {
-  return !!(
+  // Check for modern MediaDevices API
+  if (
     navigator.mediaDevices &&
     navigator.mediaDevices.getUserMedia &&
     typeof navigator.mediaDevices.getUserMedia === 'function'
+  ) {
+    return true;
+  }
+
+  // Fallback check for older browsers and mobile Safari
+  // Some versions of Safari have partial MediaDevices support
+  if (navigator && typeof navigator.getUserMedia === 'function') {
+    return true;
+  }
+
+  // Check vendor-prefixed versions (legacy support)
+  const getUserMedia = (
+    navigator.getUserMedia ||
+    (navigator as any).webkitGetUserMedia ||
+    (navigator as any).mozGetUserMedia ||
+    (navigator as any).msGetUserMedia
   );
+
+  return typeof getUserMedia === 'function';
 }
 
 /**
@@ -27,6 +47,71 @@ export function isSecureContext(): boolean {
     location.hostname === '127.0.0.1' ||
     location.hostname === '::1'
   );
+}
+
+/**
+ * Check if the browser is iOS Safari
+ */
+export function isIOSSafari(): boolean {
+  const userAgent = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(userAgent) && /Safari/.test(userAgent);
+}
+
+/**
+ * Check if the browser is running on iOS (Safari or Chrome)
+ */
+export function isIOS(): boolean {
+  const userAgent = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(userAgent);
+}
+
+/**
+ * Check if the browser is Chrome on iOS
+ */
+export function isIOSChrome(): boolean {
+  const userAgent = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(userAgent) && /CriOS/.test(userAgent);
+}
+
+/**
+ * Check if MediaDevices API is properly available
+ * This addresses the specific issue with Safari mobile where
+ * navigator.mediaDevices might be undefined
+ */
+export function isMediaDevicesAvailable(): boolean {
+  return !!(
+    typeof navigator !== 'undefined' &&
+    navigator.mediaDevices &&
+    typeof navigator.mediaDevices === 'object'
+  );
+}
+
+/**
+ * Get a polyfilled version of getUserMedia that works across browsers
+ */
+export function getGetUserMedia(): ((constraints: MediaStreamConstraints) => Promise<MediaStream>) | null {
+  // Modern standard API
+  if (isMediaDevicesAvailable() && navigator.mediaDevices.getUserMedia) {
+    return (constraints: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  // Legacy API fallback
+  const legacyGetUserMedia = (
+    navigator.getUserMedia ||
+    (navigator as any).webkitGetUserMedia ||
+    (navigator as any).mozGetUserMedia ||
+    (navigator as any).msGetUserMedia
+  );
+
+  if (legacyGetUserMedia) {
+    return (constraints: MediaStreamConstraints) => {
+      return new Promise((resolve, reject) => {
+        legacyGetUserMedia.call(navigator, constraints, resolve, reject);
+      });
+    };
+  }
+
+  return null;
 }
 
 /**
@@ -104,6 +189,31 @@ export async function getCameraCapabilities(): Promise<{
     };
   }
 
+  // Special handling for iOS browsers where mediaDevices might be undefined
+  if (!isMediaDevicesAvailable()) {
+    // On iOS (Safari or Chrome), assume camera is available but can't enumerate
+    if (isIOS()) {
+      const browserType = isIOSChrome() ? 'iOS Chrome' : 'iOS Safari';
+      return {
+        hasCamera: true,
+        cameraCount: 1,
+        frontCamera: true,
+        backCamera: true,
+        torchSupport: false,
+        error: `Camera enumeration not available on ${browserType}`
+      };
+    }
+    
+    return {
+      hasCamera: false,
+      cameraCount: 0,
+      frontCamera: false,
+      backCamera: false,
+      torchSupport: false,
+      error: 'MediaDevices API not available'
+    };
+  }
+
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter(device => device.kind === 'videoinput');
@@ -132,6 +242,19 @@ export async function getCameraCapabilities(): Promise<{
       torchSupport,
     };
   } catch (error) {
+    // Fallback for iOS browsers and other browsers that fail enumeration
+    if (isIOS()) {
+      const browserType = isIOSChrome() ? 'iOS Chrome' : 'iOS Safari';
+      return {
+        hasCamera: true,
+        cameraCount: 1,
+        frontCamera: true,
+        backCamera: true,
+        torchSupport: false,
+        error: `Camera enumeration failed on ${browserType}`
+      };
+    }
+    
     return {
       hasCamera: false,
       cameraCount: 0,
@@ -198,13 +321,29 @@ export async function generateCompatibilityReport(): Promise<{
     warnings.push('Only front camera detected. Back camera recommended for barcode scanning.');
   }
 
-  // Mobile-specific recommendations
+  // Mobile-specific recommendations and iOS-specific issues
   if (browser.isMobile) {
     recommendations.push('For best results on mobile: ensure good lighting and hold device steady.');
     
     if (browser.isIOS) {
       warnings.push('iOS devices may have limited torch/flashlight support.');
+      warnings.push('iOS Safari and Chrome may have MediaDevices API limitations.');
+      
+      if (!browser.isSecure) {
+        errors.push('iOS requires HTTPS for camera access. Camera scanning will not work over HTTP.');
+        recommendations.push('Access the site via HTTPS to enable camera scanning on iOS.');
+      }
+      
+      if (!browser.cameraSupport || camera.error) {
+        warnings.push('Camera access may be limited on iOS. Try using image upload instead.');
+        recommendations.push('If camera scanning fails, use the "Upload Image" option to scan barcodes from your photo gallery.');
+      }
     }
+  }
+
+  // Add specific guidance for common iOS issues
+  if (browser.isIOS && !browser.isSecure) {
+    recommendations.push('To enable camera scanning on iOS: 1) Use HTTPS, 2) Grant camera permission when prompted, 3) Try refreshing the page if camera fails to load.');
   }
 
   return {
