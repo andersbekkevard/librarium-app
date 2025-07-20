@@ -161,8 +161,8 @@ export const HeroSection = () => {
             className={`w-full md:w-[1200px] mx-auto rounded-lg relative border border-t-2 border-secondary ${BRAND_COLORS.primary.borderTop} hover-lift`}
             src={
               theme === "light"
-                ? "/images/hero-image-light.jpg"
-                : "/images/hero-image-dark.jpg"
+                ? "/images/hero-image-light-2.jpg"
+                : "/images/hero-image-dark-2.jpg"
             }
             alt="dashboard"
           />
