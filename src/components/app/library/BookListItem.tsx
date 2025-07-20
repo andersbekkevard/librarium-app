@@ -1,6 +1,7 @@
 "use client";
 
 import { BookOpen, User } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -56,12 +57,14 @@ export const BookListItem: React.FC<BookListItemProps> = ({
           <div className="flex gap-4 items-start p-4">
             {/* Cover Image */}
             <div className="flex-shrink-0">
-              <div className="w-16 h-22 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
+              <div className="w-16 h-22 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm relative overflow-hidden">
                 {book.coverImage ? (
-                  <img
+                  <Image
                     src={book.coverImage}
                     alt={`${book.title} cover`}
-                    className="w-full h-full object-cover rounded"
+                    fill
+                    className="object-cover"
+                    sizes="64px"
                   />
                 ) : (
                   <BookOpen className="h-6 w-6 text-muted-foreground" />
@@ -117,12 +120,14 @@ export const BookListItem: React.FC<BookListItemProps> = ({
         <div className="hidden lg:flex gap-4 items-center">
           {/* Cover Image */}
           <div className="flex-shrink-0 pl-3">
-            <div className="w-18 h-24 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm">
+            <div className="w-18 h-24 bg-muted rounded flex items-center justify-center border border-border/20 shadow-sm relative overflow-hidden">
               {book.coverImage ? (
-                <img
+                <Image
                   src={book.coverImage}
                   alt={`${book.title} cover`}
-                  className="w-full h-full object-cover rounded"
+                  fill
+                  className="object-cover"
+                  sizes="72px"
                 />
               ) : (
                 <BookOpen className="h-8 w-8 text-muted-foreground" />

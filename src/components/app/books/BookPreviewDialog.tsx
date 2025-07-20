@@ -31,6 +31,7 @@ import {
   Star,
   Tag,
 } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { useEffect, useState } from "react";
 
@@ -151,12 +152,14 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                   <CardContent className="p-4 sm:p-6">
                     <div className="space-y-4">
                       {/* Cover Image */}
-                      <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center mx-auto max-w-[200px] lg:max-w-none">
+                      <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center mx-auto max-w-[200px] lg:max-w-none relative overflow-hidden">
                         {coverImage ? (
-                          <img
+                          <Image
                             src={coverImage}
                             alt={book.volumeInfo.title}
-                            className="w-full h-full object-cover rounded-lg"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 200px, 100vw"
                           />
                         ) : (
                           <BookOpen className="h-16 w-16 text-muted-foreground" />

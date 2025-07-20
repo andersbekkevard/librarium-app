@@ -1,6 +1,7 @@
 "use client";
 
 import { BookOpen, CheckCircle, Edit, Play, Star, FileText } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
 
@@ -46,12 +47,14 @@ export const BookCover: React.FC<BookCoverProps> = ({
     <Card className="overflow-hidden">
       <CardContent className="p-6">
         {/* Cover image */}
-        <div className="aspect-[2/3] w-full mb-4 rounded-lg overflow-hidden bg-muted">
+        <div className="aspect-[2/3] w-full mb-4 rounded-lg overflow-hidden bg-muted relative">
           {book.coverImage ? (
-            <img
+            <Image
               src={book.coverImage}
               alt={`${book.title} cover`}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">

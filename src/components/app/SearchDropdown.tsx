@@ -15,6 +15,7 @@ import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
 import { BookOpen, Plus } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
@@ -351,11 +352,15 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                       >
                         <div className="flex-shrink-0">
                           {book.coverImage ? (
-                            <img
-                              src={book.coverImage}
-                              alt={book.title}
-                              className="w-8 h-10 object-cover rounded"
-                            />
+                            <div className="w-8 h-10 bg-muted rounded relative overflow-hidden">
+                              <Image
+                                src={book.coverImage}
+                                alt={book.title}
+                                fill
+                                className="object-cover"
+                                sizes="32px"
+                              />
+                            </div>
                           ) : (
                             <div className="w-8 h-10 bg-muted rounded flex items-center justify-center">
                               <BookOpen className="w-4 h-4 text-muted-foreground" />

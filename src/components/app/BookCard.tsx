@@ -9,6 +9,7 @@ import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
 import { BookOpen } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -74,12 +75,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       <CardContent className="px-4 h-full flex gap-4">
         {/* Book Cover - Responsive width, desktop uses original w-24 */}
         <div className="flex-shrink-0 w-20 md:w-24 lg:w-24">
-          <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm">
+          <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm relative">
             {book.coverImage ? (
-              <img
+              <Image
                 src={book.coverImage}
                 alt={`${book.title} cover`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 80px, 96px"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

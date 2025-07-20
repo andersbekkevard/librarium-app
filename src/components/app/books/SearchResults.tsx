@@ -10,6 +10,7 @@ import {
   Search,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
 
@@ -107,12 +108,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Book Cover */}
               <div className="flex-shrink-0 self-center sm:self-start">
-                <div className="w-20 h-28 sm:w-24 sm:h-36 md:w-32 md:h-48 bg-muted rounded flex items-center justify-center">
+                <div className="w-20 h-28 sm:w-24 sm:h-36 md:w-32 md:h-48 bg-muted rounded flex items-center justify-center relative overflow-hidden">
                   {getBestThumbnail(book) ? (
-                    <img
+                    <Image
                       src={getBestThumbnail(book)}
                       alt={book.volumeInfo.title}
-                      className="w-full h-full object-cover rounded"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
                     />
                   ) : (
                     <BookOpen className="h-8 w-8 sm:h-6 sm:w-6 text-muted-foreground" />

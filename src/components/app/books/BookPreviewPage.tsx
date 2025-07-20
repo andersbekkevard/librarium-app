@@ -21,6 +21,7 @@ import {
   Star,
   Tag,
 } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -83,12 +84,14 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
                     {/* Cover Image */}
-                    <div className="aspect-[2/3] w-full mb-4 rounded-lg overflow-hidden bg-muted">
+                    <div className="aspect-[2/3] w-full mb-4 rounded-lg overflow-hidden bg-muted relative">
                       {coverImage ? (
-                        <img
+                        <Image
                           src={coverImage}
                           alt={book.volumeInfo.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">

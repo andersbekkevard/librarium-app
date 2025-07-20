@@ -12,6 +12,7 @@ import {
   Shield,
   User,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -151,9 +152,11 @@ export const UserProfileDropdown: React.FC = () => {
           aria-haspopup="true"
         >
           {photoURL ? (
-            <img
+            <Image
               src={photoURL}
               alt="Profile"
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
@@ -169,9 +172,11 @@ export const UserProfileDropdown: React.FC = () => {
           <div className="px-4 py-3 border-b border-border bg-muted/20">
             <div className="flex items-center space-x-3">
               {photoURL ? (
-                <img
+                <Image
                   src={photoURL}
                   alt="Profile"
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
