@@ -183,4 +183,8 @@ AGENTS.md
 .env.test.local
 .env.production.local
 
-history/
+# ===========================
+# Git-of-Theseus Generated Files
+# ===========================
+history/*.png
+history/*.json
