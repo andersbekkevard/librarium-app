@@ -59,6 +59,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [lastScannedISBN, setLastScannedISBN] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Debug logging function
@@ -128,6 +129,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           ])) as any;
 
           debugLog("Barcode detected successfully!", result.getText());
+          setLastScannedISBN(result.getText());
           onBarcodeDetected(result.getText());
         } catch (error) {
           debugLog("Barcode decode failed", {
@@ -266,13 +268,19 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     <div className={`space-y-4 ${className} relative`}>
       {/* Debug Info (dev only) */}
       {process.env.NODE_ENV === "development" && (
-        <div className="absolute top-2 right-2 z-50 bg-black/80 text-white text-xs p-2 rounded">
-          <div>Upload Status: {isProcessing ? "Processing" : "Ready"}</div>
-          {debugInfo.slice(-2).map((log, i) => (
-            <div key={i} className="truncate max-w-40">
-              {log}
-            </div>
-          ))}
+        <div className="absolute top-2 right-2 z-50 bg-black/90 text-white text-xs p-3 rounded-lg max-w-80 max-h-40 overflow-y-auto">
+          <div className="font-semibold mb-1">Upload Debug Info</div>
+          <div>Mode: upload</div>
+          <div>Status: <span className={isProcessing ? 'text-yellow-300' : 'text-green-300'}>{isProcessing ? "Processing" : "Ready"}</span></div>
+          <div>ISBN: {lastScannedISBN || 'None'}</div>
+          <div className="mt-2">
+            <div className="text-gray-300">Recent logs:</div>
+            {debugInfo.slice(-3).map((log, i) => (
+              <div key={i} className="text-xs break-words">
+                {log}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -422,6 +430,7 @@ export const CompactImageUploader: React.FC<
         try {
           const reader = new BrowserMultiFormatReader();
           const result = await reader.decodeFromImageElement(img);
+          setLastScannedISBN(result.getText());
           onBarcodeDetected(result.getText());
         } catch {
           onError("No barcode detected in image. Please try a clearer image.");

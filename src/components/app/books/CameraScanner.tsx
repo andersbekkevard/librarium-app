@@ -79,9 +79,23 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     onError: (error) => {
       debugLog('Camera error occurred', { name: error.name, message: error.message, stack: error.stack });
       setIsScanning(false);
-      setCameraStatus('error');
-      const userFriendlyError = mapCameraError(error);
-      onError(userFriendlyError);
+      
+      // Only set error state for actual camera access failures
+      // Don't treat scanning/decoding errors as camera errors
+      if (error.name === 'NotAllowedError' || 
+          error.name === 'NotFoundError' || 
+          error.name === 'NotReadableError' ||
+          error.name === 'OverconstrainedError' ||
+          error.name === 'NotSupportedError' ||
+          error.name === 'SecurityError') {
+        setCameraStatus('error');
+        const userFriendlyError = mapCameraError(error);
+        onError(userFriendlyError);
+      } else {
+        // For non-critical errors (scanning issues), keep camera ready
+        debugLog('Non-critical scanning error, keeping camera active');
+        setCameraStatus('ready');
+      }
     },
     constraints: {
       video: {
@@ -108,8 +122,11 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       
       const handleLoadedData = () => {
         debugLog('Video loaded data - camera ready');
-        setCameraStatus('ready');
-        setIsScanning(!paused);
+        // Only set to ready if we're not already in an error state from permissions
+        if (cameraStatus !== 'error') {
+          setCameraStatus('ready');
+          setIsScanning(!paused);
+        }
       };
       
       const handleLoadedMetadata = () => {
@@ -122,7 +139,11 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       
       const handleError = (e: Event) => {
         debugLog('Video element error', e);
-        setCameraStatus('error');
+        // Only set error state for actual video element errors
+        // Don't override ready state for minor issues
+        if (cameraStatus === 'initializing') {
+          setCameraStatus('error');
+        }
       };
 
       video.addEventListener('loadstart', handleLoadStart);
@@ -154,12 +175,16 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     <div className={`relative ${className}`}>
       {/* Camera Status Indicator (dev only) */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 left-2 z-50 bg-black/80 text-white text-xs p-2 rounded">
-          <div>Status: {cameraStatus}</div>
+        <div className="absolute top-2 left-2 z-50 bg-black/90 text-white text-xs p-3 rounded-lg max-w-80 max-h-40 overflow-y-auto">
+          <div className="font-semibold mb-1">Camera Debug Info</div>
+          <div>Status: <span className={cameraStatus === 'ready' ? 'text-green-300' : cameraStatus === 'error' ? 'text-red-300' : 'text-yellow-300'}>{cameraStatus}</span></div>
           <div>Torch: {torch.isAvailable ? (torch.isOn ? 'ON' : 'OFF') : 'N/A'}</div>
-          {debugInfo.slice(-2).map((log, i) => (
-            <div key={i} className="truncate max-w-40">{log}</div>
-          ))}
+          <div className="mt-2">
+            <div className="text-gray-300">Recent logs:</div>
+            {debugInfo.slice(-3).map((log, i) => (
+              <div key={i} className="text-xs break-words">{log}</div>
+            ))}
+          </div>
         </div>
       )}
       

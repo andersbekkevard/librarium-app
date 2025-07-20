@@ -270,18 +270,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   return (
     <div className={`space-y-6 ${className} relative`}>
-      {/* Debug Info (dev only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 right-2 z-50 bg-black/80 text-white text-xs p-2 rounded">
-          <div>Mode: {mode}</div>
-          <div>Status: {status}</div>
-          <div>ISBN: {detectedISBN || 'None'}</div>
-          {debugInfo.slice(-2).map((log, i) => (
-            <div key={i} className="truncate max-w-48">{log}</div>
-          ))}
-        </div>
-      )}
-      
       {/* Mode Toggle */}
       <div className="flex gap-2">
         <Button
