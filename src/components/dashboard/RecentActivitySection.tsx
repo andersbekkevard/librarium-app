@@ -1,12 +1,17 @@
+import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-display";
 import { TIMING_CONFIG } from "@/lib/constants/constants";
+import { BRAND_COLORS } from "@/lib/design/colors";
 import { StandardError } from "@/lib/errors/error-handling";
-import { ActivityItem } from "@/lib/models/models";
+import { ActivityItem, Book } from "@/lib/models/models";
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 interface RecentActivitySectionProps {
   activities?: ActivityItem[];
   loading?: boolean;
   error?: StandardError | null;
+  books?: Book[];
 }
 
 const formatTimeAgo = (timestamp: Date): string => {
@@ -81,7 +86,8 @@ const getActivityText = (activity: ActivityItem): React.ReactNode => {
     case "deleted":
       return (
         <>
-          Deleted <span className="font-semibold">{bookTitle}</span> from library
+          Deleted <span className="font-semibold">{bookTitle}</span> from
+          library
         </>
       );
     default:
@@ -93,16 +99,36 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
   activities = [],
   loading = false,
   error = null,
+  books = [],
 }) => {
+  // Calculate how many currently reading books there are
+  const currentlyReadingCount = books.filter(
+    (book) => book.state === "in_progress"
+  ).length;
+
+  // Determine activity limit based on currently reading layout:
+  // - 1 row (≤2 books): show 3 activities
+  // - 2 rows (>2 books): show 5 activities
+  const maxActivities = currentlyReadingCount <= 2 ? 3 : 5;
+
+  // Filter out internal activities and limit based on currently reading layout
+  const filteredActivities = activities
+    .filter(
+      (activity) =>
+        activity.type !== "manually_updated" && activity.type !== "deleted"
+    )
+    .slice(0, maxActivities);
   return (
     <div className="lg:col-span-1">
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
-          Recent Activity
-        </h2>
+      <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-foreground">
+            Recent Activity
+          </h2>
+        </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-8">
+          <div className="flex-1 flex items-center justify-center">
             <div className="text-sm text-muted-foreground">
               Loading recent activity...
             </div>
@@ -110,29 +136,28 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         )}
 
         {error && (
-          <div className="py-4">
+          <div className="flex-1 flex items-center justify-center">
             <ErrorAlert error={error} />
           </div>
         )}
 
-        {!loading && !error && activities.length === 0 && (
-          <div className="flex items-center justify-center py-8">
+        {!loading && !error && filteredActivities.length === 0 && (
+          <div className="flex-1 flex items-center justify-center">
             <div className="text-sm text-muted-foreground">
               No recent activity to display
             </div>
           </div>
         )}
 
-        {!loading && !error && activities.length > 0 && (
-          <div className="space-y-4">
-            {activities
-              .filter((activity) => activity.type !== "manually_updated" && activity.type !== "deleted")
-              .map((activity) => (
+        {!loading && !error && (
+          <>
+            <div className="flex-1 space-y-3 overflow-hidden min-h-0">
+              {filteredActivities.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div
-                    className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2`}
+                    className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2 shrink-0`}
                   ></div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm text-foreground">
                       {getActivityText(activity)}
                     </p>
@@ -142,7 +167,21 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
                   </div>
                 </div>
               ))}
-          </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-border flex-shrink-0">
+              <Link href="/activity-history">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`w-full ${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text} flex items-center justify-center gap-1`}
+                >
+                  View all activity
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </div>

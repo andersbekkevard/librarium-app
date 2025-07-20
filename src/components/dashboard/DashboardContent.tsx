@@ -63,6 +63,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
           activities={activities}
           loading={activitiesLoading}
           error={activitiesError ? createSystemError(activitiesError) : null}
+          books={books}
         />
       </div>
 

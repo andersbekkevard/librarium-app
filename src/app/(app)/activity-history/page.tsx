@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { ActivityFilters } from "@/components/app/activity/ActivityFilters";
@@ -22,17 +23,25 @@ interface Filters {
   bookId: string;
 }
 
-export default function ActivityHistoryPage() {
+function ActivityHistoryContent() {
+  const searchParams = useSearchParams();
   const { events, loading, error } = useEventsContext();
   const { books } = useBooksContext();
-  const [filters, setFilters] = useState<Filters>({
-    eventType: "all",
+  
+  // Read filters from URL params
+  const eventType = searchParams.get("eventType") || "all";
+  const bookId = searchParams.get("bookId") || "all";
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+  
+  const filters: Filters = useMemo(() => ({
+    eventType,
     dateRange: {
-      start: null,
-      end: null,
+      start: startDate ? new Date(startDate) : null,
+      end: endDate ? new Date(endDate) : null,
     },
-    bookId: "all",
-  });
+    bookId,
+  }), [eventType, bookId, startDate, endDate]);
 
   const filteredEvents = useMemo(() => {
     let filtered = [...events];
@@ -83,7 +92,7 @@ export default function ActivityHistoryPage() {
   // Reset to page 1 when filters change
   React.useEffect(() => {
     pagination.goToFirstPage();
-  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [eventType, bookId, startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const booksList = useMemo(() => {
     return Object.values(books || {});
@@ -148,7 +157,6 @@ export default function ActivityHistoryPage() {
           <div className="lg:col-span-1">
             <ActivityFilters
               filters={filters}
-              onFiltersChange={setFilters}
               books={booksList}
               eventCount={filteredEvents.length}
             />
@@ -248,5 +256,13 @@ export default function ActivityHistoryPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ActivityHistoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background">Loading...</div>}>
+      <ActivityHistoryContent />
+    </Suspense>
   );
 }

@@ -157,7 +157,7 @@ export const EVENT_CONFIG = {
   /**
    * Default limit for user activity queries
    */
-  USER_ACTIVITY_LIMIT: 5,
+  USER_ACTIVITY_LIMIT: 10,
 
   /**
    * Maximum number of favorite genres to track
