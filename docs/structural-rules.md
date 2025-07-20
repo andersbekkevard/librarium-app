@@ -185,7 +185,10 @@ import { BookCard } from "@/components/app/BookCard"; // Other Components
 // ✅ Providers can import:
 import { bookService } from "@/lib/services"; // Services
 import { authService } from "@/lib/services"; // Services
-import React, { createContext } from "react"; // React utilities
+import { userService } from "@/lib/services"; // Services
+import { eventService } from "@/lib/services"; // Services
+import React, { createContext, useContext } from "react"; // React utilities
+import type { Book, UserProfile, BookEvent } from "@/lib/models"; // Types
 ```
 
 #### Services
@@ -193,16 +196,27 @@ import React, { createContext } from "react"; // React utilities
 // ✅ Services can import:
 import { bookRepository } from "@/lib/repositories"; // Repositories
 import { eventRepository } from "@/lib/repositories"; // Repositories
+import { userRepository } from "@/lib/repositories"; // Repositories
 import { userService } from "@/lib/services"; // Other Services
-import type { Book, ServiceResult } from "@/lib/models"; // Types
+import { eventService } from "@/lib/services"; // Other Services
+import type { Book, UserProfile, BookEvent, ServiceResult } from "@/lib/models"; // Types
 ```
 
 #### Repositories
 ```typescript
 // ✅ Repositories can import:
-import { db } from "@/lib/firebase"; // External services
-import { doc, getDoc, updateDoc } from "firebase/firestore"; // External libraries
-import type { Book, RepositoryResult } from "@/lib/models"; // Types
+import { db } from "@/lib/api/firebase"; // External services
+import { 
+  doc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  onSnapshot, 
+  addDoc,
+  writeBatch,
+  Timestamp 
+} from "firebase/firestore"; // Firebase libraries
+import type { Book, UserProfile, BookEvent, RepositoryResult } from "@/lib/models"; // Types
 ```
 
 ### ❌ **FORBIDDEN IMPORTS**
@@ -316,6 +330,51 @@ describe('BookCard', () => {
 });
 ```
 
+## Current Provider Architecture
+
+### Implemented Providers
+
+#### AuthProvider
+- **Purpose**: Authentication state and session management
+- **Responsibilities**: Google OAuth, user session, sign in/out operations
+- **Dependencies**: AuthService
+- **Context**: `useAuthContext()`
+
+#### UserProvider  
+- **Purpose**: User profile management and statistics
+- **Responsibilities**: Profile CRUD, statistics computation, profile updates
+- **Dependencies**: UserService, requires AuthProvider
+- **Context**: `useUserContext()`
+
+#### BooksProvider
+- **Purpose**: Book collection management with real-time sync
+- **Responsibilities**: Book CRUD, progress tracking, state management, filtering
+- **Dependencies**: BookService, requires AuthProvider
+- **Context**: `useBooksContext()`
+
+#### EventsProvider
+- **Purpose**: Activity history and event stream management  
+- **Responsibilities**: Event logging, activity history, comments, reviews
+- **Dependencies**: EventService, requires AuthProvider
+- **Context**: `useEventsContext()`
+
+### Provider Hierarchy
+
+```typescript
+// src/lib/providers/AppProviders.tsx
+export const AppProviders = ({ children }) => (
+  <AuthProvider>
+    <UserProvider>
+      <BooksProvider>
+        <EventsProvider>
+          {children}
+        </EventsProvider>
+      </BooksProvider>
+    </UserProvider>
+  </AuthProvider>
+);
+```
+
 ## Dependency Flow Diagram
 
 ```
@@ -326,50 +385,74 @@ describe('BookCard', () => {
           ▼           │
 ┌─────────────────┐   │
 │   Providers     │ ◄─┘
+│  ┌─────────────┐│     AuthProvider
+│  │EventsProvider││     UserProvider  
+│  │BooksProvider ││     BooksProvider
+│  │UserProvider  ││     EventsProvider
+│  │AuthProvider  ││
+│  └─────────────┘│
 └─────────────────┘
           │
           ▼
 ┌─────────────────┐
 │    Services     │ ◄─┐ ✅ Services can call other Services
+│  ┌─────────────┐│   │   AuthService, UserService
+│  │EventService ││   │   BookService, EventService
+│  │BookService  ││   │
+│  │UserService  ││   │
+│  │AuthService  ││   │
+│  └─────────────┘│   │
 └─────────────────┘   │
           │           │
           ▼           │
 ┌─────────────────┐   │
 │  Repositories   │ ──┘
+│  ┌─────────────┐│     FirebaseUserRepository
+│  │EventRepo    ││     FirebaseBookRepository
+│  │BookRepo     ││     FirebaseEventRepository
+│  │UserRepo     ││
+│  └─────────────┘│
 └─────────────────┘
           │
           ▼
 ┌─────────────────┐
 │ External APIs   │
 │   (Firebase)    │
+│ Google Books API│
 └─────────────────┘
 ```
 
 ## Examples
 
-### ✅ **CORRECT Example: Adding a Book**
+### ✅ **CORRECT Example: Adding a Book with Comment**
 
 ```typescript
 // 1. Component calls Provider
 const AddBookForm = () => {
   const { addBook } = useBooksContext(); // ✅
+  const { logEvent } = useEventsContext(); // ✅
 
-  const handleSubmit = (bookData) => {
-    addBook(bookData); // ✅
+  const handleSubmit = async (bookData, initialComment?) => {
+    const bookId = await addBook(bookData); // ✅
+    if (initialComment && bookId) {
+      await logEvent(bookId, "comment", { comment: initialComment }); // ✅
+    }
   };
 };
 
 // 2. Provider calls Service
 const BooksProvider = () => {
-  const addBook = async (bookData: BookData) => {
+  const addBook = async (bookData: BookData): Promise<string | null> => {
     const result = await bookService.addBook(userId, bookData); // ✅
     if (result.success) {
-      setBooks([...books, result.data]);
+      setBooks([...books, result.data!]);
+      return result.data!.id;
     }
+    return null;
   };
 };
 
-// 3. Service contains business logic and calls Repository
+// 3. Service contains business logic and calls Repository + other Services
 const BookService = {
   async addBook(userId: string, bookData: BookData): Promise<ServiceResult<Book>> {
     // Business logic: validate, transform, etc.
@@ -378,8 +461,10 @@ const BookService = {
     // Call repository
     const result = await this.bookRepository.addBook(userId, book); // ✅
     
-    // Log event
-    await this.eventRepository.logEvent(userId, { type: 'book_added', bookId: result.data }); // ✅
+    // Log event via EventService
+    await this.eventService.logEvent(userId, book.id, "state_change", {
+      newState: "not_started"
+    }); // ✅
     
     return result;
   }
@@ -387,20 +472,22 @@ const BookService = {
 
 // 4. Repository handles data persistence
 const FirebaseBookRepository = {
-  async addBook(userId: string, book: Book): Promise<RepositoryResult<string>> {
-    const bookRef = await addDoc(collection(db, `users/${userId}/books`), book); // ✅
-    return { success: true, data: bookRef.id };
+  async addBook(userId: string, book: Book): Promise<RepositoryResult<Book>> {
+    const bookData = { ...book, addedAt: Timestamp.now(), updatedAt: Timestamp.now() };
+    const bookRef = await addDoc(collection(db, `users/${userId}/books`), bookData); // ✅
+    return { success: true, data: { ...bookData, id: bookRef.id } as Book };
   }
 };
 ```
 
-### ❌ **INCORRECT Example: Adding a Book**
+### ❌ **INCORRECT Examples**
 
 ```typescript
 // ❌ Component calling Service directly
 const AddBookForm = () => {
   const handleSubmit = async (bookData) => {
     await bookService.addBook(userId, bookData); // ❌ FORBIDDEN
+    await eventService.logEvent(userId, bookId, "comment"); // ❌ FORBIDDEN
   };
 };
 
@@ -408,6 +495,7 @@ const AddBookForm = () => {
 const AddBookForm = () => {
   const handleSubmit = async (bookData) => {
     await bookRepository.addBook(userId, bookData); // ❌ FORBIDDEN
+    await eventRepository.logEvent(userId, eventData); // ❌ FORBIDDEN
   };
 };
 
@@ -415,6 +503,15 @@ const AddBookForm = () => {
 const BooksProvider = () => {
   const addBook = async (bookData: BookData) => {
     await bookRepository.addBook(userId, bookData); // ❌ FORBIDDEN
+    await eventRepository.logEvent(userId, eventData); // ❌ FORBIDDEN
+  };
+};
+
+// ❌ Component importing Firebase directly
+const BookCard = () => {
+  const handleUpdate = async () => {
+    const bookRef = doc(db, `users/${userId}/books/${bookId}`); // ❌ FORBIDDEN
+    await updateDoc(bookRef, updates); // ❌ FORBIDDEN
   };
 };
 ```
@@ -423,12 +520,15 @@ const BooksProvider = () => {
 
 ### Code Review Checklist
 
-- [ ] Components only import and call Provider hooks
-- [ ] Providers only call Service methods
-- [ ] Services only call Repository methods and other Services
-- [ ] Repositories only call external APIs/databases
-- [ ] No layer skipping (Component → Service, Provider → Repository)
+- [ ] Components only import and call Provider hooks (`useAuthContext`, `useBooksContext`, `useEventsContext`, `useUserContext`)
+- [ ] Providers only call Service methods (AuthService, BookService, UserService, EventService)
+- [ ] Services only call Repository methods and other Services  
+- [ ] Repositories only call external APIs/databases (Firebase, Google Books API)
+- [ ] No layer skipping (Component → Service, Provider → Repository, Component → Firebase)
 - [ ] No reverse dependencies (Repository → Service, Service → Provider)
+- [ ] All data models imported from `@/lib/models/models`
+- [ ] All Firebase operations go through repository layer
+- [ ] Event logging coordinated through EventService
 
 ### Linting Rules
 

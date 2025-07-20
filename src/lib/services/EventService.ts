@@ -492,7 +492,9 @@ export class EventService implements IEventService {
       if (book.state !== "finished") {
         return {
           success: false,
-          error: createValidationError("Reviews can only be added to finished books"),
+          error: createValidationError(
+            "Reviews can only be added to finished books"
+          ),
         };
       }
 
@@ -501,7 +503,9 @@ export class EventService implements IEventService {
       if (existingReviewResult.success && existingReviewResult.data) {
         return {
           success: false,
-          error: createValidationError("A review already exists for this book. Use updateReview to modify it."),
+          error: createValidationError(
+            "A review already exists for this book. Use updateReview to modify it."
+          ),
         };
       }
 
@@ -868,7 +872,7 @@ export class EventService implements IEventService {
 
     return {
       ...baseItem,
-      type: "manual_updated",
+      type: "manually_updated",
       colorClass: STATUS_COLORS.warning.bg,
       details: comment ? truncateText(comment, 50) : undefined,
     };

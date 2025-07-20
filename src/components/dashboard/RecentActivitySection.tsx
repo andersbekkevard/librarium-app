@@ -119,21 +119,23 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
 
         {!loading && !error && activities.length > 0 && (
           <div className="space-y-4">
-            {activities.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div
-                  className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2`}
-                ></div>
-                <div className="flex-1">
-                  <p className="text-sm text-foreground">
-                    {getActivityText(activity)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatTimeAgo(activity.timestamp)}
-                  </p>
+            {activities
+              .filter((activity) => activity.type !== "manually_updated")
+              .map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3">
+                  <div
+                    className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      {getActivityText(activity)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatTimeAgo(activity.timestamp)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>

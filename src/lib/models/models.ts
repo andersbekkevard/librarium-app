@@ -78,7 +78,13 @@ export interface BookEvent {
   userId: string; // Reference to the user
 
   // Event details
-  type: "state_change" | "progress_update" | "rating_added" | "comment" | "review" | "manual_update";
+  type:
+    | "state_change"
+    | "progress_update"
+    | "rating_added"
+    | "comment"
+    | "review"
+    | "manual_update";
   timestamp: Timestamp; // When the event occurred
 
   // Event-specific data
@@ -226,7 +232,14 @@ export const validateRating = (rating: number): boolean => {
  */
 export interface ActivityItem {
   id: string; // Event ID
-  type: "finished" | "started" | "rated" | "added" | "progress" | "commented" | "manual_updated";
+  type:
+    | "finished"
+    | "started"
+    | "rated"
+    | "added"
+    | "progress"
+    | "commented"
+    | "manually_updated";
   bookTitle: string; // Book title for display
   bookId: string; // Reference to the book
   details?: string; // Additional details (e.g., "5 stars", "20 pages")
@@ -309,7 +322,10 @@ export const validateComment = (comment: string): boolean => {
  *   showError("Invalid page number");
  * }
  */
-export const validateCommentPage = (page: number, totalPages: number): boolean => {
+export const validateCommentPage = (
+  page: number,
+  totalPages: number
+): boolean => {
   if (typeof page !== "number" || isNaN(page)) {
     return false;
   }

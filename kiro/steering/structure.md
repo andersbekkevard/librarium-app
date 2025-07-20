@@ -54,9 +54,10 @@ lib/
 
 ### Layered Architecture
 1. **Presentation Layer**: React components and pages
-2. **Service Layer**: Business logic and orchestration
-3. **Repository Layer**: Data access abstraction
-4. **Models Layer**: Type definitions and validation
+2. **Provider Layer**: Classes that provide context for UI
+3. **Service Layer**: Business logic and orchestration
+4. **Repository Layer**: Data access abstraction
+5. **Models Layer**: Type definitions and validation
 
 ### File Naming Conventions
 - **Components**: PascalCase (e.g., `BookCard.tsx`)
