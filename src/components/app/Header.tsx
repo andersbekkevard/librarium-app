@@ -3,7 +3,6 @@
 import UserProfileDropdown from "@/components/app/UserProfileDropdown";
 import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
-import { UI_CONFIG } from "@/lib/constants/constants";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { Book, Loader2, Menu } from "lucide-react";
 import Link from "next/link";
@@ -39,12 +38,12 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-2 h-full px-2 lg:w-64 lg:px-6">
           <Link
             href="/dashboard"
-            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity whitespace-nowrap"
           >
-            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center shrink-0">
               <Book className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-foreground hidden lg:block">
+            <h1 className="text-xl font-bold text-foreground hidden sm:block">
               Librarium
             </h1>
           </Link>

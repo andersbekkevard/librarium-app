@@ -120,7 +120,7 @@ export const HeroSection = () => {
               variant="secondary"
               className="w-5/6 md:w-1/4 font-bold hover-scale"
             >
-              <Link href="/dashboard">Explore Features</Link>
+              <Link href="/#features">Explore Features</Link>
             </Button>
           </div>
 

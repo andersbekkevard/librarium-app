@@ -1,8 +1,10 @@
 "use client";
 import { BRAND_COLORS } from "@/lib/design/colors";
-import { Book, Github, Menu } from "lucide-react";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { ArrowRight, Book, Github, Loader2, Menu } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { ToggleTheme } from "../toggle-theme";
 import { Button } from "../ui/button";
 import {
@@ -35,16 +37,20 @@ interface FeatureProps {
 
 const routeList: RouteProps[] = [
   {
+    href: "#benefits",
+    label: "Benefits",
+  },
+  {
     href: "#features",
     label: "Features",
   },
   {
-    href: "#testimonials",
-    label: "Reviews",
+    href: "#services",
+    label: "Services",
   },
   {
-    href: "#pricing",
-    label: "Pricing",
+    href: "#testimonials",
+    label: "Reviews",
   },
   {
     href: "#faq",
@@ -71,6 +77,26 @@ const featureList: FeatureProps[] = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const router = useRouter();
+  const { isAuthenticated, signInWithGoogle } = useAuthContext();
+
+  const handleLogin = async () => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+      return;
+    }
+
+    setIsSigningIn(true);
+
+    try {
+      await signInWithGoogle();
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Login failed:", err);
+      setIsSigningIn(false);
+    }
+  };
   return (
     <header className="shadow-inner bg-opacity-15 w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border border-secondary z-40 rounded-2xl flex justify-between items-center p-2 bg-card">
       {/* <!-- Mobile --> */}
@@ -90,11 +116,16 @@ export const Navbar = () => {
             <div>
               <SheetHeader className="mb-4 ml-4">
                 <SheetTitle className="flex items-center">
-                  <Link href="/" className="flex items-center">
-                    <Book
-                      className={`${BRAND_COLORS.primary.bg} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-9 h-9 mr-2 border text-white`}
-                    />
-                    Librarium
+                  <Link
+                    href="/"
+                    className="flex items-center whitespace-nowrap"
+                  >
+                    <div
+                      className={`${BRAND_COLORS.primary.bg} rounded-lg w-9 h-9 mr-2 flex items-center justify-center`}
+                    >
+                      <Book className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-foreground">Librarium</span>
                   </Link>
                 </SheetTitle>
               </SheetHeader>
@@ -111,6 +142,30 @@ export const Navbar = () => {
                     <Link href={href}>{label}</Link>
                   </Button>
                 ))}
+
+                {/* Mobile Login Button */}
+                <Button
+                  onClick={handleLogin}
+                  disabled={isSigningIn}
+                  className={`mt-2 justify-start text-base font-semibold group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white shadow-none border-none`}
+                >
+                  {isSigningIn ? (
+                    <>
+                      <Loader2 className="size-4 mr-2 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : isAuthenticated ? (
+                    <>
+                      Go to Dashboard
+                      <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                    </>
+                  ) : (
+                    <>
+                      Login
+                      <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
@@ -121,23 +176,30 @@ export const Navbar = () => {
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="font-bold text-lg flex items-center">
-          <Book
-            className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
-          />
-          Librarium
+        <Link
+          href="/"
+          className="font-bold text-lg flex items-center whitespace-nowrap"
+        >
+          <div
+            className={`${BRAND_COLORS.primary.bg} rounded-lg w-7 h-7 mr-2 flex items-center justify-center`}
+          >
+            <Book className="h-4 w-4 text-white" />
+          </div>
+          <span className="text-foreground">Librarium</span>
         </Link>
       </div>
 
       {/* <!-- Desktop Logo --> */}
       <Link
         href="/"
-        className="font-bold text-lg flex items-center hidden lg:block"
+        className="font-bold text-lg items-center whitespace-nowrap hidden lg:flex"
       >
-        <Book
-          className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.border} border-secondary from-brand-primary via-brand-primary/70 to-brand-primary rounded-lg w-7 h-7 mr-2 border text-white`}
-        />
-        Librarium
+        <div
+          className={`${BRAND_COLORS.primary.bg} rounded-lg w-7 h-7 mr-2 flex items-center justify-center`}
+        >
+          <Book className="h-4 w-4 text-white" />
+        </div>
+        <span className="text-foreground">Librarium</span>
       </Link>
 
       {/* <!-- Mobile spacer --> */}
@@ -182,14 +244,44 @@ export const Navbar = () => {
                 </Link>
               </NavigationMenuLink>
             ))}
+
+            {/* Desktop Login Button */}
+            <Button
+              onClick={handleLogin}
+              disabled={isSigningIn}
+              className={`ml-14 h-8 !px-10 font-semibold group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white`}
+            >
+              {isSigningIn ? (
+                <>
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+                  Signing in...
+                </>
+              ) : isAuthenticated ? (
+                <>
+                  Dashboard
+                  <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                </>
+              ) : (
+                <>
+                  Login
+                  <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                </>
+              )}
+            </Button>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
 
-      <div className="hidden lg:flex">
+      <div className="flex">
         <ToggleTheme />
 
-        <Button asChild size="sm" variant="ghost" aria-label="View on GitHub">
+        <Button
+          asChild
+          size="sm"
+          variant="ghost"
+          aria-label="View on GitHub"
+          className="hidden lg:flex"
+        >
           <Link
             aria-label="View on GitHub"
             href="https://github.com/andersbekkevard/librarium-app"
