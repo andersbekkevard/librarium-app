@@ -7,6 +7,10 @@ import { ActivityFilters } from "@/components/app/activity/ActivityFilters";
 import { ActivityDetail } from "@/components/app/activity/ActivityDetail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import { PageSizeSelector } from "@/components/ui/page-size-selector";
+import { PaginationInfo } from "@/components/ui/pagination-info";
+import { usePagination } from "@/hooks/usePagination";
 import { Calendar, Activity } from "lucide-react";
 
 interface Filters {
@@ -59,6 +63,27 @@ export default function ActivityHistoryPage() {
       (a, b) => b.timestamp.toMillis() - a.timestamp.toMillis()
     );
   }, [events, filters]);
+
+  // Pagination
+  const pagination = usePagination({
+    totalItems: filteredEvents.length,
+    initialPageSize: 25,
+    storageKey: "activity-history-page-size",
+    onPageChange: () => {
+      // Scroll to top when page changes
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+  });
+
+  // Get paginated events
+  const paginatedEvents = useMemo(() => {
+    return filteredEvents.slice(pagination.startIndex, pagination.endIndex);
+  }, [filteredEvents, pagination.startIndex, pagination.endIndex]);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    pagination.goToFirstPage();
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const booksList = useMemo(() => {
     return Object.values(books || {});
@@ -140,6 +165,22 @@ export default function ActivityHistoryPage() {
                       {filteredEvents.length} events
                     </Badge>
                   </CardTitle>
+                  {pagination.totalPages > 1 && (
+                    <div className="flex items-center gap-4">
+                      <PaginationInfo
+                        start={pagination.itemRange.start}
+                        end={pagination.itemRange.end}
+                        total={pagination.itemRange.total}
+                        itemName="event"
+                        className="hidden sm:block"
+                      />
+                      <PageSizeSelector
+                        pageSize={pagination.pageSize}
+                        onPageSizeChange={pagination.setPageSize}
+                        totalItems={filteredEvents.length}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -156,16 +197,50 @@ export default function ActivityHistoryPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {filteredEvents.map((event) => (
-                      <ActivityDetail
-                        key={event.id}
-                        event={event}
-                        bookTitle={getBookTitle(event.bookId)}
-                        book={booksList.find(book => book.id === event.bookId)}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="space-y-4">
+                      {paginatedEvents.map((event) => (
+                        <ActivityDetail
+                          key={event.id}
+                          event={event}
+                          bookTitle={getBookTitle(event.bookId)}
+                          book={booksList.find(book => book.id === event.bookId)}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {pagination.totalPages > 1 && (
+                      <div className="mt-8 pt-6 border-t border-border">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                          <PaginationInfo
+                            start={pagination.itemRange.start}
+                            end={pagination.itemRange.end}
+                            total={pagination.itemRange.total}
+                            itemName="event"
+                            className="order-2 sm:order-1"
+                          />
+                          
+                          <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            visiblePages={pagination.visiblePages}
+                            onPageChange={pagination.goToPage}
+                            hasNextPage={pagination.hasNextPage}
+                            hasPreviousPage={pagination.hasPreviousPage}
+                            className="order-1 sm:order-2"
+                          />
+                          
+                          <PageSizeSelector
+                            pageSize={pagination.pageSize}
+                            onPageSizeChange={pagination.setPageSize}
+                            totalItems={filteredEvents.length}
+                            className="order-3"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
