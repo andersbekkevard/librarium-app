@@ -8,8 +8,8 @@
 - [ ] Change two philosophy black and blue secondary color scheme
 - [ ] tweakCN?
 - [ ] Let more of the description text in 	searchResult be visible
-- [ ] Make preview show some kind of book details page in preview with more info
-- [ ] Make dark mode comments not look horrible
+- [X] Make preview show some kind of book details page in preview with more info
+- [X] Make dark mode comments not look horrible
 
 ## Mobile
 - [ ] Make new search bar functionality for mobile
@@ -18,8 +18,7 @@
 
 ## Nice-to-have feature
 - [X] Align search bar properly, and integrate it with actual functionality
-- [ ] Improve search (fzf, etc)
-- [ ] Split "Reading Activity Over Time" chart to split by genre
+- [X] Split "Reading Activity Over Time" chart to split by genre
 
 ## Bigger feature
 - [X] Add commenting on books
@@ -35,7 +34,7 @@
 
 ## Design/Architectural changes
 - [ ] Clean the codebase, extract components where possible
-- [ ] Create a useEventContext hook to use the correct design pattern
+- [X] Create a useEventsContext hook to use the correct design pattern
 - [ ] Refactor Google Books interaction to a service/provider structure (?)
 - [ ] Link "Pages this month" with useEffect dependency to the event array
 
@@ -51,4 +50,3 @@
 
 ## *Next Step*
 - [ ] Implement a small "progress summary" with LLM in Statistics and/or Dashboard page
-- [ ] Make dynamic and mobile friendly (with collapsable navbar)

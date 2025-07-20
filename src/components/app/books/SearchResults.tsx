@@ -43,10 +43,21 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
   const isMobile = useIsMobile();
 
-  const handlePreview = (book: GoogleBooksVolume) => {
+  const handlePreview = (book: GoogleBooksVolume, event?: React.MouseEvent) => {
     setPreviewBook(book);
+    
+    // Capture click position for animation
+    if (event && event.currentTarget) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setClickPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+    }
+    
     if (isMobile) {
       setShowMobilePreview(true);
     } else {
@@ -87,7 +98,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         <Card
           key={book.id}
           className="overflow-hidden cursor-pointer hover:shadow-sm transition-shadow"
-          onClick={() => handlePreview(book)}
+          onClick={(e) => handlePreview(book, e)}
         >
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -221,6 +232,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           onAddBook={onAddBook}
           isAdding={isAdding}
           isAdded={previewBook ? addedBooks.has(previewBook.id) : false}
+          clickPosition={clickPosition}
         />
       )}
     </div>
