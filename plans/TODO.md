@@ -37,6 +37,9 @@
 - [ ] Refactor Google Books interaction to a service/provider structure (?)
 - [ ] Link "Pages this month" with useEffect dependency to the event array
 
+## Scanning
+- [ ] Adjust functionality to work when has two barcodes (one isbn one other)
+
 
 ## LLM
 - [ ] Integrate

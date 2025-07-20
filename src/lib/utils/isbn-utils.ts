@@ -9,9 +9,10 @@
  * Extracts ISBN from various barcode formats
  * 
  * Handles multiple barcode formats that can contain ISBN information:
- * - ISBN-13 (EAN-13 starting with 978/979)
+ * - ISBN-13 (EAN-13 starting with 978/979 for books)
  * - ISBN-10
  * - UPC-A with leading zero (converts to ISBN-13)
+ * - EAN-13 (any 13-digit code - let Google Books API determine if it's a book)
  * 
  * @param barcodeText - Raw barcode text from scanner
  * @returns Extracted ISBN string or null if not found/invalid
@@ -20,6 +21,7 @@
  * extractISBN('9781234567890') // Returns '9781234567890' (ISBN-13)
  * extractISBN('1234567890') // Returns '1234567890' (ISBN-10)
  * extractISBN('01234567890') // Returns '1234567890' (UPC-A to ISBN-13)
+ * extractISBN('5781440898956') // Returns '5781440898956' (EAN-13)
  */
 export function extractISBN(barcodeText: string): string | null {
   if (!barcodeText || typeof barcodeText !== 'string') {
@@ -29,13 +31,19 @@ export function extractISBN(barcodeText: string): string | null {
   // Remove all non-digit characters (hyphens, spaces, etc.)
   const digits = barcodeText.replace(/\D/g, '');
   
-  // ISBN-13 (EAN-13 starting with 978/979 for books)
+  // ISBN-13 (EAN-13 starting with 978/979 for books) - highest priority
   if (digits.length === 13 && (digits.startsWith('978') || digits.startsWith('979'))) {
     return digits;
   }
   
-  // ISBN-10
+  // ISBN-10 - standard 10-digit ISBN
   if (digits.length === 10) {
+    return digits;
+  }
+  
+  // Any EAN-13 code (13 digits) - let Google Books API determine if it's a book
+  // This handles edge cases where books have EAN-13 codes with non-standard prefixes
+  if (digits.length === 13) {
     return digits;
   }
   
@@ -57,6 +65,8 @@ export function extractISBN(barcodeText: string): string | null {
  * 
  * Validates both ISBN-10 and ISBN-13 formats using their respective
  * checksum algorithms to ensure the ISBN is mathematically valid.
+ * For scanning use cases, we're more permissive and let the Google Books API
+ * determine if a barcode represents a valid book.
  * 
  * @param isbn - ISBN string to validate (should be digits only)
  * @returns true if ISBN is valid, false otherwise
@@ -65,6 +75,7 @@ export function extractISBN(barcodeText: string): string | null {
  * validateISBN('9781234567897') // Returns true if checksum is valid
  * validateISBN('1234567890') // Returns true if checksum is valid
  * validateISBN('1234567891') // Returns false (invalid checksum)
+ * validateISBN('5781440898956') // Returns true (valid EAN-13 format, let API decide)
  */
 export function validateISBN(isbn: string): boolean {
   if (!isbn || typeof isbn !== 'string') {
@@ -77,7 +88,10 @@ export function validateISBN(isbn: string): boolean {
   if (cleanIsbn.length === 10) {
     return validateISBN10(cleanIsbn);
   } else if (cleanIsbn.length === 13) {
-    return validateISBN13(cleanIsbn);
+    // For scanning use cases, accept any 13-digit EAN-13 code
+    // and let the Google Books API determine if it's a valid book
+    // Traditional ISBN-13 validation is too restrictive for real-world barcodes
+    return validateISBN13Basic(cleanIsbn);
   }
   
   return false;
@@ -118,7 +132,34 @@ function validateISBN10(isbn10: string): boolean {
 }
 
 /**
- * Validates ISBN-13 format using checksum algorithm
+ * Basic validation for 13-digit EAN-13 codes (permissive for scanning)
+ * 
+ * For barcode scanning, we use a more permissive validation that accepts
+ * any 13-digit numeric code and lets the Google Books API determine
+ * if it represents a valid book. This handles edge cases where books
+ * have non-standard EAN-13 prefixes.
+ * 
+ * @param isbn13 - 13-character string
+ * @returns true if it's a valid 13-digit numeric code, false otherwise
+ */
+function validateISBN13Basic(isbn13: string): boolean {
+  if (isbn13.length !== 13) {
+    return false;
+  }
+
+  // Check that all characters are digits
+  for (let i = 0; i < 13; i++) {
+    const digit = parseInt(isbn13[i]);
+    if (isNaN(digit)) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+/**
+ * Validates ISBN-13 format using checksum algorithm (strict validation)
  * 
  * ISBN-13 uses an alternating weight checksum where odd positions
  * are multiplied by 1 and even positions by 3. The sum must result
