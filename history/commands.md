@@ -1,4 +1,9 @@
 # Git-of-Theseus Commands
+I use Git-of-Theseus to track the evolution of my codebase over time.
+It helps me visualize how different parts of the project grow and change.
+By analyzing commit history, I can identify trends and hotspots in development.
+The tool generates charts for daily, weekly, and monthly activity, making progress easy to review.
+This insight guides my refactoring and helps maintain a healthy, sustainable codebase.
 
 ## Quick Start
 ```bash
