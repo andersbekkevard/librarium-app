@@ -97,20 +97,13 @@ interface BookEvent {
 
     // For comment events
     comment?: string;
-    commentPage?: number; // Page number when comment was made
-    commentState?: Book["state"]; // Reading state when comment was made
+    commentState?: ReadingState;
+    commentPage?: number;
 
     // For review events
     review?: string;
-    reviewRating?: number;
-
-    // For manual_update events
-    manualUpdate?: {
-      field: string; // Which field was manually updated
-      previousValue: any; // Previous value
-      newValue: any; // New value
-      reason?: string; // Optional reason for manual update
-    };
+    reviewCreatedAt?: Timestamp;
+    reviewUpdatedAt?: Timestamp;
   };
 }
 ```
@@ -137,27 +130,66 @@ users/{userId}/
 
 ## Advanced Data Models
 
+### Type Aliases
+
+Common type aliases used throughout the application:
+
+```typescript
+type ReadingState = Book["state"];
+type EventType = BookEvent["type"];
+```
+
 ### ActivityItem
 
 UI-friendly transformation of BookEvent for dashboard and activity history display.
 
 ```typescript
 interface ActivityItem {
-  id: string;
-  bookId: string;
-  bookTitle: string;
-  bookAuthor: string;
-  bookCoverImage?: string;
-  type: BookEvent["type"];
-  timestamp: Timestamp;
-  description: string; // Human-readable activity description
-  metadata?: {
-    page?: number;
-    rating?: number;
-    state?: Book["state"];
-    comment?: string;
-    review?: string;
-  };
+  id: string; // Event ID
+  type:
+    | "finished"
+    | "started"
+    | "rated"
+    | "added"
+    | "progress"
+    | "commented"
+    | "manually_updated";
+  bookTitle: string; // Book title for display
+  bookId: string; // Reference to the book
+  details?: string; // Additional details (e.g., "5 stars", "20 pages")
+  timestamp: Date; // When the activity occurred
+  colorClass: string; // Tailwind class for visual indicator
+}
+```
+
+### BookComment
+
+UI-friendly representation of comment events for display components.
+
+```typescript
+interface BookComment {
+  id: string; // Event ID
+  bookId: string; // Reference to the book
+  userId: string; // Reference to the user
+  text: string; // Comment text content
+  readingState: ReadingState; // Reading state when comment was made
+  currentPage: number; // Page number when comment was made
+  timestamp: Timestamp; // When the comment was created
+}
+```
+
+### BookReview
+
+UI-friendly representation of review events for display components.
+
+```typescript
+interface BookReview {
+  id: string; // Event ID
+  bookId: string; // Reference to the book
+  userId: string; // Reference to the user
+  text: string; // Review text content
+  createdAt: Timestamp; // When the review was created
+  updatedAt: Timestamp; // When the review was last updated
 }
 ```
 
@@ -206,19 +238,33 @@ Books follow a flexible state progression with manual override capability:
 
 #### Comment Validation
 ```typescript
-function validateComment(comment: string, page?: number, totalPages?: number): boolean {
-  if (!comment.trim() || comment.length > 1000) return false;
-  if (page !== undefined && (page < 0 || (totalPages && page > totalPages))) return false;
-  return true;
+function validateComment(comment: string): boolean {
+  if (typeof comment !== "string") {
+    return false;
+  }
+  const trimmed = comment.trim();
+  return trimmed.length >= 1 && trimmed.length <= 2000;
+}
+
+function validateCommentPage(page: number, totalPages: number): boolean {
+  if (typeof page !== "number" || isNaN(page)) {
+    return false;
+  }
+  if (typeof totalPages !== "number" || isNaN(totalPages)) {
+    return false;
+  }
+  return page >= 0 && page <= totalPages;
 }
 ```
 
 #### Review Validation
 ```typescript
-function validateReview(review: string, rating?: number): boolean {
-  if (!review.trim() || review.length > 5000) return false;
-  if (rating !== undefined && (rating < 1 || rating > 5)) return false;
-  return true;
+function validateReview(review: string): boolean {
+  if (typeof review !== "string") {
+    return false;
+  }
+  const trimmed = review.trim();
+  return trimmed.length >= 10 && trimmed.length <= 5000;
 }
 ```
 
@@ -287,23 +333,22 @@ function validateProgress(currentPage: number, totalPages: number): boolean {
 }
 ```
 
-### Business Logic Utilities
+### Reading State Machine Constants
 
 ```typescript
-// Calculate reading percentage
-function calculateReadingPercentage(currentPage: number, totalPages: number): number {
-  if (totalPages <= 0) return 0;
-  return Math.min(Math.max((currentPage / totalPages) * 100, 0), 100);
-}
+// Defines valid state transitions for books
+const READING_STATE_TRANSITIONS: Record<ReadingState, ReadingState[]> = {
+  not_started: ["in_progress"],
+  in_progress: ["finished"],
+  finished: [],
+};
 
-// State transition validation
-function canTransitionTo(currentState: Book["state"], newState: Book["state"]): boolean {
-  const transitions = {
-    not_started: ["in_progress"],
-    in_progress: ["finished"],
-    finished: [] // No transitions from finished
-  };
-  return transitions[currentState].includes(newState);
+// Validates if a state transition is allowed
+function canTransitionTo(currentState: ReadingState, newState: ReadingState): boolean {
+  if (!READING_STATE_TRANSITIONS[currentState]) {
+    return false;
+  }
+  return READING_STATE_TRANSITIONS[currentState].includes(newState);
 }
 ```
 
