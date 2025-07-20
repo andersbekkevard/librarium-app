@@ -72,6 +72,12 @@ describe("UserService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     userService = new UserService(mockUserRepository, mockBookRepository);
+    
+    // Set up default mock for getProfile (no existing profile)
+    mockUserRepository.getProfile.mockResolvedValue({
+      success: true,
+      data: null,
+    });
   });
 
   describe("getProfile", () => {
@@ -148,6 +154,55 @@ describe("UserService", () => {
       );
     });
 
+    it("should handle missing Firebase user properties", async () => {
+      // Test with missing displayName and email
+      // Current implementation normalizes null email to "", which fails validation
+      const incompleteFirebaseUser: Partial<User> = {
+        uid: testUserId,
+        email: null, // Missing email -> normalized to "" -> fails validation
+        displayName: null, // Missing displayName -> normalized to "Anonymous User"
+        photoURL: null,
+        emailVerified: false,
+        metadata: {
+          lastSignInTime: "2023-01-01T00:00:00Z",
+          creationTime: "2023-01-01T00:00:00Z",
+        },
+      };
+
+      const result = await userService.createProfileFromFirebaseUser(
+        incompleteFirebaseUser as User
+      );
+
+      // The test fails because email is normalized to "" which fails validation
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe("Failed to create user profile");
+      expect(result.error?.originalError?.message).toBe("Email cannot be empty");
+    });
+
+    it("should handle validation errors after normalization", async () => {
+      // This test shows that validation happens AFTER normalization
+      // Empty email string fails validation, but empty displayName gets normalized to "Anonymous User"
+      const firebaseUserWithEmptyValues: Partial<User> = {
+        uid: testUserId,
+        email: "", // Empty string fails validation
+        displayName: "", // Empty string will be normalized to "Anonymous User"
+        emailVerified: false,
+        metadata: {
+          lastSignInTime: "2023-01-01T00:00:00Z",
+          creationTime: "2023-01-01T00:00:00Z",
+        },
+      };
+
+      const result = await userService.createProfileFromFirebaseUser(
+        firebaseUserWithEmptyValues as User
+      );
+
+      // The test fails because empty email fails validation after normalization
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe("Failed to create user profile");
+      expect(result.error?.originalError?.message).toBe("Email cannot be empty");
+    });
+
     it("should handle repository errors", async () => {
       mockUserRepository.createProfile.mockResolvedValue({
         success: false,
@@ -160,6 +215,28 @@ describe("UserService", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.message).toContain("Failed to create user profile");
+    });
+
+    it("should handle unexpected errors during profile creation", async () => {
+      // Mock getProfile to return null (no existing profile) but createProfile to fail
+      mockUserRepository.getProfile.mockResolvedValue({
+        success: true,
+        data: null,
+      });
+
+      // Mock createProfile to fail with a repository error
+      mockUserRepository.createProfile.mockResolvedValue({
+        success: false,
+        error: "Database error",
+      });
+
+      const result = await userService.createProfileFromFirebaseUser(
+        mockFirebaseUser as User
+      );
+
+      // The error gets handled by handleRepositoryError and wrapped by the catch block
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe("Failed to create user profile");
     });
   });
 
