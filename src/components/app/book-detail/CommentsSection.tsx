@@ -80,9 +80,9 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-foreground" />
-          <h3 className="text-lg font-semibold text-gray-900">Comments</h3>
+          <h3 className="text-lg font-semibold text-foreground">Comments</h3>
           {hasComments && (
-            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-muted-foreground bg-muted rounded-full">
               {comments.length}
             </span>
           )}
@@ -142,25 +142,25 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
           {!isExpanded && comments.length > 1 && (
             <div className="relative">
               {/* Continue timeline line from first comment */}
-              <div className="absolute left-4 top-0 h-8 w-0.5 bg-gray-200" />
+              <div className="absolute left-4 top-0 h-8 w-0.5 bg-border" />
               
               {/* Placeholder comments with fade effect */}
               <div className="relative pl-12 pt-2">
                 <div className="space-y-3 opacity-30">
-                  <div className="bg-gray-100 border border-gray-200 rounded-lg p-3">
-                    <div className="h-3 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                  <div className="bg-muted border border-border rounded-lg p-3">
+                    <div className="h-3 bg-muted-foreground/30 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-muted-foreground/30 rounded w-1/2"></div>
                   </div>
                   {comments.length > 2 && (
-                    <div className="bg-gray-100 border border-gray-200 rounded-lg p-3">
-                      <div className="h-3 bg-gray-300 rounded w-2/3 mb-2"></div>
-                      <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                    <div className="bg-muted border border-border rounded-lg p-3">
+                      <div className="h-3 bg-muted-foreground/30 rounded w-2/3 mb-2"></div>
+                      <div className="h-3 bg-muted-foreground/30 rounded w-1/3"></div>
                     </div>
                   )}
                 </div>
                 
                 {/* Gradient fade overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
               </div>
 
               {/* Show more button */}
@@ -169,7 +169,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={handleToggleExpanded}
-                  className="bg-white shadow-sm border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 flex items-center gap-2"
+                  className="bg-background shadow-sm border-border text-foreground hover:bg-muted hover:border-muted-foreground/20 flex items-center gap-2"
                 >
                   <ChevronDown className="w-4 h-4" />
                   Show {comments.length - 1} more comment
@@ -181,12 +181,12 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
           {/* Collapse button when expanded */}
           {isExpanded && comments.length > 1 && (
-            <div className="pt-4 border-t border-gray-200 mt-4 flex justify-center">
+            <div className="pt-4 border-t border-border mt-4 flex justify-center">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleToggleExpanded}
-                className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
+                className="text-muted-foreground hover:text-foreground flex items-center gap-2"
               >
                 <ChevronUp className="w-4 h-4" />
                 Collapse Comments
@@ -198,10 +198,10 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
       {/* Empty State */}
       {!hasComments && !showCommentForm && (
-        <div className="text-center py-8 text-gray-500">
-          <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+        <div className="text-center py-8 text-muted-foreground">
+          <MessageSquare className="w-8 h-8 mx-auto mb-2 text-muted-foreground/60" />
           <p className="text-sm">No comments yet</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground/60 mt-1">
             Share your thoughts about this book
           </p>
         </div>

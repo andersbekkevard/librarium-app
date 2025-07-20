@@ -73,14 +73,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   const stateDisplay = getStateDisplay();
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+    <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
       <form onSubmit={handleSubmit}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
           <MessageSquarePlus className="w-4 h-4 text-foreground" />
           <Label
             htmlFor="comment-input"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-foreground"
           >
             Add Comment
           </Label>
@@ -93,7 +93,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="What are your thoughts?"
-            className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent resize-none"
+            className="w-full min-h-[100px] p-3 border border-border rounded-md text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent resize-none bg-background text-foreground"
             maxLength={maxLength}
             disabled={isSubmitting}
           />
@@ -104,7 +104,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
               className={`text-xs ${
                 characterCount > maxLength * 0.9
                   ? "text-status-warning"
-                  : "text-gray-500"
+                  : "text-muted-foreground"
               }`}
             >
               {characterCount}/{maxLength} characters
@@ -113,10 +113,10 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         </div>
 
         {/* Reading context */}
-        <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-gray-50 rounded-md">
-          <span className="text-xs text-gray-600">{stateDisplay.page}</span>
-          <span className="text-xs text-gray-400">•</span>
-          <span className="text-xs text-gray-600">{stateDisplay.label}</span>
+        <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-muted rounded-md">
+          <span className="text-xs text-muted-foreground">{stateDisplay.page}</span>
+          <span className="text-xs text-muted-foreground/60">•</span>
+          <span className="text-xs text-muted-foreground">{stateDisplay.label}</span>
         </div>
 
         {/* Error message */}
