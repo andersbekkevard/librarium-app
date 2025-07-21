@@ -4,6 +4,15 @@
  */
 
 import { API_CONFIG } from "../constants/constants";
+import {
+  createNetworkError,
+  createValidationError,
+  createSystemError,
+  ErrorBuilder,
+  ErrorCategory,
+  ErrorSeverity,
+} from "@/lib/errors/error-handling";
+import { ServiceResult } from "@/lib/services/types";
 
 // Google Books API response interfaces
 export interface GoogleBooksVolumeInfo {
@@ -138,18 +147,24 @@ export class GoogleBooksApiService {
 
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY || "";
-    if (!this.apiKey) {
-      console.warn(
-        "Google Books API key not found. Please set NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY in your environment variables."
-      );
-    }
   }
 
   /**
    * Check if the API service is properly configured
    */
-  public isConfigured(): boolean {
-    return !!this.apiKey;
+  public isConfigured(): ServiceResult<boolean> {
+    if (!this.apiKey) {
+      return {
+        success: false,
+        error: createSystemError(
+          "Google Books API key not found. Please set NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY in your environment variables."
+        ),
+      };
+    }
+    return {
+      success: true,
+      data: true,
+    };
   }
 
   /**
@@ -169,48 +184,86 @@ export class GoogleBooksApiService {
   /**
    * Make API request with error handling
    */
-  private async makeRequest<T>(url: string): Promise<T> {
+  private async makeRequest<T>(url: string): Promise<ServiceResult<T>> {
     try {
       const response = await fetch(url);
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error("Rate limit exceeded. Please try again later.");
+          return {
+            success: false,
+            error: new ErrorBuilder("Rate limit exceeded")
+              .withCategory(ErrorCategory.NETWORK)
+              .withUserMessage("Rate limit exceeded. Please try again later.")
+              .withSeverity(ErrorSeverity.MEDIUM)
+              .build(),
+          };
         } else if (response.status === 403) {
-          throw new Error("API key invalid or quota exceeded.");
+          return {
+            success: false,
+            error: new ErrorBuilder("API key invalid")
+              .withCategory(ErrorCategory.AUTHORIZATION)
+              .withUserMessage("API key invalid or quota exceeded.")
+              .withSeverity(ErrorSeverity.HIGH)
+              .build(),
+          };
         } else if (response.status === 400) {
-          throw new Error("Invalid search query.");
+          return {
+            success: false,
+            error: createValidationError("Invalid search query"),
+          };
         } else {
-          throw new Error(
-            `API error: ${response.status} ${response.statusText}`
-          );
+          return {
+            success: false,
+            error: new ErrorBuilder(`API error: ${response.status} ${response.statusText}`)
+              .withCategory(ErrorCategory.NETWORK)
+              .withUserMessage("Google Books API is temporarily unavailable. Please try again later.")
+              .withSeverity(ErrorSeverity.MEDIUM)
+              .build(),
+          };
         }
       }
 
       const data = await response.json();
-      return data;
+      return {
+        success: true,
+        data,
+      };
     } catch (error) {
       if (error instanceof Error) {
-        throw error;
+        return {
+          success: false,
+          error: createNetworkError(error.message),
+        };
       }
-      throw new Error(
-        "Network error. Please check your connection and try again."
-      );
+      return {
+        success: false,
+        error: createNetworkError(
+          "Network error. Please check your connection and try again."
+        ),
+      };
     }
   }
 
   /**
    * Search for books using the Google Books API
    * @param options - Search options including query and filters
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
-  async searchBooks(options: SearchOptions): Promise<GoogleBooksVolume[]> {
-    if (!this.isConfigured()) {
-      throw new Error("Google Books API key is not configured");
+  async searchBooks(options: SearchOptions): Promise<ServiceResult<GoogleBooksVolume[]>> {
+    const configResult = this.isConfigured();
+    if (!configResult.success) {
+      return {
+        success: false,
+        error: configResult.error,
+      };
     }
 
     if (!options.query.trim()) {
-      return [];
+      return {
+        success: true,
+        data: [],
+      };
     }
 
     const params: Record<string, string> = {
@@ -229,32 +282,46 @@ export class GoogleBooksApiService {
     if (options.orderBy) params.orderBy = options.orderBy;
 
     const url = this.buildUrl("/volumes", params);
-    const data = await this.makeRequest<GoogleBooksSearchResponse>(url);
+    const result = await this.makeRequest<GoogleBooksSearchResponse>(url);
 
-    return data.items || [];
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+      };
+    }
+
+    return {
+      success: true,
+      data: result.data?.items || [],
+    };
   }
 
   /**
    * Simple search method for basic queries
    * @param query - Search query (title, author, ISBN, etc.)
    * @param maxResults - Maximum number of results to return (default: 10, max: 40)
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async search(
     query: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     return this.searchBooks({ query, maxResults });
   }
 
   /**
    * Get detailed information about a specific book
    * @param volumeId - The Google Books volume ID
-   * @returns Promise<GoogleBooksVolume>
+   * @returns Promise<ServiceResult<GoogleBooksVolume>>
    */
-  async getBookDetails(volumeId: string): Promise<GoogleBooksVolume> {
-    if (!this.isConfigured()) {
-      throw new Error("Google Books API key is not configured");
+  async getBookDetails(volumeId: string): Promise<ServiceResult<GoogleBooksVolume>> {
+    const configResult = this.isConfigured();
+    if (!configResult.success) {
+      return {
+        success: false,
+        error: configResult.error,
+      };
     }
 
     const url = this.buildUrl(`/volumes/${volumeId}`, {});
@@ -265,12 +332,12 @@ export class GoogleBooksApiService {
    * Search books by ISBN
    * @param isbn - ISBN-10 or ISBN-13
    * @param maxResults - Maximum number of results
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async searchByISBN(
     isbn: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.AUTHOR_SEARCH_RESULTS
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     const cleanIsbn = isbn.replace(/[-\s]/g, "");
     return this.searchBooks({
       query: `isbn:${cleanIsbn}`,
@@ -282,12 +349,12 @@ export class GoogleBooksApiService {
    * Search books by title
    * @param title - Book title
    * @param maxResults - Maximum number of results
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async searchByTitle(
     title: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     return this.searchBooks({
       query: `intitle:"${title}"`,
       maxResults,
@@ -298,12 +365,12 @@ export class GoogleBooksApiService {
    * Search books by author
    * @param author - Author name
    * @param maxResults - Maximum number of results
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async searchByAuthor(
     author: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     return this.searchBooks({
       query: `inauthor:"${author}"`,
       maxResults,
@@ -313,11 +380,11 @@ export class GoogleBooksApiService {
   /**
    * Advanced search with multiple parameters
    * @param params - Advanced search parameters
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async advancedSearch(
     params: AdvancedSearchParams
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     const queryParts: string[] = [];
 
     if (params.title) queryParts.push(`intitle:"${params.title}"`);
@@ -330,7 +397,10 @@ export class GoogleBooksApiService {
     if (params.publisher) queryParts.push(`inpublisher:"${params.publisher}"`);
 
     if (queryParts.length === 0) {
-      throw new Error("At least one search parameter is required");
+      return {
+        success: false,
+        error: createValidationError("At least one search parameter is required"),
+      };
     }
 
     const query = queryParts.join(" ");
@@ -348,12 +418,12 @@ export class GoogleBooksApiService {
    * Search for free ebooks
    * @param query - Search query
    * @param maxResults - Maximum number of results
-   * @returns Promise<GoogleBooksVolume[]>
+   * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
   async searchFreeEbooks(
     query: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
-  ): Promise<GoogleBooksVolume[]> {
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     return this.searchBooks({
       query,
       maxResults,

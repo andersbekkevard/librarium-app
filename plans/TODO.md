@@ -18,6 +18,7 @@
 ## Nice-to-have feature
 - [X] Align search bar properly, and integrate it with actual functionality
 - [X] Split "Reading Activity Over Time" chart to split by genre
+- [ ] Add more documentation for non-trivial code
 
 ## Bigger feature
 - [X] Add commenting on books

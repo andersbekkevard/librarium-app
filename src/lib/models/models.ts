@@ -140,7 +140,7 @@ export type EventType = BookEvent["type"];
  * @example
  * const userInput = "in_progress";
  * if (isValidReadingState(userInput)) {
- *   // TypeScript now knows userInput is ReadingState
+ *   //TypeScript now knows userInput is ReadingState
  *   updateBookState(bookId, userInput);
  * }
  */
