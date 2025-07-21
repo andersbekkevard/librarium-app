@@ -1,6 +1,6 @@
 # Librarium
 
-A modern, production-ready personal book collection management app with real-time synchronization and comprehensive reading analytics.
+A modern, production-ready personal book collection management app with real-time synchronization and reading analytics.
 
 ### Landing page
 
