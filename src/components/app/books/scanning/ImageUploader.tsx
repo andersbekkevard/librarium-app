@@ -430,7 +430,6 @@ export const CompactImageUploader: React.FC<
         try {
           const reader = new BrowserMultiFormatReader();
           const result = await reader.decodeFromImageElement(img);
-          setLastScannedISBN(result.getText());
           onBarcodeDetected(result.getText());
         } catch {
           onError("No barcode detected in image. Please try a clearer image.");

@@ -1,6 +1,6 @@
 # Librarium
 
-A web application for managing personal book collections and tracking reading progress.
+A modern, production-ready personal book collection management app with real-time synchronization and comprehensive reading analytics.
 
 ### Landing page
 
@@ -12,56 +12,77 @@ A web application for managing personal book collections and tracking reading pr
 
 ## Overview
 
-Librarium is a personal library management system that allows users to organize their book collections, track reading progress, and maintain reading statistics. The application supports both owned books and wishlist items, with features for progress tracking and book rating.
+Librarium is a personal book collection management app built with modern web technologies. It provides a seamless reading experience with real-time data synchronization, detailed analytics, and a clean, Notion-inspired interface. The application follows service layer architecture principles and production-ready error handling.
 
-## Current State
+## Production-Ready Features
 
-The application is in active development with the following functionality implemented:
+Librarium is fully production-ready with 15+ major features implemented:
 
-- **User Authentication**: Google OAuth integration for user sign-in
-- **Book Management**: Add, edit, delete, and organize books in personal library
-- **Reading Progress**: Track reading state (not started, in progress, finished) with page-level progress tracking
-- **Book Information**: Integration with Google Books API for automatic metadata retrieval
-- **Library Organization**: Filter and sort books by various criteria (title, author, reading state, ownership)
-- **Reading Statistics**: Detailed reading analytics with charts and goal tracking
-- **Service Layer Architecture**: Clean separation of concerns with repository pattern
-- **Event Logging**: Track reading activities and state changes
-- **Responsive Design**: Mobile-friendly interface with modern UI components
+### Core Functionality
+- **Firebase Authentication**: Complete Google OAuth with automatic profile creation
+- **Personal Library Management**: Full CRUD operations with real-time synchronization
+- **Reading State Management**: Enforced state machine (not_started → in_progress → finished)
+- **Progress Tracking**: Page-by-page reading progress with percentage calculations
+- **Google Books API Integration**: Automated book metadata fetching and search
+- **Book Rating System**: 1-5 star ratings with visual display
+- **Advanced Search & Discovery**: Multi-criteria filtering and sorting capabilities
+
+### Enhanced Features
+- **Comment System**: Contextual comments with page numbers and reading state
+- **Review System**: Comprehensive book reviews with timestamps
+- **Event Logging & Activity Tracking**: Complete timeline of all reading activities
+- **Statistics Dashboard**: Real-time reading insights with visual stat cards
+- **Advanced Analytics**: Genre-based charts and 12-month activity visualization
+- **Mobile-First Design**: Fully responsive with touch-optimized interactions
+- **Error Handling**: Comprehensive error boundaries and recovery actions
+
+### Architecture
+- **Service Layer Architecture**: Clean separation with repository pattern
+- **Real-time Updates**: Firebase listeners for live data synchronization
+- **Type Safety**: Comprehensive TypeScript with centralized models
+- **Testing**: Jest test suite with 70% coverage threshold
 
 ## Technology Stack
 
 ### Frontend
-
-- **Next.js 15**: React framework with App Router
-- **React 19**: UI library with TypeScript support
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
-- **Radix UI**: Accessible component primitives (via shadcn/ui)
-- **Lucide React**: Icon library
+- **Next.js 15** (App Router, React 19, TypeScript)
+- **Tailwind CSS 4** + **shadcn/ui** (Radix UI primitives)
+- **React 19** with functional components and hooks
+- **TypeScript** with strict mode and comprehensive typing
+- **Recharts** for advanced analytics and visualizations
+- **Lucide React** for consistent iconography
 
 ### Backend & Database
+- **Firebase Auth** (Google OAuth 2.0 with session management)
+- **Firestore** (Real-time NoSQL database with user-centric security)
+- **Google Books API** (Automatic metadata fetching and search)
 
-- **Firebase Authentication**: User management with Google OAuth
-- **Firebase Firestore**: Real-time NoSQL database
-
-- **Google Books API**: Book metadata and cover images
-
-### Development Tools
-
-- **ESLint**: Code linting with Next.js configuration
-- **PostCSS**: CSS processing with Tailwind CSS
-- **Turbopack**: Fast development bundler (Next.js 15)
+### Development & Testing
+- **Jest** + **React Testing Library** (70% coverage threshold)
+- **ESLint** (next/core-web-vitals, next/typescript configurations)
+- **Turbopack** (Fast development bundler for Next.js 15)
+- **Firebase Emulator** (Local development and testing)
 
 ## Architecture
 
-The application follows a modern service layer architecture with:
+Librarium implements **strict service layer architecture** with enforced separation of concerns:
 
-- **Service Layer Pattern**: Business logic centralized in dedicated services
-- **Repository Pattern**: Data access abstracted through repository interfaces  
-- **Firebase-native Integration**: Real-time data synchronization via Firestore listeners
-- **Type-safe Development**: TypeScript interfaces throughout the application
-- **React Context Patterns**: Providers for state management and component composition
-- **Clean Architecture**: Clear separation of concerns across layers
+```
+Components → Providers → Services → Repositories → External APIs
+```
+
+### Architectural Layers (STRICT RULES)
+- **Components** (`/src/components`, `/src/app`) - Call ONLY Provider hooks
+- **Providers** (`/src/lib/providers`) - Call ONLY Service methods  
+- **Services** (`/src/lib/services`) - Call ONLY Repository methods + other Services
+- **Repositories** (`/src/lib/repositories`) - Call ONLY external APIs (Firebase)
+
+### Key Design Patterns
+- **Firebase-Native Approach**: Real-time listeners with optimistic updates
+- **Event-Driven Architecture**: All user actions logged as BookEvents
+- **TypeScript-First Development**: Centralized models with validation functions
+- **Provider Context Pattern**: Specialized contexts for auth, users, books, and events
+- **Repository Pattern**: Data access abstraction with standardized error handling
 
 ## Getting Started
 
@@ -85,14 +106,20 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) to view the application
 
-## Planned Features
+## Partially Implemented & Planned Features
 
-- **Shelf System**: Custom shelves and collections for book organization
-- **Comments & Quotes**: Add notes, comments, and save favorite quotes
-- **Household Sharing**: Share books with family members and track lending
-- **LLM Integration**: AI-powered book recommendations and insights
-- **Advanced Search**: Enhanced filtering and search capabilities
-- **Import/Export**: Bulk import/export functionality
+### Coming Soon
+- **Wishlist Management**: Basic UI exists, functional operations in development
+- **Reading Goals**: Goal progress display implemented, goal creation/management planned
+- **Social Features**: Shared books page UI ready, backend functionality planned
+
+### Planned
+- **Organization & Shelf Features**: Custom shelves and themed collections
+- **Quote Collection**: Save memorable passages with page references
+- **Reading Journal**: Detailed notes and reading journey tracking
+- **Real-time Collaboration**: Book sharing with family/household members
+- **LLM Integration**: AI reading coach and personalized recommendations
+- **Advanced Goal System**: Achievement system and reading challenges
 
 ## Project Structure
 
@@ -125,12 +152,25 @@ src/
 └── __tests__/                # E2E and setup tests
 ```
 
-## Development
+## Development Commands
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+### Development
+```bash
+npm run dev           # Start development server with Turbopack
+npm run build         # Build for production
+```
+
+### Code Quality
+```bash
+npm run lint          # Run ESLint (next/core-web-vitals, next/typescript)
+```
+
+### Testing
+```bash
+npm run test          # Run Jest test suite
+npm run test:watch    # Run tests in watch mode  
+npm run test:coverage # Run tests with coverage report
+```
 
 ## License
 

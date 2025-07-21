@@ -191,11 +191,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       const books = await googleBooksApi.searchByISBN(isbn, 1);
       
       debugLog('Google Books API response', { 
-        booksFound: books.length,
+        booksFound: books.data?.length || 0,
         searchDuration: Date.now() - startTime 
       });
       
-      if (books.length === 0) {
+      if (!books.success || !books.data || books.data.length === 0) {
         debugLog('No books found in database');
         setLocalError('Book not found in our database. You can add it manually using the "Manual Entry" tab.');
         setStatus('error');
@@ -204,10 +204,10 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       // Book found successfully
       debugLog('Book found successfully', { 
-        title: books[0].volumeInfo.title,
-        authors: books[0].volumeInfo.authors
+        title: books.data[0].volumeInfo.title,
+        authors: books.data[0].volumeInfo.authors
       });
-      setFoundBook(books[0]);
+      setFoundBook(books.data[0]);
       setStatus('success');
       
     } catch (error) {

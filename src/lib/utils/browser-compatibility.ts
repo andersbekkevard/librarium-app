@@ -21,13 +21,13 @@ export function isCameraSupported(): boolean {
 
   // Fallback check for older browsers and mobile Safari
   // Some versions of Safari have partial MediaDevices support
-  if (navigator && typeof navigator.getUserMedia === 'function') {
+  if (navigator && typeof (navigator as any).getUserMedia === 'function') {
     return true;
   }
 
   // Check vendor-prefixed versions (legacy support)
   const getUserMedia = (
-    navigator.getUserMedia ||
+    (navigator as any).getUserMedia ||
     (navigator as any).webkitGetUserMedia ||
     (navigator as any).mozGetUserMedia ||
     (navigator as any).msGetUserMedia
@@ -97,7 +97,7 @@ export function getGetUserMedia(): ((constraints: MediaStreamConstraints) => Pro
 
   // Legacy API fallback
   const legacyGetUserMedia = (
-    navigator.getUserMedia ||
+    (navigator as any).getUserMedia ||
     (navigator as any).webkitGetUserMedia ||
     (navigator as any).mozGetUserMedia ||
     (navigator as any).msGetUserMedia

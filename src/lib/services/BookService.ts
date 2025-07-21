@@ -829,7 +829,7 @@ export class BookService implements IBookService {
       // Search for book using Google Books API
       const books = await googleBooksApi.searchByISBN(isbn.trim(), 1);
       
-      if (books.length === 0) {
+      if (!books.success || !books.data || books.data.length === 0) {
         return {
           success: false,
           error: createValidationError(
@@ -840,7 +840,7 @@ export class BookService implements IBookService {
       }
 
       // Convert Google Books volume to internal Book model
-      const book = convertGoogleBookToBook(books[0]);
+      const book = convertGoogleBookToBook(books.data[0]);
       const { id: _id, ...bookData } = book;
       
       // Add the book using existing addBook method
