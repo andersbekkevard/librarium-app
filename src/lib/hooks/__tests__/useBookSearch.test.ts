@@ -28,7 +28,10 @@ describe("useBookSearch", () => {
       } as GoogleBooksVolume,
     ];
 
-    mockGoogleBooksApi.search.mockResolvedValue(mockResults);
+    mockGoogleBooksApi.search.mockResolvedValue({
+      success: true,
+      data: mockResults
+    });
 
     const { result } = renderHook(() => useBookSearch());
 
@@ -44,7 +47,20 @@ describe("useBookSearch", () => {
 
   it("should handle search errors", async () => {
     const mockError = new Error("Network error");
-    mockGoogleBooksApi.search.mockRejectedValue(mockError);
+    mockGoogleBooksApi.search.mockResolvedValue({
+      success: false,
+      error: {
+        id: "test-error",
+        type: "network",
+        category: "network" as ErrorCategory,
+        severity: "high",
+        message: "Network error",
+        userMessage: "Failed to search books. Please check your internet connection and try again.",
+        timestamp: new Date(),
+        retryable: true,
+        recoverable: true
+      }
+    });
 
     const { result } = renderHook(() => useBookSearch());
 

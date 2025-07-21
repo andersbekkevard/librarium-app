@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import MyLibraryPage from "@/components/app/MyLibraryPage";
+import MyLibraryPage from "@/components/app/library/MyLibraryPage";
 
 function LibraryContent() {
   const searchParams = useSearchParams();

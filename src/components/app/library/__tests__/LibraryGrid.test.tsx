@@ -15,7 +15,7 @@ const createBook = (overrides: Partial<any> = {}) => ({
   ...overrides,
 })
 
-jest.mock('../../BookCard', () => ({
+jest.mock('../../books/BookCard', () => ({
   __esModule: true,
   default: ({ book }: any) => <div data-testid='book-card'>{book.title}</div>,
 }))

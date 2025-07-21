@@ -17,13 +17,17 @@ describe('Google Books API Service', () => {
     it('should be configured when API key is present', () => {
       process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY = 'test-key';
       googleBooksApi = new GoogleBooksApiService();
-      expect(googleBooksApi.isConfigured()).toBe(true);
+      const result = googleBooksApi.isConfigured();
+      expect(result.success).toBe(true);
+      expect(result.data).toBe(true);
     });
 
     it('should not be configured when API key is missing', () => {
       delete process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY;
       googleBooksApi = new GoogleBooksApiService();
-      expect(googleBooksApi.isConfigured()).toBe(false);
+      const result = googleBooksApi.isConfigured();
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
   });
 });

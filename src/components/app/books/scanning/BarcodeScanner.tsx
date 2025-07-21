@@ -13,7 +13,7 @@ import { handleScanningError as handleError } from "@/lib/utils/scanning-errors"
 import { canScanBarcodes, generateCompatibilityReport, isIOSSafari, isIOS, isIOSChrome, isMediaDevicesAvailable } from "@/lib/utils/browser-compatibility";
 import { SafeCameraScanner } from "./SafeCameraScanner";
 import { ImageUploader } from "./ImageUploader";
-import { BookPreviewCard } from "./BookPreviewCard";
+import { BookPreviewCard } from "../BookPreviewCard";
 
 /**
  * BarcodeScanner Component

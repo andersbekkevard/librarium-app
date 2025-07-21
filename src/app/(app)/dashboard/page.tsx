@@ -1,5 +1,5 @@
 "use client";
-import DashboardContent from "@/components/dashboard/DashboardContent";
+import DashboardContent from "@/components/app/dashboard/DashboardContent";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";

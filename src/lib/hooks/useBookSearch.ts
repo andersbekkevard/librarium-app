@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { GoogleBooksVolume, googleBooksApi } from "../api/google-books-api";
 import { API_CONFIG } from "../constants/constants";
 import { StandardError, createNetworkError } from "../errors/error-handling";
+import { ServiceResult } from "../services/types";
 
 export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];
@@ -44,22 +45,29 @@ export const useBookSearch = (): {
       setError(null);
 
       try {
-        let results: GoogleBooksVolume[];
+        let serviceResult: ServiceResult<GoogleBooksVolume[]>;
         
         switch (searchType) {
           case 'title':
-            results = await googleBooksApi.searchByTitle(query, maxResults);
+            serviceResult = await googleBooksApi.searchByTitle(query, maxResults);
             break;
           case 'author':
-            results = await googleBooksApi.searchByAuthor(query, maxResults);
+            serviceResult = await googleBooksApi.searchByAuthor(query, maxResults);
             break;
           case 'general':
           default:
-            results = await googleBooksApi.search(query, maxResults);
+            serviceResult = await googleBooksApi.search(query, maxResults);
             break;
         }
         
-        setSearchResults(results);
+        if (serviceResult.success && serviceResult.data) {
+          setSearchResults(serviceResult.data);
+        } else {
+          setSearchResults([]);
+          if (serviceResult.error) {
+            setError(serviceResult.error);
+          }
+        }
       } catch (err) {
         console.error("Error searching books:", err);
         const standardError = createNetworkError(

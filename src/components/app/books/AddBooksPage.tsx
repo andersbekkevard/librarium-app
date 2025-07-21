@@ -23,9 +23,9 @@ import { GoogleBooksVolume } from "@/lib/api/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 
 // Extracted components
-import { ManualEntryForm } from "./books/ManualEntryForm";
-import { SearchResults } from "./books/SearchResults";
-import { BarcodeScanner } from "./books/BarcodeScanner";
+import { ManualEntryForm } from "./ManualEntryForm";
+import { SearchResults } from "./SearchResults";
+import { BarcodeScanner } from "./scanning/BarcodeScanner";
 
 // Error handling components
 import { ErrorAlert } from "@/components/ui/error-display";

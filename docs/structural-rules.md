@@ -177,7 +177,7 @@ export class FirebaseBookRepository {
 // ✅ Components can import:
 import { useBooksContext } from "@/lib/providers/BooksProvider"; // Providers
 import { Button } from "@/components/ui/button"; // Other Components
-import { BookCard } from "@/components/app/BookCard"; // Other Components
+import { BookCard } from "@/components/app/books/BookCard"; // Other Components
 ```
 
 #### Providers

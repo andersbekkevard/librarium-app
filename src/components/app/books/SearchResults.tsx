@@ -87,7 +87,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     );
   }
 
-  if (books.length === 0) {
+  if (!books || books.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />

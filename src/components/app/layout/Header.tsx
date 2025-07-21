@@ -1,6 +1,6 @@
 "use client";
 
-import UserProfileDropdown from "@/components/app/UserProfileDropdown";
+import UserProfileDropdown from "./UserProfileDropdown";
 import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
 import { useCmdK } from "@/lib/hooks/useKeyboardShortcut";

@@ -1,7 +1,7 @@
 "use client";
 
-import { Header } from "@/components/app/Header";
-import { Sidebar } from "@/components/app/Sidebar";
+import { Header } from "@/components/app/layout/Header";
+import { Sidebar } from "@/components/app/layout/Sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { AppProviders } from "@/lib/providers";

@@ -9,16 +9,16 @@ import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { ArrowLeft } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
-import { EditBookSheet } from "./EditBookSheet";
+import { EditBookSheet } from "../books/EditBookSheet";
 
 // Extracted components
-import { BookCover } from "./book-detail/BookCover";
-import { BookInfo } from "./book-detail/BookInfo";
-import { ProgressTracker } from "./book-detail/ProgressTracker";
-import { ReadingTimeline } from "./book-detail/ReadingTimeline";
-import { CommentsSection } from "./book-detail/CommentsSection";
-import { ReviewSection } from "./book-detail/ReviewSection";
-import { ReviewDialog } from "./book-detail/ReviewDialog";
+import { BookCover } from "./BookCover";
+import { BookInfo } from "./BookInfo";
+import { ProgressTracker } from "./ProgressTracker";
+import { ReadingTimeline } from "./ReadingTimeline";
+import { CommentsSection } from "./comments/CommentsSection";
+import { ReviewSection } from "./reviews/ReviewSection";
+import { ReviewDialog } from "./reviews/ReviewDialog";
 
 interface BookDetailPageProps {
   book: Book;

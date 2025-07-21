@@ -1,6 +1,6 @@
 "use client";
 
-import BookDetailPage from "@/components/app/BookDetailPage";
+import BookDetailPage from "@/components/app/book-detail/BookDetailPage";
 import { Button } from "@/components/ui/button";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";

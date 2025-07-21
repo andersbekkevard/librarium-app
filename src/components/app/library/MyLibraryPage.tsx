@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 
 // Extracted components
-import { LibraryControls } from "./library/LibraryControls";
-import { LibraryGrid } from "./library/LibraryGrid";
+import { LibraryControls } from "./LibraryControls";
+import { LibraryGrid } from "./LibraryGrid";
 
 type ViewMode = "grid" | "list";
 type SortOption = "title" | "author" | "pages" | "rating" | "progress";

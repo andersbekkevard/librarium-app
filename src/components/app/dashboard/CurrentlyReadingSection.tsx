@@ -1,4 +1,4 @@
-import BookCard from "@/components/app/BookCard";
+import BookCard from "@/components/app/books/BookCard";
 import { Button } from "@/components/ui/button";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { BRAND_COLORS } from "@/lib/design/colors";

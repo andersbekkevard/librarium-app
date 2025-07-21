@@ -3,7 +3,7 @@
 import { BookOpen, Loader2 } from "lucide-react";
 import * as React from "react";
 
-import BookCard from "@/components/app/BookCard";
+import BookCard from "@/components/app/books/BookCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Book } from "@/lib/models/models";
