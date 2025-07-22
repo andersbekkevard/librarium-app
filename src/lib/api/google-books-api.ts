@@ -347,9 +347,8 @@ export class GoogleBooksApiService {
     isbn: string,
     maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<ServiceResult<GoogleBooksVolume[]>> {
-    const cleanIsbn = isbn.replace(/[-\s]/g, "");
-    // Strip 978/979 prefix for better Google Books API compatibility
-    const searchableIsbn = stripISBNPrefix(cleanIsbn);
+    // ISBN is already clean from extractISBN, just strip prefix for Google Books API
+    const searchableIsbn = stripISBNPrefix(isbn);
     return this.searchBooks({
       query: `isbn:${searchableIsbn}`,
       maxResults,

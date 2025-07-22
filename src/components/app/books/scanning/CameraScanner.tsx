@@ -42,9 +42,18 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   useEffect(() => {
     const checkPermissions = async () => {
       console.log("[CameraScanner] Checking camera permissions...");
+      
+      // Feature detection for MediaDevices API
+      if (!navigator.mediaDevices?.getUserMedia) {
+        console.error("[CameraScanner] MediaDevices API not available");
+        setHasPermission(false);
+        onError("Camera not supported. Please use HTTPS or try a different browser.");
+        return;
+      }
+      
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { facingMode: "environment" }, // Use back camera on mobile
         });
         console.log("[CameraScanner] Camera permission granted");
         setHasPermission(true);
@@ -130,8 +139,15 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   };
 
   const requestPermissions = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      onError("Camera not supported. Please use HTTPS or try a different browser.");
+      return;
+    }
+    
     try {
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      });
       setHasPermission(true);
     } catch {
       onError(
