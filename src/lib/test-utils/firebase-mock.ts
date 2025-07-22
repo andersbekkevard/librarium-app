@@ -73,11 +73,14 @@ jest.mock("firebase/app", () => mockFirebaseApp);
 // Mock the entire firebase/storage module
 jest.mock("firebase/storage", () => mockStorage);
 
-// Mock the firebase.ts config file
+// Mock the firebase.ts config file with proper ESModule exports
 jest.mock("@/lib/api/firebase", () => ({
-  db: mockFirestore, // Use the mocked firestore
-  auth: mockAuth, // Use the mocked auth
-  storage: mockStorage, // Use the mocked storage
+  __esModule: true,
+  default: { name: "test-app", options: {} }, // Mock Firebase app instance
+  db: mockFirestore,
+  auth: mockAuth,
+  storage: mockStorage,
+  analytics: null, // Mock analytics as null for server-side tests
 }));
 
 // Helper to reset all mocks

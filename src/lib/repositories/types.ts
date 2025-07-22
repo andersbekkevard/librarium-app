@@ -201,5 +201,13 @@ export class RepositoryError extends Error {
   ) {
     super(message);
     this.name = "RepositoryError";
+    
+    // Make message property enumerable for JSON serialization
+    Object.defineProperty(this, 'message', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: message,
+    });
   }
 }

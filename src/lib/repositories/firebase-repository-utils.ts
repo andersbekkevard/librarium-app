@@ -16,7 +16,11 @@ export function filterUndefinedValues<T extends Record<string, any>>(
 ): Partial<T> {
   const filtered: Partial<T> = {};
 
-  Object.entries(data).forEach(([key, value]) => {
+  // Handle both string and symbol keys
+  const keys = [...Object.keys(data), ...Object.getOwnPropertySymbols(data)];
+  
+  keys.forEach((key) => {
+    const value = data[key as keyof T];
     if (value !== undefined) {
       filtered[key as keyof T] = value;
     }
@@ -33,6 +37,15 @@ export function handleFirebaseError(
   error: any,
   context: string = "collection"
 ): RepositoryError {
+  // Handle null, undefined, or string errors
+  if (!error || typeof error === 'string') {
+    return new RepositoryError(
+      RepositoryErrorType.UNKNOWN_ERROR,
+      `Database error: ${error || 'Unknown error'}`,
+      error
+    );
+  }
+
   if (error.code === "permission-denied") {
     return new RepositoryError(
       RepositoryErrorType.PERMISSION_DENIED,
@@ -51,7 +64,7 @@ export function handleFirebaseError(
 
   return new RepositoryError(
     RepositoryErrorType.UNKNOWN_ERROR,
-    `Database error: ${error.message}`,
+    `Database error: ${error.message || 'Unknown error'}`,
     error
   );
 }

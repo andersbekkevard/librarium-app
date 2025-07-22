@@ -54,24 +54,37 @@ export const useStaggeredScrollAnimation = (
   const [visibleItems, setVisibleItems] = useState<boolean[]>(
     new Array(itemCount).fill(false)
   );
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
+    // Clear any existing timeouts
+    timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+    timeoutRefs.current = [];
+
     if (isVisible) {
       // Stagger the animations with 150ms delay between each item
       // Add base delay of 200ms to ensure smooth fade-in for first item
       visibleItems.forEach((_, index) => {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           setVisibleItems(prev => {
             const newArray = [...prev];
             newArray[index] = true;
             return newArray;
           });
         }, (index * 150) + 200);
+        
+        timeoutRefs.current.push(timeoutId);
       });
     } else if (!options.triggerOnce) {
       setVisibleItems(new Array(itemCount).fill(false));
     }
-  }, [isVisible, itemCount, options.triggerOnce]);
+
+    // Cleanup function
+    return () => {
+      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+      timeoutRefs.current = [];
+    };
+  }, [isVisible, itemCount, options.triggerOnce]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { elementRef, isVisible, visibleItems };
 };
