@@ -1,263 +1,218 @@
 /**
- * Scanning Error Utilities
+ * Scanning Error Handling Utilities
  * 
- * Utility functions for mapping technical scanning errors to user-friendly messages
- * with actionable feedback and fallback options.
+ * Provides user-friendly error messages and recovery suggestions for barcode scanning issues.
  */
 
-/**
- * Maps camera-related errors to user-friendly messages
- * 
- * Converts technical MediaDevice errors into clear, actionable messages
- * that help users understand what went wrong and what they can do about it.
- * 
- * @param error - Camera/MediaDevice error object
- * @returns User-friendly error message with suggested actions
- * 
- * @example
- * mapCameraError(new Error('NotAllowedError')) 
- * // Returns: 'Camera permission denied. Please enable camera access in your browser settings.'
- */
-export function mapCameraError(error: Error): string {
-  const errorName = error.name || error.message;
-  
-  switch (errorName) {
-    case 'NotAllowedError':
-    case 'PermissionDeniedError':
-      return 'Camera permission denied. Please enable camera access in your browser settings and refresh the page.';
-      
-    case 'NotFoundError':
-    case 'DevicesNotFoundError':
-      return 'No camera found on this device. Please use the image upload option instead.';
-      
-    case 'NotReadableError':
-    case 'TrackStartError':
-      return 'Camera is currently in use by another application. Please close other camera apps and try again.';
-      
-    case 'OverconstrainedError':
-    case 'ConstraintNotSatisfiedError':
-      return 'Camera does not support the required settings. Please try using image upload instead.';
-      
-    case 'NotSupportedError':
-      return 'Camera is not supported in this browser. Please try using image upload or switch to a modern browser.';
-      
-    case 'AbortError':
-      return 'Camera access was interrupted. Please try scanning again.';
-      
-    case 'SecurityError':
-      return 'Camera access blocked due to security restrictions. Please check your browser settings.';
-      
-    default:
-      return 'Camera error occurred. Please try using image upload instead or refresh the page.';
-  }
+export interface ScanningError {
+  message: string;
+  suggestions: string[];
+  canRetry: boolean;
 }
 
 /**
- * Handles scanning-related errors with context-specific messages
- * 
- * Provides appropriate error messages based on the scanning context
- * (camera, upload, or search) with helpful suggestions for resolution.
- * 
- * @param error - Error object or message
- * @param context - Context where the error occurred
- * @returns Contextual user-friendly error message
- * 
- * @example
- * handleScanningError(error, 'camera') 
- * // Returns camera-specific error message
- * 
- * handleScanningError(error, 'upload')
- * // Returns upload-specific error message
+ * Maps camera-related errors to user-friendly messages with recovery suggestions
  */
-export function handleScanningError(
-  error: unknown, 
-  context: 'camera' | 'upload' | 'search' | 'processing'
-): string {
-  // Handle different error types
-  let errorMessage: string;
-  
-  if (error instanceof Error) {
-    errorMessage = error.message;
-  } else if (typeof error === 'string') {
-    errorMessage = error;
-  } else {
-    errorMessage = 'Unknown error occurred';
-  }
-  
-  switch (context) {
-    case 'camera':
-      if (error instanceof Error) {
-        return mapCameraError(error);
-      }
-      return 'Camera scanning failed. Please try image upload instead.';
-      
-    case 'upload':
-      if (errorMessage.toLowerCase().includes('file')) {
-        return 'Invalid file format. Please select a clear image file (JPG, PNG, or WebP).';
-      }
-      if (errorMessage.toLowerCase().includes('size')) {
-        return 'File is too large. Please select an image under 10MB.';
-      }
-      if (errorMessage.toLowerCase().includes('barcode') || errorMessage.toLowerCase().includes('decode')) {
-        return 'No barcode detected in the image. Please try a clearer image with better lighting and make sure the barcode is fully visible.';
-      }
-      return 'Image processing failed. Please try a different image or use camera scanning.';
-      
-    case 'search':
-      if (errorMessage.toLowerCase().includes('not found') || errorMessage.toLowerCase().includes('no results')) {
-        return 'Book not found in our database. You can add it manually using the "Manual Entry" tab.';
-      }
-      if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
-        return 'Network error. Please check your internet connection and try again.';
-      }
-      if (errorMessage.toLowerCase().includes('rate limit') || errorMessage.toLowerCase().includes('quota')) {
-        return 'Search limit reached. Please try again in a few minutes.';
-      }
-      return 'Book search failed. Please try manual entry or scan again.';
-      
-    case 'processing':
-      if (errorMessage.toLowerCase().includes('isbn') || errorMessage.toLowerCase().includes('invalid')) {
-        return 'Invalid barcode format. Please scan a book ISBN barcode or use manual entry.';
-      }
-      return 'Barcode processing failed. Please try scanning again or use manual entry.';
-      
-    default:
-      return 'Something went wrong. Please try again or use manual entry.';
-  }
-}
+export const mapCameraError = (error: any): ScanningError => {
+  const errorMessage = error?.message?.toLowerCase() || error?.name?.toLowerCase() || String(error).toLowerCase();
 
-/**
- * Validates if an error is recoverable and suggests next steps
- * 
- * Determines whether an error is temporary/recoverable or requires
- * alternative approaches, and provides appropriate guidance.
- * 
- * @param error - Error object or message
- * @param context - Context where the error occurred
- * @returns Object with recovery information and suggested actions
- */
-export function getErrorRecoveryInfo(
-  error: unknown, 
-  context: 'camera' | 'upload' | 'search' | 'processing'
-): {
-  isRecoverable: boolean;
-  suggestedAction: string;
-  alternativeMethod?: string;
-} {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const errorName = error instanceof Error ? error.name : '';
-  
-  // Non-recoverable camera errors
-  if (context === 'camera') {
-    if (errorName === 'NotFoundError' || errorName === 'NotSupportedError') {
-      return {
-        isRecoverable: false,
-        suggestedAction: 'Use image upload instead',
-        alternativeMethod: 'upload'
-      };
-    }
-    
-    if (errorName === 'NotAllowedError') {
-      return {
-        isRecoverable: true,
-        suggestedAction: 'Enable camera permissions in browser settings and refresh',
-        alternativeMethod: 'upload'
-      };
-    }
-    
+  if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
     return {
-      isRecoverable: true,
-      suggestedAction: 'Try scanning again or refresh the page',
-      alternativeMethod: 'upload'
+      message: "Camera access denied. Please allow camera permissions to scan barcodes.",
+      suggestions: [
+        "Click the camera icon in your browser's address bar",
+        "Select 'Allow' for camera permissions",
+        "Refresh the page and try again"
+      ],
+      canRetry: true,
     };
   }
-  
-  // Upload errors
-  if (context === 'upload') {
-    if (errorMessage.toLowerCase().includes('file') || errorMessage.toLowerCase().includes('format')) {
-      return {
-        isRecoverable: true,
-        suggestedAction: 'Select a different image file (JPG, PNG, or WebP)',
-        alternativeMethod: 'camera'
-      };
-    }
-    
-    if (errorMessage.toLowerCase().includes('barcode')) {
-      return {
-        isRecoverable: true,
-        suggestedAction: 'Try a clearer image with better lighting',
-        alternativeMethod: 'camera'
-      };
-    }
-    
+
+  if (errorMessage.includes('notfound') || errorMessage.includes('no camera')) {
     return {
-      isRecoverable: true,
-      suggestedAction: 'Try a different image',
-      alternativeMethod: 'camera'
+      message: "No camera found on this device.",
+      suggestions: [
+        "Try using the image upload option instead",
+        "Make sure your device has a working camera",
+        "Check that no other apps are using the camera"
+      ],
+      canRetry: false,
     };
   }
-  
-  // Search errors
-  if (context === 'search') {
-    if (errorMessage.toLowerCase().includes('not found')) {
-      return {
-        isRecoverable: false,
-        suggestedAction: 'Add the book manually',
-        alternativeMethod: 'manual'
-      };
-    }
-    
-    if (errorMessage.toLowerCase().includes('network')) {
-      return {
-        isRecoverable: true,
-        suggestedAction: 'Check internet connection and try again'
-      };
-    }
-    
+
+  if (errorMessage.includes('constraint') || errorMessage.includes('overconstrained')) {
     return {
-      isRecoverable: true,
-      suggestedAction: 'Try scanning again',
-      alternativeMethod: 'manual'
+      message: "Camera configuration issue. Your camera doesn't support the required settings.",
+      suggestions: [
+        "Try using the image upload option",
+        "Make sure your camera supports barcode scanning",
+        "Try refreshing the page"
+      ],
+      canRetry: true,
     };
   }
-  
-  // Default fallback
+
+  if (errorMessage.includes('security') || errorMessage.includes('https')) {
+    return {
+      message: "Camera access requires a secure connection.",
+      suggestions: [
+        "Make sure you're using HTTPS",
+        "Try accessing the site through a secure connection",
+        "Use the image upload option as an alternative"
+      ],
+      canRetry: false,
+    };
+  }
+
+  if (errorMessage.includes('abort') || errorMessage.includes('stopped')) {
+    return {
+      message: "Camera access was interrupted.",
+      suggestions: [
+        "Try scanning again",
+        "Make sure no other apps are using the camera",
+        "Refresh the page if the problem persists"
+      ],
+      canRetry: true,
+    };
+  }
+
+  // Generic error fallback
   return {
-    isRecoverable: true,
-    suggestedAction: 'Try again',
-    alternativeMethod: 'manual'
+    message: "Unable to access camera for barcode scanning.",
+    suggestions: [
+      "Try using the image upload option instead",
+      "Check your camera permissions",
+      "Refresh the page and try again"
+    ],
+    canRetry: true,
   };
-}
+};
 
 /**
- * Creates user-friendly error messages for barcode detection issues
- * 
- * Provides specific guidance based on common barcode scanning problems
- * with actionable tips for improving scan quality.
- * 
- * @param issue - Type of barcode detection issue
- * @returns Helpful error message with scanning tips
+ * Handles barcode detection specific errors with context-aware messaging
  */
-export function getBarcodeDetectionTips(
-  issue: 'poor_lighting' | 'blurry_image' | 'partial_barcode' | 'wrong_format' | 'multiple_barcodes'
-): string {
-  switch (issue) {
-    case 'poor_lighting':
-      return 'Poor lighting detected. Try scanning in better light or use your device\'s flashlight.';
-      
-    case 'blurry_image':
-      return 'Image appears blurry. Hold your device steady and make sure the barcode is in focus.';
-      
-    case 'partial_barcode':
-      return 'Barcode appears cut off. Make sure the entire barcode is visible in the camera view.';
-      
-    case 'wrong_format':
-      return 'This doesn\'t appear to be a book ISBN barcode. Please scan the barcode on the back cover.';
-      
-    case 'multiple_barcodes':
-      return 'Multiple barcodes detected. Try to focus on just the ISBN barcode and cover any other barcodes.';
-      
-    default:
-      return 'Barcode scanning tips: Ensure good lighting, hold steady, and keep the entire barcode in view.';
+export const handleBarcodeDetectionError = (context: 'camera' | 'upload'): ScanningError => {
+  if (context === 'camera') {
+    return {
+      message: "No barcode detected in camera view.",
+      suggestions: [
+        "Make sure the barcode is clearly visible",
+        "Move the camera closer to the barcode",
+        "Ensure good lighting conditions",
+        "Try holding the camera steady"
+      ],
+      canRetry: true,
+    };
+  } else {
+    return {
+      message: "No barcode found in the uploaded image.",
+      suggestions: [
+        "Make sure the image contains a clear barcode",
+        "Try a higher resolution image",
+        "Ensure the barcode isn't blurry or damaged",
+        "Use the camera scanner for better results"
+      ],
+      canRetry: true,
+    };
   }
-}
+};
+
+/**
+ * Provides tips for improving barcode scanning quality
+ */
+export const getBarcodeQualityTips = (issue: 'blurry' | 'lighting' | 'angle' | 'distance'): string[] => {
+  switch (issue) {
+    case 'blurry':
+      return [
+        "Hold the camera steady",
+        "Wait for the camera to focus",
+        "Move closer to the barcode",
+        "Clean the camera lens"
+      ];
+    
+    case 'lighting':
+      return [
+        "Ensure good lighting on the barcode",
+        "Avoid shadows on the barcode",
+        "Use the flashlight button if available",
+        "Avoid reflective surfaces"
+      ];
+    
+    case 'angle':
+      return [
+        "Hold the camera parallel to the barcode",
+        "Center the barcode in the scanning area",
+        "Avoid tilting the camera",
+        "Keep the barcode flat if possible"
+      ];
+    
+    case 'distance':
+      return [
+        "Move the camera closer to the barcode",
+        "Fill most of the scanning area with the barcode",
+        "Don't get too close - keep some margin",
+        "Try different distances for best focus"
+      ];
+    
+    default:
+      return [
+        "Ensure the barcode is clear and undamaged",
+        "Use good lighting",
+        "Hold the camera steady",
+        "Keep the barcode centered"
+      ];
+  }
+};
+
+/**
+ * Handles network and API errors during book lookup
+ */
+export const handleBookLookupError = (error: any): ScanningError => {
+  const errorMessage = String(error).toLowerCase();
+
+  if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+    return {
+      message: "Network error while searching for the book.",
+      suggestions: [
+        "Check your internet connection",
+        "Try scanning again",
+        "Add the book manually if the problem persists"
+      ],
+      canRetry: true,
+    };
+  }
+
+  if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+    return {
+      message: "Too many requests. Please wait a moment before trying again.",
+      suggestions: [
+        "Wait a few seconds and try again",
+        "Add the book manually as an alternative"
+      ],
+      canRetry: true,
+    };
+  }
+
+  if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+    return {
+      message: "Book not found in the database.",
+      suggestions: [
+        "Try scanning a different barcode",
+        "Add the book manually with its details",
+        "Double-check the ISBN on the book"
+      ],
+      canRetry: false,
+    };
+  }
+
+  // Generic API error
+  return {
+    message: "Unable to look up the book details.",
+    suggestions: [
+      "Try scanning again",
+      "Check your internet connection",
+      "Add the book manually if needed"
+    ],
+    canRetry: true,
+  };
+};

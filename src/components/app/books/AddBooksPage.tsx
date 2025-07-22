@@ -59,11 +59,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
     const params = new URLSearchParams(searchParams.toString());
 
     Object.entries(updates).forEach(([key, value]) => {
-      if (
-        value === "search" ||
-        value === "title" ||
-        value === ""
-      ) {
+      if (value === "search" || value === "title" || value === "") {
         // Remove default values to keep URLs clean
         params.delete(key);
       } else {
@@ -103,9 +99,9 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
    * await handleAddGoogleBook(searchResults[0]);
    */
   const handleAddGoogleBook = async (
-    googleBook: GoogleBooksVolume, 
+    googleBook: GoogleBooksVolume,
     scanningMetadata?: {
-      scanMethod: 'camera' | 'upload';
+      scanMethod: "camera" | "upload";
       isbn: string;
       scanStartTime: number;
     }
@@ -144,14 +140,20 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
               type: "manual_update",
               bookId: bookId,
               data: {
-                comment: `Book added via barcode scanning (${scanningMetadata.scanMethod === 'camera' ? 'camera' : 'image upload'}, ISBN: ${scanningMetadata.isbn}, scan duration: ${Math.round(scanDuration/1000)}s)`,
+                comment: `Book added via barcode scanning (${
+                  scanningMetadata.scanMethod === "camera"
+                    ? "camera"
+                    : "image upload"
+                }, ISBN: ${scanningMetadata.isbn}, scan duration: ${Math.round(
+                  scanDuration / 1000
+                )}s)`,
                 commentState: book.state,
                 commentPage: book.progress.currentPage,
               },
             });
           } catch (error) {
             // Don't break the flow if event logging fails
-            console.warn('Failed to log scanning event:', error);
+            console.warn("Failed to log scanning event:", error);
           }
         }
       }
@@ -262,17 +264,26 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
       {/* Main Content */}
       <Tabs value={activeTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="search" onClick={() => updateURLParams({ tab: "search" })}>
+          <TabsTrigger
+            value="search"
+            onClick={() => updateURLParams({ tab: "search" })}
+          >
             <Search className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Search</span>
             <span className="hidden sm:inline">Search Online</span>
           </TabsTrigger>
-          <TabsTrigger value="manual" onClick={() => updateURLParams({ tab: "manual" })}>
+          <TabsTrigger
+            value="manual"
+            onClick={() => updateURLParams({ tab: "manual" })}
+          >
             <FileText className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Manual</span>
             <span className="hidden sm:inline">Manual Entry</span>
           </TabsTrigger>
-          <TabsTrigger value="scan" onClick={() => updateURLParams({ tab: "scan" })}>
+          <TabsTrigger
+            value="scan"
+            onClick={() => updateURLParams({ tab: "scan" })}
+          >
             <Camera className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Scan</span>
             <span className="hidden sm:inline">Scan Barcode</span>
@@ -317,12 +328,12 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
                     onChange={(e) => {
                       const value = e.target.value;
                       setLocalSearchQuery(value);
-                      
+
                       // Clear existing timer
                       if (debounceTimerRef.current) {
                         clearTimeout(debounceTimerRef.current);
                       }
-                      
+
                       // Set new timer for debounced URL update
                       debounceTimerRef.current = setTimeout(() => {
                         updateURLParams({ q: value });
@@ -373,21 +384,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
             </CardHeader>
             <CardContent>
               <BarcodeScanner
-                onBookFound={handleAddGoogleBook}
-                onError={(error) => {
-                  // For manual entry fallback, switch to manual tab
-                  if (error.includes('Manual Entry')) {
-                    updateURLParams({ tab: 'manual' });
-                  }
-                }}
-                onManualEntry={(isbn) => {
-                  // Switch to manual entry tab and potentially pre-fill ISBN
-                  updateURLParams({ tab: 'manual' });
-                  if (isbn) {
-                    // Could potentially pre-fill the ISBN in manual form
-                    // For now, just switch tabs
-                  }
-                }}
+                onAddBook={handleAddGoogleBook}
                 isAdding={isAdding}
               />
             </CardContent>

@@ -1,367 +1,240 @@
 "use client";
 
-import { Loader2, Upload, X } from "lucide-react";
-import Image from "next/image";
-import * as React from "react";
-import { useState } from "react";
-
+import { useState, useCallback, useRef } from "react";
+// Note: Image upload scanning will be implemented in a future iteration
 import { Button } from "@/components/ui/button";
-// Image upload functionality temporarily simplified
+import { Upload, Image as ImageIcon, X, Loader2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils/utils";
 
 interface ImageUploaderProps {
-  onBarcodeDetected?: (barcodeText: string) => void;
+  onCapture: (isbn: string) => void;
   onError: (error: string) => void;
-  isProcessing?: boolean;
   className?: string;
 }
 
+/**
+ * ImageUploader Component
+ * 
+ * Handles image upload and barcode scanning from gallery images.
+ * Supports drag-and-drop and file picker functionality.
+ */
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
+  onCapture,
   onError,
-  isProcessing = false,
-  className = "",
+  className,
 }) => {
-  const [preview, setPreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
-  const [lastScannedISBN] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const debugLog = React.useCallback((message: string, data?: unknown) => {
-    const timestamp = new Date().toLocaleTimeString();
-    const logMessage = `[${timestamp}] ${message}`;
-    console.log("ImageUploader:", logMessage, data || "");
-    setDebugInfo((prev) => [...prev.slice(-4), logMessage]);
+  // File validation
+  const validateFile = (file: File): string | null => {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!validTypes.includes(file.type)) {
+      return "Please select a valid image file (JPEG, PNG, or WebP)";
+    }
+
+    if (file.size > maxSize) {
+      return "Image size must be less than 10MB";
+    }
+
+    return null;
+  };
+
+  // Process image for barcode detection
+  const processImage = useCallback(async (file: File) => {
+    setIsProcessing(true);
+    
+    try {
+      // Create image element for processing
+      const imageUrl = URL.createObjectURL(file);
+      const img = new Image();
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = imageUrl;
+      });
+
+      // Note: Full image processing implementation will be added in future iteration
+      // For now, provide user feedback about the limitation
+      
+      setTimeout(() => {
+        setIsProcessing(false);
+        onError("Barcode detection from images is not yet fully implemented. Please use camera scanning or try a different image.");
+      }, 2000);
+
+      // Cleanup
+      URL.revokeObjectURL(imageUrl);
+      
+    } catch (error) {
+      setIsProcessing(false);
+      onError("Failed to process image. Please try a different image or use camera scanning.");
+    }
+  }, [onCapture, onError]);
+
+  // Handle file selection
+  const handleFileSelect = useCallback((file: File) => {
+    const error = validateFile(file);
+    if (error) {
+      onError(error);
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    // Create preview
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    // Process the image
+    processImage(file);
+  }, [onError, processImage]);
+
+  // Handle drag and drop
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
   }, []);
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
-  const ACCEPTED_FORMATS = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-  ];
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
 
-  const processImage = async (file: File) => {
-    debugLog("Starting image processing", {
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-    });
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
 
-    try {
-      const imageUrl = URL.createObjectURL(file);
-      const img = document.createElement("img");
-
-      img.onload = async () => {
-        debugLog("Image loaded successfully", {
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-        });
-
-        try {
-          // For now, we'll use a simplified approach since react-barcode-scanner 
-          // is primarily designed for camera input. We could integrate with a 
-          // barcode detection service or use canvas-based detection.
-          // This is a placeholder that simulates processing
-          
-          debugLog("Processing image for barcode detection");
-          
-          // Simulate processing time
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          // For now, show an error message suggesting camera scanning instead
-          onError("Image barcode detection is not yet implemented. Please use camera scanning instead.");
-          
-        } catch (error) {
-          debugLog("Barcode decode failed", error);
-          onError("Could not detect barcode in image. Please try a clearer image or use camera scanning.");
-        } finally {
-          URL.revokeObjectURL(imageUrl);
-          debugLog("Image URL cleaned up");
-        }
-      };
-
-      img.onerror = (error) => {
-        debugLog("Image load error", error);
-        URL.revokeObjectURL(imageUrl);
-        onError("Invalid image file. Please select a valid image.");
-      };
-
-      debugLog("Setting image src to blob URL");
-      img.src = imageUrl;
-    } catch (error) {
-      debugLog("Process image error", error);
-      onError("Failed to process image. Please try again.");
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
     }
-  };
+  }, [handleFileSelect]);
 
-  const handleFileSelect = (file: File) => {
-    debugLog("File selected", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    });
-
-    if (file.size > MAX_FILE_SIZE) {
-      debugLog("File size validation failed");
-      onError("File is too large. Please select an image under 10MB.");
-      return;
+  // Handle file input change
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
     }
+  }, [handleFileSelect]);
 
-    if (!ACCEPTED_FORMATS.includes(file.type)) {
-      debugLog("File type validation failed");
-      onError("Invalid file format. Please select a JPG, PNG, WebP, or GIF image.");
-      return;
-    }
-
-    debugLog("File validation passed, creating preview");
-    const previewUrl = URL.createObjectURL(file);
-    setPreview(previewUrl);
-    processImage(file);
-
-    setTimeout(() => {
+  // Clear selected file
+  const clearFile = useCallback(() => {
+    setSelectedFile(null);
+    if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
-      debugLog("Preview URL cleaned up after 30s");
-    }, 30000);
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  };
-
-  const clearPreview = () => {
-    if (preview) {
-      URL.revokeObjectURL(preview);
-      setPreview(null);
+      setPreviewUrl(null);
     }
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
     }
-  };
+    setIsProcessing(false);
+  }, [previewUrl]);
 
+  // Open file picker
   const openFilePicker = () => {
     fileInputRef.current?.click();
   };
 
   return (
-    <div className={`space-y-4 ${className} relative`}>
-      {/* Debug Info (dev only) */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="absolute top-2 right-2 z-50 bg-black/90 text-white text-xs p-3 rounded-lg max-w-80 max-h-40 overflow-y-auto">
-          <div className="font-semibold mb-1">Upload Debug Info</div>
-          <div>Mode: upload</div>
-          <div>Status: <span className={isProcessing ? 'text-yellow-300' : 'text-green-300'}>{isProcessing ? "Processing" : "Ready"}</span></div>
-          <div>ISBN: {lastScannedISBN || 'None'}</div>
-          <div className="mt-2">
-            <div className="text-gray-300">Recent logs:</div>
-            {debugInfo.slice(-3).map((log, i) => (
-              <div key={i} className="text-xs break-words">
-                {log}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* File input (hidden) */}
+    <div className={cn("w-full", className)}>
       <input
         ref={fileInputRef}
         type="file"
-        accept={ACCEPTED_FORMATS.join(",")}
+        accept="image/jpeg,image/jpg,image/png,image/webp"
         onChange={handleInputChange}
         className="hidden"
-        disabled={isProcessing}
-        aria-label="Select image file for barcode scanning"
       />
 
-      {/* Upload area */}
-      <div
-        className={`
-          border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-          ${
+      {!selectedFile ? (
+        // Upload area
+        <div
+          className={cn(
+            "relative w-full aspect-video border-2 border-dashed rounded-lg transition-colors duration-200 cursor-pointer",
             isDragOver
               ? "border-primary bg-primary/5"
-              : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          }
-          ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
-        `}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={!isProcessing ? openFilePicker : undefined}
-        role="button"
-        tabIndex={isProcessing ? -1 : 0}
-        aria-label="Upload image area. Click to select file or drag and drop image here."
-        onKeyDown={(e) => {
-          if ((e.key === "Enter" || e.key === " ") && !isProcessing) {
-            e.preventDefault();
-            openFilePicker();
-          }
-        }}
-      >
-        <div className="flex flex-col items-center space-y-2">
-          <Upload
-            className={`h-8 w-8 ${
-              isDragOver ? "text-primary" : "text-muted-foreground"
-            }`}
-          />
-          <div className="space-y-1">
-            <p className="text-sm font-medium">
-              {isDragOver
-                ? "Drop image here"
-                : "Click to upload or drag image here"}
+              : "border-border hover:border-primary/50 hover:bg-muted/50"
+          )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={openFilePicker}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <Upload className="h-10 w-10 text-muted-foreground mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Upload Barcode Image</h3>
+            <p className="text-muted-foreground text-sm mb-4 max-w-sm">
+              Drag and drop an image with a barcode, or click to select from your device
             </p>
-            <p className="text-xs text-muted-foreground">
-              JPG, PNG, WebP, or GIF up to 10MB
-            </p>
-            <p className="text-xs text-amber-600 mt-2">
-              📝 Note: Image barcode scanning is currently being updated. Please use camera scanning for best results.
+            <Button variant="outline" size="sm">
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Choose Image
+            </Button>
+            <p className="text-xs text-muted-foreground mt-3">
+              Supports JPEG, PNG, WebP (max 10MB)
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Image preview */}
-      {preview && (
-        <div className="relative">
-          <div className="relative w-full rounded-lg border overflow-hidden">
-            <Image
-              src={preview}
+      ) : (
+        // Preview and processing area
+        <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
+          {previewUrl && (
+            <img
+              src={previewUrl}
               alt="Selected barcode image"
-              width={400}
-              height={160}
-              className="w-full h-32 sm:h-40 object-contain bg-muted"
+              className="w-full h-full object-contain"
             />
+          )}
 
-            {/* Processing overlay */}
-            {isProcessing && (
-              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                <div className="flex items-center space-x-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm font-medium">
-                    Processing image...
-                  </span>
-                </div>
-              </div>
-            )}
+          {/* Processing overlay */}
+          {isProcessing && (
+            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
+              <Loader2 className="h-8 w-8 animate-spin mb-3" />
+              <p className="text-sm text-center px-4">
+                Processing image for barcodes...
+              </p>
+            </div>
+          )}
 
-            {/* Clear button */}
-            {!isProcessing && (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearPreview();
-                }}
-                aria-label="Remove selected image"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+          {/* Clear button */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={clearFile}
+            className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white border-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+
+          {/* File info */}
+          <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+            {selectedFile.name}
           </div>
-
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Image uploaded. Processing for barcode detection...
-          </p>
         </div>
       )}
 
-      {/* Upload tips */}
-      {!preview && (
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            💡 For best results: Use the camera scanning feature for real-time barcode detection
-          </p>
+      {/* Instructions */}
+      <div className="mt-4 p-3 bg-muted rounded-lg">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-muted-foreground">
+            <p className="font-medium mb-1">Tips for better results:</p>
+            <ul className="space-y-0.5">
+              <li>• Ensure the barcode is clear and well-lit</li>
+              <li>• Avoid shadows or reflections on the barcode</li>
+              <li>• Use high-resolution images when possible</li>
+            </ul>
+          </div>
         </div>
-      )}
-
-      {/* Accessibility announcements */}
-      <div aria-live="polite" className="sr-only">
-        {isProcessing && "Processing image for barcode detection..."}
-        {preview &&
-          !isProcessing &&
-          "Image uploaded successfully. Barcode detection complete."}
       </div>
     </div>
   );
 };
 
-export const CompactImageUploader: React.FC<
-  Omit<ImageUploaderProps, "className">
-> = ({ onError, isProcessing = false }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = async (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      onError("File too large. Please select an image under 10MB.");
-      return;
-    }
-
-    // For now, show message that image scanning is not available
-    onError("Image barcode detection is currently being updated. Please use camera scanning instead.");
-  };
-
-  return (
-    <div className="space-y-3">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleFileSelect(file);
-        }}
-        className="hidden"
-        disabled={isProcessing}
-      />
-
-      <Button
-        variant="outline"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={isProcessing}
-        className="w-full"
-      >
-        {isProcessing ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Processing...
-          </>
-        ) : (
-          <>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Image
-          </>
-        )}
-      </Button>
-      
-      <p className="text-xs text-amber-600 text-center">
-        📝 Image scanning temporarily unavailable. Use camera instead.
-      </p>
-    </div>
-  );
-};
+export default ImageUploader;

@@ -1,339 +1,277 @@
 "use client";
 
-import { Camera, Loader2, RotateCcw, Upload } from "lucide-react";
-import * as React from "react";
-import { useState } from "react";
-
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ErrorAlert } from "@/components/ui/error-display";
-import { googleBooksApi, GoogleBooksVolume } from "@/lib/api/google-books-api";
-import { ErrorBuilder, ErrorCategory, ErrorSeverity } from "@/lib/errors/error-handling";
-import { extractISBN } from "@/lib/utils/isbn-utils";
-import { handleScanningError as handleError } from "@/lib/utils/scanning-errors";
-// SafeCameraScanner is imported dynamically below
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Camera, Upload, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CameraScanner } from "./CameraScanner";
 import { ImageUploader } from "./ImageUploader";
 import { BookPreviewCard } from "../BookPreviewCard";
-import dynamic from 'next/dynamic';
-
-// Dynamically import SafeCameraScanner to prevent SSR issues
-const SafeCameraScannerDynamic = dynamic(() => import("./SafeCameraScanner").then(mod => ({ default: mod.SafeCameraScanner })), {
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center py-8">Loading camera...</div>
-});
-
-export type ScanMode = 'camera' | 'upload';
-export type ScanStatus = 'idle' | 'processing' | 'success' | 'error';
+import { extractISBN } from "@/lib/utils/isbn-utils";
+import { GoogleBooksVolume } from "@/lib/api/google-books-api";
+import { useBookSearch } from "@/lib/hooks/useBookSearch";
+import { cn } from "@/lib/utils/utils";
 
 interface BarcodeScannerProps {
-  onBookFound: (book: GoogleBooksVolume, scanningMetadata?: {
-    scanMethod: 'camera' | 'upload';
+  onAddBook: (book: GoogleBooksVolume, scanningMetadata?: {
+    scanMethod: "camera" | "upload";
     isbn: string;
     scanStartTime: number;
   }) => void;
-  onError: (error: string) => void;
-  onManualEntry?: (isbn?: string) => void;
   isAdding?: boolean;
   className?: string;
 }
 
+type ScanMode = "camera" | "upload";
+type ScanStatus = "idle" | "scanning" | "processing" | "success" | "error";
+
+/**
+ * BarcodeScanner Component
+ * 
+ * Main orchestrator component for barcode scanning functionality.
+ * Handles mode switching, ISBN processing, book search, and preview display.
+ */
 export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
-  onBookFound,
-  onManualEntry,
+  onAddBook,
   isAdding = false,
-  className = ""
+  className,
 }) => {
-  const [mode, setMode] = useState<ScanMode>('camera');
-  const [status, setStatus] = useState<ScanStatus>('idle');
+  const [scanMode, setScanMode] = useState<ScanMode>("camera");
+  const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
+  const [scannedISBN, setScannedISBN] = useState<string | null>(null);
   const [foundBook, setFoundBook] = useState<GoogleBooksVolume | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [detectedISBN, setDetectedISBN] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scanStartTime, setScanStartTime] = useState<number>(0);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   
-  const debugLog = React.useCallback((message: string, data?: unknown) => {
-    const timestamp = new Date().toLocaleTimeString();
-    const logMessage = `[${timestamp}] ${message}`;
-    console.log('BarcodeScanner:', logMessage, data || '');
-    setDebugInfo(prev => [...prev.slice(-4), logMessage]);
+  const { search, isSearching, searchResults, error: searchError, clearError } = useBookSearch();
+
+  // Handle barcode capture from camera or image
+  const handleBarcodeCapture = useCallback(async (rawBarcode: string) => {
+    setScanStartTime(Date.now());
+    setScanStatus("processing");
+    setErrorMessage(null);
+    clearError();
+
+    // Extract ISBN from barcode
+    const isbn = extractISBN(rawBarcode);
+    
+    if (!isbn) {
+      setErrorMessage("No valid ISBN found in barcode. Please try again or enter the book manually.");
+      setScanStatus("error");
+      return;
+    }
+
+    setScannedISBN(isbn);
+
+    try {
+      // Search for book using ISBN
+      await search(isbn, 5, 'general');
+      
+      // Note: The search results will be handled in the useEffect below
+    } catch (error) {
+      console.error("Error during book search:", error);
+      setErrorMessage("Failed to search for book. Please check your internet connection and try again.");
+      setScanStatus("error");
+    }
+  }, [search, clearError]);
+
+  // Handle search results
+  useEffect(() => {
+    if (scanStatus === "processing" && !isSearching) {
+      if (searchResults.length > 0) {
+        setFoundBook(searchResults[0]);
+        setScanStatus("success");
+      } else if (searchError) {
+        setErrorMessage("Failed to search for book. Please try again or check your internet connection.");
+        setScanStatus("error");
+      } else {
+        setErrorMessage("Book not found in Google Books. You can add it manually instead.");
+        setScanStatus("error");
+      }
+    }
+  }, [scanStatus, isSearching, searchResults, searchError]);
+
+  // Handle scanner errors
+  const handleScannerError = useCallback((error: string) => {
+    setErrorMessage(error);
+    setScanStatus("error");
   }, []);
 
-  React.useEffect(() => {
-    debugLog('BarcodeScanner initialized');
-  }, [debugLog]);
-
-  const handleBarcodeDetected = async (barcodeText: string) => {
-    const startTime = Date.now();
-    setScanStartTime(startTime);
-    setStatus('processing');
-    setLocalError(null);
-    setFoundBook(null);
-    
-    debugLog('Barcode detected', { 
-      text: barcodeText, 
-      length: barcodeText.length,
-      mode: mode,
-      timestamp: startTime
-    });
-    
-    try {
-      debugLog('Extracting ISBN from barcode text');
-      const isbn = extractISBN(barcodeText);
+  // Add book to library
+  const handleAddBook = useCallback(() => {
+    if (foundBook && scannedISBN) {
+      const scanningMetadata = {
+        scanMethod: scanMode,
+        isbn: scannedISBN,
+        scanStartTime,
+      };
       
-      if (!isbn) {
-        debugLog('ISBN extraction failed', { originalText: barcodeText });
-        setLocalError('Invalid barcode format. Please scan a book ISBN barcode.');
-        setStatus('error');
-        return;
-      }
-      
-      debugLog('ISBN extracted successfully', { isbn });
-      setDetectedISBN(isbn);
-      
-      debugLog('Searching for book with detected barcode');
-      const books = await googleBooksApi.searchByISBN(isbn, 1);
-      
-      debugLog('Google Books API response', { 
-        booksFound: books.data?.length || 0,
-        searchDuration: Date.now() - startTime 
-      });
-      
-      if (!books.success || !books.data || books.data.length === 0) {
-        debugLog('No books found in database');
-        setLocalError('Book not found in our database. You can add it manually using the "Manual Entry" tab.');
-        setStatus('error');
-        return;
-      }
-      
-      debugLog('Book found successfully', { 
-        title: books.data[0].volumeInfo.title,
-        authors: books.data[0].volumeInfo.authors
-      });
-      setFoundBook(books.data[0]);
-      setStatus('success');
-      
-    } catch (error) {
-      debugLog('Error during book search', { 
-        error: error instanceof Error ? error.message : error,
-        errorType: error instanceof Error ? error.constructor.name : typeof error
-      });
-      const errorMessage = handleError(error, 'search');
-      setLocalError(errorMessage);
-      setStatus('error');
+      onAddBook(foundBook, scanningMetadata);
     }
-  };
+  }, [foundBook, scannedISBN, scanMode, scanStartTime, onAddBook]);
 
-  const handleScanningError = (error: string) => {
-    debugLog('Scanning error occurred', error);
-    setLocalError(error);
-    setStatus('error');
+  // Reset scanning state
+  const resetScan = useCallback(() => {
+    setScanStatus("idle");
+    setScannedISBN(null);
     setFoundBook(null);
-  };
+    setErrorMessage(null);
+    clearError();
+  }, [clearError]);
 
-  const handleAddBook = (book: GoogleBooksVolume) => {
-    if (book && detectedISBN) {
-      onBookFound(book, {
-        scanMethod: mode,
-        isbn: detectedISBN,
-        scanStartTime: scanStartTime
-      });
-    }
-  };
+  // Switch scan mode
+  const handleModeChange = useCallback((mode: ScanMode) => {
+    setScanMode(mode);
+    resetScan();
+  }, [resetScan]);
 
-  const resetScanning = () => {
-    debugLog('Resetting scanning state');
-    setStatus('idle');
-    setLocalError(null);
-    setFoundBook(null);
-    setDetectedISBN(null);
-    setScanStartTime(0);
-  };
-
-  const clearError = () => {
-    setLocalError(null);
-    setStatus('idle');
-  };
-
-  const handleManualEntry = () => {
-    if (onManualEntry) {
-      onManualEntry(detectedISBN || undefined);
-    }
-  };
+  const isCameraActive = scanMode === "camera" && scanStatus !== "success";
 
   return (
-    <div className={`space-y-6 ${className} relative`}>
-      {/* Debug Info (dev only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 right-2 z-50 bg-black/90 text-white text-xs p-3 rounded-lg max-w-80 max-h-40 overflow-y-auto">
-          <div className="font-semibold mb-1">Scanner Debug Info</div>
-          <div>Mode: <span className="text-blue-300">{mode}</span></div>
-          <div>Status: <span className={
-            status === 'success' ? 'text-green-300' : 
-            status === 'error' ? 'text-red-300' : 
-            status === 'processing' ? 'text-yellow-300' : 'text-gray-300'
-          }>{status}</span></div>
-          {detectedISBN && <div>ISBN: <span className="text-green-300">{detectedISBN}</span></div>}
-          <div className="mt-2">
-            <div className="text-gray-300">Recent logs:</div>
-            {debugInfo.slice(-3).map((log, i) => (
-              <div key={i} className="text-xs break-words">{log}</div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className={cn("w-full space-y-6", className)}>
+      {/* Mode Selection */}
+      <Tabs value={scanMode} onValueChange={handleModeChange as (value: string) => void}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="camera">
+            <Camera className="h-4 w-4 mr-2" />
+            Camera
+          </TabsTrigger>
+          <TabsTrigger value="upload">
+            <Upload className="h-4 w-4 mr-2" />
+            Upload
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Mode Toggle */}
-      <div className="flex gap-2">
-        <Button
-          variant={mode === 'camera' ? 'default' : 'outline'}
-          onClick={() => {
-            setMode('camera');
-            resetScanning();
-          }}
-          className="flex-1"
-          disabled={status === 'processing'}
-        >
-          <Camera className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Camera</span>
-          <span className="sm:hidden">Scan</span>
-        </Button>
-        <Button
-          variant={mode === 'upload' ? 'default' : 'outline'}
-          onClick={() => {
-            setMode('upload');
-            resetScanning();
-          }}
-          className="flex-1"
-          disabled={status === 'processing'}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Upload Image</span>
-          <span className="sm:hidden">Upload</span>
-        </Button>
-      </div>
+        <TabsContent value="camera" className="mt-6">
+          <CameraScanner
+            onCapture={handleBarcodeCapture}
+            onError={handleScannerError}
+            isActive={isCameraActive}
+            className="w-full"
+          />
+        </TabsContent>
 
-      {/* Scanning Interface */}
-      {mode === 'camera' ? (
-        <SafeCameraScannerDynamic
-          onBarcodeDetected={handleBarcodeDetected}
-          onError={handleScanningError}
-          paused={status === 'success'}
-          onSwitchToUpload={() => setMode('upload')}
-        />
-      ) : (
-        <ImageUploader
-          onBarcodeDetected={handleBarcodeDetected}
-          onError={handleScanningError}
-          isProcessing={status === 'processing'}
-        />
-      )}
+        <TabsContent value="upload" className="mt-6">
+          <ImageUploader
+            onCapture={handleBarcodeCapture}
+            onError={handleScannerError}
+            className="w-full"
+          />
+        </TabsContent>
+      </Tabs>
 
-      {/* Processing State */}
-      {status === 'processing' && (
-        <div className="flex items-center justify-center py-8">
-          <div className="flex items-center space-x-3">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <div className="text-center">
-              <p className="font-medium">Searching for book...</p>
-              <p className="text-sm text-muted-foreground">Please wait while we find the book information</p>
+      {/* Status Messages */}
+      {scanStatus === "processing" && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center space-x-3 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <div className="text-center">
+                <p className="font-medium">Processing barcode...</p>
+                {scannedISBN && (
+                  <p className="text-sm">
+                    ISBN: <Badge variant="outline" className="ml-1">{scannedISBN}</Badge>
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Success State - Book Found */}
-      {status === 'success' && foundBook && (
+      {/* Error State */}
+      {scanStatus === "error" && errorMessage && (
+        <Card className="border-destructive/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-destructive mb-2">Scanning Error</p>
+                <p className="text-sm text-muted-foreground mb-3">{errorMessage}</p>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={resetScan} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    Try Again
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.href = '/add-books?tab=manual'} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    Add Manually
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Success State - Book Preview */}
+      {scanStatus === "success" && foundBook && (
         <div className="space-y-4">
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-semibold text-green-600">Book Found!</h3>
-            <p className="text-sm text-muted-foreground">
-              Review the details below and add to your library
-            </p>
-          </div>
-          
+          <Card className="border-success/20">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 text-success">
+                <CheckCircle2 className="h-5 w-5" />
+                <p className="font-medium">Book found!</p>
+                {scannedISBN && (
+                  <Badge variant="outline" className="ml-auto">
+                    ISBN: {scannedISBN}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           <BookPreviewCard
             book={foundBook}
             onAddBook={handleAddBook}
             isAdding={isAdding}
+            className="shadow-lg"
           />
-          
+
           <div className="flex justify-center">
-            <Button
+            <Button 
+              onClick={resetScan} 
               variant="outline"
-              onClick={resetScanning}
               disabled={isAdding}
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
               Scan Another Book
             </Button>
           </div>
         </div>
       )}
 
-      {/* Error State */}
-      {localError && (
-        <div className="space-y-3">
-          <ErrorAlert
-            error={new ErrorBuilder(localError)
-              .withCategory(ErrorCategory.VALIDATION)
-              .withSeverity(ErrorSeverity.MEDIUM)
-              .withType("scanning_error")
-              .build()}
-            onDismiss={clearError}
-          />
-          <div className="flex gap-2 justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetScanning}
-            >
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Try Again
-            </Button>
-            {(localError.includes('manual') || localError.includes('not found')) && onManualEntry && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleManualEntry}
-              >
-                Manual Entry
-                {detectedISBN && ' (with ISBN)'}
-              </Button>
-            )}
-          </div>
-        </div>
+      {/* Instructions */}
+      {scanStatus === "idle" && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center text-muted-foreground">
+              <h3 className="font-semibold text-foreground mb-2">
+                {scanMode === "camera" ? "Scan Book Barcode" : "Upload Barcode Image"}
+              </h3>
+              <p className="text-sm mb-3">
+                {scanMode === "camera" 
+                  ? "Position your camera over a book's ISBN barcode. The barcode will be detected automatically."
+                  : "Select an image containing a book's ISBN barcode from your device."
+                }
+              </p>
+              <div className="text-xs">
+                <p className="font-medium mb-1">Supported formats:</p>
+                <p>ISBN-10, ISBN-13, EAN-13, UPC-A</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
-      {/* Scanning Tips */}
-      {status === 'idle' && !localError && (
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            💡 <strong>{mode === 'camera' ? 'Camera Scanning Tips:' : 'Image Upload Tips:'}</strong>
-          </p>
-          {mode === 'camera' ? (
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• Ensure good lighting for best results</li>
-              <li>• Hold the device steady when scanning</li>
-              <li>• Make sure the entire barcode is visible</li>
-              <li>• Try different angles if scanning fails</li>
-            </ul>
-          ) : (
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• Take a clear, well-lit photo of the barcode</li>
-              <li>• Ensure the barcode is in focus and readable</li>
-              <li>• Crop the image to include just the barcode if possible</li>
-              <li>• JPG, PNG, and WebP formats are supported</li>
-            </ul>
-          )}
-        </div>
-      )}
-
-      {/* Accessibility announcements */}
-      <div aria-live="polite" className="sr-only">
-        {status === 'processing' && 'Searching for book information...'}
-        {status === 'success' && foundBook && `Book found: ${foundBook.volumeInfo.title}. Review details and add to library.`}
-        {status === 'error' && localError && `Error: ${localError}`}
-        {status === 'idle' && 'Ready to scan. Point camera at barcode or upload an image.'}
-      </div>
     </div>
   );
 };
+
+export default BarcodeScanner;
