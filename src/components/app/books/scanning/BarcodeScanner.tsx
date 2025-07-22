@@ -147,7 +147,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           "google_search",
           `Starting Google Books search for ISBN: ${isbn}`
         );
-        await search(isbn, 5, "general");
+        await search(isbn, 5, "isbn");
 
         // Note: The search results will be handled in the useEffect below
       } catch (error) {

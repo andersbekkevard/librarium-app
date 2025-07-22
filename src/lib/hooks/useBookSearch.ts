@@ -8,7 +8,11 @@ export const useBookSearch = (): {
   searchResults: GoogleBooksVolume[];
   isSearching: boolean;
   error: StandardError | null;
-  search: (query: string, maxResults?: number, searchType?: 'title' | 'author' | 'general') => Promise<void>;
+  search: (
+    query: string,
+    maxResults?: number,
+    searchType?: "title" | "author" | "general" | "isbn"
+  ) => Promise<void>;
   clearResults: () => void;
   clearError: () => void;
 } => {
@@ -24,17 +28,18 @@ export const useBookSearch = (): {
    *
    * @param query - Search query string
    * @param maxResults - Maximum number of results to return (default: 20)
-   * @param searchType - Type of search: 'title', 'author', or 'general' (default: 'general')
+   * @param searchType - Type of search: 'title', 'author', 'isbn', or 'general' (default: 'general')
    *
    * @example
    * const { search } = useBookSearch();
    * await search("javascript programming", 20, 'title');
+   * await search("9781234567890", 5, 'isbn');
    */
   const search = useCallback(
     async (
       query: string,
       maxResults: number = API_CONFIG.SEARCH.DEFAULT_LIMIT,
-      searchType: 'title' | 'author' | 'general' = 'general'
+      searchType: "title" | "author" | "general" | "isbn" = "general"
     ) => {
       if (!query.trim()) {
         setSearchResults([]);
@@ -46,20 +51,32 @@ export const useBookSearch = (): {
 
       try {
         let serviceResult: ServiceResult<GoogleBooksVolume[]>;
-        
+
         switch (searchType) {
-          case 'title':
-            serviceResult = await googleBooksApi.searchByTitle(query, maxResults);
+          case "title":
+            serviceResult = await googleBooksApi.searchByTitle(
+              query,
+              maxResults
+            );
             break;
-          case 'author':
-            serviceResult = await googleBooksApi.searchByAuthor(query, maxResults);
+          case "author":
+            serviceResult = await googleBooksApi.searchByAuthor(
+              query,
+              maxResults
+            );
             break;
-          case 'general':
+          case "isbn":
+            serviceResult = await googleBooksApi.searchByISBN(
+              query,
+              maxResults
+            );
+            break;
+          case "general":
           default:
             serviceResult = await googleBooksApi.search(query, maxResults);
             break;
         }
-        
+
         if (serviceResult.success && serviceResult.data) {
           setSearchResults(serviceResult.data);
         } else {

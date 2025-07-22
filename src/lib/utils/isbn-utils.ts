@@ -36,18 +36,18 @@ export function extractISBN(barcodeText: string): string | null {
     digits.length === 13 &&
     (digits.startsWith("978") || digits.startsWith("979"))
   ) {
-    return stripISBNPrefix(digits);
+    return digits;
   }
 
   // ISBN-10 - standard 10-digit ISBN
   if (digits.length === 10) {
-    return stripISBNPrefix(digits);
+    return digits;
   }
 
   // Any EAN-13 code (13 digits) - let Google Books API determine if it's a book
   // This handles edge cases where books have EAN-13 codes with non-standard prefixes
   if (digits.length === 13) {
-    return stripISBNPrefix(digits);
+    return digits;
   }
 
   // UPC-A with leading zero (12 digits starting with 0)
@@ -56,7 +56,7 @@ export function extractISBN(barcodeText: string): string | null {
     const potentialIsbn = digits.substring(1);
     // Check if it looks like an ISBN (11 digits that could be ISBN-13 without prefix)
     if (potentialIsbn.length === 11) {
-      return stripISBNPrefix(potentialIsbn);
+      return potentialIsbn;
     }
   }
 

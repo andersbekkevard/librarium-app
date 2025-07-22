@@ -12,6 +12,7 @@ import {
   createValidationError,
 } from "@/lib/errors/error-handling";
 import { ServiceResult } from "@/lib/services/types";
+import { stripISBNPrefix } from "@/lib/utils/isbn-utils";
 import { API_CONFIG } from "../constants/constants";
 
 // Google Books API response interfaces
@@ -344,11 +345,13 @@ export class GoogleBooksApiService {
    */
   async searchByISBN(
     isbn: string,
-    maxResults: number = API_CONFIG.GOOGLE_BOOKS.AUTHOR_SEARCH_RESULTS
+    maxResults: number = API_CONFIG.GOOGLE_BOOKS.DEFAULT_SEARCH_RESULTS
   ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     const cleanIsbn = isbn.replace(/[-\s]/g, "");
+    // Strip 978/979 prefix for better Google Books API compatibility
+    const searchableIsbn = stripISBNPrefix(cleanIsbn);
     return this.searchBooks({
-      query: `isbn:${cleanIsbn}`,
+      query: `isbn:${searchableIsbn}`,
       maxResults,
     });
   }
