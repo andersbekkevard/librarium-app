@@ -114,7 +114,6 @@ export const READING_STATE_COLORS = {
     border: "border-[var(--reading-finished-border)]",
   },
 } as const;
-
 /**
  * Utility function to get CSS variable value
  *
