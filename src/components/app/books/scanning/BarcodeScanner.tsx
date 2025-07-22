@@ -8,12 +8,7 @@ import { GoogleBooksVolume } from "@/lib/api/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 import { extractISBN } from "@/lib/utils/isbn-utils";
 import { cn } from "@/lib/utils/utils";
-import {
-  AlertCircle,
-  Camera,
-  Loader2,
-  Upload,
-} from "lucide-react";
+import { AlertCircle, Camera, Loader2, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { BookSearchCard } from "../BookSearchCard";
 import { CameraScanner } from "./CameraScanner";
@@ -60,8 +55,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     error: searchError,
     clearError,
   } = useBookSearch();
-
-
 
   // Handle barcode capture from camera or image
   const handleBarcodeCapture = useCallback(
@@ -117,22 +110,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         setScanStatus("error");
       }
     }
-  }, [
-    scanStatus,
-    isSearching,
-    searchResults,
-    searchError,
-    scannedISBN,
-  ]);
+  }, [scanStatus, isSearching, searchResults, searchError, scannedISBN]);
 
   // Handle scanner errors
-  const handleScannerError = useCallback(
-    (error: string) => {
-      setErrorMessage(error);
-      setScanStatus("error");
-    },
-    []
-  );
+  const handleScannerError = useCallback((error: string) => {
+    setErrorMessage(error);
+    setScanStatus("error");
+  }, []);
 
   // Add book to library
   const handleAddBook = useCallback(() => {
@@ -169,7 +153,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   return (
     <div className={cn("w-full space-y-6", className)}>
-
       {/* Mode Selection */}
       <Tabs
         value={scanMode}
@@ -213,11 +196,22 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         <TabsContent value="upload" className="mt-6">
           <div className="flex gap-4 h-96">
             <div className="flex-1">
-              <ImageUploader
-                onCapture={handleBarcodeCapture}
-                onError={handleScannerError}
-                className="w-full h-full"
-              />
+              {scanStatus === "success" && foundBook ? (
+                <BookSearchCard
+                  book={foundBook}
+                  onAddBook={handleAddBook}
+                  isAdded={false}
+                  isAdding={isAdding}
+                  showDescription={true}
+                  className="h-full"
+                />
+              ) : (
+                <ImageUploader
+                  onCapture={handleBarcodeCapture}
+                  onError={handleScannerError}
+                  className="w-full h-full"
+                />
+              )}
             </div>
           </div>
         </TabsContent>
@@ -286,7 +280,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           </Button>
         </div>
       )}
-
     </div>
   );
 };

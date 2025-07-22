@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-// Note: Image upload scanning will be implemented in a future iteration
 import { Button } from "@/components/ui/button";
-import { Upload, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BarcodeFormat } from "react-barcode-scanner";
+import "react-barcode-scanner/polyfill";
 
 interface ImageUploaderProps {
   onCapture: (isbn: string) => void;
@@ -14,7 +15,7 @@ interface ImageUploaderProps {
 
 /**
  * ImageUploader Component
- * 
+ *
  * Handles image upload and barcode scanning from gallery images.
  * Supports drag-and-drop and file picker functionality.
  */
@@ -29,9 +30,25 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // State for scanning results
+  const [scanError, setScanError] = useState<string | null>(null);
+
+  // Check if BarcodeDetector is available after polyfill loads
+  useEffect(() => {
+    console.log("Checking BarcodeDetector availability...");
+    console.log("window.BarcodeDetector:", typeof window.BarcodeDetector);
+    if (window.BarcodeDetector) {
+      console.log("BarcodeDetector is available");
+    } else {
+      console.warn(
+        "BarcodeDetector is not available - polyfill may not have loaded"
+      );
+    }
+  }, []);
+
   // File validation
   const validateFile = (file: File): string | null => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
     if (!validTypes.includes(file.type)) {
@@ -45,55 +62,136 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     return null;
   };
 
-  // Process image for barcode detection
-  const processImage = useCallback(async (file: File) => {
-    setIsProcessing(true);
-    
-    try {
-      // Create image element for processing
-      const imageUrl = URL.createObjectURL(file);
-      const img = new Image();
-      
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = imageUrl;
-      });
+  // Process image for barcode detection using BarcodeDetector API
+  const processImage = useCallback(
+    async (file: File) => {
+      setIsProcessing(true);
+      setScanError(null);
 
-      // Note: Full image processing implementation will be added in future iteration
-      // For now, provide user feedback about the limitation
-      
-      setTimeout(() => {
+      try {
+        // Check if BarcodeDetector is available
+        if (!window.BarcodeDetector) {
+          console.warn("BarcodeDetector not available, using fallback");
+          // For testing purposes, simulate a delay and then show an error
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          throw new Error(
+            "Barcode detection is not supported in this browser. Please use a modern browser or try camera scanning instead."
+          );
+        }
+
+        console.log("Starting image processing...");
+
+        // Create object URL for the image
+        const imageUrl = URL.createObjectURL(file);
+
+        // Create image element to get dimensions
+        const img = new Image();
+
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => {
+            console.log(
+              "Image loaded, dimensions:",
+              img.width,
+              "x",
+              img.height
+            );
+            resolve();
+          };
+          img.onerror = () => reject(new Error("Failed to load image"));
+          img.src = imageUrl;
+        });
+
+        // Create canvas to draw the image
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          throw new Error("Failed to get canvas context");
+        }
+
+        // Set canvas dimensions to match image
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0);
+        console.log("Image drawn to canvas");
+
+        // Get image data
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        console.log("Image data extracted, size:", imageData.data.length);
+
+        // Create BarcodeDetector instance
+        const barcodeDetector = new window.BarcodeDetector({
+          formats: [
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.CODE_128,
+          ],
+        });
+
+        console.log("BarcodeDetector created, starting detection...");
+
+        // Detect barcodes
+        const barcodes = await barcodeDetector.detect(imageData);
+        console.log(
+          "Detection completed, found barcodes:",
+          barcodes?.length || 0
+        );
+
+        // Clean up
+        URL.revokeObjectURL(imageUrl);
+
+        if (barcodes && barcodes.length > 0) {
+          // Success - barcode found
+          const firstBarcode = barcodes[0];
+          console.log("Barcode detected:", firstBarcode.rawValue);
+          onCapture(firstBarcode.rawValue);
+          setScanError(null);
+        } else {
+          // No barcode found in image
+          const errorMsg =
+            "No barcode detected in this image. Please try a different image with a clear, visible barcode.";
+          console.log("No barcode found in image");
+          setScanError(errorMsg);
+          onError(errorMsg);
+        }
+
         setIsProcessing(false);
-        onError("Barcode detection from images is not yet fully implemented. Please use camera scanning or try a different image.");
-      }, 2000);
-
-      // Cleanup
-      URL.revokeObjectURL(imageUrl);
-      
-    } catch (error) {
-      setIsProcessing(false);
-      onError("Failed to process image. Please try a different image or use camera scanning.");
-    }
-  }, [onCapture, onError]);
+      } catch (error) {
+        console.error("Image processing error:", error);
+        const errorMsg =
+          error instanceof Error
+            ? error.message
+            : "Failed to process image. Please try again.";
+        setScanError(errorMsg);
+        onError(errorMsg);
+        setIsProcessing(false);
+      }
+    },
+    [onCapture, onError]
+  );
 
   // Handle file selection
-  const handleFileSelect = useCallback((file: File) => {
-    const error = validateFile(file);
-    if (error) {
-      onError(error);
-      return;
-    }
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const error = validateFile(file);
+      if (error) {
+        onError(error);
+        return;
+      }
 
-    setSelectedFile(file);
-    
-    // Create preview
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+      setSelectedFile(file);
 
-    // Process the image
-    processImage(file);
-  }, [onError, processImage]);
+      // Create preview
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+
+      // Process the image
+      processImage(file);
+    },
+    [onError, processImage]
+  );
 
   // Handle drag and drop
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -106,35 +204,44 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setIsDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  }, [handleFileSelect]);
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        handleFileSelect(files[0]);
+      }
+    },
+    [handleFileSelect]
+  );
 
   // Handle file input change
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  }, [handleFileSelect]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleFileSelect(files[0]);
+      }
+    },
+    [handleFileSelect]
+  );
 
   // Clear selected file
   const clearFile = useCallback(() => {
     setSelectedFile(null);
+    setScanError(null);
+    setIsProcessing(false);
+
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
-    setIsProcessing(false);
   }, [previewUrl]);
 
   // Open file picker
@@ -168,9 +275,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
             <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="font-semibold text-base sm:text-lg mb-2">Upload Barcode Image</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">
+              Upload Barcode Image
+            </h3>
             <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4 max-w-xs sm:max-w-sm">
-              Drag and drop an image with a barcode, or click to select from your device
+              Drag and drop an image with a barcode, or click to select from
+              your device
             </p>
             <Button variant="outline" size="sm">
               <ImageIcon className="h-4 w-4 mr-2" />
@@ -211,6 +321,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           >
             <X className="h-4 w-4" />
           </Button>
+
+          {/* Scan Again button */}
+          {!isProcessing && scanError && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => processImage(selectedFile!)}
+              className="absolute top-2 right-12 bg-black/50 hover:bg-black/70 text-white border-0"
+            >
+              Scan Again
+            </Button>
+          )}
 
           {/* File info */}
           <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
