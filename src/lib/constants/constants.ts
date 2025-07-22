@@ -87,6 +87,36 @@ export const UI_CONFIG = {
      * Modal overlays and important floating content
      */
     MODAL: 50,
+
+    /**
+     * Cropper and image editing overlays
+     */
+    CROPPER: 60,
+  },
+
+  /**
+   * Image processing configuration
+   */
+  IMAGE: {
+    /**
+     * Maximum file size for image uploads (10MB)
+     */
+    MAX_FILE_SIZE: 10 * 1024 * 1024,
+
+    /**
+     * Supported image formats for upload
+     */
+    SUPPORTED_FORMATS: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+
+    /**
+     * Default quality for cropped images (0.9 = 90%)
+     */
+    CROP_QUALITY: 0.9,
+
+    /**
+     * Default format for cropped images
+     */
+    CROP_FORMAT: "image/jpeg",
   },
 } as const;
 

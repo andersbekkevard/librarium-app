@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ImageCropper } from "@/components/ui/image-cropper";
+import { UI_CONFIG } from "@/lib/constants/constants";
 import { cn } from "@/lib/utils/utils";
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { Crop, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BarcodeFormat } from "react-barcode-scanner";
 import "react-barcode-scanner/polyfill";
@@ -18,6 +20,7 @@ interface ImageUploaderProps {
  *
  * Handles image upload and barcode scanning from gallery images.
  * Supports drag-and-drop and file picker functionality.
+ * Now includes cropping functionality when scanning fails.
  */
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
   onCapture,
@@ -28,6 +31,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State for scanning results
@@ -48,10 +52,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   // File validation
   const validateFile = (file: File): string | null => {
-    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validTypes = UI_CONFIG.IMAGE.SUPPORTED_FORMATS;
+    const maxSize = UI_CONFIG.IMAGE.MAX_FILE_SIZE;
 
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(file.type as (typeof validTypes)[number])) {
       return "Please select a valid image file (JPEG, PNG, or WebP)";
     }
 
@@ -67,6 +71,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     async (file: File) => {
       setIsProcessing(true);
       setScanError(null);
+      setShowCropper(false);
 
       try {
         // Check if BarcodeDetector is available
@@ -151,7 +156,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         } else {
           // No barcode found in image
           const errorMsg =
-            "No barcode detected in this image. Please try a different image with a clear, visible barcode.";
+            "No barcode detected in this image. You can try cropping the image to focus on the barcode area.";
           console.log("No barcode found in image");
           setScanError(errorMsg);
           onError(errorMsg);
@@ -171,6 +176,35 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     },
     [onCapture, onError]
   );
+
+  // Handle cropped image
+  const handleCroppedImage = useCallback(
+    (croppedBlob: Blob) => {
+      // Create a new file from the cropped blob
+      const croppedFile = new File(
+        [croppedBlob],
+        selectedFile?.name || "cropped-image.jpg",
+        {
+          type: "image/jpeg",
+        }
+      );
+
+      // Update the selected file and preview
+      setSelectedFile(croppedFile);
+      const newPreviewUrl = URL.createObjectURL(croppedBlob);
+      setPreviewUrl(newPreviewUrl);
+
+      // Hide cropper and process the cropped image
+      setShowCropper(false);
+      processImage(croppedFile);
+    },
+    [selectedFile, processImage]
+  );
+
+  // Handle crop cancel
+  const handleCropCancel = useCallback(() => {
+    setShowCropper(false);
+  }, []);
 
   // Handle file selection
   const handleFileSelect = useCallback(
@@ -233,6 +267,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setSelectedFile(null);
     setScanError(null);
     setIsProcessing(false);
+    setShowCropper(false);
 
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -248,6 +283,25 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const openFilePicker = () => {
     fileInputRef.current?.click();
   };
+
+  // Show cropper
+  const handleShowCropper = () => {
+    setShowCropper(true);
+  };
+
+  // If cropper is shown, render the cropper component
+  if (showCropper && previewUrl) {
+    return (
+      <div className={cn("w-full h-full", className)}>
+        <ImageCropper
+          imageUrl={previewUrl}
+          onCrop={handleCroppedImage}
+          onCancel={handleCropCancel}
+          className="w-full h-full"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn("w-full", className)}>
@@ -322,22 +376,45 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <X className="h-4 w-4" />
           </Button>
 
-          {/* Scan Again button */}
-          {!isProcessing && scanError && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => processImage(selectedFile!)}
-              className="absolute top-2 right-12 bg-black/50 hover:bg-black/70 text-white border-0"
-            >
-              Scan Again
-            </Button>
+          {/* Action buttons */}
+          {!isProcessing && (
+            <div className="absolute top-2 right-12 flex gap-2">
+              {/* Crop button - show when there's a scan error */}
+              {scanError && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleShowCropper}
+                  className="bg-black/50 hover:bg-black/70 text-white border-0"
+                  title="Crop image to focus on barcode"
+                >
+                  <Crop className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Scan Again button */}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => processImage(selectedFile!)}
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                Scan Again
+              </Button>
+            </div>
           )}
 
           {/* File info */}
           <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
             {selectedFile.name}
           </div>
+
+          {/* Error message */}
+          {scanError && !isProcessing && (
+            <div className="absolute bottom-12 left-2 right-2 bg-red-500/90 text-white text-xs px-3 py-2 rounded">
+              {scanError}
+            </div>
+          )}
         </div>
       )}
     </div>
