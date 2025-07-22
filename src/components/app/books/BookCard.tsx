@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { GenreBadge } from "@/components/ui/genre-badge";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { StarRating } from "@/components/ui/star-rating";
 import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
@@ -17,24 +18,6 @@ interface BookCardProps {
   book: Book;
   onBookClick?: (bookId: string) => void;
 }
-// Helper functions
-
-const ProgressBar = ({
-  value,
-  className,
-}: {
-  value: number;
-  className?: string;
-}) => {
-  return (
-    <div className={cn("w-full bg-muted rounded-full h-1.5", className)}>
-      <div
-        className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
-    </div>
-  );
-};
 
 export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   const router = useRouter();
