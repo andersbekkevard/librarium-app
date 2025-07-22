@@ -28,32 +28,32 @@ export function extractISBN(barcodeText: string): string | null {
     return null;
   }
 
-  // Remove all non-digit characters (hyphens, spaces, etc.)
-  const digits = barcodeText.replace(/\D/g, "");
+  // Remove all non-digit characters except 'X' (valid in ISBN-10)
+  const cleaned = barcodeText.replace(/[^0-9X]/gi, "").toUpperCase();
 
   // ISBN-13 (EAN-13 starting with 978/979 for books) - highest priority
   if (
-    digits.length === 13 &&
-    (digits.startsWith("978") || digits.startsWith("979"))
+    cleaned.length === 13 &&
+    (cleaned.startsWith("978") || cleaned.startsWith("979"))
   ) {
-    return digits;
+    return cleaned;
   }
 
-  // ISBN-10 - standard 10-digit ISBN
-  if (digits.length === 10) {
-    return digits;
+  // ISBN-10 - standard 10-digit ISBN (can contain 'X' as last character)
+  if (cleaned.length === 10) {
+    return cleaned;
   }
 
   // Any EAN-13 code (13 digits) - let Google Books API determine if it's a book
   // This handles edge cases where books have EAN-13 codes with non-standard prefixes
-  if (digits.length === 13) {
-    return digits;
+  if (cleaned.length === 13 && /^\d{13}$/.test(cleaned)) {
+    return cleaned;
   }
 
   // UPC-A with leading zero (12 digits starting with 0)
   // Convert to ISBN-13 by removing leading zero
-  if (digits.length === 12 && digits.startsWith("0")) {
-    const potentialIsbn = digits.substring(1);
+  if (cleaned.length === 12 && cleaned.startsWith("0") && /^\d{12}$/.test(cleaned)) {
+    const potentialIsbn = cleaned.substring(1);
     // Check if it looks like an ISBN (11 digits that could be ISBN-13 without prefix)
     if (potentialIsbn.length === 11) {
       return potentialIsbn;
@@ -216,16 +216,17 @@ export function formatISBN(isbn: string): string {
     return isbn;
   }
 
-  const cleanIsbn = isbn.replace(/\D/g, "");
+  // Preserve 'X' in ISBN-10, remove other non-digits
+  const cleanIsbn = isbn.replace(/[^0-9X]/gi, "").toUpperCase();
 
   if (cleanIsbn.length === 13) {
-    // Basic ISBN-13 formatting: 978-1-234-567-89-0
+    // ISBN-13 formatting: 978-0-471-95869-7 (prefix-group-publisher-title-check)
     return `${cleanIsbn.slice(0, 3)}-${cleanIsbn.slice(3, 4)}-${cleanIsbn.slice(
       4,
       7
     )}-${cleanIsbn.slice(7, 12)}-${cleanIsbn.slice(12)}`;
   } else if (cleanIsbn.length === 10) {
-    // Basic ISBN-10 formatting: 1-234-567-89-0
+    // ISBN-10 formatting: 0-471-95869-7 (group-publisher-title-check)
     return `${cleanIsbn.slice(0, 1)}-${cleanIsbn.slice(1, 4)}-${cleanIsbn.slice(
       4,
       9
@@ -248,11 +249,17 @@ export function formatISBN(isbn: string): string {
  * convertISBN10to13('1234567890') // Returns '9781234567xxx' (with correct check digit)
  */
 export function convertISBN10to13(isbn10: string): string | null {
-  if (!validateISBN(isbn10) || isbn10.replace(/\D/g, "").length !== 10) {
+  if (!validateISBN(isbn10)) {
     return null;
   }
 
-  const cleanIsbn10 = isbn10.replace(/\D/g, "");
+  // Clean ISBN-10 but preserve 'X' for validation
+  const cleanIsbn10 = isbn10.replace(/[^0-9X]/gi, "").toUpperCase();
+  if (cleanIsbn10.length !== 10) {
+    return null;
+  }
+
+  // Extract the first 9 digits for conversion (removing the check digit)
   const isbn13Base = "978" + cleanIsbn10.slice(0, 9);
 
   // Calculate ISBN-13 check digit
@@ -286,7 +293,8 @@ export function stripISBNPrefix(isbn: string): string {
     return isbn;
   }
 
-  const cleanIsbn = isbn.replace(/\D/g, "");
+  // Clean ISBN but preserve 'X' for ISBN-10
+  const cleanIsbn = isbn.replace(/[^0-9X]/gi, "").toUpperCase();
 
   // If it's a 13-digit ISBN starting with 978 or 979, convert to ISBN-10
   if (
@@ -307,6 +315,6 @@ export function stripISBNPrefix(isbn: string): string {
     return core + checkChar;
   }
 
-  // Return as-is for ISBN-10 or non-prefixed ISBNs
+  // Return as-is for ISBN-10 or non-prefixed ISBNs (preserving X)
   return cleanIsbn;
 }

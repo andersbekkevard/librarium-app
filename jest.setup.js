@@ -63,6 +63,78 @@ jest.mock("next/navigation", () => ({
 // Mock fetch for API calls
 global.fetch = jest.fn();
 
+// Mock Response for Node.js environment
+global.Response = class Response {
+  constructor(body, init = {}) {
+    this.body = body;
+    this.status = init.status || 200;
+    this.statusText = init.statusText || 'OK';
+    this.headers = new Map(Object.entries(init.headers || {}));
+    this.ok = this.status >= 200 && this.status < 300;
+  }
+
+  async json() {
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body;
+  }
+
+  async text() {
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+  }
+
+  async blob() {
+    return new Blob([this.body]);
+  }
+
+  clone() {
+    return new Response(this.body, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: Object.fromEntries(this.headers),
+    });
+  }
+};
+
+// Mock Request for Node.js environment
+global.Request = class Request {
+  constructor(url, init = {}) {
+    this.url = url;
+    this.method = init.method || 'GET';
+    this.headers = new Map(Object.entries(init.headers || {}));
+    this.body = init.body || null;
+  }
+
+  clone() {
+    return new Request(this.url, {
+      method: this.method,
+      headers: Object.fromEntries(this.headers),
+      body: this.body,
+    });
+  }
+};
+
+// Mock Headers for Node.js environment
+global.Headers = class Headers extends Map {
+  constructor(init = {}) {
+    super(Object.entries(init));
+  }
+
+  get(name) {
+    return super.get(name.toLowerCase());
+  }
+
+  set(name, value) {
+    return super.set(name.toLowerCase(), value);
+  }
+
+  has(name) {
+    return super.has(name.toLowerCase());
+  }
+
+  delete(name) {
+    return super.delete(name.toLowerCase());
+  }
+};
+
 // Mock window.matchMedia for responsive components
 Object.defineProperty(window, "matchMedia", {
   writable: true,

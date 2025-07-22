@@ -16,7 +16,7 @@ export interface ScanningError {
 export const mapCameraError = (error: any): ScanningError => {
   const errorMessage = error?.message?.toLowerCase() || error?.name?.toLowerCase() || String(error).toLowerCase();
 
-  if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
+  if (errorMessage.includes('permission') || errorMessage.includes('denied') || errorMessage.includes('notallowederror')) {
     return {
       message: "Camera access denied. Please allow camera permissions to scan barcodes.",
       suggestions: [
@@ -28,7 +28,7 @@ export const mapCameraError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('notfound') || errorMessage.includes('no camera')) {
+  if (errorMessage.includes('notfound') || errorMessage.includes('devicenotfounderror') || errorMessage.includes('no camera')) {
     return {
       message: "No camera found on this device.",
       suggestions: [
@@ -40,7 +40,7 @@ export const mapCameraError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('constraint') || errorMessage.includes('overconstrained')) {
+  if (errorMessage.includes('constraint') || errorMessage.includes('overconstrained') || errorMessage.includes('constraintnotsatisfiederror')) {
     return {
       message: "Camera configuration issue. Your camera doesn't support the required settings.",
       suggestions: [
@@ -52,7 +52,7 @@ export const mapCameraError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('security') || errorMessage.includes('https')) {
+  if (errorMessage.includes('security') || errorMessage.includes('https') || errorMessage.includes('notsupportederror')) {
     return {
       message: "Camera access requires a secure connection.",
       suggestions: [
@@ -64,7 +64,7 @@ export const mapCameraError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('abort') || errorMessage.includes('stopped')) {
+  if (errorMessage.includes('abort') || errorMessage.includes('stopped') || errorMessage.includes('operationerror')) {
     return {
       message: "Camera access was interrupted.",
       suggestions: [
@@ -168,9 +168,9 @@ export const getBarcodeQualityTips = (issue: 'blurry' | 'lighting' | 'angle' | '
  * Handles network and API errors during book lookup
  */
 export const handleBookLookupError = (error: any): ScanningError => {
-  const errorMessage = String(error).toLowerCase();
+  const errorMessage = error?.message?.toLowerCase() || String(error).toLowerCase();
 
-  if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+  if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('timeout')) {
     return {
       message: "Network error while searching for the book.",
       suggestions: [
@@ -182,7 +182,7 @@ export const handleBookLookupError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+  if (errorMessage.includes('rate limit') || errorMessage.includes('quota') || errorMessage.includes('too many requests')) {
     return {
       message: "Too many requests. Please wait a moment before trying again.",
       suggestions: [
@@ -193,7 +193,7 @@ export const handleBookLookupError = (error: any): ScanningError => {
     };
   }
 
-  if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+  if (errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('no results')) {
     return {
       message: "Book not found in the database.",
       suggestions: [
