@@ -41,11 +41,8 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Check camera permission and torch support on mount
   useEffect(() => {
     const checkPermissions = async () => {
-      console.log("[CameraScanner] Checking camera permissions...");
-      
       // Feature detection for MediaDevices API
       if (!navigator.mediaDevices?.getUserMedia) {
-        console.error("[CameraScanner] MediaDevices API not available");
         setHasPermission(false);
         onError("Camera not supported. Please use HTTPS or try a different browser.");
         return;
@@ -55,7 +52,6 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" }, // Use back camera on mobile
         });
-        console.log("[CameraScanner] Camera permission granted");
         setHasPermission(true);
 
         // Check torch support
@@ -63,14 +59,12 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         if (tracks.length > 0) {
           const capabilities = tracks[0].getCapabilities();
           const supportsTorch = "torch" in capabilities;
-          console.log("[CameraScanner] Torch supported:", supportsTorch);
           setTorchSupported(supportsTorch);
         }
 
         // Clean up test stream
         stream.getTracks().forEach((track) => track.stop());
-      } catch (error) {
-        console.error("[CameraScanner] Camera permission denied:", error);
+      } catch {
         setHasPermission(false);
         onError(
           "Camera access denied. Please allow camera permissions and refresh the page."
@@ -86,43 +80,26 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Start scanning when component becomes active
   useEffect(() => {
     if (isActive && hasPermission) {
-      console.log("[CameraScanner] Starting scanning...");
       setIsScanning(true);
     } else {
-      console.log("[CameraScanner] Stopping scanning...", {
-        isActive,
-        hasPermission,
-      });
       setIsScanning(false);
     }
   }, [isActive, hasPermission]);
 
   const handleCapture = (barcodes: DetectedBarcode[]) => {
-    // Log raw scanner result for debugging
-    console.log("[CameraScanner] Raw capture result:", barcodes);
-
     if (!isActive || scanCooldown || !barcodes || barcodes.length === 0) {
-      console.log("[CameraScanner] Scan ignored:", {
-        isActive,
-        scanCooldown,
-        hasResult: !!(barcodes && barcodes.length > 0),
-      });
       return;
     }
 
     const scannedCode = barcodes[0].rawValue;
-    console.log("[CameraScanner] Extracted code:", scannedCode);
 
     // Prevent duplicate scans
     if (scannedCode === lastScannedCode) {
-      console.log("[CameraScanner] Duplicate scan ignored:", scannedCode);
       return;
     }
 
     setLastScannedCode(scannedCode);
     setScanCooldown(true);
-
-    console.log("[CameraScanner] Processing scan:", scannedCode);
 
     // Brief cooldown to prevent multiple rapid scans
     setTimeout(() => {

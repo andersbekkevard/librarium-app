@@ -10,17 +10,14 @@ import { extractISBN } from "@/lib/utils/isbn-utils";
 import { cn } from "@/lib/utils/utils";
 import {
   AlertCircle,
-  Bug,
   Camera,
-  CheckCircle2,
   Loader2,
   Upload,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { BookPreviewCard } from "../BookPreviewCard";
+import { BookSearchCard } from "../BookSearchCard";
 import { CameraScanner } from "./CameraScanner";
 import { ImageUploader } from "./ImageUploader";
-import { SideDebugPanel } from "./SideDebugPanel";
 
 interface BarcodeScannerProps {
   onAddBook: (
@@ -55,7 +52,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [foundBook, setFoundBook] = useState<GoogleBooksVolume | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scanStartTime, setScanStartTime] = useState<number>(0);
-  const [debugOpen, setDebugOpen] = useState<boolean>(false);
 
   const {
     search,
@@ -65,58 +61,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     clearError,
   } = useBookSearch();
 
-  // Debug logging helper
-  const debugLog = useCallback((type: string, message: string, data?: any) => {
-    // Always log to console for development
-    console.log(`[BarcodeScanner Debug] ${type}:`, message, data);
 
-    // Only use window debugScanner if available (client-side only)
-    if (typeof window !== "undefined" && (window as any).debugScanner) {
-      try {
-        switch (type) {
-          case "scanner_raw":
-            (window as any).debugScanner.logRawScan(data);
-            break;
-          case "isbn_extracted":
-            (window as any).debugScanner.logISBNExtraction(
-              data.input,
-              data.output
-            );
-            break;
-          case "google_search":
-            (window as any).debugScanner.logGoogleSearch(
-              data.isbn,
-              data.resultCount
-            );
-            break;
-          case "error":
-            (window as any).debugScanner.logError(message, data);
-            break;
-          case "success":
-            (window as any).debugScanner.logSuccess(message, data);
-            break;
-        }
-      } catch (error) {
-        // Fail silently if debug logger is not available
-        console.warn("Debug logger not available:", error);
-      }
-    }
-  }, []);
-
-  // Log component initialization
-  useEffect(() => {
-    console.log("[BarcodeScanner] Component mounted");
-    debugLog("success", "BarcodeScanner component initialized");
-    return () => {
-      console.log("[BarcodeScanner] Component unmounted");
-    };
-  }, [debugLog]);
 
   // Handle barcode capture from camera or image
   const handleBarcodeCapture = useCallback(
     async (rawBarcode: string) => {
-      debugLog("scanner_raw", `Received raw barcode data`, rawBarcode);
-
       setScanStartTime(Date.now());
       setScanStatus("processing");
       setErrorMessage(null);
@@ -124,74 +73,46 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
       // Extract ISBN from barcode
       const isbn = extractISBN(rawBarcode);
-      debugLog("isbn_extracted", `ISBN extraction completed`, {
-        input: rawBarcode,
-        output: isbn,
-      });
 
       if (!isbn) {
         const errorMsg =
           "No valid ISBN found in barcode. Please try again or enter the book manually.";
-        debugLog("error", errorMsg, { rawBarcode });
         setErrorMessage(errorMsg);
         setScanStatus("error");
         return;
       }
 
       setScannedISBN(isbn);
-      debugLog("success", `ISBN successfully extracted: ${isbn}`);
 
       try {
         // Search for book using ISBN
-        debugLog(
-          "google_search",
-          `Starting Google Books search for ISBN: ${isbn}`
-        );
         await search(isbn, 5, "isbn");
 
         // Note: The search results will be handled in the useEffect below
-      } catch (error) {
+      } catch {
         const errorMsg =
           "Failed to search for book. Please check your internet connection and try again.";
-        debugLog("error", errorMsg, { isbn, error });
-        console.error("Error during book search:", error);
         setErrorMessage(errorMsg);
         setScanStatus("error");
       }
     },
-    [search, clearError, debugLog]
+    [search, clearError]
   );
 
   // Handle search results
   useEffect(() => {
     if (scanStatus === "processing" && !isSearching) {
-      debugLog("google_search", `Search completed`, {
-        resultCount: searchResults.length,
-        hasError: !!searchError,
-        isbn: scannedISBN,
-      });
-
       if (searchResults.length > 0) {
-        debugLog(
-          "success",
-          `Book found in Google Books: ${searchResults[0].volumeInfo.title}`,
-          searchResults[0]
-        );
         setFoundBook(searchResults[0]);
         setScanStatus("success");
       } else if (searchError) {
         const errorMsg =
           "Failed to search for book. Please try again or check your internet connection.";
-        debugLog("error", errorMsg, { searchError, isbn: scannedISBN });
         setErrorMessage(errorMsg);
         setScanStatus("error");
       } else {
         const errorMsg =
           "Book not found in Google Books. You can add it manually instead.";
-        debugLog("error", errorMsg, {
-          isbn: scannedISBN,
-          searchResultCount: searchResults.length,
-        });
         setErrorMessage(errorMsg);
         setScanStatus("error");
       }
@@ -202,17 +123,15 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     searchResults,
     searchError,
     scannedISBN,
-    debugLog,
   ]);
 
   // Handle scanner errors
   const handleScannerError = useCallback(
     (error: string) => {
-      debugLog("error", `Scanner error: ${error}`);
       setErrorMessage(error);
       setScanStatus("error");
     },
-    [debugLog]
+    []
   );
 
   // Add book to library
@@ -250,18 +169,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   return (
     <div className={cn("w-full space-y-6", className)}>
-      {/* Debug Toggle */}
-      <div className="flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setDebugOpen(true)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Bug className="h-4 w-4 mr-1" />
-          Debug Console
-        </Button>
-      </div>
 
       {/* Mode Selection */}
       <Tabs
@@ -282,20 +189,24 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         <TabsContent value="camera" className="mt-6">
           <div className="flex gap-4 h-96">
             <div className="flex-1">
-              <CameraScanner
-                onCapture={handleBarcodeCapture}
-                onError={handleScannerError}
-                isActive={isCameraActive}
-                className="w-full h-full"
-              />
+              {scanStatus === "success" && foundBook ? (
+                <BookSearchCard
+                  book={foundBook}
+                  onAddBook={handleAddBook}
+                  isAdded={false}
+                  isAdding={isAdding}
+                  showDescription={true}
+                  className="h-full"
+                />
+              ) : (
+                <CameraScanner
+                  onCapture={handleBarcodeCapture}
+                  onError={handleScannerError}
+                  isActive={isCameraActive}
+                  className="w-full h-full"
+                />
+              )}
             </div>
-            {debugOpen && (
-              <SideDebugPanel
-                isVisible={debugOpen}
-                onClose={() => setDebugOpen(false)}
-                className="flex-shrink-0"
-              />
-            )}
           </div>
         </TabsContent>
 
@@ -308,13 +219,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                 className="w-full h-full"
               />
             </div>
-            {debugOpen && (
-              <SideDebugPanel
-                isVisible={debugOpen}
-                onClose={() => setDebugOpen(false)}
-                className="flex-shrink-0"
-              />
-            )}
           </div>
         </TabsContent>
       </Tabs>
@@ -374,35 +278,12 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         </Card>
       )}
 
-      {/* Success State - Book Preview */}
+      {/* Success State - Scan Another Button */}
       {scanStatus === "success" && foundBook && (
-        <div className="space-y-4">
-          <Card className="border-success/20">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 text-success">
-                <CheckCircle2 className="h-5 w-5" />
-                <p className="font-medium">Book found!</p>
-                {scannedISBN && (
-                  <Badge variant="outline" className="ml-auto">
-                    ISBN: {scannedISBN}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <BookPreviewCard
-            book={foundBook}
-            onAddBook={handleAddBook}
-            isAdding={isAdding}
-            className="shadow-lg"
-          />
-
-          <div className="flex justify-center">
-            <Button onClick={resetScan} variant="outline" disabled={isAdding}>
-              Scan Another Book
-            </Button>
-          </div>
+        <div className="flex justify-center">
+          <Button onClick={resetScan} variant="outline" disabled={isAdding}>
+            Scan Another Book
+          </Button>
         </div>
       )}
 
