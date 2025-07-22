@@ -287,29 +287,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         </div>
       )}
 
-      {/* Instructions */}
-      {scanStatus === "idle" && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center text-muted-foreground">
-              <h3 className="font-semibold text-foreground mb-2">
-                {scanMode === "camera"
-                  ? "Scan Book Barcode"
-                  : "Upload Barcode Image"}
-              </h3>
-              <p className="text-sm mb-3">
-                {scanMode === "camera"
-                  ? "Position your camera over a book's ISBN barcode. The barcode will be detected automatically."
-                  : "Select an image containing a book's ISBN barcode from your device."}
-              </p>
-              <div className="text-xs">
-                <p className="font-medium mb-1">Supported formats:</p>
-                <p>ISBN-10, ISBN-13, EAN-13, UPC-A</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

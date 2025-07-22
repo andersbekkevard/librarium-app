@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 // Note: Image upload scanning will be implemented in a future iteration
 import { Button } from "@/components/ui/button";
-import { Upload, Image as ImageIcon, X, Loader2, AlertCircle } from "lucide-react";
+import { Upload, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 
 interface ImageUploaderProps {
@@ -156,7 +156,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         // Upload area
         <div
           className={cn(
-            "relative w-full aspect-video border-2 border-dashed rounded-lg transition-colors duration-200 cursor-pointer",
+            "relative w-full h-full border-2 border-dashed rounded-lg transition-colors duration-200 cursor-pointer",
             isDragOver
               ? "border-primary bg-primary/5"
               : "border-border hover:border-primary/50 hover:bg-muted/50"
@@ -166,24 +166,24 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           onDrop={handleDrop}
           onClick={openFilePicker}
         >
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-            <Upload className="h-10 w-10 text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Upload Barcode Image</h3>
-            <p className="text-muted-foreground text-sm mb-4 max-w-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+            <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-3 sm:mb-4" />
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Upload Barcode Image</h3>
+            <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4 max-w-xs sm:max-w-sm">
               Drag and drop an image with a barcode, or click to select from your device
             </p>
             <Button variant="outline" size="sm">
               <ImageIcon className="h-4 w-4 mr-2" />
               Choose Image
             </Button>
-            <p className="text-xs text-muted-foreground mt-3">
-              Supports JPEG, PNG, WebP (max 10MB)
+            <p className="text-xs text-muted-foreground mt-2 sm:mt-3">
+              JPEG, PNG, WebP (max 10MB)
             </p>
           </div>
         </div>
       ) : (
         // Preview and processing area
-        <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
+        <div className="relative w-full h-full bg-muted rounded-lg overflow-hidden">
           {previewUrl && (
             <img
               src={previewUrl}
@@ -218,21 +218,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
         </div>
       )}
-
-      {/* Instructions */}
-      <div className="mt-4 p-3 bg-muted rounded-lg">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Tips for better results:</p>
-            <ul className="space-y-0.5">
-              <li>• Ensure the barcode is clear and well-lit</li>
-              <li>• Avoid shadows or reflections on the barcode</li>
-              <li>• Use high-resolution images when possible</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
