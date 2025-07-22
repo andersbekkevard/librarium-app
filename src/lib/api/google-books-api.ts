@@ -3,16 +3,16 @@
  * Handles all interactions with the Google Books API v1
  */
 
-import { API_CONFIG } from "../constants/constants";
 import {
-  createNetworkError,
-  createValidationError,
-  createSystemError,
   ErrorBuilder,
   ErrorCategory,
   ErrorSeverity,
+  createNetworkError,
+  createSystemError,
+  createValidationError,
 } from "@/lib/errors/error-handling";
 import { ServiceResult } from "@/lib/services/types";
+import { API_CONFIG } from "../constants/constants";
 
 // Google Books API response interfaces
 export interface GoogleBooksVolumeInfo {
@@ -215,9 +215,13 @@ export class GoogleBooksApiService {
         } else {
           return {
             success: false,
-            error: new ErrorBuilder(`API error: ${response.status} ${response.statusText}`)
+            error: new ErrorBuilder(
+              `API error: ${response.status} ${response.statusText}`
+            )
               .withCategory(ErrorCategory.NETWORK)
-              .withUserMessage("Google Books API is temporarily unavailable. Please try again later.")
+              .withUserMessage(
+                "Google Books API is temporarily unavailable. Please try again later."
+              )
               .withSeverity(ErrorSeverity.MEDIUM)
               .build(),
           };
@@ -250,7 +254,9 @@ export class GoogleBooksApiService {
    * @param options - Search options including query and filters
    * @returns Promise<ServiceResult<GoogleBooksVolume[]>>
    */
-  async searchBooks(options: SearchOptions): Promise<ServiceResult<GoogleBooksVolume[]>> {
+  async searchBooks(
+    options: SearchOptions
+  ): Promise<ServiceResult<GoogleBooksVolume[]>> {
     const configResult = this.isConfigured();
     if (!configResult.success) {
       return {
@@ -315,7 +321,9 @@ export class GoogleBooksApiService {
    * @param volumeId - The Google Books volume ID
    * @returns Promise<ServiceResult<GoogleBooksVolume>>
    */
-  async getBookDetails(volumeId: string): Promise<ServiceResult<GoogleBooksVolume>> {
+  async getBookDetails(
+    volumeId: string
+  ): Promise<ServiceResult<GoogleBooksVolume>> {
     const configResult = this.isConfigured();
     if (!configResult.success) {
       return {
@@ -399,7 +407,9 @@ export class GoogleBooksApiService {
     if (queryParts.length === 0) {
       return {
         success: false,
-        error: createValidationError("At least one search parameter is required"),
+        error: createValidationError(
+          "At least one search parameter is required"
+        ),
       };
     }
 
