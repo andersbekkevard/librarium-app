@@ -3,7 +3,6 @@
 import * as React from "react";
 import { AlertTriangle, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isIOS, isIOSChrome, isMediaDevicesAvailable } from "@/lib/utils/browser-compatibility";
 import { CameraScanner } from "./CameraScanner";
 
 interface SafeCameraScannerProps {
@@ -14,13 +13,6 @@ interface SafeCameraScannerProps {
   onSwitchToUpload?: () => void;
 }
 
-/**
- * SafeCameraScanner Component
- * 
- * A wrapper around CameraScanner that provides graceful error handling
- * for iOS Safari and other browsers where the MediaDevices API may fail.
- * Automatically detects compatibility issues and provides fallback options.
- */
 export const SafeCameraScanner: React.FC<SafeCameraScannerProps> = ({
   onBarcodeDetected,
   onError,
@@ -34,20 +26,13 @@ export const SafeCameraScanner: React.FC<SafeCameraScannerProps> = ({
   React.useEffect(() => {
     const checkCameraAvailability = async () => {
       try {
-        // Check if we're on iOS where MediaDevices might not be available
-        if (isIOS() && !isMediaDevicesAvailable()) {
-          const browserType = isIOSChrome() ? 'iOS Chrome' : 'iOS Safari';
-          console.log(`SafeCameraScanner: ${browserType} detected without MediaDevices API`);
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           setHasCameraError(true);
           setIsCheckingCamera(false);
           return;
         }
 
-        // Try to check if cameras are available
-        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-          await navigator.mediaDevices.enumerateDevices();
-        }
-
+        await navigator.mediaDevices.enumerateDevices();
         setIsCheckingCamera(false);
       } catch (error) {
         console.log('SafeCameraScanner: Camera check failed', error);
@@ -83,10 +68,7 @@ export const SafeCameraScanner: React.FC<SafeCameraScannerProps> = ({
           <AlertTriangle className="h-12 w-12 mx-auto text-amber-500" />
           <h3 className="font-medium text-foreground">Camera Not Available</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            {isIOS() 
-              ? `Camera scanning is not supported on this iOS device (${isIOSChrome() ? 'Chrome' : 'Safari'}). Please use image upload instead.`
-              : "Unable to access camera. Please check permissions or try image upload instead."
-            }
+            Unable to access camera. Please check permissions or try image upload instead.
           </p>
         </div>
         
@@ -98,16 +80,6 @@ export const SafeCameraScanner: React.FC<SafeCameraScannerProps> = ({
           >
             Switch to Image Upload
           </Button>
-        )}
-        
-        {isIOS() && (
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>💡 <strong>Tip for iOS users:</strong></p>
-            <p>Take a clear photo of the barcode and upload it using the &quot;Upload Image&quot; option.</p>
-            {isIOSChrome() && (
-              <p><strong>Note:</strong> Chrome on iOS has the same camera limitations as Safari.</p>
-            )}
-          </div>
         )}
       </div>
     );

@@ -2,46 +2,30 @@
 
 import { Flashlight, FlashlightOff } from "lucide-react";
 import * as React from "react";
-import { useZxing } from "react-zxing";
-
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { mapCameraError } from "@/lib/utils/scanning-errors";
 import { ScanningOverlay } from "./ScanningOverlay";
 
-/**
- * CameraScanner Component
- * 
- * Provides camera-based barcode scanning using the react-zxing library.
- * Features a clean interface with scanning overlay, torch control, and
- * proper error handling for various camera-related issues.
- * 
- * This component leverages react-zxing's built-in camera management,
- * permission handling, and barcode detection capabilities while providing
- * a user-friendly interface consistent with the app's design system.
- */
+// Dynamic import for BarcodeScanner to prevent SSR issues
+let BarcodeScanner: any = null;
+if (typeof window !== 'undefined') {
+  import('react-barcode-scanner').then(module => {
+    BarcodeScanner = module.BarcodeScanner;
+  });
+}
+
+// Type definition for native browser BarcodeDetector API
+interface DetectedBarcode {
+  rawValue: string;
+  boundingBox: DOMRectReadOnly;
+  cornerPoints: Array<{ x: number; y: number }>;
+  format: string;
+}
 
 interface CameraScannerProps {
-  /**
-   * Callback fired when a barcode is successfully detected
-   * @param barcodeText - Raw text content of the detected barcode
-   */
   onBarcodeDetected: (barcodeText: string) => void;
-  
-  /**
-   * Callback fired when camera or scanning errors occur
-   * @param error - User-friendly error message
-   */
   onError: (error: string) => void;
-  
-  /**
-   * Whether scanning should be paused
-   * Useful for pausing detection after successful scan
-   */
   paused?: boolean;
-  
-  /**
-   * Additional CSS classes for styling
-   */
   className?: string;
 }
 
@@ -51,134 +35,82 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   paused = false,
   className = ""
 }) => {
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [cameraStatus, setCameraStatus] = React.useState<'initializing' | 'ready' | 'error' | 'no-camera'>('initializing');
-  const [debugInfo, setDebugInfo] = React.useState<string[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
+  const [torchEnabled, setTorchEnabled] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [isClient, setIsClient] = useState(false);
   
-  // Debug logging function
-  const debugLog = React.useCallback((message: string, data?: any) => {
+  const debugLog = React.useCallback((message: string, data?: unknown) => {
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
     console.log('CameraScanner:', logMessage, data || '');
-    setDebugInfo(prev => [...prev.slice(-4), logMessage]); // Keep last 5 logs
+    setDebugInfo(prev => [...prev.slice(-4), logMessage]);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setIsClient(true);
     debugLog('CameraScanner initialized', { paused });
   }, [debugLog, paused]);
-  
-  // useZxing hook provides camera management and barcode detection
-  const { ref, torch } = useZxing({
-    paused,
-    onResult: (result) => {
-      debugLog('Barcode detected!', result.getText());
-      setIsScanning(false);
-      setCameraStatus('ready');
-      onBarcodeDetected(result.getText());
-    },
-    onError: (error) => {
-      debugLog('Camera error occurred', { name: error.name, message: error.message, stack: error.stack });
-      setIsScanning(false);
-      
-      // Only set error state for actual camera access failures
-      // Don't treat scanning/decoding errors as camera errors
-      if (error.name === 'NotAllowedError' || 
-          error.name === 'NotFoundError' || 
-          error.name === 'NotReadableError' ||
-          error.name === 'OverconstrainedError' ||
-          error.name === 'NotSupportedError' ||
-          error.name === 'SecurityError') {
-        setCameraStatus('error');
-        const userFriendlyError = mapCameraError(error);
-        onError(userFriendlyError);
-      } else {
-        // For non-critical errors (scanning issues), keep camera ready
-        debugLog('Non-critical scanning error, keeping camera active');
-        setCameraStatus('ready');
-      }
-    },
-    constraints: {
-      video: {
-        // Prefer back camera for better barcode scanning
-        facingMode: 'environment',
-        // Optimal resolution for barcode detection
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    },
-    // Reduce detection frequency to improve performance
-    timeBetweenDecodingAttempts: 300
-  });
 
-  // Monitor video element for camera stream status
-  React.useEffect(() => {
-    if (ref.current) {
-      const video = ref.current;
-      
-      const handleLoadStart = () => {
-        debugLog('Video load start');
-        setCameraStatus('initializing');
-      };
-      
-      const handleLoadedData = () => {
-        debugLog('Video loaded data - camera ready');
-        // Only set to ready if we're not already in an error state from permissions
-        if (cameraStatus !== 'error') {
-          setCameraStatus('ready');
-          setIsScanning(!paused);
-        }
-      };
-      
-      const handleLoadedMetadata = () => {
-        debugLog('Video metadata loaded', {
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-          readyState: video.readyState
-        });
-      };
-      
-      const handleError = (e: Event) => {
-        debugLog('Video element error', e);
-        // Only set error state for actual video element errors
-        // Don't override ready state for minor issues
-        if (cameraStatus === 'initializing') {
-          setCameraStatus('error');
-        }
-      };
-
-      video.addEventListener('loadstart', handleLoadStart);
-      video.addEventListener('loadeddata', handleLoadedData);
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('error', handleError);
-      
-      return () => {
-        video.removeEventListener('loadstart', handleLoadStart);
-        video.removeEventListener('loadeddata', handleLoadedData);
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('error', handleError);
-      };
+  const handleCapture = React.useCallback((barcode: DetectedBarcode) => {
+    if (barcode) {
+      debugLog('Barcode detected!', barcode.rawValue);
+      setIsScanning(false);
+      onBarcodeDetected(barcode.rawValue);
     }
-  }, [ref, debugLog, paused]);
+  }, [onBarcodeDetected, debugLog]);
 
-  // Check for MediaDevices API support
+  const handleError = React.useCallback((_event: React.SyntheticEvent<HTMLVideoElement>) => {
+    debugLog('Camera error occurred');
+    setIsScanning(false);
+    onError('Camera access failed. Please check permissions and try again.');
+  }, [onError, debugLog]);
+
   React.useEffect(() => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      debugLog('MediaDevices API not supported');
-      setCameraStatus('no-camera');
-      onError('Camera not supported in this browser. Please use image upload instead.');
+    if (!paused) {
+      setIsScanning(true);
     } else {
-      debugLog('MediaDevices API supported');
+      setIsScanning(false);
     }
-  }, [debugLog, onError]);
+  }, [paused]);
+
+  const toggleTorch = async () => {
+    try {
+      if (navigator.mediaDevices && 'torch' in navigator.mediaDevices) {
+        setTorchEnabled(!torchEnabled);
+        debugLog('Torch toggled', { enabled: !torchEnabled });
+      }
+    } catch (error) {
+      debugLog('Torch toggle failed', error);
+    }
+  };
+
+  React.useEffect(() => {
+    const checkTorchSupport = async () => {
+      try {
+        if (navigator.mediaDevices && 'getSupportedConstraints' in navigator.mediaDevices) {
+          const constraints = navigator.mediaDevices.getSupportedConstraints();
+          if ('torch' in constraints) {
+            setTorchSupported(true);
+          }
+        }
+      } catch (error) {
+        debugLog('Torch support check failed', error);
+      }
+    };
+    
+    checkTorchSupport();
+  }, [debugLog]);
 
   return (
     <div className={`relative ${className}`}>
-      {/* Camera Status Indicator (dev only) */}
+      {/* Debug Info (dev only) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="absolute top-2 left-2 z-50 bg-black/90 text-white text-xs p-3 rounded-lg max-w-80 max-h-40 overflow-y-auto">
           <div className="font-semibold mb-1">Camera Debug Info</div>
-          <div>Status: <span className={cameraStatus === 'ready' ? 'text-green-300' : cameraStatus === 'error' ? 'text-red-300' : 'text-yellow-300'}>{cameraStatus}</span></div>
-          <div>Torch: {torch.isAvailable ? (torch.isOn ? 'ON' : 'OFF') : 'N/A'}</div>
+          <div>Status: <span className={isScanning ? 'text-green-300' : 'text-yellow-300'}>{isScanning ? 'Scanning' : 'Ready'}</span></div>
+          <div>Torch: {torchSupported ? (torchEnabled ? 'ON' : 'OFF') : 'N/A'}</div>
           <div className="mt-2">
             <div className="text-gray-300">Recent logs:</div>
             {debugInfo.slice(-3).map((log, i) => (
@@ -188,15 +120,34 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         </div>
       )}
       
-      {/* Video element for camera preview */}
-      <video
-        ref={ref}
-        className="w-full h-64 sm:h-72 object-cover rounded-lg bg-muted border"
-        playsInline
-        muted
-        autoPlay
-        aria-label="Camera preview for barcode scanning"
-      />
+      {/* Barcode Scanner */}
+      <div className="w-full h-64 sm:h-72 rounded-lg bg-muted border overflow-hidden">
+        {isClient && BarcodeScanner ? (
+          <BarcodeScanner
+            onCapture={handleCapture}
+            onError={handleError}
+            options={{
+              formats: [
+                "ean_13",    // Primary ISBN-13 format
+                "upc_a",     // Older books/US publications
+                "code_128",  // Internal book codes
+              ],
+              delay: 500,
+            }}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+            autoPlay
+            playsInline
+            muted
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full">
+            <p className="text-muted-foreground">Loading barcode scanner...</p>
+          </div>
+        )}
+      </div>
       
       {/* Scanning overlay with visual guidance */}
       <ScanningOverlay 
@@ -209,15 +160,15 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       />
       
       {/* Torch/flashlight control */}
-      {torch.isAvailable && (
+      {torchSupported && (
         <Button
           variant="secondary"
           size="icon"
           className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-          onClick={torch.isOn ? torch.off : torch.on}
-          aria-label={torch.isOn ? "Turn off flashlight" : "Turn on flashlight"}
+          onClick={toggleTorch}
+          aria-label={torchEnabled ? "Turn off flashlight" : "Turn on flashlight"}
         >
-          {torch.isOn ? (
+          {torchEnabled ? (
             <FlashlightOff className="h-4 w-4" />
           ) : (
             <Flashlight className="h-4 w-4" />
@@ -229,34 +180,11 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
         <div className="bg-background/80 backdrop-blur-sm rounded-full px-3 py-1">
           <p className="text-xs text-muted-foreground">
-            {cameraStatus === 'initializing' && 'Initializing camera...'}
-            {cameraStatus === 'ready' && !paused && (isScanning ? 'Scanning...' : 'Ready to scan')}
-            {cameraStatus === 'ready' && paused && 'Paused'}
-            {cameraStatus === 'error' && 'Camera error'}
-            {cameraStatus === 'no-camera' && 'No camera available'}
+            {paused ? 'Paused' : isScanning ? 'Scanning...' : 'Ready to scan'}
           </p>
         </div>
       </div>
 
-      {/* Camera Permission Request */}
-      {cameraStatus === 'error' && (
-        <div className="absolute inset-0 bg-background/90 flex items-center justify-center">
-          <div className="text-center space-y-3 p-4">
-            <p className="text-sm font-medium">Camera Access Required</p>
-            <p className="text-xs text-muted-foreground">Please allow camera access to scan barcodes</p>
-            <Button
-              size="sm"
-              onClick={() => {
-                debugLog('Attempting to request camera permission');
-                window.location.reload();
-              }}
-            >
-              Try Again
-            </Button>
-          </div>
-        </div>
-      )}
-      
       {/* Accessibility announcements */}
       <div aria-live="polite" className="sr-only">
         {paused && "Scanning paused. Book found."}
@@ -267,43 +195,55 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   );
 };
 
-/**
- * Simplified camera scanner for compact layouts
- * Provides basic scanning without torch control or detailed overlay
- */
 export const CompactCameraScanner: React.FC<Omit<CameraScannerProps, 'className'>> = ({
   onBarcodeDetected,
   onError,
   paused = false
 }) => {
-  const { ref } = useZxing({
-    paused,
-    onResult: (result) => {
-      onBarcodeDetected(result.getText());
-    },
-    onError: (error) => {
-      const userFriendlyError = mapCameraError(error);
-      onError(userFriendlyError);
-    },
-    constraints: {
-      video: {
-        facingMode: 'environment',
-        width: { ideal: 640 },
-        height: { ideal: 480 }
-      }
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  const handleCapture = React.useCallback((barcode: DetectedBarcode) => {
+    if (barcode) {
+      onBarcodeDetected(barcode.rawValue);
     }
-  });
+  }, [onBarcodeDetected]);
+
+  const handleError = React.useCallback((_event: React.SyntheticEvent<HTMLVideoElement>) => {
+    onError('Camera access failed. Please check permissions and try again.');
+  }, [onError]);
 
   return (
     <div className="relative">
-      <video
-        ref={ref}
-        className="w-full h-48 object-cover rounded-lg bg-muted"
-        playsInline
-        muted
-        autoPlay
-        aria-label="Compact camera view for barcode scanning"
-      />
+      <div className="w-full h-48 rounded-lg bg-muted overflow-hidden">
+        {isClient && BarcodeScanner ? (
+          <BarcodeScanner
+            onCapture={handleCapture}
+            onError={handleError}
+            options={{
+              formats: [
+                "ean_13",
+                "upc_a", 
+                "code_128",
+              ],
+              delay: 500,
+            }}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+            autoPlay
+            playsInline
+            muted
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full">
+            <p className="text-muted-foreground">Loading scanner...</p>
+          </div>
+        )}
+      </div>
       <ScanningOverlay isScanning={!paused} />
     </div>
   );
