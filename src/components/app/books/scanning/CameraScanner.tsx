@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  BarcodeScanner,
-} from "react-barcode-scanner";
 import { Button } from "@/components/ui/button";
-import { Camera, CameraOff, Flashlight, FlashlightOff } from "lucide-react";
-import { ScanningOverlay } from "./ScanningOverlay";
 import { cn } from "@/lib/utils/utils";
+import { Camera, CameraOff, Flashlight, FlashlightOff } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  BarcodeFormat,
+  BarcodeScanner,
+  DetectedBarcode,
+} from "react-barcode-scanner";
+import "react-barcode-scanner/polyfill";
+import { ScanningOverlay } from "./ScanningOverlay";
 
 interface CameraScannerProps {
   onCapture: (isbn: string) => void;
@@ -18,7 +21,7 @@ interface CameraScannerProps {
 
 /**
  * CameraScanner Component
- * 
+ *
  * Handles live camera barcode scanning using react-barcode-scanner.
  * Optimized for book ISBN barcodes with proper error handling and user guidance.
  */
@@ -38,27 +41,31 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Check camera permission and torch support on mount
   useEffect(() => {
     const checkPermissions = async () => {
-      console.log('[CameraScanner] Checking camera permissions...');
+      console.log("[CameraScanner] Checking camera permissions...");
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log('[CameraScanner] Camera permission granted');
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        console.log("[CameraScanner] Camera permission granted");
         setHasPermission(true);
-        
+
         // Check torch support
         const tracks = stream.getVideoTracks();
         if (tracks.length > 0) {
           const capabilities = tracks[0].getCapabilities();
-          const supportsTorch = 'torch' in capabilities;
-          console.log('[CameraScanner] Torch supported:', supportsTorch);
+          const supportsTorch = "torch" in capabilities;
+          console.log("[CameraScanner] Torch supported:", supportsTorch);
           setTorchSupported(supportsTorch);
         }
-        
+
         // Clean up test stream
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       } catch (error) {
-        console.error('[CameraScanner] Camera permission denied:', error);
+        console.error("[CameraScanner] Camera permission denied:", error);
         setHasPermission(false);
-        onError("Camera access denied. Please allow camera permissions and refresh the page.");
+        onError(
+          "Camera access denied. Please allow camera permissions and refresh the page."
+        );
       }
     };
 
@@ -70,36 +77,43 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Start scanning when component becomes active
   useEffect(() => {
     if (isActive && hasPermission) {
-      console.log('[CameraScanner] Starting scanning...');
+      console.log("[CameraScanner] Starting scanning...");
       setIsScanning(true);
     } else {
-      console.log('[CameraScanner] Stopping scanning...', { isActive, hasPermission });
+      console.log("[CameraScanner] Stopping scanning...", {
+        isActive,
+        hasPermission,
+      });
       setIsScanning(false);
     }
   }, [isActive, hasPermission]);
 
-  const handleCapture = (result: any) => {
+  const handleCapture = (barcodes: DetectedBarcode[]) => {
     // Log raw scanner result for debugging
-    console.log('[CameraScanner] Raw capture result:', result);
-    
-    if (!isActive || scanCooldown || !result) {
-      console.log('[CameraScanner] Scan ignored:', { isActive, scanCooldown, hasResult: !!result });
+    console.log("[CameraScanner] Raw capture result:", barcodes);
+
+    if (!isActive || scanCooldown || !barcodes || barcodes.length === 0) {
+      console.log("[CameraScanner] Scan ignored:", {
+        isActive,
+        scanCooldown,
+        hasResult: !!(barcodes && barcodes.length > 0),
+      });
       return;
     }
 
-    const scannedCode = result.text || result.codeResult?.code || result;
-    console.log('[CameraScanner] Extracted code:', scannedCode);
+    const scannedCode = barcodes[0].rawValue;
+    console.log("[CameraScanner] Extracted code:", scannedCode);
 
     // Prevent duplicate scans
     if (scannedCode === lastScannedCode) {
-      console.log('[CameraScanner] Duplicate scan ignored:', scannedCode);
+      console.log("[CameraScanner] Duplicate scan ignored:", scannedCode);
       return;
     }
 
     setLastScannedCode(scannedCode);
     setScanCooldown(true);
-    
-    console.log('[CameraScanner] Processing scan:', scannedCode);
+
+    console.log("[CameraScanner] Processing scan:", scannedCode);
 
     // Brief cooldown to prevent multiple rapid scans
     setTimeout(() => {
@@ -119,15 +133,22 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     try {
       await navigator.mediaDevices.getUserMedia({ video: true });
       setHasPermission(true);
-    } catch (error) {
-      onError("Camera access is required for barcode scanning. Please allow camera permissions in your browser settings.");
+    } catch {
+      onError(
+        "Camera access is required for barcode scanning. Please allow camera permissions in your browser settings."
+      );
     }
   };
 
   // Permission denied state
   if (hasPermission === false) {
     return (
-      <div className={cn("relative w-full aspect-video bg-muted rounded-lg flex flex-col items-center justify-center p-6", className)}>
+      <div
+        className={cn(
+          "relative w-full aspect-video bg-muted rounded-lg flex flex-col items-center justify-center p-6",
+          className
+        )}
+      >
         <CameraOff className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg mb-2">Camera Access Required</h3>
         <p className="text-muted-foreground text-center mb-4 max-w-sm">
@@ -144,21 +165,38 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Loading state
   if (hasPermission === null) {
     return (
-      <div className={cn("relative w-full aspect-video bg-muted rounded-lg flex items-center justify-center", className)}>
+      <div
+        className={cn(
+          "relative w-full aspect-video bg-muted rounded-lg flex items-center justify-center",
+          className
+        )}
+      >
         <div className="text-center">
           <Camera className="h-8 w-8 animate-pulse text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Requesting camera access...</p>
+          <p className="text-sm text-muted-foreground">
+            Requesting camera access...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("relative w-full aspect-video rounded-lg overflow-hidden", className)}>
+    <div
+      className={cn(
+        "relative w-full aspect-video rounded-lg overflow-hidden",
+        className
+      )}
+    >
       {isActive && hasPermission && (
         <BarcodeScanner
           onCapture={handleCapture}
           options={{
+            formats: [
+              BarcodeFormat.EAN_13,
+              BarcodeFormat.UPC_A,
+              BarcodeFormat.CODE_128,
+            ],
             delay: 500, // Scan every 500ms for optimal performance
           }}
           style={{
@@ -175,8 +213,8 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           isScanning={true}
           isDetecting={scanCooldown}
           message={
-            scanCooldown 
-              ? "Barcode detected! Searching..." 
+            scanCooldown
+              ? "Barcode detected! Searching..."
               : "Position barcode within the frame"
           }
         />
