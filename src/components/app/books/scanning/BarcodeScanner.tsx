@@ -47,6 +47,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [foundBook, setFoundBook] = useState<GoogleBooksVolume | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scanStartTime, setScanStartTime] = useState<number>(0);
+  const [wasAdding, setWasAdding] = useState<boolean>(false);
 
   const {
     search,
@@ -139,6 +140,15 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     setErrorMessage(null);
     clearError();
   }, [clearError]);
+
+  // Reset scanning state when book addition completes
+  useEffect(() => {
+    if (wasAdding && !isAdding && scanStatus === "success") {
+      // Book was successfully added, reset the scanning state
+      resetScan();
+    }
+    setWasAdding(isAdding);
+  }, [isAdding, wasAdding, scanStatus, resetScan]);
 
   // Switch scan mode
   const handleModeChange = useCallback(
