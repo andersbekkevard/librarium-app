@@ -1,6 +1,13 @@
 "use client";
 
-import { BookOpen, CheckCircle, Edit, Play, Star, FileText } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle,
+  Edit,
+  FileText,
+  Play,
+  Star,
+} from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
@@ -9,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { Book } from "@/lib/models/models";
 
@@ -87,12 +95,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
                 {book.progress.totalPages || "?"} pages
               </span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div
-                className="bg-brand-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <ProgressBar value={progress} variant="md" />
           </div>
         )}
 

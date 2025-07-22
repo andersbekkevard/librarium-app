@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { Book } from "@/lib/models/models";
 
 interface ProgressTrackerProps {
@@ -81,12 +82,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
             <span>Progress</span>
             <span>{progress}%</span>
           </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-brand-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <ProgressBar value={progress} variant="md" />
         </div>
       </CardContent>
     </Card>
