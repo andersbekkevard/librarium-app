@@ -1,7 +1,7 @@
+import { createSystemError } from "@/lib/errors/error-handling";
 import { Book } from "@/lib/models/models";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useRouter } from "next/navigation";
-import { createSystemError } from "@/lib/errors/error-handling";
 import CurrentlyReadingSection from "./CurrentlyReadingSection";
 import DashboardHeader from "./DashboardHeader";
 import RecentActivitySection from "./RecentActivitySection";
@@ -34,7 +34,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onBookClick,
 }) => {
   const router = useRouter();
-  const { activities, activitiesLoading, error: activitiesError } = useEventsContext();
+  const {
+    activities,
+    activitiesLoading,
+    error: activitiesError,
+  } = useEventsContext();
 
   const handleViewAllCurrently = () => {
     router.push("/library?filter=in_progress");
@@ -53,8 +57,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <CurrentlyReadingSection
           books={books}
-          onEdit={onEdit}
-          onUpdateProgress={onUpdateProgress}
           onBookClick={onBookClick}
           onViewAll={handleViewAllCurrently}
         />
@@ -69,8 +71,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 
       <RecentlyReadSection
         books={books}
-        onEdit={onEdit}
-        onUpdateProgress={onUpdateProgress}
         onBookClick={onBookClick}
         onViewAll={handleViewAllRecent}
       />
