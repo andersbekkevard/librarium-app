@@ -38,20 +38,25 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Check camera permission and torch support on mount
   useEffect(() => {
     const checkPermissions = async () => {
+      console.log('[CameraScanner] Checking camera permissions...');
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log('[CameraScanner] Camera permission granted');
         setHasPermission(true);
         
         // Check torch support
         const tracks = stream.getVideoTracks();
         if (tracks.length > 0) {
           const capabilities = tracks[0].getCapabilities();
-          setTorchSupported('torch' in capabilities);
+          const supportsTorch = 'torch' in capabilities;
+          console.log('[CameraScanner] Torch supported:', supportsTorch);
+          setTorchSupported(supportsTorch);
         }
         
         // Clean up test stream
         stream.getTracks().forEach(track => track.stop());
       } catch (error) {
+        console.error('[CameraScanner] Camera permission denied:', error);
         setHasPermission(false);
         onError("Camera access denied. Please allow camera permissions and refresh the page.");
       }
@@ -65,26 +70,36 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   // Start scanning when component becomes active
   useEffect(() => {
     if (isActive && hasPermission) {
+      console.log('[CameraScanner] Starting scanning...');
       setIsScanning(true);
     } else {
+      console.log('[CameraScanner] Stopping scanning...', { isActive, hasPermission });
       setIsScanning(false);
     }
   }, [isActive, hasPermission]);
 
   const handleCapture = (result: any) => {
+    // Log raw scanner result for debugging
+    console.log('[CameraScanner] Raw capture result:', result);
+    
     if (!isActive || scanCooldown || !result) {
+      console.log('[CameraScanner] Scan ignored:', { isActive, scanCooldown, hasResult: !!result });
       return;
     }
 
     const scannedCode = result.text || result.codeResult?.code || result;
+    console.log('[CameraScanner] Extracted code:', scannedCode);
 
     // Prevent duplicate scans
     if (scannedCode === lastScannedCode) {
+      console.log('[CameraScanner] Duplicate scan ignored:', scannedCode);
       return;
     }
 
     setLastScannedCode(scannedCode);
     setScanCooldown(true);
+    
+    console.log('[CameraScanner] Processing scan:', scannedCode);
 
     // Brief cooldown to prevent multiple rapid scans
     setTimeout(() => {
