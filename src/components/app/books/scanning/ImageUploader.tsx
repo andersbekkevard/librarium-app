@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-// Note: Image upload scanning will be implemented in a future iteration
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useScanning, BarcodeFormat } from "react-barcode-scanner";
+import "react-barcode-scanner/polyfill";
 import { Button } from "@/components/ui/button";
 import { Upload, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
@@ -29,6 +30,42 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ADD THESE NEW STATE VARIABLES:
+  const [isScanComplete, setIsScanComplete] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null); // For useScanning hook
+
+  // ADD THIS: useScanning hook setup
+  const { 
+    detectedBarcodes, 
+    isScanning, 
+    startScan, 
+    stopScan 
+  } = useScanning(imageRef, {
+    formats: [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.UPC_A, 
+      BarcodeFormat.CODE_128
+    ],
+  });
+
+  // ADD THIS: Monitor scanning results
+  useEffect(() => {
+    if (!isScanning && isScanComplete && detectedBarcodes.length > 0) {
+      // Success - barcode found
+      const firstBarcode = detectedBarcodes[0];
+      onCapture(firstBarcode.rawValue);
+      setScanError(null);
+      setIsProcessing(false);
+    } else if (!isScanning && isScanComplete && detectedBarcodes.length === 0) {
+      // No barcode found in image
+      const errorMsg = "No barcode detected in this image. Please try a different image with a clear, visible barcode.";
+      setScanError(errorMsg);
+      onError(errorMsg);
+      setIsProcessing(false);
+    }
+  }, [isScanning, isScanComplete, detectedBarcodes, onCapture, onError]);
+
   // File validation
   const validateFile = (file: File): string | null => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -45,37 +82,48 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     return null;
   };
 
-  // Process image for barcode detection
+  // REPLACE THE ENTIRE processImage FUNCTION:
   const processImage = useCallback(async (file: File) => {
     setIsProcessing(true);
+    setIsScanComplete(false);
+    setScanError(null);
     
     try {
-      // Create image element for processing
+      // Create object URL for the image
       const imageUrl = URL.createObjectURL(file);
-      const img = new Image();
       
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = imageUrl;
-      });
-
-      // Note: Full image processing implementation will be added in future iteration
-      // For now, provide user feedback about the limitation
+      // Wait for image to load completely before scanning
+      if (imageRef.current) {
+        imageRef.current.onload = () => {
+          // Image is now loaded and ready to scan
+          setIsScanComplete(false);
+          startScan(); // Trigger the scanning
+          
+          // Set flag to track scan completion after a delay
+          setTimeout(() => {
+            setIsScanComplete(true);
+          }, 1500); // Give scanning time to complete
+        };
+        
+        imageRef.current.onerror = () => {
+          const errorMsg = "Failed to load image. Please try a different file.";
+          setScanError(errorMsg);
+          onError(errorMsg);
+          setIsProcessing(false);
+          URL.revokeObjectURL(imageUrl);
+        };
+        
+        // Set the source to trigger loading
+        imageRef.current.src = imageUrl;
+      }
       
-      setTimeout(() => {
-        setIsProcessing(false);
-        onError("Barcode detection from images is not yet fully implemented. Please use camera scanning or try a different image.");
-      }, 2000);
-
-      // Cleanup
-      URL.revokeObjectURL(imageUrl);
-      
-    } catch (error) {
+    } catch {
+      const errorMsg = "Failed to process image. Please try again.";
+      setScanError(errorMsg);
+      onError(errorMsg);
       setIsProcessing(false);
-      onError("Failed to process image. Please try a different image or use camera scanning.");
     }
-  }, [onCapture, onError]);
+  }, [startScan, onError]);
 
   // Handle file selection
   const handleFileSelect = useCallback((file: File) => {
@@ -124,18 +172,28 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   }, [handleFileSelect]);
 
-  // Clear selected file
+  // REPLACE THE ENTIRE clearFile FUNCTION:
   const clearFile = useCallback(() => {
     setSelectedFile(null);
+    setIsScanComplete(false);
+    setScanError(null);
+    setIsProcessing(false);
+    
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+    
+    if (imageRef.current) {
+      imageRef.current.src = '';
+    }
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setIsProcessing(false);
-  }, [previewUrl]);
+    
+    stopScan(); // Stop any ongoing scanning
+  }, [previewUrl, stopScan]);
 
   // Open file picker
   const openFilePicker = () => {
@@ -150,6 +208,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         accept="image/jpeg,image/jpg,image/png,image/webp"
         onChange={handleInputChange}
         className="hidden"
+      />
+
+      {/* ADD THIS: Hidden image element for scanning */}
+      <img
+        ref={imageRef}
+        className="hidden"
+        alt="Scanning target"
       />
 
       {!selectedFile ? (
@@ -197,7 +262,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
               <Loader2 className="h-8 w-8 animate-spin mb-3" />
               <p className="text-sm text-center px-4">
-                Processing image for barcodes...
+                {isScanning ? "Scanning for barcodes..." : "Processing image for barcodes..."}
               </p>
             </div>
           )}
@@ -211,6 +276,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           >
             <X className="h-4 w-4" />
           </Button>
+
+          {/* ADD THIS: Scan Again button */}
+          {!isProcessing && scanError && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => processImage(selectedFile!)}
+              className="absolute top-2 right-12 bg-black/50 hover:bg-black/70 text-white border-0"
+            >
+              Scan Again
+            </Button>
+          )}
 
           {/* File info */}
           <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
