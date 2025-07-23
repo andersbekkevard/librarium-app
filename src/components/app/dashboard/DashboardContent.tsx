@@ -1,12 +1,13 @@
 import { createSystemError } from "@/lib/errors/error-handling";
 import { Book } from "@/lib/models/models";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
+import { useUserContext } from "@/lib/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import CurrentlyReadingSection from "./CurrentlyReadingSection";
 import DashboardHeader from "./DashboardHeader";
+import PersonalizedMessageSection from "./PersonalizedMessageSection";
 import RecentActivitySection from "./RecentActivitySection";
 import RecentlyReadSection from "./RecentlyReadSection";
-import StatsGrid from "./StatsGrid";
 
 interface Stats {
   totalBooks: number;
@@ -34,6 +35,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onBookClick,
 }) => {
   const router = useRouter();
+  const { userProfile } = useUserContext();
   const {
     activities,
     activitiesLoading,
@@ -52,7 +54,14 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     <div className="p-6">
       <DashboardHeader />
 
-      <StatsGrid stats={stats} />
+      {userProfile && (
+        <PersonalizedMessageSection
+          userProfile={userProfile}
+          books={books}
+          stats={stats}
+          recentActivity={activities || []}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <CurrentlyReadingSection

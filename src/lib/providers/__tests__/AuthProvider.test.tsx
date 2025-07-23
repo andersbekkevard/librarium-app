@@ -6,7 +6,7 @@
  */
 
 import { createMockUser } from "@/lib/test-utils/firebase-mock";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
 import { AuthProvider, useAuthContext } from "../AuthProvider";
 
 // Mock AuthService
@@ -72,7 +72,7 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 10);
+      setTimeout(() => act(() => callback(mockUser)), 10);
       return jest.fn();
     });
 
@@ -110,14 +110,18 @@ describe("AuthProvider", () => {
     expect(screen.getByTestId("user")).toHaveTextContent("no-user");
 
     // Simulate user login
-    authCallback(mockUser);
+    act(() => {
+      authCallback(mockUser);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId("user")).toHaveTextContent("test@example.com");
     });
 
     // Simulate user logout
-    authCallback(null);
+    act(() => {
+      authCallback(null);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId("user")).toHaveTextContent("no-user");
@@ -131,7 +135,7 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 10);
+      setTimeout(() => act(() => callback(mockUser)), 10);
       return jest.fn();
     });
 
@@ -148,7 +152,9 @@ describe("AuthProvider", () => {
     });
 
     const signOutButton = screen.getByTestId("signout-button");
-    signOutButton.click();
+    await act(async () => {
+      fireEvent.click(signOutButton);
+    });
 
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
@@ -160,7 +166,7 @@ describe("AuthProvider", () => {
     });
 
     mockOnAuthStateChanged.mockImplementation((callback) => {
-      setTimeout(() => callback(mockUser), 10);
+      setTimeout(() => act(() => callback(mockUser)), 10);
       return jest.fn();
     });
 
@@ -177,7 +183,9 @@ describe("AuthProvider", () => {
     });
 
     const signOutButton = screen.getByTestId("signout-button");
-    signOutButton.click();
+    await act(async () => {
+      fireEvent.click(signOutButton);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId("error")).toHaveTextContent("Sign out failed");

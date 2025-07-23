@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useMemo, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { useEventsContext } from "@/lib/providers/EventsProvider";
-import { useBooksContext } from "@/lib/providers/BooksProvider";
-import { ActivityFilters } from "@/components/app/activity/ActivityFilters";
 import { ActivityDetail } from "@/components/app/activity/ActivityDetail";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ActivityFilters } from "@/components/app/activity/ActivityFilters";
 import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSizeSelector } from "@/components/ui/page-size-selector";
+import { Pagination } from "@/components/ui/pagination";
 import { PaginationInfo } from "@/components/ui/pagination-info";
-import { usePagination } from "@/hooks/usePagination";
-import { Calendar, Activity } from "lucide-react";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useBooksContext } from "@/lib/providers/BooksProvider";
+import { useEventsContext } from "@/lib/providers/EventsProvider";
+import { Activity, Calendar } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useMemo } from "react";
 
 interface Filters {
   eventType: string;
@@ -27,21 +27,24 @@ function ActivityHistoryContent() {
   const searchParams = useSearchParams();
   const { events, loading, error } = useEventsContext();
   const { books } = useBooksContext();
-  
+
   // Read filters from URL params
   const eventType = searchParams.get("eventType") || "all";
   const bookId = searchParams.get("bookId") || "all";
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
-  
-  const filters: Filters = useMemo(() => ({
-    eventType,
-    dateRange: {
-      start: startDate ? new Date(startDate) : null,
-      end: endDate ? new Date(endDate) : null,
-    },
-    bookId,
-  }), [eventType, bookId, startDate, endDate]);
+
+  const filters: Filters = useMemo(
+    () => ({
+      eventType,
+      dateRange: {
+        start: startDate ? new Date(startDate) : null,
+        end: endDate ? new Date(endDate) : null,
+      },
+      bookId,
+    }),
+    [eventType, bookId, startDate, endDate]
+  );
 
   const filteredEvents = useMemo(() => {
     let filtered = [...events];
@@ -80,7 +83,7 @@ function ActivityHistoryContent() {
     storageKey: "activity-history-page-size",
     onPageChange: () => {
       // Scroll to top when page changes
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
   });
 
@@ -99,7 +102,9 @@ function ActivityHistoryContent() {
   }, [books]);
 
   const getBookTitle = (bookId: string) => {
-    return booksList.find(book => book.id === bookId)?.title || "Unknown Book";
+    return (
+      booksList.find((book) => book.id === bookId)?.title || "Unknown Book"
+    );
   };
 
   if (loading) {
@@ -131,7 +136,9 @@ function ActivityHistoryContent() {
       <div className="container mx-auto py-8 px-4 max-w-6xl">
         <Card className="border-status-error/20">
           <CardHeader>
-            <CardTitle className="text-status-error">Error Loading Activity</CardTitle>
+            <CardTitle className="text-status-error">
+              Error Loading Activity
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">{error}</p>
@@ -212,7 +219,9 @@ function ActivityHistoryContent() {
                           key={event.id}
                           event={event}
                           bookTitle={getBookTitle(event.bookId)}
-                          book={booksList.find(book => book.id === event.bookId)}
+                          book={booksList.find(
+                            (book) => book.id === event.bookId
+                          )}
                         />
                       ))}
                     </div>
@@ -228,7 +237,7 @@ function ActivityHistoryContent() {
                             itemName="event"
                             className="order-2 sm:order-1"
                           />
-                          
+
                           <Pagination
                             currentPage={pagination.currentPage}
                             totalPages={pagination.totalPages}
@@ -238,7 +247,7 @@ function ActivityHistoryContent() {
                             hasPreviousPage={pagination.hasPreviousPage}
                             className="order-1 sm:order-2"
                           />
-                          
+
                           <PageSizeSelector
                             pageSize={pagination.pageSize}
                             onPageSizeChange={pagination.setPageSize}
@@ -261,7 +270,9 @@ function ActivityHistoryContent() {
 
 export default function ActivityHistoryPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background">Loading...</div>}>
+    <Suspense
+      fallback={<div className="min-h-screen bg-background">Loading...</div>}
+    >
       <ActivityHistoryContent />
     </Suspense>
   );
