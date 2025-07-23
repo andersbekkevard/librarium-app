@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Bot, Sparkles } from "lucide-react";
-import { personalizedMessageService } from "@/lib/services/PersonalizedMessageService";
+import { useMessageContext } from "@/lib/providers/MessageProvider";
 import { Book, UserProfile, ActivityItem } from "@/lib/models/models";
 
 interface Stats {
@@ -24,39 +24,33 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
   stats,
   recentActivity,
 }) => {
-  const [message, setMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    currentMessage,
+    isLoading,
+    error,
+    generateMessage,
+    clearError,
+  } = useMessageContext();
 
   useEffect(() => {
-    const generateMessage = async () => {
+    const loadMessage = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        const personalizedMessage = await personalizedMessageService.generateMessage({
+        clearError();
+        await generateMessage({
           userProfile,
           books,
           stats,
           recentActivity,
         });
-        
-        setMessage(personalizedMessage);
       } catch (err) {
         console.error("Failed to generate personalized message:", err);
-        setError("Unable to generate personalized message");
-        // Fallback message based on stats
-        const fallbackMessage = stats.readingStreak > 0 
-          ? `Great job keeping up your ${stats.readingStreak}-day reading streak! Your dedication is inspiring.`
-          : "Your reading journey is unique and wonderful. Keep exploring new worlds through books!";
-        setMessage(fallbackMessage);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    generateMessage();
-  }, [userProfile, books, stats, recentActivity]);
+    if (userProfile?.id) {
+      loadMessage();
+    }
+  }, [userProfile?.id, books, stats, recentActivity, generateMessage, clearError]);
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
@@ -83,44 +77,42 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
   );
 
   return (
-    <div className="mb-8">
-      <div className="bg-card border border-border rounded-lg p-6">
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : (
-          <div className="flex items-start space-x-4">
-            {/* AI Avatar */}
-            <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Bot className="h-6 w-6 text-white" />
+    <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <div className="flex items-start space-x-4 flex-1">
+          {/* AI Avatar */}
+          <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Bot className="h-6 w-6 text-white" />
+          </div>
+          
+          {/* Chat bubble */}
+          <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative flex flex-col justify-between min-h-full">
+            {/* Speech bubble tail */}
+            <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
+            
+            {/* Message content */}
+            <div className="text-sm leading-relaxed text-foreground flex-1 flex items-center">
+              {currentMessage || "Loading your personalized message..."}
             </div>
             
-            {/* Chat bubble */}
-            <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative">
-              {/* Speech bubble tail */}
-              <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
-              
-              {/* Message content */}
-              <div className="text-sm leading-relaxed text-foreground">
-                {message}
-              </div>
-              
-              {/* AI indicator */}
-              <div className="flex items-center mt-3 pt-2 border-t border-border/50">
-                <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
-                <span className="text-xs text-muted-foreground font-medium">
-                  AI Reading Companion
-                </span>
-              </div>
+            {/* AI indicator */}
+            <div className="flex items-center mt-3 pt-2 border-t border-border/50 flex-shrink-0">
+              <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
+              <span className="text-xs text-muted-foreground font-medium">
+                AI Reading Companion
+              </span>
             </div>
           </div>
-        )}
-        
-        {error && !isLoading && (
-          <div className="mt-2 text-xs text-status-warning">
-            Using fallback message - AI service temporarily unavailable
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {error && !isLoading && (
+        <div className="mt-2 text-xs text-status-warning">
+          Using fallback message - AI service temporarily unavailable
+        </div>
+      )}
     </div>
   );
 };

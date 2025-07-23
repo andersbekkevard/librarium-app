@@ -368,6 +368,45 @@ export const validateReview = (review: string): boolean => {
 };
 
 /**
+ * PersonalizedMessage represents an AI-generated personalized message for a user.
+ *
+ * Messages are stored in Firestore and refreshed every 24 hours.
+ *
+ * Firestore Path: users/{userId}/messages/{messageId}
+ */
+export interface PersonalizedMessage {
+  id: string; // Unique message identifier
+  userId: string; // Reference to the user
+  content: string; // AI-generated message content
+  timestamp: Timestamp; // When the message was generated
+}
+
+/**
+ * Validates personalized message content
+ *
+ * Ensures that message content is within valid bounds (10-500 characters).
+ * Used by MessageService when storing AI-generated messages.
+ *
+ * @param content - Message content to validate
+ * @returns boolean - True if content is valid (10-500 characters)
+ *
+ * @example
+ * const aiMessage = "Great job on your reading streak!";
+ * if (validatePersonalizedMessage(aiMessage)) {
+ *   await saveMessage(userId, aiMessage);
+ * } else {
+ *   console.error("Invalid message content length");
+ * }
+ */
+export const validatePersonalizedMessage = (content: string): boolean => {
+  if (typeof content !== "string") {
+    return false;
+  }
+  const trimmed = content.trim();
+  return trimmed.length >= 10 && trimmed.length <= 500;
+};
+
+/**
  * Constants for the reading state machine
  */
 

@@ -12,3 +12,4 @@ export * from "./types";
 export { FirebaseUserRepository, firebaseUserRepository } from "./FirebaseUserRepository";
 export { FirebaseBookRepository, firebaseBookRepository } from "./FirebaseBookRepository";
 export { FirebaseEventRepository, firebaseEventRepository } from "./FirebaseEventRepository";
+export { FirebaseMessageRepository, messageRepository } from "./FirebaseMessageRepository";

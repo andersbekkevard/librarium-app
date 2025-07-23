@@ -8,6 +8,7 @@ import DashboardHeader from "./DashboardHeader";
 import PersonalizedMessageSection from "./PersonalizedMessageSection";
 import RecentActivitySection from "./RecentActivitySection";
 import RecentlyReadSection from "./RecentlyReadSection";
+import StatsSummaryCard from "./StatsSummaryCard";
 
 interface Stats {
   totalBooks: number;
@@ -54,16 +55,28 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     <div className="p-6">
       <DashboardHeader />
 
-      {userProfile && (
-        <PersonalizedMessageSection
-          userProfile={userProfile}
-          books={books}
-          stats={stats}
-          recentActivity={activities || []}
-        />
-      )}
+      {/* Top Row: AI Companion + Stats */}
+      <div className="flex gap-6 mb-6">
+        {/* AI Message Section */}
+        {userProfile && (
+          <div className="flex-1">
+            <PersonalizedMessageSection
+              userProfile={userProfile}
+              books={books}
+              stats={stats}
+              recentActivity={activities || []}
+            />
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stats Summary Card */}
+        <div className="flex-shrink-0">
+          <StatsSummaryCard stats={stats} />
+        </div>
+      </div>
+
+      {/* Middle Row: Currently Reading + Recent Activity */}
+      <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 mb-8">
         <CurrentlyReadingSection
           books={books}
           onBookClick={onBookClick}
@@ -78,6 +91,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
+      {/* Bottom Row: Recently Read (Full Width) */}
       <RecentlyReadSection
         books={books}
         onBookClick={onBookClick}

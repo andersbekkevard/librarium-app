@@ -176,15 +176,6 @@ export class BookService implements IBookService {
         return { success: false, error: standardError };
       }
 
-      // Log book addition event
-      await this.eventRepository.logEvent(userId, {
-        type: "state_change",
-        bookId: result.data!,
-        data: {
-          newState: book.state,
-        },
-      });
-
       return { success: true, data: result.data! };
     } catch (error) {
       const standardError = createSystemError(
@@ -755,6 +746,12 @@ export class BookService implements IBookService {
         return { success: false, error: validationError };
       }
 
+      // Get current book state before update for logging
+      const currentBookResult = await this.bookRepository.getBook(userId, bookId);
+      const previousState = currentBookResult.success && currentBookResult.data 
+        ? currentBookResult.data.state 
+        : undefined;
+
       // Add updatedAt timestamp
       const finalUpdates = {
         ...updates,
@@ -775,16 +772,30 @@ export class BookService implements IBookService {
       // Get updated book for logging
       const updatedBookResult = await this.bookRepository.getBook(userId, bookId);
       if (updatedBookResult.success && updatedBookResult.data) {
+        const updatedBook = updatedBookResult.data;
+        
         // Log manual update event
         await this.eventRepository.logEvent(userId, {
           type: "manual_update",
           bookId,
           data: {
             comment: `Manual update: ${Object.keys(updates).join(", ")}`,
-            commentState: updatedBookResult.data.state,
-            commentPage: updatedBookResult.data.progress.currentPage,
+            commentState: updatedBook.state,
+            commentPage: updatedBook.progress.currentPage,
           },
         });
+
+        // Log state_change event if state was updated and actually changed
+        if (updates.state && previousState && updates.state !== previousState) {
+          await this.eventRepository.logEvent(userId, {
+            type: "state_change",
+            bookId,
+            data: {
+              previousState: previousState,
+              newState: updates.state,
+            },
+          });
+        }
       }
 
       return { success: true };

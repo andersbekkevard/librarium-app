@@ -241,13 +241,8 @@ describe("BookService", () => {
       expect(result.success).toBe(true);
       expect(result.data).toBe("new-book-id");
       expect(mockBookRepository.addBook).toHaveBeenCalledWith(testUserId, expect.any(Object));
-      expect(mockEventRepository.logEvent).toHaveBeenCalledWith(
-        testUserId,
-        expect.objectContaining({
-          type: "state_change",
-          bookId: "new-book-id",
-        })
-      );
+      // No state_change event should be logged for new books
+      expect(mockEventRepository.logEvent).not.toHaveBeenCalled();
     });
 
     it("should validate book data before adding", async () => {
@@ -653,6 +648,59 @@ describe("BookService", () => {
         testUserId,
         testBookId,
         expect.objectContaining(updates)
+      );
+    });
+
+    it("should log state_change event when state is updated in manual update", async () => {
+      const updates = {
+        title: "Manual Update",
+        state: "not_started" as const, // Changing from in_progress to not_started
+      };
+
+      // Mock the initial book with in_progress state
+      mockBookRepository.getBook
+        .mockResolvedValueOnce({
+          success: true,
+          data: { ...mockBook, state: "in_progress" },
+        })
+        .mockResolvedValueOnce({
+          success: true,
+          data: { ...mockBook, ...updates },
+        });
+
+      mockBookRepository.updateBook.mockResolvedValue({
+        success: true,
+      });
+
+      mockEventRepository.logEvent.mockResolvedValue({
+        success: true,
+        data: "event-id",
+      });
+
+      const result = await bookService.updateBookManual(testUserId, testBookId, updates);
+
+      expect(result.success).toBe(true);
+      
+      // Verify manual_update event was logged
+      expect(mockEventRepository.logEvent).toHaveBeenCalledWith(
+        testUserId,
+        expect.objectContaining({
+          type: "manual_update",
+          bookId: testBookId,
+        })
+      );
+
+      // Verify state_change event was also logged
+      expect(mockEventRepository.logEvent).toHaveBeenCalledWith(
+        testUserId,
+        expect.objectContaining({
+          type: "state_change",
+          bookId: testBookId,
+          data: expect.objectContaining({
+            previousState: "in_progress",
+            newState: "not_started",
+          }),
+        })
       );
     });
 

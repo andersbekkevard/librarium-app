@@ -26,7 +26,6 @@ export const CurrentlyReadingSection: React.FC<
       onBookClick={onBookClick}
       onViewAll={onViewAll}
       maxBooks={maxBooks}
-      className="lg:col-span-2"
     />
   );
 };

@@ -1,0 +1,75 @@
+import { BookOpen, Star, TrendingUp, Zap } from "lucide-react";
+
+interface Stats {
+  totalBooks: number;
+  finishedBooks: number;
+  totalPagesRead: number;
+  currentlyReading: number;
+  readingStreak: number;
+}
+
+interface StatsSummaryCardProps {
+  stats: Stats;
+}
+
+export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({ stats }) => {
+  return (
+    <div className="bg-card border border-border rounded-lg p-4 h-full w-fit flex flex-col justify-center">
+      <div className="grid grid-cols-2 gap-2">
+        {/* Total Books */}
+        <div className="text-center p-2 bg-brand-primary/5 rounded-lg w-24 h-24 flex flex-col justify-center">
+          <div className="h-5 w-5 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-1">
+            <BookOpen className="h-3 w-3 text-brand-primary" />
+          </div>
+          <p className="text-base font-bold text-foreground mb-1">
+            {stats.totalBooks}
+          </p>
+          <p className="text-xs font-medium text-muted-foreground leading-tight">
+            Total
+          </p>
+        </div>
+
+        {/* Read This Year */}
+        <div className="text-center p-2 bg-status-success/5 rounded-lg w-24 h-24 flex flex-col justify-center">
+          <div className="h-5 w-5 bg-status-success/10 rounded-full flex items-center justify-center mx-auto mb-1">
+            <Star className="h-3 w-3 text-status-success fill-current" />
+          </div>
+          <p className="text-base font-bold text-foreground mb-1">
+            {stats.finishedBooks}
+          </p>
+          <p className="text-xs font-medium text-muted-foreground leading-tight">
+            Read
+          </p>
+        </div>
+
+        {/* Pages This Month */}
+        <div className="text-center p-2 bg-brand-accent/5 rounded-lg w-24 h-24 flex flex-col justify-center">
+          <div className="h-5 w-5 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-1">
+            <TrendingUp className="h-3 w-3 text-brand-accent" />
+          </div>
+          <p className="text-base font-bold text-foreground mb-1">
+            {stats.totalPagesRead}
+          </p>
+          <p className="text-xs font-medium text-muted-foreground leading-tight">
+            Pages
+          </p>
+        </div>
+
+        {/* Reading Streak */}
+        <div className="text-center p-2 bg-gradient-to-br from-brand-primary/10 to-brand-accent/10 rounded-lg w-24 h-24 flex flex-col justify-center">
+          <div className="h-5 w-5 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center mx-auto mb-1">
+            <Zap className="h-3 w-3 text-white" />
+          </div>
+          <p className="text-base font-bold text-foreground mb-1">
+            {stats.readingStreak}
+          </p>
+          <p className="text-xs font-medium text-muted-foreground leading-tight">
+            Streak
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StatsSummaryCard;

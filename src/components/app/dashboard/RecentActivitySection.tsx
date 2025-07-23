@@ -119,8 +119,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
     )
     .slice(0, maxActivities);
   return (
-    <div className="lg:col-span-1">
-      <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
+    <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-foreground">
             Recent Activity
@@ -183,7 +182,6 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
             </div>
           </>
         )}
-      </div>
     </div>
   );
 };
