@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Bot, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bot, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useMessageContext } from "@/lib/providers/MessageProvider";
 import { Book, UserProfile, ActivityItem } from "@/lib/models/models";
 
@@ -24,6 +24,7 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
   stats,
   recentActivity,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     currentMessage,
     isLoading,
@@ -77,42 +78,99 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
   );
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
-      {isLoading ? (
-        <LoadingSkeleton />
-      ) : (
-        <div className="flex items-start space-x-4 flex-1">
-          {/* AI Avatar */}
-          <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-            <Bot className="h-6 w-6 text-white" />
-          </div>
-          
-          {/* Chat bubble */}
-          <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative flex flex-col justify-between min-h-full">
-            {/* Speech bubble tail */}
-            <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
-            
-            {/* Message content */}
-            <div className="text-sm leading-relaxed text-foreground flex-1 flex items-center">
-              {currentMessage || "Loading your personalized message..."}
+    <div className="bg-card border border-border rounded-lg h-full flex flex-col">
+      {/* Mobile: Collapsed header with expand button */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors rounded-lg"
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? "Collapse AI message" : "Expand AI message"}
+        >
+          <div className="flex items-center space-x-3">
+            <div className="h-8 w-8 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
-            
-            {/* AI indicator */}
-            <div className="flex items-center mt-3 pt-2 border-t border-border/50 flex-shrink-0">
-              <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
-              <span className="text-xs text-muted-foreground font-medium">
-                AI Reading Companion
-              </span>
+            <div className="text-left">
+              <div className="text-sm font-medium text-foreground">AI Reading Companion</div>
+              <div className="text-xs text-muted-foreground">
+                {isLoading ? "Generating message..." : "Tap to view personalized message"}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      {error && !isLoading && (
-        <div className="mt-2 text-xs text-status-warning">
-          Using fallback message - AI service temporarily unavailable
-        </div>
-      )}
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
+        
+        {/* Mobile: Expandable content */}
+        {isExpanded && (
+          <div className="px-4 pb-4">
+            {isLoading ? (
+              <div className="bg-muted/50 rounded-lg p-4 animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted-foreground/20 rounded w-3/4"></div>
+                  <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
+                  <div className="h-3 bg-muted-foreground/20 rounded w-2/3"></div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-brand-primary/5 to-brand-accent/5 border border-brand-primary/20 rounded-lg p-4">
+                <div className="text-sm leading-relaxed text-foreground">
+                  {currentMessage || "Loading your personalized message..."}
+                </div>
+              </div>
+            )}
+            
+            {error && !isLoading && (
+              <div className="mt-2 text-xs text-status-warning">
+                Using fallback message - AI service temporarily unavailable
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: Original layout (hidden on mobile) */}
+      <div className="hidden md:flex md:flex-col md:p-6 md:h-full">
+        {isLoading ? (
+          <LoadingSkeleton />
+        ) : (
+          <div className="flex items-start space-x-4 flex-1">
+            {/* AI Avatar */}
+            <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Bot className="h-6 w-6 text-white" />
+            </div>
+            
+            {/* Chat bubble */}
+            <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative flex flex-col justify-between min-h-full">
+              {/* Speech bubble tail */}
+              <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
+              
+              {/* Message content */}
+              <div className="text-sm leading-relaxed text-foreground flex-1 flex items-center">
+                {currentMessage || "Loading your personalized message..."}
+              </div>
+              
+              {/* AI indicator */}
+              <div className="flex items-center mt-3 pt-2 border-t border-border/50 flex-shrink-0">
+                <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
+                <span className="text-xs text-muted-foreground font-medium">
+                  AI Reading Companion
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {error && !isLoading && (
+          <div className="mt-2 text-xs text-status-warning">
+            Using fallback message - AI service temporarily unavailable
+          </div>
+        )}
+      </div>
     </div>
   );
 };

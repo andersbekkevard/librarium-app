@@ -69,8 +69,8 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
           </div>
         )}
 
-        {/* Stats Summary Card */}
-        <div className="flex-shrink-0">
+        {/* Stats Summary Card - Hidden on mobile */}
+        <div className="flex-shrink-0 hidden md:block">
           <StatsSummaryCard stats={stats} />
         </div>
       </div>
