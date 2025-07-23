@@ -6,7 +6,7 @@
  */
 
 import { Unsubscribe } from "firebase/firestore";
-import { Book, BookEvent, UserProfile } from "../models/models";
+import { Book, BookEvent, PersonalizedMessage, UserProfile } from "../models/models";
 
 /**
  * Common repository result type for operations that can fail
@@ -176,6 +176,52 @@ export interface IEventRepository {
   deleteBookEvents(
     userId: string,
     bookId: string
+  ): Promise<RepositoryResult<void>>;
+}
+
+/**
+ * Message repository interface
+ *
+ * Handles all personalized message data operations
+ */
+export interface IMessageRepository {
+  /**
+   * Get the latest personalized message for a user
+   */
+  getLatestMessage(
+    userId: string
+  ): Promise<RepositoryResult<PersonalizedMessage | null>>;
+
+  /**
+   * Save a new personalized message
+   */
+  saveMessage(
+    userId: string,
+    message: Omit<PersonalizedMessage, "id">
+  ): Promise<RepositoryResult<string>>;
+
+  /**
+   * Get message history for a user (for debugging/analytics)
+   */
+  getMessageHistory(
+    userId: string,
+    limit?: number
+  ): Promise<RepositoryResult<PersonalizedMessage[]>>;
+
+  /**
+   * Subscribe to latest message changes
+   */
+  subscribeToLatestMessage(
+    userId: string,
+    callback: (message: PersonalizedMessage | null) => void
+  ): Unsubscribe;
+
+  /**
+   * Delete old messages (cleanup operation)
+   */
+  deleteOldMessages(
+    userId: string,
+    olderThanDays: number
   ): Promise<RepositoryResult<void>>;
 }
 
