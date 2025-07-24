@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Bot, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { ActivityItem, Book, UserProfile } from "@/lib/models/models";
 import { useMessageContext } from "@/lib/providers/MessageProvider";
-import { Book, UserProfile, ActivityItem } from "@/lib/models/models";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 interface Stats {
   totalBooks: number;
@@ -18,20 +19,12 @@ interface PersonalizedMessageSectionProps {
   recentActivity: ActivityItem[];
 }
 
-export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProps> = ({
-  userProfile,
-  books,
-  stats,
-  recentActivity,
-}) => {
+export const PersonalizedMessageSection: React.FC<
+  PersonalizedMessageSectionProps
+> = ({ userProfile, books, stats, recentActivity }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const {
-    currentMessage,
-    isLoading,
-    error,
-    generateMessage,
-    clearError,
-  } = useMessageContext();
+  const { currentMessage, isLoading, error, generateMessage, clearError } =
+    useMessageContext();
 
   useEffect(() => {
     const loadMessage = async () => {
@@ -51,7 +44,14 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
     if (userProfile?.id) {
       loadMessage();
     }
-  }, [userProfile?.id, books, stats, recentActivity, generateMessage, clearError]);
+  }, [
+    userProfile?.id,
+    books,
+    stats,
+    recentActivity,
+    generateMessage,
+    clearError,
+  ]);
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
@@ -69,8 +69,14 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
           {/* Loading indicator with gentle pulse */}
           <div className="absolute -bottom-1 left-6 flex space-x-1">
             <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            <div
+              className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"
+              style={{ animationDelay: "0.4s" }}
+            ></div>
           </div>
         </div>
       </div>
@@ -92,9 +98,13 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div className="text-left">
-              <div className="text-sm font-medium text-foreground">AI Reading Companion</div>
+              <div className="text-sm font-medium text-foreground">
+                AI Reading Companion
+              </div>
               <div className="text-xs text-muted-foreground">
-                {isLoading ? "Generating message..." : "Tap to view personalized message"}
+                {isLoading
+                  ? "Generating message..."
+                  : "Tap to view personalized message"}
               </div>
             </div>
           </div>
@@ -104,7 +114,7 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           )}
         </button>
-        
+
         {/* Mobile: Expandable content */}
         {isExpanded && (
           <div className="px-4 pb-4">
@@ -123,7 +133,7 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
                 </div>
               </div>
             )}
-            
+
             {error && !isLoading && (
               <div className="mt-2 text-xs text-status-warning">
                 Using fallback message - AI service temporarily unavailable
@@ -141,19 +151,26 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
           <div className="flex items-start space-x-4 flex-1">
             {/* AI Avatar */}
             <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Bot className="h-6 w-6 text-white" />
+              <Image
+                src="/librarian.png"
+                alt="Personal Librarian"
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain rounded-full"
+                priority
+              />
             </div>
-            
+
             {/* Chat bubble */}
             <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative flex flex-col justify-between min-h-full">
               {/* Speech bubble tail */}
               <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
-              
+
               {/* Message content */}
               <div className="text-sm leading-relaxed text-foreground flex-1 flex items-center">
                 {currentMessage || "Loading your personalized message..."}
               </div>
-              
+
               {/* AI indicator */}
               <div className="flex items-center mt-3 pt-2 border-t border-border/50 flex-shrink-0">
                 <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
@@ -164,7 +181,7 @@ export const PersonalizedMessageSection: React.FC<PersonalizedMessageSectionProp
             </div>
           </div>
         )}
-        
+
         {error && !isLoading && (
           <div className="mt-2 text-xs text-status-warning">
             Using fallback message - AI service temporarily unavailable

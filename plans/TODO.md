@@ -37,13 +37,17 @@
 - [X] Create a useEventsContext hook to use the correct design pattern
 - [ ] Refactor Google Books interaction to a service/provider structure (?)
 - [ ] Link "Pages this month" with useEffect dependency to the event array
+- [ ] SIMPLIFY
+- [ ] Add a "book added" event so this is tracked as well
 
 ## Scanning
 - [ ] Adjust functionality to work when has two barcodes (one isbn one other)
 
 
 ## LLM
-- [ ] Integrate
+- [X] Integrate
+- [ ] Get an overview message for statistics-page
+- [ ] Get "next-book" reccomendations
 
 
 ## Testing

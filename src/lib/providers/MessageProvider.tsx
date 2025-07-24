@@ -7,11 +7,22 @@
 
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Unsubscribe } from "firebase/firestore";
-import { PersonalizedMessage, ActivityItem, Book, UserProfile } from "../models/models";
-import { messageService } from "../services/MessageService";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  ActivityItem,
+  Book,
+  PersonalizedMessage,
+  UserProfile,
+} from "../models/models";
 import { messageRepository } from "../repositories/FirebaseMessageRepository";
+import { messageService } from "../services/MessageService";
 import { useAuthContext } from "./AuthProvider";
 
 interface MessageContextData {
@@ -44,7 +55,9 @@ interface MessageContextValue {
   loadMessageHistory: () => Promise<void>;
 }
 
-const MessageContext = createContext<MessageContextValue | undefined>(undefined);
+const MessageContext = createContext<MessageContextValue | undefined>(
+  undefined
+);
 
 interface MessageProviderProps {
   children: React.ReactNode;
@@ -58,7 +71,9 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [messageHistory, setMessageHistory] = useState<PersonalizedMessage[]>([]);
+  const [messageHistory, setMessageHistory] = useState<PersonalizedMessage[]>(
+    []
+  );
 
   // Real-time listener for message updates
   useEffect(() => {
@@ -93,43 +108,65 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
   /**
    * Generate personalized message
    */
-  const generateMessage = useCallback(async (data: MessageContextData): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const generateMessage = useCallback(
+    async (data: MessageContextData): Promise<void> => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const result = await messageService.getPersonalizedMessage(data);
+        const result = await messageService.getPersonalizedMessage(data);
 
-      if (result.success && result.data) {
-        setCurrentMessage(result.data);
-        setLastUpdated(new Date());
-      } else {
-        const errorMessage = typeof result.error === 'string' ? result.error : "Failed to generate message";
-        throw new Error(errorMessage);
+        if (result.success && result.data) {
+          // Note: setCurrentMessage and setLastUpdated will be handled by the real-time listener
+          // The service handles all fallback logic internally
+        } else {
+          const errorMessage =
+            typeof result.error === "string"
+              ? result.error
+              : "Failed to generate message";
+          setError(errorMessage);
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error occurred";
+        setError(errorMessage);
+        console.error("Failed to generate personalized message:", err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      setError(errorMessage);
-      console.error("Failed to generate personalized message:", err);
-      
-      // Set fallback message on error
-      const fallbackMessage = getFallbackMessage(data.stats);
-      setCurrentMessage(fallbackMessage);
-      setLastUpdated(new Date());
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   /**
    * Force refresh message (bypass cache)
    */
-  const refreshMessage = useCallback(async (data: MessageContextData): Promise<void> => {
-    // Clear current message to force regeneration
-    setCurrentMessage(null);
-    setLastUpdated(null);
-    await generateMessage(data);
-  }, [generateMessage]);
+  const refreshMessage = useCallback(
+    async (data: MessageContextData): Promise<void> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const result = await messageService.getPersonalizedMessage(data, true);
+
+        if (!result.success) {
+          const errorMessage =
+            typeof result.error === "string"
+              ? result.error
+              : "Failed to refresh message";
+          setError(errorMessage);
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error occurred";
+        setError(errorMessage);
+        console.error("Failed to refresh personalized message:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   /**
    * Clear error state
@@ -143,10 +180,10 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
    */
   const loadMessageHistory = useCallback(async (): Promise<void> => {
     if (!user?.uid) return;
-    
+
     try {
       const result = await messageService.getMessageHistory(user.uid, 10);
-      
+
       if (result.success && result.data) {
         setMessageHistory(result.data);
       } else {
@@ -156,29 +193,6 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
       console.error("Error loading message history:", err);
     }
   }, [user?.uid]);
-
-  /**
-   * Generate fallback message based on stats
-   */
-  const getFallbackMessage = (stats: MessageContextData["stats"]): string => {
-    if (stats.readingStreak > 7) {
-      return `Amazing ${stats.readingStreak}-day reading streak! Your dedication to reading is truly inspiring.`;
-    }
-
-    if (stats.currentlyReading > 0) {
-      return `You're currently reading ${stats.currentlyReading} book${
-        stats.currentlyReading > 1 ? "s" : ""
-      }! That's wonderful progress.`;
-    }
-
-    if (stats.finishedBooks > 0) {
-      return `Congratulations on finishing ${stats.finishedBooks} book${
-        stats.finishedBooks > 1 ? "s" : ""
-      }! Your reading journey is building something beautiful.`;
-    }
-
-    return "Your reading journey is unique and wonderful. Keep exploring new worlds through books!";
-  };
 
   const contextValue: MessageContextValue = {
     // State
@@ -207,11 +221,11 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
  */
 export const useMessageContext = (): MessageContextValue => {
   const context = useContext(MessageContext);
-  
+
   if (context === undefined) {
     throw new Error("useMessageContext must be used within a MessageProvider");
   }
-  
+
   return context;
 };
 
