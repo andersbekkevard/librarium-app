@@ -107,9 +107,10 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
   ).length;
 
   // Determine activity limit based on currently reading layout:
-  // - 1 row (≤2 books): show 3 activities
-  // - 2 rows (>2 books): show 5 activities
-  const maxActivities = currentlyReadingCount <= 2 ? 3 : 5;
+  // - 1 row (≤2 books): show 4-6 activities with adaptive spacing
+  // - 2 rows (3-4 books): show 6-8 activities with tighter spacing
+  const isShortLayout = currentlyReadingCount <= 2;
+  const maxActivities = isShortLayout ? 6 : 8;
 
   // Filter out internal activities and limit based on currently reading layout
   const filteredActivities = activities
@@ -118,9 +119,23 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         activity.type !== "manually_updated" && activity.type !== "deleted"
     )
     .slice(0, maxActivities);
+
+  // Determine spacing strategy based on available height and content
+  const getContentSpacing = () => {
+    const activityCount = filteredActivities.length;
+    
+    if (isShortLayout) {
+      // Shorter container: use generous spacing for fewer activities
+      return activityCount <= 3 ? "space-y-6" : "space-y-4";
+    } else {
+      // Taller container: use moderate spacing for more activities
+      return activityCount <= 5 ? "space-y-4" : "space-y-3";
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
-        <div className="mb-4">
+        <div className="mb-4 flex-shrink-0">
           <h2 className="text-lg font-semibold text-foreground">
             Recent Activity
           </h2>
@@ -148,32 +163,39 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && filteredActivities.length > 0 && (
           <>
-            <div className="flex-1 space-y-3 overflow-hidden min-h-0">
-              {filteredActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div
-                    className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2 shrink-0`}
-                  ></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">
-                      {getActivityText(activity)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatTimeAgo(activity.timestamp)}
-                    </p>
+            {/* Activities container with proper flex distribution */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className={`flex-grow ${getContentSpacing()}`}>
+                {filteredActivities.map((activity) => (
+                  <div 
+                    key={activity.id} 
+                    className="flex items-start space-x-3"
+                  >
+                    <div
+                      className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2 shrink-0`}
+                    ></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground leading-relaxed">
+                        {getActivityText(activity)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formatTimeAgo(activity.timestamp)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border flex-shrink-0">
+            {/* Fixed footer with better visual separation */}
+            <div className="mt-6 pt-4 border-t border-border flex-shrink-0">
               <Link href="/activity-history">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`w-full ${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text} flex items-center justify-center gap-1`}
+                  className={`w-full ${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text} flex items-center justify-center gap-1 transition-colors`}
                 >
                   View all activity
                   <ChevronRight className="h-3 w-3" />
