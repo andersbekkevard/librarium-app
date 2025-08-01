@@ -62,9 +62,9 @@ export const HeroSection = () => {
         <div className="text-center space-y-8">
           <Badge variant="outline" className="text-sm py-2 animate-fade-in-up">
             <span className={`mr-2 ${BRAND_COLORS.primary.text}`}>
-              <Badge className={BRAND_COLORS.primary.bg}>MVP</Badge>
+              <Badge className={BRAND_COLORS.primary.bg}>New</Badge>
             </span>
-            <span>Essential reading tools are ready!</span>
+            <span>AI-powered reading assistant is here!</span>
           </Badge>
 
           <div className="max-w-screen-md mx-auto text-center text-4xl md:text-6xl font-bold animate-fade-in-up delay-200">

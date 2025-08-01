@@ -1,12 +1,12 @@
 # TODO.md
 
 ## UI
-- [X] Refine Landing animations
 - [ ] Animations for app
 - [ ] Rethink all colors?
 - [ ] Change two philosophy black and blue secondary color scheme
 - [ ] tweakCN?
-- [ ] Let more of the description text in 	searchResult be visible
+- [ ] Let more of the description text in searchResult be visible
+- [X] Refine Landing animations
 - [X] Make preview show some kind of book details page in preview with more info
 - [X] Make dark mode comments not look horrible
 
@@ -16,44 +16,39 @@
 
 
 ## Nice-to-have feature
-- [X] Align search bar properly, and integrate it with actual functionality
-- [X] Split "Reading Activity Over Time" chart to split by genre
 - [ ] Add more documentation for non-trivial code
+- [X] Split "Reading Activity Over Time" chart to split by genre
+- [X] Align search bar properly, and integrate it with actual functionality
 
 ## Bigger feature
-- [X] Add commenting on books
-  - [X] Real time comment
-  - [X] Let users commit a one time "review"
-  - [ ] Refactor to link ratings with reviews
 - [ ] Improve user features
   - [ ] Allow for email/github/facebook sing in, and email/image management
   - [ ] Create profile pages, settings etc etc
 - [ ] Add shelf/collection functionality
 - [ ] Color code genres in separate database
 - [ ] Implement barcode scanner
+- [X] Add commenting on books
+  - [X] Real time comment
+  - [X] Let users commit a one time "review"
+  - [ ] Refactor to link ratings with reviews (?)
 
 ## Design/Architectural changes
 - [ ] Clean the codebase, extract components where possible
-- [X] Create a useEventsContext hook to use the correct design pattern
 - [ ] Refactor Google Books interaction to a service/provider structure (?)
 - [ ] Link "Pages this month" with useEffect dependency to the event array
 - [ ] SIMPLIFY
 - [ ] Add a "book added" event so this is tracked as well
+- [ ] Architectural cleanup in ai loop, right now its a mess with uneccesary layers
+- [X] Create a useEventsContext hook to use the correct design pattern
 
 ## Scanning
 - [ ] Adjust functionality to work when has two barcodes (one isbn one other)
 
-
 ## LLM
-- [X] Integrate
 - [ ] Get an overview message for statistics-page
 - [ ] Get "next-book" reccomendations
+- [X] Integrate
 
 
 ## Testing
 - [ ] Get full test coverage
-
-***
-
-## *Next Step*
-- [ ] Implement a small "progress summary" with LLM in Statistics and/or Dashboard page

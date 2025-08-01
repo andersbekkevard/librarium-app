@@ -104,7 +104,7 @@ export const FooterSection = () => {
               © 2025 Librarium. All rights reserved.
             </div>
             <div className="text-sm text-muted-foreground">
-              Made with ❤️ for book lovers everywhere
+              Made with ❤️ by Anders Bekkevard
             </div>
           </div>
         </div>
