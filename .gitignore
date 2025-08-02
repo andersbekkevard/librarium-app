@@ -188,3 +188,4 @@ AGENTS.md
 # ===========================
 history/*.png
 history/*.json
+.serena/
