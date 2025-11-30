@@ -3,8 +3,8 @@
 import {
   BookOpenIcon,
   CheckCircleIcon,
-  PencilSimpleIcon,
   FileTextIcon,
+  PencilSimpleIcon,
   PlayIcon,
   StarIcon,
 } from "@phosphor-icons/react";
@@ -66,7 +66,10 @@ export const BookCover: React.FC<BookCoverProps> = ({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
-              <BookOpenIcon className="h-16 w-16 text-muted-foreground mb-4" weight="light" />
+              <BookOpenIcon
+                className="h-16 w-16 text-muted-foreground mb-4"
+                weight="light"
+              />
               <p className="text-sm font-medium text-foreground mb-2">
                 {book.title}
               </p>
@@ -95,7 +98,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
                 {book.progress.totalPages || "?"} pages
               </span>
             </div>
-            <ProgressBar value={progress} variant="md" />
+            <ProgressBar value={progress} size="md" />
           </div>
         )}
 

@@ -82,7 +82,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
             <span>Progress</span>
             <span>{progress}%</span>
           </div>
-          <ProgressBar value={progress} variant="md" />
+          <ProgressBar value={progress} size="md" />
         </div>
       </CardContent>
     </Card>
