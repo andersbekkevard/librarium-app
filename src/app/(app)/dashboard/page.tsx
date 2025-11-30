@@ -4,7 +4,7 @@ import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
-import { Loader2 } from "lucide-react";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -52,7 +52,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" />
+          <CircleNotchIcon className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" weight="bold" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>

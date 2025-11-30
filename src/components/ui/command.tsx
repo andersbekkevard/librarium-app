@@ -1,7 +1,7 @@
 "use client";
 
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Command as CommandPrimitive } from "cmdk";
-import { Search } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils/utils";
@@ -25,8 +25,11 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b border-border/60 px-4" cmdk-input-wrapper="">
-    <Search className="mr-3 h-4 w-4 shrink-0 text-muted-foreground" />
+  <div
+    className="flex items-center border-b border-border/60 px-4"
+    cmdk-input-wrapper=""
+  >
+    <MagnifyingGlassIcon className="mr-3 h-4 w-4 shrink-0 text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(

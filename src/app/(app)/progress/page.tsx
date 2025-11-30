@@ -1,6 +1,6 @@
 "use client";
 
-import { Target } from "lucide-react";
+import { TargetIcon } from "@phosphor-icons/react";
 
 export default function ProgressPage() {
   return (
@@ -10,7 +10,7 @@ export default function ProgressPage() {
           Feature Preview
         </span>
         <div className="bg-muted/50 rounded-full p-5 mb-4 ring-2 ring-brand-primary flex items-center justify-center">
-          <Target
+          <TargetIcon
             className="h-10 w-10 text-brand-primary"
             aria-hidden="true"
           />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -74,7 +74,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   if (!books || books.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+        <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
         <p>Search for books to add to your library</p>
       </div>
     );

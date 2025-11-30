@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND_COLORS, STATUS_COLORS } from "@/lib/design/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRightIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,8 +47,9 @@ export const HeroSection = () => {
       <section className="container w-full">
         <div className="grid place-items-center lg:max-w-screen-xl gap-8 mx-auto py-20 md:py-32">
           <div className="flex items-center justify-center">
-            <Loader2
+            <CircleNotchIcon
               className={`h-8 w-8 animate-spin ${BRAND_COLORS.primary.text}`}
+              weight="bold"
             />
           </div>
         </div>
@@ -99,18 +100,18 @@ export const HeroSection = () => {
                 <>✓ Welcome! Redirecting...</>
               ) : isSigningIn ? (
                 <>
-                  <Loader2 className="size-4 mr-2 animate-spin" />
+                  <CircleNotchIcon className="size-4 mr-2 animate-spin" weight="bold" />
                   Signing in...
                 </>
               ) : isAuthenticated ? (
                 <>
                   Go to Dashboard
-                  <ArrowRight className="size-5 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                  <ArrowRightIcon className="size-5 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
                 </>
               ) : (
                 <>
                   Start Reading
-                  <ArrowRight className="size-5 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                  <ArrowRightIcon className="size-5 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
                 </>
               )}
             </Button>

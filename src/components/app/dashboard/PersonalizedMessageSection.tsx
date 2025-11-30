@@ -141,7 +141,7 @@ export const PersonalizedMessageSection: React.FC<
             <div className="flex-1 min-w-0">
               {/* Header */}
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm font-heading font-medium text-brand-primary">
+                <span className="text-lg font-heading font-medium text-brand-primary">
                   Librarium AI
                 </span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-primary/10 text-brand-primary border border-brand-primary/20">

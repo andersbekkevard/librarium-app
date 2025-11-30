@@ -1,7 +1,7 @@
 import { READING_STATE_COLORS } from "@/lib/design/colors";
 import type { Book } from "@/lib/models/models";
 import { cn } from "@/lib/utils/utils";
-import { CheckCircle, Clock, HelpCircle, LucideIcon, Play } from "lucide-react";
+import { CheckCircleIcon, ClockIcon, QuestionIcon, PlayIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { Badge } from "./badge";
 
@@ -13,7 +13,7 @@ interface ReadingStateBadgeProps {
 
 interface BadgeConfig {
   label: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   classes: string;
 }
 
@@ -23,7 +23,7 @@ const READING_STATE_CONFIG: Record<
 > = {
   not_started: {
     label: "Not Started",
-    icon: Clock,
+    icon: ClockIcon,
     classes: cn(
       READING_STATE_COLORS.not_started.bg,
       READING_STATE_COLORS.not_started.text,
@@ -33,7 +33,7 @@ const READING_STATE_CONFIG: Record<
   },
   in_progress: {
     label: "Reading",
-    icon: Play,
+    icon: PlayIcon,
     classes: cn(
       READING_STATE_COLORS.in_progress.bg,
       READING_STATE_COLORS.in_progress.text,
@@ -43,7 +43,7 @@ const READING_STATE_CONFIG: Record<
   },
   finished: {
     label: "Finished",
-    icon: CheckCircle,
+    icon: CheckCircleIcon,
     classes: cn(
       READING_STATE_COLORS.finished.bg,
       READING_STATE_COLORS.finished.text,
@@ -55,7 +55,7 @@ const READING_STATE_CONFIG: Record<
 
 const UNKNOWN_STATE_CONFIG: BadgeConfig & { testId: string } = {
   label: "Unknown",
-  icon: HelpCircle,
+  icon: QuestionIcon,
   classes: cn(
     READING_STATE_COLORS.not_started.bg,
     READING_STATE_COLORS.not_started.text,

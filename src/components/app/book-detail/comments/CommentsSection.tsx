@@ -7,8 +7,8 @@ import { useEventsContext } from "@/lib/providers/EventsProvider";
 import {
   CaretDownIcon,
   CaretUpIcon,
-  ChatIcon,
-  PlusCircle,
+  ChatCircleIcon,
+  PlusCircleIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
@@ -79,7 +79,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <ChatIcon className="w-5 h-5 text-muted-foreground" weight="light" />
+          <ChatCircleIcon className="w-5 h-5 text-muted-foreground" weight="light" />
           <h3 className="text-lg font-semibold text-foreground">Comments</h3>
           {hasComments && (
             <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-xs font-medium text-muted-foreground bg-input rounded-full dark:bg-input/30">
@@ -104,7 +104,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             className="flex items-center gap-2"
             disabled={commentsLoading}
           >
-            <PlusCircle className="w-4 h-4" weight="light" />
+            <PlusCircleIcon className="w-4 h-4" weight="light" />
             {getAddButtonText()}
           </Button>
         </div>
@@ -200,7 +200,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       {!hasComments && !showCommentForm && (
         <div className="text-center py-10 text-muted-foreground">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-input mb-3 dark:bg-input/30">
-            <ChatIcon className="w-6 h-6 text-muted-foreground/60" weight="light" />
+            <ChatCircleIcon className="w-6 h-6 text-muted-foreground/60" weight="light" />
           </div>
           <p className="text-sm font-medium">No comments yet</p>
           <p className="text-xs text-muted-foreground/60 mt-1">

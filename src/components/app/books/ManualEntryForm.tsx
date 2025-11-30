@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Loader2, Plus, X } from "lucide-react";
+import { FileTextIcon, CircleNotchIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -69,7 +69,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
+          <FileTextIcon className="h-5 w-5" />
           Add Book Manually
         </CardTitle>
       </CardHeader>
@@ -161,12 +161,12 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({
             <Button type="submit" disabled={isAdding}>
               {isAdding ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <CircleNotchIcon className="h-4 w-4 mr-2 animate-spin" weight="bold" />
                   Adding...
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <PlusIcon className="h-4 w-4 mr-2" />
                   Add to Library
                 </>
               )}
@@ -177,7 +177,7 @@ export const ManualEntryForm: React.FC<ManualEntryFormProps> = ({
               disabled={isAdding}
               onClick={clearForm}
             >
-              <X className="h-4 w-4 mr-2" />
+              <XIcon className="h-4 w-4 mr-2" />
               Clear Form
             </Button>
           </div>

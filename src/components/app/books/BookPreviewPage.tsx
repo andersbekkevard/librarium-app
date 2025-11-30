@@ -9,18 +9,18 @@ import {
   getBestThumbnail,
 } from "@/lib/api/google-books-api";
 import {
-  ArrowLeft,
-  BookOpen,
-  Building,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Hash,
-  Plus,
-  Star,
-  Tag,
-} from "lucide-react";
+  ArrowLeftIcon,
+  BookOpenIcon,
+  BuildingsIcon,
+  CalendarIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  LinkSimpleIcon,
+  HashIcon,
+  PlusIcon,
+  StarIcon,
+  TagIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
@@ -71,7 +71,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
               onClick={onBack}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeftIcon className="h-4 w-4" />
               Back
             </Button>
           </div>
@@ -95,7 +95,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
-                          <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+                          <BookOpenIcon className="h-16 w-16 text-muted-foreground mb-4" />
                           <p className="text-sm font-medium text-foreground mb-2">
                             {book.volumeInfo.title}
                           </p>
@@ -109,7 +109,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                     {/* Rating */}
                     {book.volumeInfo.averageRating && (
                       <div className="flex items-center justify-center gap-1">
-                        <Star className="h-4 w-4 fill-status-warning text-status-warning" />
+                        <StarIcon className="h-4 w-4 fill-status-warning text-status-warning" />
                         <span className="text-sm font-medium">
                           {book.volumeInfo.averageRating}
                         </span>
@@ -131,17 +131,17 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                         >
                           {isAdded ? (
                             <>
-                              <BookOpen className="h-4 w-4 mr-2" />
+                              <BookOpenIcon className="h-4 w-4 mr-2" />
                               Added to Library
                             </>
                           ) : isAdding ? (
                             <>
-                              <Plus className="h-4 w-4 mr-2 animate-spin" />
+                              <PlusIcon className="h-4 w-4 mr-2 animate-spin" />
                               Adding...
                             </>
                           ) : (
                             <>
-                              <Plus className="h-4 w-4 mr-2" />
+                              <PlusIcon className="h-4 w-4 mr-2" />
                               Add to Library
                             </>
                           )}
@@ -158,7 +158,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                               window.open(book.volumeInfo.previewLink, "_blank")
                             }
                           >
-                            <ExternalLink className="h-4 w-4 mr-2" />
+                            <LinkSimpleIcon className="h-4 w-4 mr-2" />
                             Preview on Google
                           </Button>
                         )}
@@ -170,7 +170,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                               window.open(book.volumeInfo.infoLink, "_blank")
                             }
                           >
-                            <ExternalLink className="h-4 w-4 mr-2" />
+                            <LinkSimpleIcon className="h-4 w-4 mr-2" />
                             More Info
                           </Button>
                         )}
@@ -202,7 +202,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {publishedYear && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Published:</span>
                         <span className="text-muted-foreground">
                           {publishedYear}
@@ -211,7 +211,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                     )}
                     {book.volumeInfo.publisher && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <BuildingsIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Publisher:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.publisher}
@@ -220,7 +220,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                     )}
                     {book.volumeInfo.pageCount && (
                       <div className="flex items-center gap-2 text-sm">
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Pages:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.pageCount}
@@ -229,7 +229,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                     )}
                     {book.volumeInfo.industryIdentifiers && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Hash className="h-4 w-4 text-muted-foreground" />
+                        <HashIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">ISBN:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.industryIdentifiers[0]?.identifier}
@@ -242,7 +242,7 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                   {book.volumeInfo.categories && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        <TagIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Categories:</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -279,12 +279,12 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                             >
                               {isDescriptionExpanded ? (
                                 <>
-                                  <ChevronUp className="h-4 w-4 mr-1" />
+                                  <CaretUpIcon className="h-4 w-4 mr-1" />
                                   Read less
                                 </>
                               ) : (
                                 <>
-                                  <ChevronDown className="h-4 w-4 mr-1" />
+                                  <CaretDownIcon className="h-4 w-4 mr-1" />
                                   Read more
                                 </>
                               )}
@@ -304,13 +304,13 @@ export const BookPreviewPage: React.FC<BookPreviewPageProps> = ({
                         <div className="flex gap-4 text-sm">
                           {book.volumeInfo.readingModes.text && (
                             <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" />
+                              <BookOpenIcon className="h-3 w-3" />
                               Text available
                             </span>
                           )}
                           {book.volumeInfo.readingModes.image && (
                             <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" />
+                              <BookOpenIcon className="h-3 w-3" />
                               Image available
                             </span>
                           )}

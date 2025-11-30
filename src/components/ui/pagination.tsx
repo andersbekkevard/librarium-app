@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils/utils";
 
 interface PaginationProps {
@@ -70,7 +70,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         aria-label="Go to previous page"
         className="flex items-center gap-1"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <CaretLeftIcon className="h-4 w-4" />
         <span className="hidden sm:inline">Previous</span>
       </Button>
 
@@ -85,7 +85,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 className="flex h-8 w-8 items-center justify-center"
                 aria-hidden="true"
               >
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                <DotsThreeIcon className="h-4 w-4 text-muted-foreground" />
               </div>
             );
           }
@@ -122,7 +122,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         className="flex items-center gap-1"
       >
         <span className="hidden sm:inline">Next</span>
-        <ChevronRight className="h-4 w-4" />
+        <CaretRightIcon className="h-4 w-4" />
       </Button>
 
       {/* Last page button (optional) */}
@@ -179,7 +179,7 @@ export const SimplePagination: React.FC<SimplePaginationProps> = ({
         aria-label="Go to previous page"
         className="flex items-center gap-1"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <CaretLeftIcon className="h-4 w-4" />
         Previous
       </Button>
 
@@ -196,7 +196,7 @@ export const SimplePagination: React.FC<SimplePaginationProps> = ({
         className="flex items-center gap-1"
       >
         Next
-        <ChevronRight className="h-4 w-4" />
+        <CaretRightIcon className="h-4 w-4" />
       </Button>
     </nav>
   );

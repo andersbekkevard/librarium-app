@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, List, SortAsc, SortDesc, X } from "lucide-react";
+import { GridFourIcon, ListIcon, SortAscendingIcon, SortDescendingIcon, XIcon } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
@@ -96,14 +96,14 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
             size="sm"
             onClick={() => updateURLParams({ view: "grid" })}
           >
-            <Grid className="h-4 w-4" />
+            <GridFourIcon className="h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === "list" ? "default" : "outline"}
             size="sm"
             onClick={() => updateURLParams({ view: "list" })}
           >
-            <List className="h-4 w-4" />
+            <ListIcon className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -192,9 +192,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                     {label}
                     {sortBy === key &&
                       (sortDirection === "asc" ? (
-                        <SortAsc className="h-3 w-3" />
+                        <SortAscendingIcon className="h-3 w-3" />
                       ) : (
-                        <SortDesc className="h-3 w-3" />
+                        <SortDescendingIcon className="h-3 w-3" />
                       ))}
                   </Button>
                 ))}
@@ -218,7 +218,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                 }
                 className="flex items-center gap-1 w-full justify-center"
               >
-                <X className="h-3 w-3" />
+                <XIcon className="h-3 w-3" />
                 Clear Filters ({activeFiltersCount})
               </Button>
             )}
@@ -316,9 +316,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                       {label}
                       {sortBy === key &&
                         (sortDirection === "asc" ? (
-                          <SortAsc className="h-3 w-3" />
+                          <SortAscendingIcon className="h-3 w-3" />
                         ) : (
-                          <SortDesc className="h-3 w-3" />
+                          <SortDescendingIcon className="h-3 w-3" />
                         ))}
                     </Button>
                   ))}
@@ -342,7 +342,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
                   }
                   className="flex items-center gap-1"
                 >
-                  <X className="h-3 w-3" />
+                  <XIcon className="h-3 w-3" />
                   Clear Filters ({activeFiltersCount})
                 </Button>
               )}

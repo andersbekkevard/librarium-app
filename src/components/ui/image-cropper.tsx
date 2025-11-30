@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { BRAND_COLORS } from "@/lib/design/colors";
 import { cn } from "@/lib/utils/utils";
-import { Check, RotateCcw, X } from "lucide-react";
+import { CheckIcon, ArrowCounterClockwiseIcon, XIcon } from "@phosphor-icons/react";
 import { useCallback, useRef, useState } from "react";
 
 interface CropArea {
@@ -192,7 +192,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
           onClick={onCancel}
           className="text-muted-foreground hover:text-foreground"
         >
-          <X className="h-4 w-4" />
+          <XIcon className="h-4 w-4" />
         </Button>
       </div>
 
@@ -310,7 +310,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
               onClick={handleResetCrop}
               className="text-muted-foreground"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <ArrowCounterClockwiseIcon className="h-4 w-4 mr-2" />
               Reset
             </Button>
           </div>
@@ -326,7 +326,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
                 BRAND_COLORS.primary.bgHover
               )}
             >
-              <Check className="h-4 w-4 mr-2" />
+              <CheckIcon className="h-4 w-4 mr-2" />
               Apply Crop
             </Button>
           </div>

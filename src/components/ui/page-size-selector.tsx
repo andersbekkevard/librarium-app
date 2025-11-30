@@ -8,7 +8,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, Check } from "lucide-react";
+import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils/utils";
 import { DEFAULT_PAGE_SIZE_OPTIONS, validatePageSize } from "@/lib/utils/pagination-utils";
 
@@ -100,7 +100,7 @@ export const PageSizeSelector: React.FC<PageSizeSelectorProps> = ({
         aria-label="Items per page"
       >
         <span>{pageSize} per page</span>
-        <ChevronDown className={cn("h-3 w-3 transition-transform", isOpen && "rotate-180")} />
+        <CaretDownIcon className={cn("h-3 w-3 transition-transform", isOpen && "rotate-180")} />
       </Button>
 
       {isOpen && (
@@ -118,7 +118,7 @@ export const PageSizeSelector: React.FC<PageSizeSelectorProps> = ({
                 aria-selected={size === pageSize}
               >
                 <span>{size} per page</span>
-                {size === pageSize && <Check className="h-3 w-3 text-foreground" />}
+                {size === pageSize && <CheckIcon className="h-3 w-3 text-foreground" />}
               </button>
             ))}
             
@@ -140,7 +140,7 @@ export const PageSizeSelector: React.FC<PageSizeSelectorProps> = ({
                     <span>
                       {isCustomSize ? `${pageSize} per page` : "Custom..."}
                     </span>
-                    {isCustomSize && <Check className="h-3 w-3 text-foreground" />}
+                    {isCustomSize && <CheckIcon className="h-3 w-3 text-foreground" />}
                   </button>
                 ) : (
                   <div className="px-3 py-2">

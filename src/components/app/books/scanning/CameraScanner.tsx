@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/utils";
-import { Camera, CameraOff, Flashlight, FlashlightOff } from "lucide-react";
+import { CameraIcon, CameraSlashIcon, FlashlightIcon, LightningSlashIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import {
   BarcodeFormat,
@@ -142,13 +142,13 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           className
         )}
       >
-        <CameraOff className="h-12 w-12 text-muted-foreground mb-4" />
+        <CameraSlashIcon className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg mb-2">Camera Access Required</h3>
         <p className="text-muted-foreground text-center mb-4 max-w-sm">
           To scan barcodes, please allow camera access in your browser settings.
         </p>
         <Button onClick={requestPermissions} variant="outline">
-          <Camera className="h-4 w-4 mr-2" />
+          <CameraIcon className="h-4 w-4 mr-2" />
           Enable Camera
         </Button>
       </div>
@@ -165,7 +165,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         )}
       >
         <div className="text-center">
-          <Camera className="h-8 w-8 animate-pulse text-muted-foreground mx-auto mb-2" />
+          <CameraIcon className="h-8 w-8 animate-pulse text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             Requesting camera access...
           </p>
@@ -223,9 +223,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
             className="bg-black/50 hover:bg-black/70 text-white border-0"
           >
             {torchEnabled ? (
-              <FlashlightOff className="h-4 w-4" />
+              <LightningSlashIcon className="h-4 w-4" />
             ) : (
-              <Flashlight className="h-4 w-4" />
+              <FlashlightIcon className="h-4 w-4" />
             )}
           </Button>
         </div>
@@ -235,7 +235,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       {!isActive && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
           <div className="text-center text-white">
-            <CameraOff className="h-8 w-8 mx-auto mb-2" />
+            <CameraSlashIcon className="h-8 w-8 mx-auto mb-2" />
             <p className="text-sm">Camera paused</p>
           </div>
         </div>

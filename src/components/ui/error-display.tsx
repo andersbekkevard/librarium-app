@@ -13,7 +13,13 @@ import {
   StandardError,
 } from "@/lib/errors/error-handling";
 import { cn } from "@/lib/utils/utils";
-import { AlertCircle, AlertTriangle, Info, RefreshCw, X } from "lucide-react";
+import {
+  ArrowClockwiseIcon,
+  InfoIcon,
+  WarningCircleIcon,
+  WarningIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import React from "react";
 import { Button } from "./button";
 import { Card, CardContent } from "./card";
@@ -41,13 +47,13 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
     switch (severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
-        return <AlertTriangle className="h-4 w-4" />;
+        return <WarningIcon className="h-4 w-4" />;
       case ErrorSeverity.MEDIUM:
-        return <AlertCircle className="h-4 w-4" />;
+        return <WarningCircleIcon className="h-4 w-4" />;
       case ErrorSeverity.LOW:
-        return <Info className="h-4 w-4" />;
+        return <InfoIcon className="h-4 w-4" />;
       default:
-        return <AlertCircle className="h-4 w-4" />;
+        return <WarningCircleIcon className="h-4 w-4" />;
     }
   };
 
@@ -128,7 +134,7 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
                 onClick={onDismiss}
                 className={cn("h-6 w-6 p-0", styles.text)}
               >
-                <X className="h-3 w-3" />
+                <XIcon className="h-3 w-3" />
               </Button>
             )}
           </div>
@@ -209,7 +215,7 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
     <Card className={cn("border-destructive", className)}>
       <CardContent className="p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <WarningCircleIcon className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             {title && (
               <h3 className="font-medium text-foreground mb-1">{title}</h3>
@@ -226,7 +232,7 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
                   onClick={onRetry}
                   className="text-xs"
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
+                  <ArrowClockwiseIcon className="h-3 w-3 mr-1" />
                   Try Again
                 </Button>
               )}
@@ -269,14 +275,14 @@ export const LoadingError: React.FC<LoadingErrorProps> = ({
 }) => {
   return (
     <div className={cn("text-center p-8", className)}>
-      <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+      <WarningCircleIcon className="h-12 w-12 mx-auto mb-4 text-destructive" />
       <h3 className="text-lg font-medium text-foreground mb-2">
         Failed to load
       </h3>
       <p className="text-muted-foreground mb-4">{error.userMessage}</p>
       {error.retryable && onRetry && (
         <Button onClick={onRetry} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
           Try Again
         </Button>
       )}
@@ -303,7 +309,7 @@ export const InlineError: React.FC<InlineErrorProps> = ({
         className
       )}
     >
-      <AlertCircle className="h-3 w-3 flex-shrink-0" />
+      <WarningCircleIcon className="h-3 w-3 flex-shrink-0" />
       <span>{error.userMessage}</span>
     </div>
   );
@@ -346,7 +352,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
       )}
     >
       <div className="flex items-start gap-3">
-        <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+        <WarningCircleIcon className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <p className="text-sm font-medium text-foreground">
             {error.userMessage}
@@ -364,7 +370,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
             onClick={onDismiss}
             className="h-6 w-6 p-0"
           >
-            <X className="h-3 w-3" />
+            <XIcon className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -388,7 +394,7 @@ export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
 }) => {
   return (
     <div className={cn("p-8 text-center", className)}>
-      <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+      <WarningIcon className="h-12 w-12 mx-auto mb-4 text-destructive" />
       <h2 className="text-xl font-semibold text-foreground mb-2">
         Something went wrong
       </h2>
@@ -397,7 +403,7 @@ export const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
       </p>
       <div className="space-y-2">
         <Button onClick={resetError} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
           Try Again
         </Button>
         <details className="mt-4 text-left">

@@ -31,14 +31,14 @@ import {
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import {
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Save,
-  Star,
-  Trash2,
-  X,
-} from "lucide-react";
+  WarningCircleIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  FloppyDiskIcon,
+  StarIcon,
+  TrashIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -292,7 +292,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
           {(validationErrors.length > 0 || error) && (
             <div className="p-4 bg-status-error/10 border border-status-error/20 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-status-error mt-0.5 flex-shrink-0" />
+                <WarningCircleIcon className="h-4 w-4 text-status-error mt-0.5 flex-shrink-0" />
                 <div className="space-y-1">
                   {validationErrors.map((err, index) => (
                     <p key={index} className="text-sm text-status-error">
@@ -367,7 +367,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                       className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
                       aria-label="Expand description to edit"
                     >
-                      <ChevronDown className="h-4 w-4 mr-1" />
+                      <CaretDownIcon className="h-4 w-4 mr-1" />
                       Read more
                     </Button>
                   )}
@@ -392,7 +392,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                     className="text-brand-primary hover:text-brand-primary/80 p-0 h-auto font-medium"
                     aria-label="Collapse description field"
                   >
-                    <ChevronUp className="h-4 w-4 mr-1" />
+                    <CaretUpIcon className="h-4 w-4 mr-1" />
                     Read less
                   </Button>
                 </>
@@ -472,7 +472,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }, (_, i) => (
-                    <Star
+                    <StarIcon
                       key={i}
                       className={`h-5 w-5 cursor-pointer transition-colors ${
                         i < (formData.rating || 0)
@@ -615,7 +615,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
                   disabled={isSubmitting || isDeleting}
                   className="bg-status-error hover:bg-status-error/90 text-white"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <TrashIcon className="h-4 w-4 mr-2" />
                   Delete Book
                 </Button>
               </div>
@@ -636,11 +636,11 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            <X className="h-4 w-4 mr-2" />
+            <XIcon className="h-4 w-4 mr-2" />
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting || isDeleting}>
-            <Save className="h-4 w-4 mr-2" />
+            <FloppyDiskIcon className="h-4 w-4 mr-2" />
             {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </SheetFooter>
@@ -672,7 +672,7 @@ export const EditBookSheet: React.FC<EditBookSheetProps> = ({
               disabled={isDeleting}
               className="bg-status-error hover:bg-status-error/90 text-white"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <TrashIcon className="h-4 w-4 mr-2" />
               {isDeleting ? "Deleting..." : "Delete Book"}
             </Button>
           </DialogFooter>

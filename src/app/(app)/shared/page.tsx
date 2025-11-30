@@ -1,6 +1,6 @@
 "use client";
 
-import { Users } from "lucide-react";
+import { UsersIcon } from "@phosphor-icons/react";
 
 export default function SharedPage() {
   return (
@@ -10,7 +10,7 @@ export default function SharedPage() {
           Feature Preview
         </span>
         <div className="bg-muted/50 rounded-full p-5 mb-4 ring-2 ring-brand-primary flex items-center justify-center">
-          <Users className="h-10 w-10 text-brand-primary" aria-hidden="true" />
+          <UsersIcon className="h-10 w-10 text-brand-primary" aria-hidden="true" />
         </div>
         <h1 className="text-4xl font-extrabold text-foreground mb-2 text-center">
           Shared Books

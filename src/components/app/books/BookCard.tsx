@@ -9,7 +9,7 @@ import { TIMING_CONFIG, UI_CONFIG } from "@/lib/constants/constants";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
-import { BookOpen } from "lucide-react";
+import { BookOpenIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -71,7 +71,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-accent/10 to-brand-primary/5">
-                <BookOpen className="h-7 w-7 text-brand-accent/70" />
+                <BookOpenIcon className="h-7 w-7 text-brand-accent/70" />
               </div>
             )}
           </div>

@@ -6,7 +6,7 @@ import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
 import { createGenreColorMapping } from "@/lib/utils/genre-colors";
 import { eachMonthOfInterval, format, startOfMonth, subMonths } from "date-fns";
-import { BookOpen, Flame, Library, Sparkles, TrendingUp } from "lucide-react";
+import { BookOpenIcon, FlameIcon, BooksIcon, SparkleIcon, TrendUpIcon } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import {
   Area,
@@ -211,7 +211,7 @@ export default function StatisticsPage() {
               {/* Books Read */}
               <div className="flex items-start gap-4">
                 <div className="h-12 w-12 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="h-6 w-6 text-brand-primary" />
+                  <BookOpenIcon className="h-6 w-6 text-brand-primary" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -229,7 +229,7 @@ export default function StatisticsPage() {
               {/* Pages This Month */}
               <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
                 <div className="h-12 w-12 bg-brand-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="h-6 w-6 text-brand-accent" />
+                  <TrendUpIcon className="h-6 w-6 text-brand-accent" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -245,7 +245,7 @@ export default function StatisticsPage() {
               {/* Reading Streak */}
               <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
                 <div className="h-12 w-12 bg-status-warning/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Flame className="h-6 w-6 text-status-warning" />
+                  <FlameIcon className="h-6 w-6 text-status-warning" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -263,7 +263,7 @@ export default function StatisticsPage() {
               {/* Reading Velocity */}
               <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
                 <div className="h-12 w-12 bg-status-info/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-6 w-6 text-status-info" />
+                  <SparkleIcon className="h-6 w-6 text-status-info" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -464,7 +464,7 @@ export default function StatisticsPage() {
             <div className="bg-card border border-border rounded-xl p-8 lg:p-12">
               <div className="text-center max-w-md mx-auto">
                 <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                  <TrendUpIcon className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-serif text-foreground mb-1">
                   Start Your Journey
@@ -483,7 +483,7 @@ export default function StatisticsPage() {
           {/* Genre Distribution */}
           <div className="bg-card border border-border rounded-xl p-5 lg:p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Library className="h-5 w-5 text-muted-foreground" />
+              <BooksIcon className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-xl text-foreground">Library Composition</h2>
             </div>
 
@@ -569,7 +569,7 @@ export default function StatisticsPage() {
             ) : (
               <div className="text-center py-8">
                 <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Add books to see your genre distribution

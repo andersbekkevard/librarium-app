@@ -1,31 +1,31 @@
 import { render, screen } from "@testing-library/react";
-import { Book, TrendingUp, Zap } from "lucide-react";
+import { BookIcon, TrendUpIcon, LightningIcon } from "@phosphor-icons/react";
 import { StatCard } from "../StatCard";
 
 import "@testing-library/jest-dom";
 
 describe("StatCard", () => {
   it("should render the title and value correctly", () => {
-    render(<StatCard title="Total Books" value={125} icon={Book} />);
+    render(<StatCard title="Total Books" value={125} icon={BookIcon} />);
 
     expect(screen.getByText("Total Books")).toBeInTheDocument();
     expect(screen.getByText("125")).toBeInTheDocument();
   });
 
   it("should format numerical values with toLocaleString", () => {
-    render(<StatCard title="Large Number" value={10000} icon={TrendingUp} />);
+    render(<StatCard title="Large Number" value={10000} icon={TrendUpIcon} />);
 
     expect(screen.getByText("10,000")).toBeInTheDocument();
   });
 
   it("should render string values as is", () => {
-    render(<StatCard title="Streak" value="25 days" icon={Zap} />);
+    render(<StatCard title="Streak" value="25 days" icon={LightningIcon} />);
 
     expect(screen.getByText("25 days")).toBeInTheDocument();
   });
 
   it("should render the icon", () => {
-    render(<StatCard title="Total Books" value={125} icon={Book} />);
+    render(<StatCard title="Total Books" value={125} icon={BookIcon} />);
 
     const icon = screen.getByTestId("stat-card-icon");
     expect(icon).toBeInTheDocument();

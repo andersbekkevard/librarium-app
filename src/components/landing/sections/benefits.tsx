@@ -4,7 +4,7 @@ import {
   useScrollAnimation,
   useStaggeredScrollAnimation,
 } from "@/lib/hooks/useScrollAnimation";
-import { Book, Sparkles, TrendingUp, Users2 } from "lucide-react";
+import { BookIcon, SparkleIcon, TrendUpIcon, UsersIcon } from "@phosphor-icons/react";
 
 interface BenefitsProps {
   icon: React.ReactElement;
@@ -14,25 +14,25 @@ interface BenefitsProps {
 
 const benefitList: BenefitsProps[] = [
   {
-    icon: <Book className="w-8 h-8" />,
+    icon: <BookIcon className="w-8 h-8" />,
     title: "Stay Organized",
     description:
       "Keep all your books in one place with basic organization. Filter by reading state and ownership to find what you need.",
   },
   {
-    icon: <TrendingUp className="w-8 h-8" />,
+    icon: <TrendUpIcon className="w-8 h-8" />,
     title: "Track Your Progress",
     description:
       "Monitor your reading with simple page-by-page tracking and see basic statistics about your reading habits.",
   },
   {
-    icon: <Sparkles className="w-8 h-8" />,
+    icon: <SparkleIcon className="w-8 h-8" />,
     title: "Easy Book Discovery",
     description:
       "Search millions of books through Google Books API and add them to your library with automatic metadata.",
   },
   {
-    icon: <Users2 className="w-8 h-8" />,
+    icon: <UsersIcon className="w-8 h-8" />,
     title: "More Features Coming",
     description:
       "Community features, advanced analytics, reading goals, and personalized recommendations are in development.",

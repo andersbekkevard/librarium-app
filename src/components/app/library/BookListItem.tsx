@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, User } from "lucide-react";
+import { BookOpenIcon, UserIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -49,7 +49,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                     sizes="64px"
                   />
                 ) : (
-                  <BookOpen className="h-6 w-6 text-muted-foreground" />
+                  <BookOpenIcon className="h-6 w-6 text-muted-foreground" />
                 )}
               </div>
             </div>
@@ -112,7 +112,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                   sizes="72px"
                 />
               ) : (
-                <BookOpen className="h-8 w-8 text-muted-foreground" />
+                <BookOpenIcon className="h-8 w-8 text-muted-foreground" />
               )}
             </div>
           </div>
@@ -124,7 +124,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
                 {book.title}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <User className="h-3 w-3" />
+                <UserIcon className="h-3 w-3" />
                 {book.author}
               </p>
               {/* Progress bar for in_progress books, 10% shorter than title width */}
@@ -146,7 +146,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
 
             <div className="text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
-                <BookOpen className="h-3 w-3" />
+                <BookOpenIcon className="h-3 w-3" />
                 {book.progress.totalPages || "?"} pages
               </span>
             </div>

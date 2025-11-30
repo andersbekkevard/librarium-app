@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BRAND_COLORS } from "@/lib/design/colors";
-import { Check } from "lucide-react";
+import { CheckIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 
 enum PopularPlan {
@@ -123,7 +123,7 @@ export const PricingSection = () => {
                 <div className="space-y-4">
                   {benefitList.map((benefit) => (
                     <span key={benefit} className="flex">
-                      <Check className={`${BRAND_COLORS.primary.text} mr-2`} />
+                      <CheckIcon className={`${BRAND_COLORS.primary.text} mr-2`} />
                       <h3 className="text-sm">{benefit}</h3>
                     </span>
                   ))}

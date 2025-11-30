@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Check, FileText, Loader2, Search } from "lucide-react";
+import { CameraIcon, CheckIcon, FileTextIcon, CircleNotchIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useEffect, useState } from "react";
@@ -252,7 +252,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
             <div className="flex flex-wrap gap-2">
               {recentlyAdded.map((book) => (
                 <Badge key={book.id} variant="secondary" className="px-3 py-1">
-                  <Check className="h-3 w-3 mr-1" />
+                  <CheckIcon className="h-3 w-3 mr-1" />
                   {book.title} by {book.author}
                 </Badge>
               ))}
@@ -268,7 +268,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
             value="search"
             onClick={() => updateURLParams({ tab: "search" })}
           >
-            <Search className="h-4 w-4 mr-1 sm:mr-2" />
+            <MagnifyingGlassIcon className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Search</span>
             <span className="hidden sm:inline">Search Online</span>
           </TabsTrigger>
@@ -276,7 +276,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
             value="manual"
             onClick={() => updateURLParams({ tab: "manual" })}
           >
-            <FileText className="h-4 w-4 mr-1 sm:mr-2" />
+            <FileTextIcon className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Manual</span>
             <span className="hidden sm:inline">Manual Entry</span>
           </TabsTrigger>
@@ -284,7 +284,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
             value="scan"
             onClick={() => updateURLParams({ tab: "scan" })}
           >
-            <Camera className="h-4 w-4 mr-1 sm:mr-2" />
+            <CameraIcon className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="inline sm:hidden">Scan</span>
             <span className="hidden sm:inline">Scan Barcode</span>
           </TabsTrigger>
@@ -321,7 +321,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
 
                 {/* Search Input */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlassIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={`Search by ${searchType}...`}
                     value={localSearchQuery}
@@ -346,7 +346,7 @@ const AddBooksPageContent: React.FC<AddBooksPageContentProps> = ({
 
               {isSearching ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <CircleNotchIcon className="h-6 w-6 animate-spin text-muted-foreground" weight="bold" />
                   <span className="ml-2 text-muted-foreground">
                     Searching...
                   </span>

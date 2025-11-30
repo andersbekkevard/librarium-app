@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  BookOpen,
-  Building,
-  Calendar,
-  Check,
-  Loader2,
-  Plus,
-  Star,
-} from "lucide-react";
+  BookOpenIcon,
+  BuildingsIcon,
+  CalendarIcon,
+  CheckIcon,
+  CircleNotchIcon,
+  PlusIcon,
+  StarIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -70,7 +70,7 @@ export const BookSearchCard: React.FC<BookSearchCardProps> = ({
                   sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
                 />
               ) : (
-                <BookOpen className="h-8 w-8 sm:h-6 sm:w-6 text-muted-foreground" />
+                <BookOpenIcon className="h-8 w-8 sm:h-6 sm:w-6 text-muted-foreground" />
               )}
             </div>
           </div>
@@ -91,21 +91,21 @@ export const BookSearchCard: React.FC<BookSearchCardProps> = ({
               <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
                 {book.volumeInfo.publishedDate && (
                   <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
+                    <CalendarIcon className="h-3 w-3" />
                     {new Date(book.volumeInfo.publishedDate).getFullYear()}
                   </span>
                 )}
 
                 {book.volumeInfo.pageCount && (
                   <span className="flex items-center gap-1">
-                    <BookOpen className="h-3 w-3" />
+                    <BookOpenIcon className="h-3 w-3" />
                     {book.volumeInfo.pageCount}p
                   </span>
                 )}
 
                 {book.volumeInfo.publisher && (
                   <span className="flex items-center gap-1">
-                    <Building className="h-3 w-3" />
+                    <BuildingsIcon className="h-3 w-3" />
                     <span className="truncate max-w-20">
                       {book.volumeInfo.publisher}
                     </span>
@@ -115,7 +115,7 @@ export const BookSearchCard: React.FC<BookSearchCardProps> = ({
 
               {book.volumeInfo.averageRating && (
                 <div className="flex items-center justify-center sm:justify-start gap-1">
-                  <Star className="h-4 w-4 fill-status-warning text-status-warning" />
+                  <StarIcon className="h-4 w-4 fill-status-warning text-status-warning" />
                   <span className="text-sm">
                     {book.volumeInfo.averageRating}
                   </span>
@@ -150,17 +150,17 @@ export const BookSearchCard: React.FC<BookSearchCardProps> = ({
               >
                 {isAdded ? (
                   <>
-                    <Check className="h-4 w-4 mr-1" />
+                    <CheckIcon className="h-4 w-4 mr-1" />
                     Added
                   </>
                 ) : isAdding ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    <CircleNotchIcon className="h-4 w-4 mr-1 animate-spin" weight="bold" />
                     Adding...
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4 mr-1" />
+                    <PlusIcon className="h-4 w-4 mr-1" />
                     Add to Library
                   </>
                 )}

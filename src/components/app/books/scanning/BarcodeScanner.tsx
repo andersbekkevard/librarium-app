@@ -8,7 +8,7 @@ import { GoogleBooksVolume } from "@/lib/api/google-books-api";
 import { useBookSearch } from "@/lib/hooks/useBookSearch";
 import { extractISBN } from "@/lib/utils/isbn-utils";
 import { cn } from "@/lib/utils/utils";
-import { AlertCircle, Camera, Loader2, Upload } from "lucide-react";
+import { WarningCircleIcon, CameraIcon, CircleNotchIcon, UploadIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useState } from "react";
 import { BookSearchCard } from "../BookSearchCard";
 import { CameraScanner } from "./CameraScanner";
@@ -170,11 +170,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="camera">
-            <Camera className="h-4 w-4 mr-2" />
+            <CameraIcon className="h-4 w-4 mr-2" />
             Camera
           </TabsTrigger>
           <TabsTrigger value="upload">
-            <Upload className="h-4 w-4 mr-2" />
+            <UploadIcon className="h-4 w-4 mr-2" />
             Upload
           </TabsTrigger>
         </TabsList>
@@ -232,7 +232,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-center space-x-3 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <CircleNotchIcon className="h-5 w-5 animate-spin" weight="bold" />
               <div className="text-center">
                 <p className="font-medium">Processing barcode...</p>
                 {scannedISBN && (
@@ -254,7 +254,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         <Card className="border-destructive/20">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+              <WarningCircleIcon className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-destructive mb-2">
                   Scanning Error

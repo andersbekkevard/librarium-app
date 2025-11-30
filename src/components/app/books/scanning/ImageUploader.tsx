@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ImageCropper } from "@/components/ui/image-cropper";
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { cn } from "@/lib/utils/utils";
-import { Crop, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { CropIcon, ImageIcon, CircleNotchIcon, UploadIcon, XIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BarcodeFormat } from "react-barcode-scanner";
 import "react-barcode-scanner/polyfill";
@@ -328,7 +328,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           onClick={openFilePicker}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-            <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-3 sm:mb-4" />
+            <UploadIcon className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-3 sm:mb-4" />
             <h3 className="font-semibold text-base sm:text-lg mb-2">
               Upload Barcode Image
             </h3>
@@ -359,7 +359,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           {/* Processing overlay */}
           {isProcessing && (
             <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
-              <Loader2 className="h-8 w-8 animate-spin mb-3" />
+              <CircleNotchIcon className="h-8 w-8 animate-spin mb-3" weight="bold" />
               <p className="text-sm text-center px-4">
                 Processing image for barcodes...
               </p>
@@ -373,7 +373,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             onClick={clearFile}
             className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white border-0"
           >
-            <X className="h-4 w-4" />
+            <XIcon className="h-4 w-4" />
           </Button>
 
           {/* Action buttons */}
@@ -388,7 +388,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   className="bg-black/50 hover:bg-black/70 text-white border-0"
                   title="Crop image to focus on barcode"
                 >
-                  <Crop className="h-4 w-4" />
+                  <CropIcon className="h-4 w-4" />
                 </Button>
               )}
 

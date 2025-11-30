@@ -2,7 +2,7 @@
 import { BRAND_COLORS } from "@/lib/design/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { BookIcon, ListIcon, CircleNotchIcon } from "@phosphor-icons/react";
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRightIcon, GithubLogoIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -144,12 +144,12 @@ export const Navbar = () => {
                   ) : isAuthenticated ? (
                     <>
                       Go to Dashboard
-                      <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                      <ArrowRightIcon className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
                     </>
                   ) : (
                     <>
                       Login
-                      <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+                      <ArrowRightIcon className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
                     </>
                   )}
                 </Button>
@@ -212,12 +212,12 @@ export const Navbar = () => {
           ) : isAuthenticated ? (
             <>
               Dashboard
-              <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+              <ArrowRightIcon className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
             </>
           ) : (
             <>
               Login
-              <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+              <ArrowRightIcon className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
             </>
           )}
         </Button>
@@ -236,7 +236,7 @@ export const Navbar = () => {
             href="https://github.com/andersbekkevard/librarium-app"
             target="_blank"
           >
-            <Github className="size-4" />
+            <GithubLogoIcon className="size-4" />
           </Link>
         </Button>
       </div>

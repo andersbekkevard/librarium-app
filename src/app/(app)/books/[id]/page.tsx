@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeftIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -73,7 +73,7 @@ export default function BookDetailRoute() {
       <div className="p-6">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" />
+            <CircleNotchIcon className="h-8 w-8 animate-spin text-brand-primary mx-auto mb-4" weight="bold" />
             <p className="text-muted-foreground">Loading book details...</p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function BookDetailRoute() {
               variant="outline"
               className="border-brand-primary text-brand-primary hover:bg-brand-primary/10"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeftIcon className="h-4 w-4 mr-2" />
               Go Back
             </Button>
           </div>

@@ -13,24 +13,24 @@ import {
 import { Separator } from "@/components/ui/separator";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils/utils";
-import { X } from "lucide-react";
+import { XIcon } from "@phosphor-icons/react";
 import {
   GoogleBooksVolume,
   formatAuthors,
   getBestThumbnail,
 } from "@/lib/api/google-books-api";
 import {
-  BookOpen,
-  Building,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Hash,
-  Plus,
-  Star,
-  Tag,
-} from "lucide-react";
+  BookOpenIcon,
+  BuildingsIcon,
+  CalendarIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  LinkSimpleIcon,
+  HashIcon,
+  PlusIcon,
+  StarIcon,
+  TagIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import * as React from "react";
 import { useEffect, useState } from "react";
@@ -162,14 +162,14 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                             sizes="(max-width: 1024px) 200px, 100vw"
                           />
                         ) : (
-                          <BookOpen className="h-16 w-16 text-muted-foreground" />
+                          <BookOpenIcon className="h-16 w-16 text-muted-foreground" />
                         )}
                       </div>
 
                       {/* Rating */}
                       {book.volumeInfo.averageRating && (
                         <div className="flex items-center justify-center gap-1">
-                          <Star className="h-4 w-4 fill-status-warning text-status-warning" />
+                          <StarIcon className="h-4 w-4 fill-status-warning text-status-warning" />
                           <span className="text-sm font-medium">
                             {book.volumeInfo.averageRating}
                           </span>
@@ -195,17 +195,17 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                           >
                             {isAdded ? (
                               <>
-                                <BookOpen className="h-4 w-4 mr-2" />
+                                <BookOpenIcon className="h-4 w-4 mr-2" />
                                 Added to Library
                               </>
                             ) : isAdding ? (
                               <>
-                                <Plus className="h-4 w-4 mr-2 animate-spin" />
+                                <PlusIcon className="h-4 w-4 mr-2 animate-spin" />
                                 Adding...
                               </>
                             ) : (
                               <>
-                                <Plus className="h-4 w-4 mr-2" />
+                                <PlusIcon className="h-4 w-4 mr-2" />
                                 Add to Library
                               </>
                             )}
@@ -225,7 +225,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                                 )
                               }
                             >
-                              <ExternalLink className="h-4 w-4 mr-2" />
+                              <LinkSimpleIcon className="h-4 w-4 mr-2" />
                               Preview on Google
                             </Button>
                           )}
@@ -237,7 +237,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                                 window.open(book.volumeInfo.infoLink, "_blank")
                               }
                             >
-                              <ExternalLink className="h-4 w-4 mr-2" />
+                              <LinkSimpleIcon className="h-4 w-4 mr-2" />
                               More Info
                             </Button>
                           )}
@@ -270,7 +270,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {publishedYear && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Published:</span>
                         <span className="text-muted-foreground">
                           {publishedYear}
@@ -279,7 +279,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                     )}
                     {book.volumeInfo.publisher && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <BuildingsIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Publisher:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.publisher}
@@ -288,7 +288,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                     )}
                     {book.volumeInfo.pageCount && (
                       <div className="flex items-center gap-2 text-sm">
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Pages:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.pageCount}
@@ -297,7 +297,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                     )}
                     {book.volumeInfo.industryIdentifiers && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Hash className="h-4 w-4 text-muted-foreground" />
+                        <HashIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">ISBN:</span>
                         <span className="text-muted-foreground">
                           {book.volumeInfo.industryIdentifiers[0]?.identifier}
@@ -310,7 +310,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                   {book.volumeInfo.categories && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        <TagIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">Categories:</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -347,12 +347,12 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                             >
                               {isDescriptionExpanded ? (
                                 <>
-                                  <ChevronUp className="h-4 w-4 mr-1" />
+                                  <CaretUpIcon className="h-4 w-4 mr-1" />
                                   Read less
                                 </>
                               ) : (
                                 <>
-                                  <ChevronDown className="h-4 w-4 mr-1" />
+                                  <CaretDownIcon className="h-4 w-4 mr-1" />
                                   Read more
                                 </>
                               )}
@@ -374,13 +374,13 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
                         <div className="flex gap-4 text-sm">
                           {book.volumeInfo.readingModes.text && (
                             <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" />
+                              <BookOpenIcon className="h-3 w-3" />
                               Text available
                             </span>
                           )}
                           {book.volumeInfo.readingModes.image && (
                             <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" />
+                              <BookOpenIcon className="h-3 w-3" />
                               Image available
                             </span>
                           )}
@@ -394,7 +394,7 @@ export const BookPreviewDialog: React.FC<BookPreviewDialogProps> = ({
           </div>
         </div>
         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <X className="h-4 w-4" />
+          <XIcon className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
         </DialogPrimitive.Content>

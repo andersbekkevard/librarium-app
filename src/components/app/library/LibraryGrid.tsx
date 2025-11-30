@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpenIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import * as React from "react";
 
 import BookCard from "@/components/app/books/BookCard";
@@ -37,7 +37,7 @@ export const LibraryGrid: React.FC<LibraryGridProps> = ({
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+          <CircleNotchIcon className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" weight="bold" />
           <p className="text-muted-foreground">Loading your library...</p>
         </CardContent>
       </Card>
@@ -69,7 +69,7 @@ export const LibraryGrid: React.FC<LibraryGridProps> = ({
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <BookOpenIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-medium text-foreground mb-2">
             No books found
           </h3>

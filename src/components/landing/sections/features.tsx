@@ -4,7 +4,7 @@ import {
   useScrollAnimation,
   useStaggeredScrollAnimation,
 } from "@/lib/hooks/useScrollAnimation";
-import { BarChart3, Book, Search, Star, Users } from "lucide-react";
+import { ChartBarIcon, BookIcon, MagnifyingGlassIcon, StarIcon, UsersIcon } from "@phosphor-icons/react";
 
 interface FeaturesProps {
   icon: React.ReactElement;
@@ -14,37 +14,37 @@ interface FeaturesProps {
 
 const featureList: FeaturesProps[] = [
   {
-    icon: <Book className="w-6 h-6" />,
+    icon: <BookIcon className="w-6 h-6" />,
     title: "Reading Progress",
     description:
       "Track your reading progress page by page with three simple states: not started, in progress, and finished.",
   },
   {
-    icon: <Book className="w-6 h-6" />,
+    icon: <BookIcon className="w-6 h-6" />,
     title: "Personal Library",
     description:
       "Organize your book collection with basic filtering by reading state and ownership. Search and sort your books easily.",
   },
   {
-    icon: <Search className="w-6 h-6" />,
+    icon: <MagnifyingGlassIcon className="w-6 h-6" />,
     title: "Book Discovery",
     description:
       "Search millions of books through Google Books API and automatically populate details like covers, pages, and descriptions.",
   },
   {
-    icon: <BarChart3 className="w-6 h-6" />,
+    icon: <ChartBarIcon className="w-6 h-6" />,
     title: "Basic Statistics",
     description:
       "View essential reading stats on your dashboard: total books, finished books, pages read, and current reading count.",
   },
   {
-    icon: <Star className="w-6 h-6" />,
+    icon: <StarIcon className="w-6 h-6" />,
     title: "Book Ratings",
     description:
       "Rate finished books with a 1-5 star system to remember your favorites and track your reading preferences.",
   },
   {
-    icon: <Users className="w-6 h-6" />,
+    icon: <UsersIcon className="w-6 h-6" />,
     title: "Coming Soon",
     description:
       "Social reading features, advanced analytics, reading goals, and custom shelves are planned for future releases.",

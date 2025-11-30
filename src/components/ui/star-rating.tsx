@@ -1,7 +1,7 @@
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { STAR_RATING_COLORS } from "@/lib/design/colors";
 import { cn } from "@/lib/utils/utils";
-import { Star } from "lucide-react";
+import { StarIcon } from "@phosphor-icons/react";
 import * as React from "react";
 
 interface StarRatingProps {
@@ -44,7 +44,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
   className,
 }) => {
   const stars = Array.from({ length: maxRating }, (_, i) => (
-    <Star
+    <StarIcon
       key={i}
       data-testid="star-icon"
       className={cn(

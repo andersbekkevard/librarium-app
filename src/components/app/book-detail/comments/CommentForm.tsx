@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Book, validateComment } from "@/lib/models/models";
-import { PlusCircle, XIcon } from "@phosphor-icons/react";
+import { PlusCircleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -77,7 +77,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       <form onSubmit={handleSubmit}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
-          <PlusCircle className="w-4 h-4 text-muted-foreground" weight="light" />
+          <PlusCircleIcon className="w-4 h-4 text-muted-foreground" weight="light" />
           <Label
             htmlFor="comment-input"
             className="text-sm font-medium text-muted-foreground"
@@ -147,7 +147,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             disabled={!isValid || isSubmitting}
             className="flex items-center gap-1.5"
           >
-            <PlusCircle className="w-3.5 h-3.5" weight="light" />
+            <PlusCircleIcon className="w-3.5 h-3.5" weight="light" />
             {isSubmitting ? "Adding..." : "Add Comment"}
           </Button>
         </div>
