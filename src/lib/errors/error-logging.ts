@@ -156,6 +156,8 @@ export class SimpleErrorLogger implements ErrorLogger {
    * Logs to local storage
    */
   private logToLocalStorage(entry: LogEntry): void {
+    if (typeof window === "undefined") return;
+
     try {
       const storageKey = "librarium_error_logs";
       const existingLogs = this.getStoredLogs();
@@ -182,6 +184,8 @@ export class SimpleErrorLogger implements ErrorLogger {
    * Retrieves stored logs from localStorage
    */
   getStoredLogs(): LogEntry[] {
+    if (typeof window === "undefined") return [];
+
     try {
       const storageKey = "librarium_error_logs";
       const stored = localStorage.getItem(storageKey);
@@ -196,6 +200,8 @@ export class SimpleErrorLogger implements ErrorLogger {
    * Clears stored logs from localStorage
    */
   clearStoredLogs(): void {
+    if (typeof window === "undefined") return;
+
     try {
       const storageKey = "librarium_error_logs";
       localStorage.removeItem(storageKey);

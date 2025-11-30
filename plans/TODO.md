@@ -26,7 +26,7 @@
   - [ ] Create profile pages, settings etc etc
 - [ ] Add shelf/collection functionality
 - [ ] Color code genres in separate database
-- [ ] Implement barcode scanner
+- [X] Implement barcode scanner
 - [X] Add commenting on books
   - [X] Real time comment
   - [X] Let users commit a one time "review"
