@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <div className="min-h-screen bg-background overflow-x-hidden">
-            <Header onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />
+            <Header onMenuClick={toggleSidebar} />
 
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
@@ -55,7 +55,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 `}
                 >
                   <div className="pt-[72px] h-full">
-                    <Sidebar onAddBookClick={handleAddBookClick} onNavigate={toggleSidebar} />
+                    <Sidebar
+                      onAddBookClick={handleAddBookClick}
+                      onNavigate={toggleSidebar}
+                    />
                   </div>
                 </div>
               </>

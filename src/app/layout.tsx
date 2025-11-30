@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   title: "Librarium - Your Personal Book Collection",
   description:
     "Track your reading progress and organize your personal library with Librarium",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

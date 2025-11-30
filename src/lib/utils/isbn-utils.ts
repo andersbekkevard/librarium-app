@@ -52,7 +52,11 @@ export function extractISBN(barcodeText: string): string | null {
 
   // UPC-A with leading zero (12 digits starting with 0)
   // Convert to ISBN-13 by removing leading zero
-  if (cleaned.length === 12 && cleaned.startsWith("0") && /^\d{12}$/.test(cleaned)) {
+  if (
+    cleaned.length === 12 &&
+    cleaned.startsWith("0") &&
+    /^\d{12}$/.test(cleaned)
+  ) {
     const potentialIsbn = cleaned.substring(1);
     // Check if it looks like an ISBN (11 digits that could be ISBN-13 without prefix)
     if (potentialIsbn.length === 11) {
@@ -171,7 +175,7 @@ function validateISBN13Basic(isbn13: string): boolean {
  * @param isbn13 - 13-character ISBN string
  * @returns true if valid ISBN-13, false otherwise
  */
-function validateISBN13(isbn13: string): boolean {
+export function validateISBN13(isbn13: string): boolean {
   if (isbn13.length !== 13) {
     return false;
   }

@@ -1,14 +1,14 @@
 import {
-  calculatePagination,
-  generateVisiblePages,
-  validatePageSize,
-  getStoredPageSize,
-  storePageSize,
-  calculateItemRange,
-  getSafePage,
   DEFAULT_PAGE_SIZE_OPTIONS,
   DEFAULT_PAGINATION_CONFIG,
-} from '../pagination-utils';
+  calculateItemRange,
+  calculatePagination,
+  generateVisiblePages,
+  getSafePage,
+  getStoredPageSize,
+  storePageSize,
+  validatePageSize,
+} from "../pagination-utils";
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -19,12 +19,13 @@ const mockLocalStorage = {
 };
 
 // Save original window.localStorage if it exists
-const originalLocalStorage = typeof window !== 'undefined' ? window.localStorage : undefined;
+const originalLocalStorage =
+  typeof window !== "undefined" ? window.localStorage : undefined;
 
 // Mock window.localStorage
 beforeAll(() => {
-  if (typeof window !== 'undefined') {
-    Object.defineProperty(window, 'localStorage', {
+  if (typeof window !== "undefined") {
+    Object.defineProperty(window, "localStorage", {
       value: mockLocalStorage,
       configurable: true,
     });
@@ -33,8 +34,8 @@ beforeAll(() => {
 
 // Restore original localStorage after tests
 afterAll(() => {
-  if (typeof window !== 'undefined' && originalLocalStorage) {
-    Object.defineProperty(window, 'localStorage', {
+  if (typeof window !== "undefined" && originalLocalStorage) {
+    Object.defineProperty(window, "localStorage", {
       value: originalLocalStorage,
       configurable: true,
     });
@@ -45,8 +46,8 @@ afterAll(() => {
 const mockConsoleWarn = jest.fn();
 global.console.warn = mockConsoleWarn;
 
-describe('calculatePagination', () => {
-  it('should calculate pagination for first page', () => {
+describe("calculatePagination", () => {
+  it("should calculate pagination for first page", () => {
     const result = calculatePagination({
       currentPage: 1,
       totalItems: 100,
@@ -63,7 +64,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should calculate pagination for middle page', () => {
+  it("should calculate pagination for middle page", () => {
     const result = calculatePagination({
       currentPage: 5,
       totalItems: 100,
@@ -80,7 +81,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should calculate pagination for last page', () => {
+  it("should calculate pagination for last page", () => {
     const result = calculatePagination({
       currentPage: 10,
       totalItems: 100,
@@ -97,7 +98,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should handle partial last page', () => {
+  it("should handle partial last page", () => {
     const result = calculatePagination({
       currentPage: 5,
       totalItems: 47,
@@ -114,7 +115,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should handle single page', () => {
+  it("should handle single page", () => {
     const result = calculatePagination({
       currentPage: 1,
       totalItems: 5,
@@ -131,7 +132,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should handle empty items', () => {
+  it("should handle empty items", () => {
     const result = calculatePagination({
       currentPage: 1,
       totalItems: 0,
@@ -148,7 +149,7 @@ describe('calculatePagination', () => {
     });
   });
 
-  it('should use custom maxVisiblePages', () => {
+  it("should use custom maxVisiblePages", () => {
     const result = calculatePagination({
       currentPage: 1,
       totalItems: 200,
@@ -161,12 +162,12 @@ describe('calculatePagination', () => {
   });
 });
 
-describe('generateVisiblePages', () => {
-  it('should show all pages when total is less than max', () => {
+describe("generateVisiblePages", () => {
+  it("should show all pages when total is less than max", () => {
     expect(generateVisiblePages(3, 5, 7)).toEqual([1, 2, 3, 4, 5]);
   });
 
-  it('should show first page, ellipsis, middle pages, ellipsis, last page', () => {
+  it("should show first page, ellipsis, middle pages, ellipsis, last page", () => {
     const result = generateVisiblePages(10, 20, 7);
     expect(result).toContain(1);
     expect(result).toContain(20);
@@ -174,30 +175,30 @@ describe('generateVisiblePages', () => {
     expect(result.length).toBeLessThanOrEqual(7);
   });
 
-  it('should handle beginning pages without left ellipsis', () => {
+  it("should handle beginning pages without left ellipsis", () => {
     const result = generateVisiblePages(2, 20, 7);
     expect(result).toEqual([1, 2, 3, 4, 5, -1, 20]);
   });
 
-  it('should handle end pages without right ellipsis', () => {
+  it("should handle end pages without right ellipsis", () => {
     const result = generateVisiblePages(19, 20, 7);
     expect(result).toEqual([1, -1, 16, 17, 18, 19, 20]);
   });
 
-  it('should handle single page', () => {
+  it("should handle single page", () => {
     expect(generateVisiblePages(1, 1, 7)).toEqual([1]);
   });
 
-  it('should handle two pages', () => {
+  it("should handle two pages", () => {
     expect(generateVisiblePages(1, 2, 7)).toEqual([1, 2]);
     expect(generateVisiblePages(2, 2, 7)).toEqual([1, 2]);
   });
 
-  it('should handle maxVisiblePages of 1', () => {
+  it("should handle maxVisiblePages of 1", () => {
     expect(generateVisiblePages(5, 10, 1)).toEqual([1]);
   });
 
-  it('should handle maxVisiblePages of 3', () => {
+  it("should handle maxVisiblePages of 3", () => {
     const result = generateVisiblePages(10, 20, 3);
     expect(result.length).toBeLessThanOrEqual(3);
     expect(result).toContain(1);
@@ -205,148 +206,148 @@ describe('generateVisiblePages', () => {
   });
 });
 
-describe('validatePageSize', () => {
-  it('should return valid page size as-is', () => {
+describe("validatePageSize", () => {
+  it("should return valid page size as-is", () => {
     expect(validatePageSize(25)).toBe(25);
     expect(validatePageSize(100)).toBe(100);
   });
 
-  it('should return minimum for values below minimum', () => {
+  it("should return minimum for values below minimum", () => {
     expect(validatePageSize(2)).toBe(5); // Default min is 5
     expect(validatePageSize(0)).toBe(5);
     expect(validatePageSize(-10)).toBe(5);
   });
 
-  it('should return maximum for values above maximum', () => {
+  it("should return maximum for values above maximum", () => {
     expect(validatePageSize(1000)).toBe(500); // Default max is 500
     expect(validatePageSize(999)).toBe(500);
   });
 
-  it('should use custom min/max values', () => {
+  it("should use custom min/max values", () => {
     expect(validatePageSize(5, 10, 50)).toBe(10); // Below custom min
     expect(validatePageSize(100, 10, 50)).toBe(50); // Above custom max
     expect(validatePageSize(25, 10, 50)).toBe(25); // Within range
   });
 
-  it('should handle NaN values', () => {
+  it("should handle NaN values", () => {
     expect(validatePageSize(NaN)).toBe(5);
     expect(validatePageSize(NaN, 10, 100)).toBe(10);
   });
 
-  it('should floor decimal values', () => {
+  it("should floor decimal values", () => {
     expect(validatePageSize(25.7)).toBe(25);
     expect(validatePageSize(25.1)).toBe(25);
     expect(validatePageSize(25.9)).toBe(25);
   });
 });
 
-describe('getStoredPageSize', () => {
+describe("getStoredPageSize", () => {
   beforeEach(() => {
     mockLocalStorage.getItem.mockClear();
     mockConsoleWarn.mockClear();
   });
 
-  it('should return stored page size when valid', () => {
-    mockLocalStorage.getItem.mockReturnValue('50');
-    
-    const result = getStoredPageSize('test-key');
-    
-    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('test-key');
+  it("should return stored page size when valid", () => {
+    mockLocalStorage.getItem.mockReturnValue("50");
+
+    const result = getStoredPageSize("test-key");
+
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith("test-key");
     expect(result).toBe(50);
   });
 
-  it('should return default when no stored value', () => {
+  it("should return default when no stored value", () => {
     mockLocalStorage.getItem.mockReturnValue(null);
-    
-    const result = getStoredPageSize('test-key', 30);
-    
+
+    const result = getStoredPageSize("test-key", 30);
+
     expect(result).toBe(30);
   });
 
-  it('should validate stored page size', () => {
-    mockLocalStorage.getItem.mockReturnValue('1000'); // Above max
-    
-    const result = getStoredPageSize('test-key');
-    
+  it("should validate stored page size", () => {
+    mockLocalStorage.getItem.mockReturnValue("1000"); // Above max
+
+    const result = getStoredPageSize("test-key");
+
     expect(result).toBe(500); // Should be clamped to max
   });
 
-  it('should handle invalid stored values', () => {
-    mockLocalStorage.getItem.mockReturnValue('invalid');
-    
-    const result = getStoredPageSize('test-key', 30);
-    
+  it("should handle invalid stored values", () => {
+    mockLocalStorage.getItem.mockReturnValue("invalid");
+
+    const result = getStoredPageSize("test-key", 30);
+
     expect(result).toBe(5); // Should return min value for NaN
   });
 
-  it('should handle localStorage errors', () => {
+  it("should handle localStorage errors", () => {
     mockLocalStorage.getItem.mockImplementation(() => {
-      throw new Error('localStorage error');
+      throw new Error("localStorage error");
     });
-    
-    const result = getStoredPageSize('test-key', 30);
-    
+
+    const result = getStoredPageSize("test-key", 30);
+
     expect(result).toBe(30);
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      'Failed to read page size from localStorage:',
+      "Failed to read page size from localStorage:",
       expect.any(Error)
     );
   });
 
-  it('should return default when running server-side', () => {
+  it("should return default when running server-side", () => {
     // Mock server-side environment by making window undefined
-    const originalWindow = (global as any).window;
-    (global as any).window = undefined;
-    
-    const result = getStoredPageSize('test-key', 30);
-    
+    const originalWindow = (global as { window?: typeof window }).window;
+    (global as { window?: typeof window }).window = undefined;
+
+    const result = getStoredPageSize("test-key", 30);
+
     expect(result).toBe(30);
-    
+
     // Restore window
-    (global as any).window = originalWindow;
+    (global as { window?: typeof window }).window = originalWindow;
   });
 });
 
-describe('storePageSize', () => {
+describe("storePageSize", () => {
   beforeEach(() => {
     mockLocalStorage.setItem.mockClear();
     mockConsoleWarn.mockClear();
   });
 
-  it('should store page size in localStorage', () => {
-    storePageSize('test-key', 50);
-    
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('test-key', '50');
+  it("should store page size in localStorage", () => {
+    storePageSize("test-key", 50);
+
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith("test-key", "50");
   });
 
-  it('should handle localStorage errors', () => {
+  it("should handle localStorage errors", () => {
     mockLocalStorage.setItem.mockImplementation(() => {
-      throw new Error('localStorage error');
+      throw new Error("localStorage error");
     });
-    
-    storePageSize('test-key', 50);
-    
+
+    storePageSize("test-key", 50);
+
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      'Failed to store page size in localStorage:',
+      "Failed to store page size in localStorage:",
       expect.any(Error)
     );
   });
 
-  it('should handle server-side environment', () => {
-    const originalWindow = (global as any).window;
-    (global as any).window = undefined;
-    
+  it("should handle server-side environment", () => {
+    const originalWindow = (global as { window?: typeof window }).window;
+    (global as { window?: typeof window }).window = undefined;
+
     // Should not throw
-    expect(() => storePageSize('test-key', 50)).not.toThrow();
-    
-    (global as any).window = originalWindow;
+    expect(() => storePageSize("test-key", 50)).not.toThrow();
+
+    (global as { window?: typeof window }).window = originalWindow;
   });
 });
 
-describe('calculateItemRange', () => {
-  it('should calculate range for first page', () => {
+describe("calculateItemRange", () => {
+  it("should calculate range for first page", () => {
     const result = calculateItemRange(1, 10, 100);
-    
+
     expect(result).toEqual({
       start: 1,
       end: 10,
@@ -354,9 +355,9 @@ describe('calculateItemRange', () => {
     });
   });
 
-  it('should calculate range for middle page', () => {
+  it("should calculate range for middle page", () => {
     const result = calculateItemRange(5, 10, 100);
-    
+
     expect(result).toEqual({
       start: 41,
       end: 50,
@@ -364,9 +365,9 @@ describe('calculateItemRange', () => {
     });
   });
 
-  it('should calculate range for partial last page', () => {
+  it("should calculate range for partial last page", () => {
     const result = calculateItemRange(5, 10, 47);
-    
+
     expect(result).toEqual({
       start: 41,
       end: 47,
@@ -374,9 +375,9 @@ describe('calculateItemRange', () => {
     });
   });
 
-  it('should handle empty total', () => {
+  it("should handle empty total", () => {
     const result = calculateItemRange(1, 10, 0);
-    
+
     expect(result).toEqual({
       start: 0,
       end: 0,
@@ -384,9 +385,9 @@ describe('calculateItemRange', () => {
     });
   });
 
-  it('should handle single item', () => {
+  it("should handle single item", () => {
     const result = calculateItemRange(1, 10, 1);
-    
+
     expect(result).toEqual({
       start: 1,
       end: 1,
@@ -395,67 +396,67 @@ describe('calculateItemRange', () => {
   });
 });
 
-describe('getSafePage', () => {
-  it('should return valid page as-is', () => {
+describe("getSafePage", () => {
+  it("should return valid page as-is", () => {
     expect(getSafePage(5, 10)).toBe(5);
     expect(getSafePage(1, 10)).toBe(1);
     expect(getSafePage(10, 10)).toBe(10);
   });
 
-  it('should return 1 for pages below 1', () => {
+  it("should return 1 for pages below 1", () => {
     expect(getSafePage(0, 10)).toBe(1);
     expect(getSafePage(-5, 10)).toBe(1);
   });
 
-  it('should return totalPages for pages above total', () => {
+  it("should return totalPages for pages above total", () => {
     expect(getSafePage(15, 10)).toBe(10);
     expect(getSafePage(999, 10)).toBe(10);
   });
 
-  it('should handle totalPages of 0', () => {
+  it("should handle totalPages of 0", () => {
     expect(getSafePage(1, 0)).toBe(1);
     expect(getSafePage(5, 0)).toBe(1);
   });
 
-  it('should handle negative totalPages', () => {
+  it("should handle negative totalPages", () => {
     expect(getSafePage(1, -5)).toBe(1);
     expect(getSafePage(10, -1)).toBe(1);
   });
 });
 
-describe('constants', () => {
-  it('should have default page size options', () => {
+describe("constants", () => {
+  it("should have default page size options", () => {
     expect(DEFAULT_PAGE_SIZE_OPTIONS).toEqual([10, 25, 50, 100]);
   });
 
-  it('should have default pagination config', () => {
+  it("should have default pagination config", () => {
     expect(DEFAULT_PAGINATION_CONFIG).toEqual({
       pageSize: 25,
       maxVisiblePages: 7,
-      storageKey: 'pagination-page-size',
+      storageKey: "pagination-page-size",
       minPageSize: 5,
       maxPageSize: 500,
     });
   });
 });
 
-describe('pagination integration', () => {
-  it('should work together for complete pagination flow', () => {
+describe("pagination integration", () => {
+  it("should work together for complete pagination flow", () => {
     const totalItems = 250;
     const pageSize = 25;
     const currentPage = 5;
-    
+
     // Calculate pagination
     const pagination = calculatePagination({
       currentPage,
       totalItems,
       pageSize,
     });
-    
+
     expect(pagination.totalPages).toBe(10);
     expect(pagination.hasNextPage).toBe(true);
     expect(pagination.hasPreviousPage).toBe(true);
-    
+
     // Calculate item range
     const range = calculateItemRange(currentPage, pageSize, totalItems);
     expect(range).toEqual({
@@ -463,26 +464,26 @@ describe('pagination integration', () => {
       end: 125,
       total: 250,
     });
-    
+
     // Validate page
     const safePage = getSafePage(currentPage, pagination.totalPages);
     expect(safePage).toBe(5);
   });
 
-  it('should handle edge cases in integration', () => {
+  it("should handle edge cases in integration", () => {
     const totalItems = 0;
     const pageSize = 25;
     const currentPage = 1;
-    
+
     const pagination = calculatePagination({
       currentPage,
       totalItems,
       pageSize,
     });
-    
+
     expect(pagination.totalPages).toBe(0);
     expect(pagination.visiblePages).toEqual([]);
-    
+
     const range = calculateItemRange(currentPage, pageSize, totalItems);
     expect(range.start).toBe(0);
     expect(range.end).toBe(0);

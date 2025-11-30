@@ -67,7 +67,6 @@ export const PersonalizedMessageSection: React.FC<
     <div className="relative group">
       {/* Main card container */}
       <div className="relative overflow-hidden rounded-xl border border-brand-primary/25 bg-gradient-to-br from-brand-primary/[0.03] via-card to-brand-accent/[0.05] shadow-[0_6px_20px_-6px_rgba(36,70,51,0.25)]">
-
         {/* Decorative corner glow */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-primary/[0.08] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-brand-accent/[0.06] rounded-full blur-2xl pointer-events-none" />
