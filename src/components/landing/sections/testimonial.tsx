@@ -80,7 +80,7 @@ export const TestimonialSection = () => {
           Testimonials
         </h2> */}
 
-        <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
+        <h2 className="text-3xl md:text-4xl text-center mb-4">
           Early Access Preview
         </h2>
 
@@ -98,7 +98,7 @@ export const TestimonialSection = () => {
       >
         <div className="max-w-2xl mx-auto">
           <h3
-            className={`text-2xl font-bold mb-4 scroll-fade-in-up ${
+            className={`text-2xl mb-4 scroll-fade-in-up ${
               cardVisible ? "animate" : ""
             }`}
             style={{ transitionDelay: cardVisible ? "200ms" : "0ms" }}

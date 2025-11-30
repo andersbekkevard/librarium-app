@@ -67,8 +67,8 @@ export const HeroSection = () => {
             <span>AI-powered reading assistant is here!</span>
           </Badge>
 
-          <div className="max-w-screen-md mx-auto text-center text-4xl md:text-6xl font-bold animate-fade-in-up delay-200">
-            <h1>
+          <div className="max-w-screen-md mx-auto text-center animate-fade-in-up delay-200">
+            <h1 className="text-5xl md:text-7xl tracking-tight">
               Track Your
               <span
                 className={`text-transparent px-2 bg-gradient-to-r ${BRAND_COLORS.accent.gradientFrom} ${BRAND_COLORS.primary.gradientTo} bg-clip-text`}

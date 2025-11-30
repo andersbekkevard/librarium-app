@@ -33,7 +33,7 @@ export const BookSection: React.FC<BookSectionProps> = ({
     <div className={className}>
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 className="text-lg text-foreground">{title}</h2>
           {onViewAll && (
             <Button
               variant="ghost"

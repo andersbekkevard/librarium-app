@@ -81,7 +81,7 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
       {/* Header with view toggle */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+          <h1 className="text-3xl tracking-tight text-foreground mb-2">
             My Library
           </h1>
           <p className="text-muted-foreground">
