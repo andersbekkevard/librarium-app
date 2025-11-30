@@ -4,7 +4,7 @@ import { ToggleTheme } from "@/components/toggle-theme";
 import { Button } from "@/components/ui/button";
 import { useCmdK } from "@/lib/hooks/useKeyboardShortcut";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { Book, Loader2, Menu } from "lucide-react";
+import { BookIcon, CircleNotchIcon, ListIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import SearchDropdown from "./SearchDropdown";
@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             onClick={onMenuClick}
             className="text-muted-foreground hover:text-foreground"
           >
-            <Menu className="h-5 w-5" />
+            <ListIcon className="h-5 w-5" weight="light" />
           </Button>
         </div>
 
@@ -45,9 +45,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity whitespace-nowrap"
           >
             <div className="w-9 h-9 bg-brand-accent/20 rounded-xl flex items-center justify-center shrink-0">
-              <Book className="h-5 w-5 text-brand-primary" />
+              <BookIcon
+                className="h-5 w-5 text-brand-primary"
+                weight="duotone"
+              />
             </div>
-            <h1 className="text-xl font-bold text-foreground hidden sm:block tracking-tight">
+            <h1 className="text-xl text-foreground hidden sm:block tracking-tight">
               Librarium
             </h1>
           </Link>
@@ -70,7 +73,10 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           {/* User Profile */}
           {loading ? (
             <div className="w-9 h-9 flex items-center justify-center">
-              <Loader2 className="h-4 w-4 animate-spin text-brand-accent" />
+              <CircleNotchIcon
+                className="h-4 w-4 animate-spin text-brand-accent"
+                weight="bold"
+              />
             </div>
           ) : (
             <UserProfileDropdown />

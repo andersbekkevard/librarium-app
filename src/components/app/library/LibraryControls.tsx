@@ -110,10 +110,10 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
 
       {/* Controls */}
       <Card>
-        <CardContent className="px-4 space-y-4">
+        <CardContent className="px-6 py-5 space-y-5">
           {/* Search info - controlled by header */}
           {searchQuery.trim() && (
-            <div className="bg-muted/50 p-3 rounded-md">
+            <div className="bg-input p-4 rounded-xl dark:bg-input/30">
               <p className="text-sm text-muted-foreground">
                 Searching for:{" "}
                 <span className="font-medium text-foreground">
@@ -124,19 +124,20 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
           )}
 
           {/* Mobile Layout - Vertical stacking */}
-          <div className="lg:hidden space-y-4">
+          <div className="lg:hidden space-y-5">
             {/* Filters Section */}
             <div className="space-y-3">
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-3">
                 {/* Status Filter */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Status:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Status:</span>
                   <select
                     value={filterStatus}
                     onChange={(e) =>
                       updateURLParams({ filter: e.target.value })
                     }
-                    className="bg-background border border-input rounded-md px-3 py-1 text-sm min-w-[120px]"
+                    className="bg-input border border-border rounded-xl px-4 py-2 text-sm min-w-[140px] transition-all duration-200 outline-none focus:border-ring focus:ring-ring/30 focus:ring-2 dark:bg-input/30"
+                    aria-label="Filter by reading status"
                   >
                     <option value="all">All</option>
                     <option value="not_started">Not Started</option>
@@ -147,13 +148,14 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
 
                 {/* Ownership Filter */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Ownership:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ownership:</span>
                   <select
                     value={filterOwnership}
                     onChange={(e) =>
                       updateURLParams({ ownership: e.target.value })
                     }
-                    className="bg-background border border-input rounded-md px-3 py-1 text-sm min-w-[120px]"
+                    className="bg-input border border-border rounded-xl px-4 py-2 text-sm min-w-[140px] transition-all duration-200 outline-none focus:border-ring focus:ring-ring/30 focus:ring-2 dark:bg-input/30"
+                    aria-label="Filter by ownership status"
                   >
                     <option value="all">All Books</option>
                     <option value="owned">Owned</option>
@@ -164,8 +166,8 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
             </div>
 
             {/* Sort Options - Horizontal scroll on mobile */}
-            <div className="space-y-2">
-              <span className="text-sm font-medium">Sort by:</span>
+            <div className="space-y-3">
+              <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
               <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                 {[
                   { key: "title" as const, label: "Title" },
@@ -224,14 +226,15 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
 
           {/* Desktop Layout - Original horizontal layout */}
           <div className="hidden lg:block">
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap gap-6 items-center">
               {/* Status Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Status:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Status:</span>
                 <select
                   value={filterStatus}
                   onChange={(e) => updateURLParams({ filter: e.target.value })}
-                  className="bg-background border border-input rounded-md px-3 py-1 text-sm"
+                  className="bg-input border border-border rounded-xl px-4 py-2 text-sm transition-all duration-200 outline-none focus:border-ring focus:ring-ring/30 focus:ring-2 dark:bg-input/30"
+                  aria-label="Filter by reading status"
                 >
                   <option value="all">All</option>
                   <option value="not_started">Not Started</option>
@@ -241,14 +244,15 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
               </div>
 
               {/* Ownership Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Ownership:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Ownership:</span>
                 <select
                   value={filterOwnership}
                   onChange={(e) =>
                     updateURLParams({ ownership: e.target.value })
                   }
-                  className="bg-background border border-input rounded-md px-3 py-1 text-sm"
+                  className="bg-input border border-border rounded-xl px-4 py-2 text-sm transition-all duration-200 outline-none focus:border-ring focus:ring-ring/30 focus:ring-2 dark:bg-input/30"
+                  aria-label="Filter by ownership status"
                 >
                   <option value="all">All Books</option>
                   <option value="owned">Owned</option>
@@ -286,9 +290,9 @@ export const LibraryControls: React.FC<LibraryControlsProps> = ({
               )} */}
 
               {/* Sort Options */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Sort by:</span>
-                <div className="flex gap-1">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+                <div className="flex gap-2">
                   {[
                     { key: "title" as const, label: "Title" },
                     { key: "author" as const, label: "Author" },

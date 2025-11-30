@@ -1,15 +1,19 @@
-import { LucideIcon } from "lucide-react";
+import { Icon as PhosphorIcon } from "@phosphor-icons/react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
+  iconColor?: string;
+  iconBgColor?: string;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon: Icon,
+  iconColor = "text-brand-primary",
+  iconBgColor = "bg-brand-accent/15",
 }) => {
   return (
     <div className="bg-card border border-border/60 rounded-2xl p-6 hover:shadow-sm hover:border-brand-accent/30 transition-all duration-200">
@@ -20,9 +24,12 @@ export const StatCard: React.FC<StatCardProps> = ({
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
         </div>
-        <div className="h-10 w-10 bg-brand-accent/15 rounded-xl flex items-center justify-center">
+        <div
+          className={`h-10 w-10 ${iconBgColor} rounded-xl flex items-center justify-center`}
+        >
           <Icon
-            className="h-5 w-5 text-brand-primary"
+            className={`h-5 w-5 ${iconColor}`}
+            weight="light"
             data-testid="stat-card-icon"
           />
         </div>

@@ -1,4 +1,9 @@
-import { BookOpen, Star, TrendingUp, Zap } from "lucide-react";
+import {
+  BookOpenIcon,
+  LightningIcon,
+  StarIcon,
+  TrendUpIcon,
+} from "@phosphor-icons/react";
 
 interface Stats {
   totalBooks: number;
@@ -12,14 +17,19 @@ interface StatsSummaryCardProps {
   stats: Stats;
 }
 
-export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({ stats }) => {
+export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({
+  stats,
+}) => {
   return (
     <div className="bg-card border border-border rounded-lg p-4 h-full w-fit flex flex-col justify-center">
       <div className="grid grid-cols-2 gap-2">
         {/* Total Books */}
         <div className="text-center p-2 bg-brand-primary/5 rounded-lg w-24 h-24 flex flex-col justify-center">
           <div className="h-8 w-8 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-1">
-            <BookOpen className="h-5 w-5 text-brand-primary" />
+            <BookOpenIcon
+              className="h-5 w-5 text-brand-primary"
+              weight="light"
+            />
           </div>
           <p className="text-xl font-bold text-foreground mb-1">
             {stats.totalBooks}
@@ -32,7 +42,7 @@ export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({ stats }) => 
         {/* Read This Year */}
         <div className="text-center p-2 bg-status-success/5 rounded-lg w-24 h-24 flex flex-col justify-center">
           <div className="h-8 w-8 bg-status-success/10 rounded-full flex items-center justify-center mx-auto mb-1">
-            <Star className="h-5 w-5 text-status-success fill-current" />
+            <StarIcon className="h-5 w-5 text-status-success" weight="fill" />
           </div>
           <p className="text-xl font-bold text-foreground mb-1">
             {stats.finishedBooks}
@@ -45,7 +55,7 @@ export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({ stats }) => 
         {/* Pages This Month */}
         <div className="text-center p-2 bg-brand-accent/5 rounded-lg w-24 h-24 flex flex-col justify-center">
           <div className="h-8 w-8 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-1">
-            <TrendingUp className="h-5 w-5 text-brand-accent" />
+            <TrendUpIcon className="h-5 w-5 text-brand-accent" weight="light" />
           </div>
           <p className="text-xl font-bold text-foreground mb-1">
             {stats.totalPagesRead}
@@ -58,7 +68,7 @@ export const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({ stats }) => 
         {/* Reading Streak */}
         <div className="text-center p-2 bg-gradient-to-br from-brand-primary/10 to-brand-accent/10 rounded-lg w-24 h-24 flex flex-col justify-center">
           <div className="h-8 w-8 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center mx-auto mb-1">
-            <Zap className="h-5 w-5 text-white" />
+            <LightningIcon className="h-5 w-5 text-white" weight="fill" />
           </div>
           <p className="text-xl font-bold text-foreground mb-1">
             {stats.readingStreak}

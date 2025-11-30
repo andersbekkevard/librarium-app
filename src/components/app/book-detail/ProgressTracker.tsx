@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { TrendUpIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -42,7 +42,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
+          <TrendUpIcon className="h-5 w-5" weight="light" />
           Update Progress
         </CardTitle>
       </CardHeader>

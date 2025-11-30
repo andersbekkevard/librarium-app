@@ -68,7 +68,7 @@ export const HeroSection = () => {
           </Badge>
 
           <div className="max-w-screen-md mx-auto text-center animate-fade-in-up delay-200">
-            <h1 className="text-5xl md:text-7xl tracking-tight">
+            <h1 className="text-5xl md:text-[4rem] tracking-tight">
               Track Your
               <span
                 className={`text-transparent px-2 bg-gradient-to-r ${BRAND_COLORS.accent.gradientFrom} ${BRAND_COLORS.primary.gradientTo} bg-clip-text`}

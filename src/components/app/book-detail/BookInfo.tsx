@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
-  BookOpen,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Hash,
-  Tag,
-} from "lucide-react";
+  BookOpenIcon,
+  CalendarIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  HashIcon,
+  TagIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -38,7 +38,7 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {book.publishedDate && (
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" weight="light" />
               <span className="font-medium">Published:</span>
               <span className="text-muted-foreground">
                 {book.publishedDate}
@@ -47,14 +47,14 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
           )}
           {book.isbn && (
             <div className="flex items-center gap-2 text-sm">
-              <Hash className="h-4 w-4 text-muted-foreground" />
+              <HashIcon className="h-4 w-4 text-muted-foreground" weight="light" />
               <span className="font-medium">ISBN:</span>
               <span className="text-muted-foreground">{book.isbn}</span>
             </div>
           )}
           {book.progress.totalPages && (
             <div className="flex items-center gap-2 text-sm">
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <BookOpenIcon className="h-4 w-4 text-muted-foreground" weight="light" />
               <span className="font-medium">Pages:</span>
               <span className="text-muted-foreground">
                 {book.progress.totalPages}
@@ -63,7 +63,7 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
           )}
           {book.genre && (
             <div className="flex items-center gap-2 text-sm">
-              <Tag className="h-4 w-4 text-muted-foreground" />
+              <TagIcon className="h-4 w-4 text-muted-foreground" weight="light" />
               <span className="font-medium">Genre:</span>
               <span className="text-muted-foreground">{book.genre}</span>
             </div>
@@ -92,12 +92,12 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
                 >
                   {isDescriptionExpanded ? (
                     <>
-                      <ChevronUp className="h-4 w-4 mr-1" />
+                      <CaretUpIcon className="h-4 w-4 mr-1" weight="bold" />
                       Read less
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="h-4 w-4 mr-1" />
+                      <CaretDownIcon className="h-4 w-4 mr-1" weight="bold" />
                       Read more
                     </>
                   )}

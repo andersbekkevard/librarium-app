@@ -1,10 +1,11 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-display";
 import { TIMING_CONFIG } from "@/lib/constants/constants";
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { StandardError } from "@/lib/errors/error-handling";
 import { ActivityItem, Book } from "@/lib/models/models";
-import { ChevronRight } from "lucide-react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 
 interface RecentActivitySectionProps {
@@ -23,13 +24,13 @@ const formatTimeAgo = (timestamp: Date): string => {
   const weeks = Math.floor(diff / TIMING_CONFIG.TIME.WEEK_MS);
 
   if (minutes < 60) {
-    return minutes <= 1 ? "just now" : `${minutes} minutes ago`;
+    return minutes <= 1 ? "just now" : `${minutes}m ago`;
   } else if (hours < 24) {
-    return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+    return `${hours}h ago`;
   } else if (days < 7) {
-    return days === 1 ? "1 day ago" : `${days} days ago`;
+    return `${days}d ago`;
   } else {
-    return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+    return `${weeks}w ago`;
   }
 };
 
@@ -41,26 +42,26 @@ const getActivityText = (activity: ActivityItem): React.ReactNode => {
     case "finished":
       return (
         <>
-          Finished reading <span className="font-semibold">{bookTitle}</span>
+          Finished <span className="font-medium">{bookTitle}</span>
         </>
       );
     case "started":
       return (
         <>
-          Started reading <span className="font-semibold">{bookTitle}</span>
+          Started <span className="font-medium">{bookTitle}</span>
         </>
       );
     case "rated":
       return (
         <>
-          Rated <span className="font-semibold">{bookTitle}</span>
+          Rated <span className="font-medium">{bookTitle}</span>
           {details ? ` ${details}` : ""}
         </>
       );
     case "added":
       return (
         <>
-          Added <span className="font-semibold">{bookTitle}</span>
+          Added <span className="font-medium">{bookTitle}</span>
         </>
       );
     case "progress":
@@ -74,24 +75,23 @@ const getActivityText = (activity: ActivityItem): React.ReactNode => {
                 ? `Read ${pages} pages in `
                 : `Unread ${Math.abs(pages)} pages in `;
             })()}
-          <span className="font-semibold">{bookTitle}</span>
+          <span className="font-medium">{bookTitle}</span>
         </>
       );
     case "commented":
       return (
         <>
-          Commented on <span className="font-semibold">{bookTitle}</span>
+          Commented on <span className="font-medium">{bookTitle}</span>
         </>
       );
     case "deleted":
       return (
         <>
-          Deleted <span className="font-semibold">{bookTitle}</span> from
-          library
+          Removed <span className="font-medium">{bookTitle}</span>
         </>
       );
     default:
-      return <span className="font-semibold">{bookTitle}</span>;
+      return <span className="font-medium">{bookTitle}</span>;
   }
 };
 
@@ -106,13 +106,11 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
     (book) => book.state === "in_progress"
   ).length;
 
-  // Determine activity limit based on currently reading layout:
-  // - 1 row (≤2 books): show 4-6 activities with adaptive spacing
-  // - 2 rows (3-4 books): show 6-8 activities with tighter spacing
+  // Determine activity limit based on currently reading layout
   const isShortLayout = currentlyReadingCount <= 2;
-  const maxActivities = isShortLayout ? 6 : 8;
+  const maxActivities = isShortLayout ? 5 : 7;
 
-  // Filter out internal activities and limit based on currently reading layout
+  // Filter out internal activities and limit
   const filteredActivities = activities
     .filter(
       (activity) =>
@@ -120,90 +118,71 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
     )
     .slice(0, maxActivities);
 
-  // Determine spacing strategy based on available height and content
-  const getContentSpacing = () => {
-    const activityCount = filteredActivities.length;
-    
-    if (isShortLayout) {
-      // Shorter container: use generous spacing for fewer activities
-      return activityCount <= 3 ? "space-y-6" : "space-y-4";
-    } else {
-      // Taller container: use moderate spacing for more activities
-      return activityCount <= 5 ? "space-y-4" : "space-y-3";
-    }
-  };
-
   return (
-    <div className="bg-card border border-border rounded-lg p-6 h-full flex flex-col">
-        <div className="mb-4 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-foreground">
-            Recent Activity
-          </h2>
-        </div>
+    <div className="bg-card border border-border rounded-lg h-full flex flex-col">
+      {/* Header */}
+      <div className="p-5 pb-0">
+        <h3 className="text-lg font-semibold text-foreground">
+          Recent Activity
+        </h3>
+      </div>
 
+      {/* Content */}
+      <div className="flex-1 p-5 pt-4 overflow-hidden">
         {loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">
-              Loading recent activity...
-            </div>
+          <div className="h-full flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         )}
 
         {error && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="h-full flex items-center justify-center">
             <ErrorAlert error={error} />
           </div>
         )}
 
         {!loading && !error && filteredActivities.length === 0 && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">
-              No recent activity to display
-            </div>
+          <div className="h-full flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">No recent activity</p>
           </div>
         )}
 
         {!loading && !error && filteredActivities.length > 0 && (
-          <>
-            {/* Activities container with proper flex distribution */}
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className={`flex-grow ${getContentSpacing()}`}>
-                {filteredActivities.map((activity) => (
-                  <div 
-                    key={activity.id} 
-                    className="flex items-start space-x-3"
-                  >
-                    <div
-                      className={`h-2 w-2 ${activity.colorClass} rounded-full mt-2 shrink-0`}
-                    ></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground leading-relaxed">
-                        {getActivityText(activity)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatTimeAgo(activity.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+          <div className="space-y-3">
+            {filteredActivities.map((activity) => (
+              <div key={activity.id} className="flex items-start gap-3 group">
+                <div
+                  className={`h-2 w-2 ${activity.colorClass} rounded-full mt-1.5 shrink-0`}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground leading-snug">
+                    {getActivityText(activity)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatTimeAgo(activity.timestamp)}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            {/* Fixed footer with better visual separation */}
-            <div className="mt-6 pt-4 border-t border-border flex-shrink-0">
-              <Link href="/activity-history">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`w-full ${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text} flex items-center justify-center gap-1 transition-colors`}
-                >
-                  View all activity
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-              </Link>
-            </div>
-          </>
+            ))}
+          </div>
         )}
+      </div>
+
+      {/* Footer */}
+      {!loading && !error && filteredActivities.length > 0 && (
+        <div className="p-5 pt-0">
+          <Link href="/activity-history">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 transition-colors"
+            >
+              View all activity
+              <ArrowRightIcon className="h-3.5 w-3.5" weight="light" />
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

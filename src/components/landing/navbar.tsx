@@ -1,20 +1,13 @@
 "use client";
 import { BRAND_COLORS } from "@/lib/design/colors";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { ArrowRight, Book, Github, Loader2, Menu } from "lucide-react";
+import { BookIcon, ListIcon, CircleNotchIcon } from "@phosphor-icons/react";
+import { ArrowRight, Github } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { ToggleTheme } from "../toggle-theme";
 import { Button } from "../ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "../ui/navigation-menu";
 import { Separator } from "../ui/separator";
 import {
   Sheet,
@@ -30,19 +23,14 @@ interface RouteProps {
   label: string;
 }
 
-interface FeatureProps {
-  title: string;
-  description: string;
-}
-
 const routeList: RouteProps[] = [
-  {
-    href: "#benefits",
-    label: "Benefits",
-  },
   {
     href: "#features",
     label: "Features",
+  },
+  {
+    href: "#benefits",
+    label: "Benefits",
   },
   {
     href: "#services",
@@ -55,23 +43,6 @@ const routeList: RouteProps[] = [
   {
     href: "#faq",
     label: "FAQ",
-  },
-];
-
-const featureList: FeatureProps[] = [
-  {
-    title: "Track Your Reading",
-    description:
-      "Monitor your reading progress and maintain your personal library.",
-  },
-  {
-    title: "Discover Books",
-    description:
-      "Find new books with intelligent recommendations and social features.",
-  },
-  {
-    title: "Reading Analytics",
-    description: "Visualize your reading habits and track your reading goals.",
   },
 ];
 
@@ -97,61 +68,77 @@ export const Navbar = () => {
       setIsSigningIn(false);
     }
   };
+
   return (
-    <header className="shadow-inner bg-opacity-15 w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border border-secondary z-40 rounded-2xl flex justify-between items-center p-2 bg-card">
-      {/* <!-- Mobile --> */}
+    <header className="w-[90%] md:w-[80%] lg:w-[85%] lg:max-w-screen-xl top-5 mx-auto sticky border border-border/60 z-40 rounded-xl flex justify-between items-center px-4 py-3 bg-background/95 backdrop-blur-sm">
+      {/* Mobile Menu */}
       <div className="flex items-center lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Menu
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setIsOpen(!isOpen)}
-              className="cursor-pointer lg:hidden mr-3"
-            />
+              className="mr-2 text-muted-foreground hover:text-foreground"
+              aria-label="Open menu"
+            >
+              <ListIcon className="h-5 w-5" weight="light" />
+            </Button>
           </SheetTrigger>
 
           <SheetContent
             side="left"
-            className="flex flex-col justify-between rounded-tr-2xl rounded-br-2xl bg-card border-secondary"
+            className="flex flex-col justify-between bg-background border-border/60"
           >
             <div>
-              <SheetHeader className="mb-4 ml-4">
+              <SheetHeader className="mb-6">
                 <SheetTitle className="flex items-center">
                   <Link
                     href="/"
-                    className="flex items-center whitespace-nowrap"
+                    className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
                   >
-                    <div
-                      className={`${BRAND_COLORS.primary.bg} rounded-lg w-9 h-9 mr-2 flex items-center justify-center`}
-                    >
-                      <Book className="h-5 w-5 text-white" />
+                    <div className="w-9 h-9 bg-brand-accent/20 rounded-xl flex items-center justify-center">
+                      <BookIcon
+                        className="h-5 w-5 text-brand-primary"
+                        weight="duotone"
+                      />
                     </div>
-                    <span className="text-foreground">Librarium</span>
+                    <span
+                      className="text-xl text-foreground tracking-tight"
+                      style={{ fontFamily: "var(--font-geist-sans)" }}
+                    >
+                      Librarium
+                    </span>
                   </Link>
                 </SheetTitle>
               </SheetHeader>
 
-              <div className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1">
                 {routeList.map(({ href, label }) => (
                   <Button
                     key={href}
                     onClick={() => setIsOpen(false)}
                     asChild
                     variant="ghost"
-                    className="justify-start text-base"
+                    className="justify-start text-base font-normal text-muted-foreground hover:text-foreground"
                   >
                     <Link href={href}>{label}</Link>
                   </Button>
                 ))}
 
-                {/* Mobile Login Button */}
+                <Separator className="my-3" />
+
                 <Button
                   onClick={handleLogin}
                   disabled={isSigningIn}
-                  className={`mt-2 justify-start text-base font-semibold group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white shadow-none border-none`}
+                  className={`justify-center font-medium group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white`}
                 >
                   {isSigningIn ? (
                     <>
-                      <Loader2 className="size-4 mr-2 animate-spin" />
+                      <CircleNotchIcon
+                        className="size-4 mr-2 animate-spin"
+                        weight="bold"
+                      />
                       Signing in...
                     </>
                   ) : isAuthenticated ? (
@@ -166,128 +153,90 @@ export const Navbar = () => {
                     </>
                   )}
                 </Button>
-              </div>
+              </nav>
             </div>
 
             <SheetFooter className="flex-col sm:flex-col justify-start items-start">
-              <Separator className="mb-2" />
+              <Separator className="mb-3" />
               <ToggleTheme />
             </SheetFooter>
           </SheetContent>
         </Sheet>
-
-        <Link
-          href="/"
-          className="font-bold text-lg flex items-center whitespace-nowrap"
-        >
-          <div
-            className={`${BRAND_COLORS.primary.bg} rounded-lg w-7 h-7 mr-2 flex items-center justify-center`}
-          >
-            <Book className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-foreground">Librarium</span>
-        </Link>
       </div>
 
-      {/* <!-- Desktop Logo --> */}
+      {/* Logo - Both Mobile & Desktop */}
       <Link
         href="/"
-        className="font-bold text-lg items-center whitespace-nowrap hidden lg:flex"
+        className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
       >
-        <div
-          className={`${BRAND_COLORS.primary.bg} rounded-lg w-7 h-7 mr-2 flex items-center justify-center`}
-        >
-          <Book className="h-4 w-4 text-white" />
+        <div className="w-9 h-9 bg-brand-accent/20 rounded-xl flex items-center justify-center shrink-0">
+          <BookIcon className="h-5 w-5 text-brand-primary" weight="duotone" />
         </div>
-        <span className="text-foreground">Librarium</span>
+        <span
+          className="text-xl text-foreground tracking-tight hidden sm:block"
+          style={{ fontFamily: "var(--font-geist-sans)" }}
+        >
+          Librarium
+        </span>
       </Link>
 
-      {/* <!-- Mobile spacer --> */}
-      <div className="lg:hidden"></div>
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex items-center gap-1">
+        {routeList.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
 
-      {/* <!-- Desktop --> */}
-      <NavigationMenu className="hidden lg:block mx-auto">
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="bg-card text-base">
-              Features
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <div className="grid w-[600px] grid-cols-2 gap-5 p-4">
-                <div className="flex items-center justify-center bg-gradient-to-br from-brand-primary to-brand-accent rounded-lg h-full min-h-[200px]">
-                  <Book className="w-20 h-20 text-white" />
-                </div>
-                <ul className="flex flex-col gap-2">
-                  {featureList.map(({ title, description }) => (
-                    <li
-                      key={title}
-                      className="rounded-md p-3 text-sm hover:bg-muted"
-                    >
-                      <p className="mb-1 font-semibold leading-none text-foreground">
-                        {title}
-                      </p>
-                      <p className="line-clamp-2 text-muted-foreground">
-                        {description}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
+      {/* Right Side Actions */}
+      <div className="flex items-center gap-2">
+        {/* Desktop Login Button */}
+        <Button
+          onClick={handleLogin}
+          disabled={isSigningIn}
+          className={`hidden lg:flex h-9 px-5 font-medium group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white`}
+        >
+          {isSigningIn ? (
+            <>
+              <CircleNotchIcon
+                className="size-4 mr-2 animate-spin"
+                weight="bold"
+              />
+              Signing in...
+            </>
+          ) : isAuthenticated ? (
+            <>
+              Dashboard
+              <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+            </>
+          ) : (
+            <>
+              Login
+              <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
+            </>
+          )}
+        </Button>
 
-          <NavigationMenuItem>
-            {routeList.map(({ href, label }) => (
-              <NavigationMenuLink key={href} asChild>
-                <Link href={href} className="text-base px-2">
-                  {label}
-                </Link>
-              </NavigationMenuLink>
-            ))}
-
-            {/* Desktop Login Button */}
-            <Button
-              onClick={handleLogin}
-              disabled={isSigningIn}
-              className={`ml-14 h-8 !px-10 font-semibold group/arrow ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-white`}
-            >
-              {isSigningIn ? (
-                <>
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-                  Signing in...
-                </>
-              ) : isAuthenticated ? (
-                <>
-                  Dashboard
-                  <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
-                </>
-              ) : (
-                <>
-                  Login
-                  <ArrowRight className="size-4 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
-                </>
-              )}
-            </Button>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-
-      <div className="flex">
         <ToggleTheme />
 
         <Button
           asChild
-          size="sm"
+          size="icon-sm"
           variant="ghost"
           aria-label="View on GitHub"
-          className="hidden lg:flex"
+          className="hidden lg:flex text-muted-foreground hover:text-foreground"
         >
           <Link
             aria-label="View on GitHub"
             href="https://github.com/andersbekkevard/librarium-app"
             target="_blank"
           >
-            <Github className="size-5" />
+            <Github className="size-4" />
           </Link>
         </Button>
       </div>

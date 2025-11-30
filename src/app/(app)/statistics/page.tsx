@@ -6,16 +6,7 @@ import { useEventsContext } from "@/lib/providers/EventsProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
 import { createGenreColorMapping } from "@/lib/utils/genre-colors";
 import { eachMonthOfInterval, format, startOfMonth, subMonths } from "date-fns";
-import {
-  Award,
-  BarChart3,
-  BookOpen,
-  Calendar,
-  Star,
-  Target,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { BookOpen, Flame, Library, Sparkles, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 import {
   Area,
@@ -24,6 +15,7 @@ import {
   Cell,
   Pie,
   PieChart,
+  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
@@ -78,9 +70,17 @@ export default function StatisticsPage() {
         return acc;
       }, {} as Record<string, number>);
 
+      // Calculate total pages for the month
+      const totalPages = Object.values(genrePages).reduce(
+        (sum, pages) => sum + pages,
+        0
+      );
+
       // Ensure all genres have a value (0 if no data for that month)
       const monthData: Record<string, number | string> = {
-        month: format(month, "MMM yyyy"),
+        month: format(month, "MMM"),
+        fullMonth: format(month, "MMM yyyy"),
+        total: totalPages,
       };
 
       allGenres.forEach((genre) => {
@@ -151,508 +151,546 @@ export default function StatisticsPage() {
       label: "Pages Read",
       color: "hsl(var(--brand-primary))",
     },
-    books: {
-      label: "Books Started",
-      color: "hsl(var(--brand-accent))",
-    },
   };
 
   const loading = userLoading || booksLoading || eventsLoading;
 
+  // Calculate current month pages
+  const currentMonthPages = useMemo(() => {
+    if (!historicalDataByGenre.length) return 0;
+    const lastMonth = historicalDataByGenre[historicalDataByGenre.length - 1];
+    return typeof lastMonth.total === "number" ? lastMonth.total : 0;
+  }, [historicalDataByGenre]);
+
+  // Calculate books finished this year
+  const booksFinishedThisYear = userStats?.booksReadThisYear || 0;
+
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2 mb-6"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+      <div className="min-h-screen bg-background">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          {/* Header skeleton */}
+          <div className="animate-pulse mb-6">
+            <div className="h-8 w-56 bg-muted rounded mb-2" />
+            <div className="h-4 w-80 bg-muted rounded" />
+          </div>
+
+          {/* Stats skeleton */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded-lg"></div>
+              <div key={i} className="animate-pulse">
+                <div className="h-3 w-20 bg-muted rounded mb-2" />
+                <div className="h-8 w-14 bg-muted rounded mb-1" />
+                <div className="h-3 w-16 bg-muted rounded" />
+              </div>
             ))}
           </div>
+
+          {/* Chart skeleton */}
+          <div className="h-72 bg-muted rounded-xl animate-pulse" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Reading Analytics
-        </h1>
-        <p className="text-muted-foreground">
-          Deep insights into your reading journey and habits.
-        </p>
-      </div>
-
-      {/* Main Stats Card */}
-      {/* Mobile Layout - Clean 2x2 grid in single card */}
-      <div className="bg-card border border-border rounded-lg p-4 mb-6 lg:hidden">
-        {/* Mobile Layout - Clean 2x2 grid */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Total Books Read */}
-          <div className="text-center p-3 bg-brand-primary/5 rounded-lg">
-            <div className="h-10 w-10 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-              <BookOpen className="h-5 w-5 text-brand-primary" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">
-              {userStats?.totalBooksRead || 0}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Total Books Read
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {userStats?.booksReadThisYear || 0} this year
-            </p>
-          </div>
-
-          {/* Average Rating */}
-          <div className="text-center p-3 bg-status-warning/5 rounded-lg">
-            <div className="h-10 w-10 bg-status-warning/10 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Star className="h-5 w-5 text-status-warning" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">
-              {userStats?.averageRating
-                ? userStats.averageRating.toFixed(1)
-                : "0.0"}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Avg Rating
-            </p>
-            <div className="flex items-center justify-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(userStats?.averageRating || 0)
-                      ? "text-status-warning fill-current"
-                      : "text-muted-foreground"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Reading Velocity */}
-          <div className="text-center p-3 bg-brand-accent/5 rounded-lg">
-            <div className="h-10 w-10 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Zap className="h-5 w-5 text-brand-accent" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">
-              {readingVelocity}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Reading Velocity
-            </p>
-            <p className="text-xs text-muted-foreground">pages per day</p>
-          </div>
-
-          {/* Total Pages */}
-          <div className="text-center p-3 bg-status-success/5 rounded-lg">
-            <div className="h-10 w-10 bg-status-success/10 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Award className="h-5 w-5 text-status-success" />
-            </div>
-            <p className="text-2xl font-bold text-foreground mb-1">
-              {userStats?.totalPagesRead?.toLocaleString() || "0"}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Total Pages
-            </p>
-            <p className="text-xs text-muted-foreground">
-              lifetime achievement
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Layout - 4 separate cards */}
-      <div className="hidden lg:grid lg:grid-cols-4 gap-6 mb-8">
-        {/* Total Books Read */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Total Books Read
-            </p>
-            <div className="h-8 w-8 bg-brand-primary/10 rounded-full flex items-center justify-center">
-              <BookOpen className="h-4 w-4 text-brand-primary" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-foreground mb-1">
-            {userStats?.totalBooksRead || 0}
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-6 py-6">
+        {/* Header - matches DashboardHeader pattern */}
+        <header className="mb-6">
+          <h1 className="text-3xl text-foreground mb-2">Reading Analytics</h1>
+          <p className="text-muted-foreground">
+            Your reading habits, patterns, and achievements over time.
           </p>
-          <p className="text-xs text-muted-foreground">
-            {userStats?.booksReadThisYear || 0} this year
-          </p>
-        </div>
+        </header>
 
-        {/* Average Rating */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Avg Rating
-            </p>
-            <div className="h-8 w-8 bg-status-warning/10 rounded-full flex items-center justify-center">
-              <Star className="h-4 w-4 text-status-warning" />
+        {/* Key Metrics - Card-based with visual hierarchy */}
+        <section className="mb-10">
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Books Read */}
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="h-6 w-6 text-brand-primary" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Books Finished
+                  </p>
+                  <p className="text-3xl lg:text-4xl font-serif font-medium text-foreground">
+                    {userStats?.totalBooksRead || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {booksFinishedThisYear} this year
+                  </p>
+                </div>
+              </div>
+
+              {/* Pages This Month */}
+              <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
+                <div className="h-12 w-12 bg-brand-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="h-6 w-6 text-brand-accent" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    This Month
+                  </p>
+                  <p className="text-3xl lg:text-4xl font-serif font-medium text-foreground">
+                    {currentMonthPages.toLocaleString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground">pages read</p>
+                </div>
+              </div>
+
+              {/* Reading Streak */}
+              <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
+                <div className="h-12 w-12 bg-status-warning/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Flame className="h-6 w-6 text-status-warning" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Reading Streak
+                  </p>
+                  <p className="text-3xl lg:text-4xl font-serif font-medium text-foreground">
+                    {userStats?.readingStreak || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    consecutive days
+                  </p>
+                </div>
+              </div>
+
+              {/* Reading Velocity */}
+              <div className="flex items-start gap-4 lg:border-l lg:border-border lg:pl-6">
+                <div className="h-12 w-12 bg-status-info/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-6 w-6 text-status-info" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Daily Pace
+                  </p>
+                  <p className="text-3xl lg:text-4xl font-serif font-medium text-foreground">
+                    {readingVelocity}
+                  </p>
+                  <p className="text-sm text-muted-foreground">pages per day</p>
+                </div>
+              </div>
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mb-1">
-            {userStats?.averageRating
-              ? userStats.averageRating.toFixed(1)
-              : "0.0"}
-          </p>
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3 w-3 ${
-                  i < Math.floor(userStats?.averageRating || 0)
-                    ? "text-status-warning fill-current"
-                    : "text-muted-foreground"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
+        </section>
 
-        {/* Reading Velocity */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Reading Velocity
-            </p>
-            <div className="h-8 w-8 bg-brand-accent/10 rounded-full flex items-center justify-center">
-              <Zap className="h-4 w-4 text-brand-accent" />
+        {/* Reading Activity Chart */}
+        <section className="mb-10">
+          <div className="flex items-baseline justify-between mb-4">
+            <div>
+              <h2 className="text-xl text-foreground mb-1">Reading Activity</h2>
+              <p className="text-sm text-muted-foreground">
+                Pages read over the past 12 months
+              </p>
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mb-1">
-            {readingVelocity}
-          </p>
-          <p className="text-xs text-muted-foreground">pages per day</p>
-        </div>
 
-        {/* Total Pages */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Total Pages
-            </p>
-            <div className="h-8 w-8 bg-status-success/10 rounded-full flex items-center justify-center">
-              <Award className="h-4 w-4 text-status-success" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-foreground mb-1">
-            {userStats?.totalPagesRead?.toLocaleString() || "0"}
-          </p>
-          <p className="text-xs text-muted-foreground">lifetime achievement</p>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-        {/* Historical Pages Read Chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-lg p-4 lg:p-6">
-          <div className="flex items-center mb-4">
-            <TrendingUp className="h-5 w-5 text-brand-primary mr-2" />
-            <h2 className="text-lg font-semibold text-foreground">
-              Reading Activity Over Time
-            </h2>
-          </div>
           {historicalDataByGenre.length > 0 ? (
             (() => {
-              // Extract all unique genres from the data (excluding 'month' key)
+              // Extract all unique genres from the data (excluding utility keys)
               const allGenres = new Set<string>();
               historicalDataByGenre.forEach((monthData) => {
                 Object.keys(monthData).forEach((key) => {
-                  if (key !== "month") {
+                  if (
+                    key !== "month" &&
+                    key !== "fullMonth" &&
+                    key !== "total"
+                  ) {
                     allGenres.add(key);
                   }
                 });
               });
-              const availableGenres = Array.from(allGenres).sort(); // Sort for consistent ordering
+              const availableGenres = Array.from(allGenres).sort();
               const genreColorMap = createGenreColorMapping(availableGenres);
 
               return (
-                <ChartContainer
-                  config={chartConfig}
-                  className="h-[250px] lg:h-[300px] w-full"
-                >
-                  <AreaChart data={historicalDataByGenre}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 10 }}
-                      tickLine={false}
-                      angle={-45}
-                      textAnchor="end"
-                      height={50}
-                    />
-                    <YAxis tick={{ fontSize: 10 }} tickLine={false} />
-                    <ChartTooltip
-                      content={({ active, payload, label }) => {
-                        if (active && payload && payload.length) {
-                          const totalPages = payload.reduce(
-                            (sum, entry) => sum + (Number(entry.value) || 0),
-                            0
-                          );
-                          return (
-                            <div className="bg-background border border-border rounded-lg p-2 lg:p-3 shadow-lg">
-                              <p className="font-medium text-foreground mb-1 lg:mb-2 text-sm lg:text-base">
-                                {label}
-                              </p>
-                              <p className="text-xs lg:text-sm text-muted-foreground mb-1 lg:mb-2">
-                                Total: {totalPages} pages
-                              </p>
-                              <div className="space-y-1">
-                                {payload
-                                  .filter((entry) => Number(entry.value) > 0) // Only show genres with pages read
-                                  .map((entry, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center justify-between"
-                                    >
-                                      <div className="flex items-center">
+                <div className="bg-card border border-border rounded-xl p-4 lg:p-6">
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-[260px] lg:h-[320px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={historicalDataByGenre}
+                        margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                      >
+                        <defs>
+                          {availableGenres.map((genre) => (
+                            <linearGradient
+                              key={genre}
+                              id={`gradient-${genre.replace(/\s+/g, "-")}`}
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor={genreColorMap[genre]}
+                                stopOpacity={0.4}
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor={genreColorMap[genre]}
+                                stopOpacity={0.05}
+                              />
+                            </linearGradient>
+                          ))}
+                        </defs>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--border)"
+                          strokeOpacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          tick={{
+                            fontSize: 12,
+                            fill: "var(--muted-foreground)",
+                          }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          tick={{
+                            fontSize: 12,
+                            fill: "var(--muted-foreground)",
+                          }}
+                          tickLine={false}
+                          axisLine={false}
+                          width={45}
+                        />
+                        <ChartTooltip
+                          content={({ active, payload, label }) => {
+                            if (active && payload && payload.length) {
+                              const monthData = historicalDataByGenre.find(
+                                (d) => d.month === label
+                              );
+                              const totalPages = monthData?.total || 0;
+                              return (
+                                <div className="bg-popover border border-border rounded-xl p-4 shadow-xl">
+                                  <p className="font-serif font-medium text-foreground text-lg mb-1">
+                                    {monthData?.fullMonth}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mb-3">
+                                    {totalPages.toLocaleString()} pages total
+                                  </p>
+                                  <div className="space-y-1.5">
+                                    {payload
+                                      .filter(
+                                        (entry) => Number(entry.value) > 0
+                                      )
+                                      .sort(
+                                        (a, b) =>
+                                          Number(b.value) - Number(a.value)
+                                      )
+                                      .slice(0, 5)
+                                      .map((entry, index) => (
                                         <div
-                                          className="w-2 h-2 lg:w-3 lg:h-3 rounded-full mr-1 lg:mr-2"
-                                          style={{
-                                            backgroundColor: entry.color,
-                                          }}
-                                        />
-                                        <span className="text-xs lg:text-sm text-foreground">
-                                          {entry.dataKey}
-                                        </span>
-                                      </div>
-                                      <span className="text-xs lg:text-sm font-medium text-foreground">
-                                        {entry.value} pages
-                                      </span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    {availableGenres.map((genre) => (
-                      <Area
-                        key={genre}
-                        type="monotone"
-                        dataKey={genre}
-                        stackId="genres"
-                        stroke={genreColorMap[genre]}
-                        fill={genreColorMap[genre]}
-                        fillOpacity={0.2}
-                        strokeWidth={2}
-                      />
+                                          key={index}
+                                          className="flex items-center justify-between gap-6"
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <div
+                                              className="w-2.5 h-2.5 rounded-full"
+                                              style={{
+                                                backgroundColor: entry.color,
+                                              }}
+                                            />
+                                            <span className="text-sm text-foreground">
+                                              {entry.dataKey}
+                                            </span>
+                                          </div>
+                                          <span className="text-sm font-medium text-foreground tabular-nums">
+                                            {Number(
+                                              entry.value
+                                            ).toLocaleString()}
+                                          </span>
+                                        </div>
+                                      ))}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        {availableGenres.map((genre) => (
+                          <Area
+                            key={genre}
+                            type="monotone"
+                            dataKey={genre}
+                            stackId="genres"
+                            stroke={genreColorMap[genre]}
+                            fill={`url(#gradient-${genre.replace(
+                              /\s+/g,
+                              "-"
+                            )})`}
+                            strokeWidth={1.5}
+                          />
+                        ))}
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+
+                  {/* Genre Legend - Horizontal, minimal */}
+                  <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
+                    {availableGenres.slice(0, 6).map((genre) => (
+                      <div key={genre} className="flex items-center gap-2">
+                        <div
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: genreColorMap[genre] }}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {genre}
+                        </span>
+                      </div>
                     ))}
-                  </AreaChart>
-                </ChartContainer>
+                    {availableGenres.length > 6 && (
+                      <span className="text-xs text-muted-foreground">
+                        +{availableGenres.length - 6} more
+                      </span>
+                    )}
+                  </div>
+                </div>
               );
             })()
           ) : (
-            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Start reading to see your progress over time</p>
+            <div className="bg-card border border-border rounded-xl p-8 lg:p-12">
+              <div className="text-center max-w-md mx-auto">
+                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-serif text-foreground mb-1">
+                  Start Your Journey
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Begin reading and tracking your progress to see your activity
+                  visualized here.
+                </p>
               </div>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Genre Distribution Pie Chart */}
-        <div className="bg-card border border-border rounded-lg p-4 lg:p-6">
-          <div className="flex items-center mb-4">
-            <BarChart3 className="h-5 w-5 text-brand-primary mr-2" />
-            <h2 className="text-lg font-semibold text-foreground">
-              Books by Genre
-            </h2>
-          </div>
-          {genreData.length > 0 ? (
-            <div className="space-y-3 lg:space-y-4">
-              {/* Pie Chart */}
-              <div className="h-[180px] lg:h-[200px] w-full">
-                <ChartContainer config={{}} className="h-full w-full">
-                  <PieChart>
-                    <Pie
-                      data={genreData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={45}
-                      outerRadius={65}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {genreData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-background border border-border rounded-lg p-2 lg:p-3 shadow-lg">
-                              <p className="font-medium text-foreground text-sm">
-                                {data.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {data.value} books ({data.percentage}%)
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                  </PieChart>
-                </ChartContainer>
-              </div>
+        {/* Two Column Layout - Genre Distribution + Reading Summary */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          {/* Genre Distribution */}
+          <div className="bg-card border border-border rounded-xl p-5 lg:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Library className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-xl text-foreground">Library Composition</h2>
+            </div>
 
-              {/* Legend */}
-              <div className="space-y-1.5 lg:space-y-2">
-                {genreData.slice(0, 5).map((item) => (
-                  <div
-                    key={item.name}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center">
+            {genreData.length > 0 ? (
+              <div className="flex flex-col lg:flex-row items-center gap-6">
+                {/* Pie Chart */}
+                <div className="w-40 h-40 lg:w-44 lg:h-44 flex-shrink-0">
+                  <ChartContainer config={{}} className="h-full w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={genreData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={45}
+                          outerRadius={68}
+                          paddingAngle={2}
+                          dataKey="value"
+                          strokeWidth={0}
+                        >
+                          {genreData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <ChartTooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-popover border border-border rounded-xl p-3 shadow-xl">
+                                  <p className="font-medium text-foreground">
+                                    {data.name}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {data.value} books · {data.percentage}%
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+
+                {/* Legend - Vertical list */}
+                <div className="flex-1 w-full">
+                  <div className="space-y-2">
+                    {genreData.slice(0, 6).map((item) => (
                       <div
-                        className="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full mr-2"
-                        style={{ backgroundColor: item.fill }}
-                      ></div>
-                      <span className="text-xs lg:text-sm text-muted-foreground truncate max-w-[80px] lg:max-w-[100px]">
-                        {item.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1 lg:space-x-2">
-                      <span className="text-xs lg:text-sm font-medium text-foreground">
-                        {item.value}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        ({item.percentage}%)
-                      </span>
-                    </div>
+                        key={item.name}
+                        className="flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: item.fill }}
+                          />
+                          <span className="text-sm text-foreground">
+                            {item.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-foreground tabular-nums">
+                            {item.value}
+                          </span>
+                          <span className="text-xs text-muted-foreground w-10 text-right">
+                            {item.percentage}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                {genreData.length > 5 && (
-                  <div className="text-xs text-muted-foreground text-center pt-1 lg:pt-2">
-                    +{genreData.length - 5} more
-                  </div>
-                )}
+                  {genreData.length > 6 && (
+                    <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
+                      +{genreData.length - 6} more genres
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Add books to see genre breakdown</p>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Add books to see your genre distribution
+                </p>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Reading Goals & Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        {/* Reading Goal Progress */}
-        <div className="bg-card border border-border rounded-lg p-4 lg:p-6">
-          <div className="flex items-center mb-3 lg:mb-4">
-            <Target className="h-4 w-4 lg:h-5 lg:w-5 text-brand-primary mr-2" />
-            <h2 className="text-base lg:text-lg font-semibold text-foreground">
-              Reading Goal
-            </h2>
+            )}
           </div>
-          {userStats?.readingGoalProgress ? (
-            <div className="space-y-3 lg:space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs lg:text-sm text-muted-foreground">
-                  Annual Goal
-                </span>
-                <span className="text-sm lg:text-base font-medium">
-                  {userStats.readingGoalProgress.current} /
-                  {userStats.readingGoalProgress.goal}
-                </span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2.5 lg:h-3">
-                <div
-                  className="bg-brand-primary h-2.5 lg:h-3 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      userStats.readingGoalProgress.percentage
-                    )}%`,
-                  }}
-                ></div>
-              </div>
-              <p className="text-xs lg:text-sm text-muted-foreground">
-                {userStats.readingGoalProgress.percentage.toFixed(1)}% complete
-              </p>
-            </div>
-          ) : (
-            <div className="text-center py-6 lg:py-8">
-              <Target className="h-10 w-10 lg:h-12 lg:w-12 mx-auto mb-3 lg:mb-4 text-muted-foreground opacity-50" />
-              <p className="text-sm lg:text-base text-muted-foreground">
-                Goals coming soon!
-              </p>
-            </div>
-          )}
-        </div>
 
-        {/* Quick Insights */}
-        <div className="bg-card border border-border rounded-lg p-4 lg:p-6">
-          <div className="flex items-center mb-3 lg:mb-4">
-            <Zap className="h-4 w-4 lg:h-5 lg:w-5 text-brand-primary mr-2" />
-            <h2 className="text-base lg:text-lg font-semibold text-foreground">
-              Quick Insights
-            </h2>
-          </div>
-          <div className="space-y-3 lg:space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-xs lg:text-sm text-muted-foreground">
-                Reading
-              </span>
-              <span className="text-sm lg:text-base font-medium">
-                {userStats?.currentlyReading || 0}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs lg:text-sm text-muted-foreground">
-                Library
-              </span>
-              <span className="text-sm lg:text-base font-medium">
-                {userStats?.booksInLibrary || 0}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs lg:text-sm text-muted-foreground">
-                Streak
-              </span>
-              <span className="text-sm lg:text-base font-medium">
-                {userStats?.readingStreak || 0}d
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs lg:text-sm text-muted-foreground">
-                This Month
-              </span>
-              <span className="text-sm lg:text-base font-medium">
-                {userStats?.booksReadThisMonth || 0}
-              </span>
-            </div>
-            {userStats?.favoriteGenres &&
-              userStats.favoriteGenres.length > 0 && (
-                <div className="pt-2 border-t">
-                  <span className="text-xs lg:text-sm text-muted-foreground">
-                    Favorite
-                  </span>
-                  <p className="text-sm lg:text-base font-medium text-brand-primary">
-                    {userStats.favoriteGenres[0]}
+          {/* Quick Stats / Reading Summary */}
+          <div className="bg-card border border-border rounded-xl p-5 lg:p-6">
+            <h2 className="text-xl text-foreground mb-4">Reading Summary</h2>
+
+            <div className="space-y-4">
+              {/* Total Pages */}
+              <div className="pb-4 border-b border-border">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                  Lifetime Pages
+                </p>
+                <p className="text-2xl lg:text-3xl font-serif font-medium text-foreground">
+                  {userStats?.totalPagesRead?.toLocaleString() || "0"}
+                </p>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                    Currently Reading
+                  </p>
+                  <p className="text-xl font-serif font-medium text-foreground">
+                    {userStats?.currentlyReading || 0}
                   </p>
                 </div>
-              )}
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                    In Library
+                  </p>
+                  <p className="text-xl font-serif font-medium text-foreground">
+                    {userStats?.booksInLibrary || 0}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                    This Month
+                  </p>
+                  <p className="text-xl font-serif font-medium text-foreground">
+                    {userStats?.booksReadThisMonth || 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">books</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                    Avg Rating
+                  </p>
+                  <p className="text-xl font-serif font-medium text-foreground">
+                    {userStats?.averageRating
+                      ? userStats.averageRating.toFixed(1)
+                      : "—"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">of 5</p>
+                </div>
+              </div>
+
+              {/* Favorite Genre */}
+              {userStats?.favoriteGenres &&
+                userStats.favoriteGenres.length > 0 && (
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">
+                      Top Genre
+                    </p>
+                    <p className="text-base font-medium text-brand-primary">
+                      {userStats.favoriteGenres[0]}
+                    </p>
+                  </div>
+                )}
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Reading Goal Progress */}
+        {userStats?.readingGoalProgress && (
+          <section className="mb-6">
+            <div className="bg-gradient-to-br from-brand-primary/5 via-background to-brand-accent/5 border border-border rounded-xl p-5 lg:p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <h2 className="text-xl text-foreground mb-1">
+                    Annual Reading Goal
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {userStats.readingGoalProgress.percentage.toFixed(0)}% of
+                    the way there
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl lg:text-4xl font-serif font-medium text-foreground">
+                    {userStats.readingGoalProgress.current}
+                    <span className="text-xl text-muted-foreground font-normal">
+                      /{userStats.readingGoalProgress.goal}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">books</p>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-5">
+                <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-brand-primary to-brand-accent rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        userStats.readingGoalProgress.percentage
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

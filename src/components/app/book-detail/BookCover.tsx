@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  BookOpen,
-  CheckCircle,
-  Edit,
-  FileText,
-  Play,
-  Star,
-} from "lucide-react";
+  BookOpenIcon,
+  CheckCircleIcon,
+  PencilSimpleIcon,
+  FileTextIcon,
+  PlayIcon,
+  StarIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
@@ -66,7 +66,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
-              <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+              <BookOpenIcon className="h-16 w-16 text-muted-foreground mb-4" weight="light" />
               <p className="text-sm font-medium text-foreground mb-2">
                 {book.title}
               </p>
@@ -107,13 +107,14 @@ export const BookCover: React.FC<BookCoverProps> = ({
             </Label>
             <div className="flex items-center gap-1">
               {Array.from({ length: 5 }, (_, i) => (
-                <Star
+                <StarIcon
                   key={i}
                   className={`h-5 w-5 cursor-pointer transition-colors ${
                     i < (hoverRating || rating)
-                      ? "fill-status-warning text-status-warning"
-                      : "fill-muted text-muted hover:text-status-warning"
+                      ? "text-status-warning"
+                      : "text-muted hover:text-status-warning"
                   }`}
+                  weight={i < (hoverRating || rating) ? "fill" : "regular"}
                   onMouseEnter={() => setHoverRating(i + 1)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => handleRatingClick(i + 1)}
@@ -134,7 +135,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
               disabled={isUpdating}
               className="w-full"
             >
-              <Play className="h-4 w-4 mr-2" />
+              <PlayIcon className="h-4 w-4 mr-2" weight="fill" />
               Start Reading
             </Button>
           )}
@@ -145,7 +146,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
               disabled={isUpdating}
               className="w-full"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircleIcon className="h-4 w-4 mr-2" weight="light" />
               Mark as Finished
             </Button>
           )}
@@ -156,13 +157,13 @@ export const BookCover: React.FC<BookCoverProps> = ({
               disabled={isUpdating}
               className="w-full bg-foreground hover:bg-foreground/90 text-background"
             >
-              <FileText className="h-4 w-4 mr-2" />
+              <FileTextIcon className="h-4 w-4 mr-2" weight="light" />
               Add Review
             </Button>
           )}
 
           <Button variant="outline" className="w-full" onClick={onEditBook}>
-            <Edit className="h-4 w-4 mr-2" />
+            <PencilSimpleIcon className="h-4 w-4 mr-2" weight="light" />
             Edit Book
           </Button>
         </div>

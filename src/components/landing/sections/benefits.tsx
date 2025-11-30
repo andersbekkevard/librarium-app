@@ -99,7 +99,7 @@ export const BenefitsSection = () => {
                     }`}
                     style={{
                       transitionDelay: visibleItems[index]
-                        ? `${(index * 150) + 300}ms`
+                        ? `${index * 150 + 300}ms`
                         : "0ms",
                     }}
                   >
@@ -109,9 +109,9 @@ export const BenefitsSection = () => {
                     0{index + 1}
                   </span>
                 </div>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="text-lg">{title}</CardTitle>
               </CardHeader>
-              <CardContent className="text-muted-foreground">
+              <CardContent className="text-muted-foreground text-sm">
                 {description}
               </CardContent>
             </Card>

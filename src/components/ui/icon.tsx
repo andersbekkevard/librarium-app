@@ -1,17 +1,36 @@
-import { icons, BookOpen } from "lucide-react";
+import * as PhosphorIcons from "@phosphor-icons/react";
+import { BookOpenIcon } from "@phosphor-icons/react";
+
+// Phosphor icon name type
+type PhosphorIconName = keyof typeof PhosphorIcons;
 
 export const Icon = ({
   name,
   color,
   size,
   className,
+  weight = "light",
 }: {
-  name: keyof typeof icons;
+  name: PhosphorIconName;
   color?: string;
   size?: number;
   className?: string;
+  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 }) => {
-  const LucideIcon = icons[name as keyof typeof icons] || BookOpen;
+  const PhosphorIcon =
+    (PhosphorIcons[name] as React.ComponentType<{
+      color?: string;
+      size?: number;
+      className?: string;
+      weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+    }>) || BookOpenIcon;
 
-  return <LucideIcon color={color} size={size} className={className} />;
+  return (
+    <PhosphorIcon
+      color={color}
+      size={size}
+      className={className}
+      weight={weight}
+    />
+  );
 };

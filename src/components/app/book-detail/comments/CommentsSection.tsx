@@ -5,11 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Book } from "@/lib/models/models";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
 import {
-  ChevronDown,
-  ChevronUp,
-  MessageSquare,
-  MessageSquarePlus,
-} from "lucide-react";
+  CaretDownIcon,
+  CaretUpIcon,
+  ChatIcon,
+  PlusCircle,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 import { CommentForm } from "./CommentForm";
@@ -77,12 +77,12 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   return (
     <Card className={`p-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-foreground" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <ChatIcon className="w-5 h-5 text-muted-foreground" weight="light" />
           <h3 className="text-lg font-semibold text-foreground">Comments</h3>
           {hasComments && (
-            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-muted-foreground bg-muted rounded-full">
+            <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-xs font-medium text-muted-foreground bg-input rounded-full dark:bg-input/30">
               {comments.length}
             </span>
           )}
@@ -91,7 +91,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
       {/* Error display */}
       {error && (
-        <div className="mb-4 p-3 bg-status-error/10 border border-status-error/20 rounded-md">
+        <div className="mb-5 p-4 bg-status-error/10 border border-status-error/20 rounded-xl">
           <p className="text-sm text-status-error">{error}</p>
         </div>
       )}
@@ -101,10 +101,10 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         <div className="mb-6">
           <Button
             onClick={handleAddButtonClick}
-            className="flex items-center gap-2 bg-foreground hover:bg-foreground/90 text-background"
+            className="flex items-center gap-2"
             disabled={commentsLoading}
           >
-            <MessageSquarePlus className="w-4 h-4" />
+            <PlusCircle className="w-4 h-4" weight="light" />
             {getAddButtonText()}
           </Button>
         </div>
@@ -147,14 +147,14 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
               {/* Placeholder comments with fade effect */}
               <div className="relative pl-12 pt-2">
                 <div className="space-y-3 opacity-30">
-                  <div className="bg-muted border border-border rounded-lg p-3">
-                    <div className="h-3 bg-muted-foreground/30 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-muted-foreground/30 rounded w-1/2"></div>
+                  <div className="bg-input border border-border rounded-xl p-4 dark:bg-input/30">
+                    <div className="h-3 bg-muted-foreground/20 rounded-lg w-3/4 mb-2"></div>
+                    <div className="h-3 bg-muted-foreground/20 rounded-lg w-1/2"></div>
                   </div>
                   {comments.length > 2 && (
-                    <div className="bg-muted border border-border rounded-lg p-3">
-                      <div className="h-3 bg-muted-foreground/30 rounded w-2/3 mb-2"></div>
-                      <div className="h-3 bg-muted-foreground/30 rounded w-1/3"></div>
+                    <div className="bg-input border border-border rounded-xl p-4 dark:bg-input/30">
+                      <div className="h-3 bg-muted-foreground/20 rounded-lg w-2/3 mb-2"></div>
+                      <div className="h-3 bg-muted-foreground/20 rounded-lg w-1/3"></div>
                     </div>
                   )}
                 </div>
@@ -169,9 +169,9 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={handleToggleExpanded}
-                  className="bg-background shadow-sm border-border text-foreground hover:bg-muted hover:border-muted-foreground/20 flex items-center gap-2"
+                  className="bg-input shadow-sm border-border text-foreground hover:bg-accent hover:border-ring/30 flex items-center gap-2 rounded-xl transition-all duration-200 dark:bg-input/30"
                 >
-                  <ChevronDown className="w-4 h-4" />
+                  <CaretDownIcon className="w-4 h-4" weight="bold" />
                   Show {comments.length - 1} more comment
                   {comments.length - 1 !== 1 ? "s" : ""}
                 </Button>
@@ -181,14 +181,14 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
           {/* Collapse button when expanded */}
           {isExpanded && comments.length > 1 && (
-            <div className="pt-4 border-t border-border mt-4 flex justify-center">
+            <div className="pt-5 border-t border-border mt-5 flex justify-center">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleToggleExpanded}
-                className="text-muted-foreground hover:text-foreground flex items-center gap-2"
+                className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors duration-200"
               >
-                <ChevronUp className="w-4 h-4" />
+                <CaretUpIcon className="w-4 h-4" weight="bold" />
                 Collapse Comments
               </Button>
             </div>
@@ -198,9 +198,11 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
       {/* Empty State */}
       {!hasComments && !showCommentForm && (
-        <div className="text-center py-8 text-muted-foreground">
-          <MessageSquare className="w-8 h-8 mx-auto mb-2 text-muted-foreground/60" />
-          <p className="text-sm">No comments yet</p>
+        <div className="text-center py-10 text-muted-foreground">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-input mb-3 dark:bg-input/30">
+            <ChatIcon className="w-6 h-6 text-muted-foreground/60" weight="light" />
+          </div>
+          <p className="text-sm font-medium">No comments yet</p>
           <p className="text-xs text-muted-foreground/60 mt-1">
             Share your thoughts about this book
           </p>

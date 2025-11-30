@@ -129,35 +129,35 @@
 }
 
 .dark {
-  /* Eden Dark Mode - Elegant dark library aesthetic */
-  --background: oklch(0.12 0.01 155); /* Very dark with green tint */
-  --foreground: oklch(0.95 0.005 100); /* Warm off-white text */
-  --card: oklch(0.16 0.01 155); /* Slightly lighter dark green */
-  --card-foreground: oklch(0.95 0.005 100);
-  --popover: oklch(0.14 0.01 155);
-  --popover-foreground: oklch(0.95 0.005 100);
+  /* Eden Dark Mode - Notion/Cursor inspired with subtle green warmth */
+  --background: oklch(0.16 0.005 155); /* Soft dark - not pure black */
+  --foreground: oklch(0.93 0.005 100); /* Warm off-white text */
+  --card: oklch(0.19 0.006 155); /* Elevated surface */
+  --card-foreground: oklch(0.93 0.005 100);
+  --popover: oklch(0.21 0.007 155); /* Popover slightly elevated */
+  --popover-foreground: oklch(0.93 0.005 100);
   
   /* Primary - Lighter forest green for dark mode visibility */
   --primary: oklch(0.62 0.08 145); /* Sage green as primary */
-  --primary-foreground: oklch(0.12 0.01 155);
+  --primary-foreground: oklch(0.16 0.005 155);
   
-  /* Secondary */
-  --secondary: oklch(0.20 0.015 155);
-  --secondary-foreground: oklch(0.92 0.005 100);
+  /* Secondary - Subtle elevated surface */
+  --secondary: oklch(0.24 0.008 155);
+  --secondary-foreground: oklch(0.90 0.005 100);
   
-  /* Muted */
-  --muted: oklch(0.20 0.01 155);
-  --muted-foreground: oklch(0.65 0.01 100);
+  /* Muted - For subtle backgrounds */
+  --muted: oklch(0.22 0.006 155);
+  --muted-foreground: oklch(0.60 0.008 100);
   
-  /* Accent */
-  --accent: oklch(0.22 0.02 155);
-  --accent-foreground: oklch(0.92 0.005 100);
+  /* Accent - Hover states and highlights */
+  --accent: oklch(0.26 0.012 155);
+  --accent-foreground: oklch(0.90 0.005 100);
   
   --destructive: oklch(0.65 0.18 25);
   
-  /* Borders */
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 8%);
+  /* Borders - Subtle definition */
+  --border: oklch(0.30 0.008 155);
+  --input: oklch(0.20 0.006 155);
   --ring: oklch(0.62 0.08 145);
   
   /* Charts - Eden green palette for dark mode */
@@ -167,14 +167,14 @@
   --chart-4: oklch(0.80 0.05 145); /* Very light sage */
   --chart-5: oklch(0.68 0.08 245); /* Muted blue accent */
   
-  /* Sidebar */
-  --sidebar: oklch(0.12 0.01 155);
-  --sidebar-foreground: oklch(0.95 0.005 100);
+  /* Sidebar - Slightly darker than main content */
+  --sidebar: oklch(0.14 0.004 155);
+  --sidebar-foreground: oklch(0.93 0.005 100);
   --sidebar-primary: oklch(0.62 0.08 145);
-  --sidebar-primary-foreground: oklch(0.12 0.01 155);
-  --sidebar-accent: oklch(0.22 0.02 155);
-  --sidebar-accent-foreground: oklch(0.92 0.005 100);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-primary-foreground: oklch(0.14 0.004 155);
+  --sidebar-accent: oklch(0.22 0.010 155);
+  --sidebar-accent-foreground: oklch(0.90 0.005 100);
+  --sidebar-border: oklch(0.26 0.006 155);
   --sidebar-ring: oklch(0.62 0.08 145);
 
   /* Brand Colors - Dark mode variants */
@@ -192,10 +192,10 @@
   --status-info: oklch(0.68 0.08 245); /* Brighter muted blue */
 
   /* Reading State Colors - Dark mode variants */
-  --reading-finished-bg: oklch(0.25 0.04 145);
+  --reading-finished-bg: oklch(0.28 0.025 145);
   --reading-finished-text: oklch(0.80 0.06 145);
-  --reading-finished-border: oklch(0.35 0.05 145);
-  --reading-in-progress-bg: oklch(0.62 0.08 145 / 0.15);
+  --reading-finished-border: oklch(0.38 0.04 145);
+  --reading-in-progress-bg: oklch(0.62 0.08 145 / 0.18);
   --reading-in-progress-text: oklch(0.72 0.06 145);
   --reading-in-progress-border: oklch(0.62 0.08 145);
 }
@@ -209,9 +209,15 @@
   }
   
   /* Eden-style typography - Serif headings with substantial weight */
-  h1, h2, h3, h4, h5, h6 {
+  /* Larger headings use medium weight, smaller headings use semibold for legibility */
+  h1, h2 {
     font-family: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     font-weight: 500;
+  }
+  
+  h3, h4, h5, h6 {
+    font-family: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-weight: 600;
   }
   
   h1 {
@@ -243,7 +249,7 @@
   /* Eden-style serif typography utilities */
   .font-heading {
     font-family: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-    font-weight: 500;
+    /* Weight is controlled by the element using this class */
   }
   
   .text-display {

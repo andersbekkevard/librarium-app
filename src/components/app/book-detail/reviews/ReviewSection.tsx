@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STATUS_COLORS } from "@/lib/design/colors";
 import { Book, BookReview } from "@/lib/models/models";
-import { Edit3, FileText, Loader2 } from "lucide-react";
+import { PencilSimpleIcon, FileTextIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { ReviewDialog } from "./ReviewDialog";
 
@@ -127,7 +127,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" />
+              <FileTextIcon className="w-5 h-5 text-primary" weight="light" />
               <CardTitle className="text-lg">Your Review</CardTitle>
             </div>
 
@@ -140,9 +140,9 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
                 className="flex items-center gap-2"
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <CircleNotchIcon className="w-4 h-4 animate-spin" weight="bold" />
                 ) : (
-                  <Edit3 className="w-4 h-4" />
+                  <PencilSimpleIcon className="w-4 h-4" weight="light" />
                 )}
                 Edit Review
               </Button>
@@ -154,7 +154,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
           {/* Loading state */}
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <CircleNotchIcon className="w-6 h-6 animate-spin text-muted-foreground" weight="bold" />
               <span className="ml-2 text-muted-foreground">
                 Loading review...
               </span>

@@ -1,3 +1,5 @@
+"use client";
+
 import { UI_CONFIG } from "@/lib/constants/constants";
 import { Book } from "@/lib/models/models";
 import BookSection from "./BookSection";
@@ -19,13 +21,12 @@ export const RecentlyReadSection: React.FC<RecentlyReadSectionProps> = ({
     <BookSection
       books={books}
       title="Recently Read"
-      emptyStateMessage="No books finished yet"
+      emptyStateMessage="No books finished yet. Start reading to see your completed books here!"
       filterFunction={(book) => book.state === "finished"}
       onBookClick={onBookClick}
       onViewAll={onViewAll}
       maxBooks={maxBooks}
-      className="mt-8"
-      gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3"
+      gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
     />
   );
 };

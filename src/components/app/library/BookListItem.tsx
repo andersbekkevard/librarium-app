@@ -120,7 +120,7 @@ export const BookListItem: React.FC<BookListItemProps> = ({
           {/* Book Details */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
             <div className="md:col-span-2">
-              <h3 className="font-semibold text-foreground truncate">
+              <h3 className="font-medium text-[18px] text-foreground truncate">
                 {book.title}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1">

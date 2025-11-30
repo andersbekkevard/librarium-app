@@ -37,8 +37,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-brand-accent/30 bg-card border-border/50",
-        // Mobile/tablet responsive dimensions with increased height for better content fit
+        "group relative overflow-hidden cursor-pointer transition-all duration-200",
+        "bg-card border-border/40 hover:border-brand-accent/40",
+        "hover:shadow-md hover:shadow-brand-accent/10 hover:-translate-y-0.5",
+        // Mobile/tablet responsive dimensions
         "h-44 md:h-48 w-full max-w-sm md:max-w-md",
         // Desktop: restore original height but allow full width in grid
         `lg:${UI_CONFIG.CARD.HEIGHT} lg:w-full lg:max-w-none`
@@ -58,7 +60,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       <CardContent className="px-4 h-full flex gap-4">
         {/* Book Cover - Responsive width, desktop uses original w-24 */}
         <div className="flex-shrink-0 w-20 md:w-24 lg:w-24">
-          <div className="w-full h-full rounded-xl overflow-hidden bg-muted border border-border/30 shadow-sm relative">
+          <div className="w-full h-full rounded-lg overflow-hidden bg-muted border border-border/20 shadow-sm relative">
             {book.coverImage ? (
               <Image
                 src={book.coverImage}
@@ -68,21 +70,21 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
                 sizes="(max-width: 768px) 80px, 96px"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-brand-accent/10">
-                <BookOpen className="h-8 w-8 text-brand-accent" />
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-accent/10 to-brand-primary/5">
+                <BookOpen className="h-7 w-7 text-brand-accent/70" />
               </div>
             )}
           </div>
         </div>
 
         {/* Book Information */}
-        <div className="flex-1 flex flex-col justify-between min-w-0">
+        <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
           {/* Title and Author */}
-          <div className="space-y-1.5">
-            <h3 className="font-semibold text-foreground text-sm md:text-base leading-tight line-clamp-2 transition-colors">
+          <div className="space-y-1">
+            <h4 className="font-heading font-semibold text-foreground text-sm md:text-[15px] leading-snug line-clamp-2 group-hover:text-brand-primary transition-colors">
               {book.title}
-            </h3>
-            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">
+            </h4>
+            <p className="text-xs md:text-[13px] text-muted-foreground/80 line-clamp-1">
               by {book.author}
             </p>
           </div>
@@ -100,11 +102,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
               book.progress.totalPages && (
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground/70">
                       {book.progress.currentPage} / {book.progress.totalPages}{" "}
                       pages
                     </span>
-                    <span className="text-xs font-medium text-brand-primary">
+                    <span className="text-[11px] font-semibold text-brand-primary">
                       {progress}%
                     </span>
                   </div>

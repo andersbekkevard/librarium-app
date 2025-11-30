@@ -2,14 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  BarChart3,
-  BookOpen,
-  Home,
-  Plus,
-  Settings,
-  Target,
-  Users,
-} from "lucide-react";
+  BookOpenIcon,
+  ChartBarIcon,
+  GearIcon,
+  HouseIcon,
+  PlusIcon,
+  TargetIcon,
+  UsersIcon,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -27,25 +27,25 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: Home, href: "/dashboard" },
-  { id: "library", label: "My Library", icon: BookOpen, href: "/library" },
+  { id: "dashboard", label: "Dashboard", icon: HouseIcon, href: "/dashboard" },
+  { id: "library", label: "My Library", icon: BookOpenIcon, href: "/library" },
   {
     id: "statistics",
     label: "Statistics",
-    icon: BarChart3,
+    icon: ChartBarIcon,
     href: "/statistics",
   },
   {
     id: "progress",
     label: "Reading Goals",
-    icon: Target,
+    icon: TargetIcon,
     href: "/progress",
     disabled: true,
   },
   {
     id: "shared",
     label: "Shared Books",
-    icon: Users,
+    icon: UsersIcon,
     href: "/shared",
     disabled: true,
   },
@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full"
           size="default"
         >
-          <Plus className="h-4 w-4" />
+          <PlusIcon className="h-4 w-4" weight="bold" />
           Add Book
         </Button>
       </div>
@@ -124,6 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       className={`h-4 w-4 ${
                         isActive ? "text-brand-accent" : ""
                       }`}
+                      weight={isActive ? "regular" : "light"}
                     />
                     {item.label}
                   </Link>
@@ -142,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-xl transition-all duration-200"
         >
           <div className="w-7 h-7 bg-brand-secondary rounded-lg flex items-center justify-center">
-            <Settings className="h-4 w-4 text-white" />
+            <GearIcon className="h-4 w-4 text-white" weight="light" />
           </div>
           Settings
         </Link>

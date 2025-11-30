@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Book, validateComment } from "@/lib/models/models";
-import { MessageSquarePlus, X } from "lucide-react";
+import { PlusCircle, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -73,33 +73,34 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   const stateDisplay = getStateDisplay();
 
   return (
-    <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+    <div className="bg-input border border-border rounded-xl p-5 dark:bg-input/30">
       <form onSubmit={handleSubmit}>
         {/* Header */}
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquarePlus className="w-4 h-4 text-foreground" />
+        <div className="flex items-center gap-2 mb-4">
+          <PlusCircle className="w-4 h-4 text-muted-foreground" weight="light" />
           <Label
             htmlFor="comment-input"
-            className="text-sm font-medium text-foreground"
+            className="text-sm font-medium text-muted-foreground"
           >
             Add Comment
           </Label>
         </div>
 
         {/* Textarea */}
-        <div className="mb-3">
+        <div className="mb-4">
           <textarea
             id="comment-input"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="What are your thoughts?"
-            className="w-full min-h-[100px] p-3 border border-border rounded-md text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent resize-none bg-background text-foreground"
+            className="w-full min-h-[120px] px-4 py-3 border border-border rounded-xl text-sm placeholder-muted-foreground outline-none transition-all duration-200 focus:border-ring focus:ring-ring/30 focus:ring-2 resize-none bg-background text-foreground"
             maxLength={maxLength}
             disabled={isSubmitting}
+            aria-label="Comment text"
           />
 
           {/* Character count */}
-          <div className="flex justify-between items-center mt-1">
+          <div className="flex justify-between items-center mt-2">
             <span
               className={`text-xs ${
                 characterCount > maxLength * 0.9
@@ -113,30 +114,30 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         </div>
 
         {/* Reading context */}
-        <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-muted rounded-md">
+        <div className="flex items-center gap-2 mb-5 px-4 py-2.5 bg-background border border-border rounded-xl">
           <span className="text-xs text-muted-foreground">{stateDisplay.page}</span>
-          <span className="text-xs text-muted-foreground/60">•</span>
+          <span className="text-xs text-muted-foreground/40">•</span>
           <span className="text-xs text-muted-foreground">{stateDisplay.label}</span>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mb-3 p-2 bg-status-error/10 border border-status-error/20 rounded-md">
+          <div className="mb-4 p-3 bg-status-error/10 border border-status-error/20 rounded-xl">
             <p className="text-xs text-status-error">{error}</p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-3">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1.5 transition-colors duration-200"
           >
-            <X className="w-3 h-3" />
+            <XIcon className="w-3.5 h-3.5" weight="light" />
             Cancel
           </Button>
 
@@ -144,9 +145,9 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             type="submit"
             size="sm"
             disabled={!isValid || isSubmitting}
-            className="flex items-center gap-1 bg-foreground hover:bg-foreground/90 text-background"
+            className="flex items-center gap-1.5"
           >
-            <MessageSquarePlus className="w-3 h-3" />
+            <PlusCircle className="w-3.5 h-3.5" weight="light" />
             {isSubmitting ? "Adding..." : "Add Comment"}
           </Button>
         </div>

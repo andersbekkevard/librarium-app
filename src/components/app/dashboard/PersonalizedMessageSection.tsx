@@ -1,7 +1,8 @@
+"use client";
+
 import { ActivityItem, Book, UserProfile } from "@/lib/models/models";
 import { useMessageContext } from "@/lib/providers/MessageProvider";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
-import Image from "next/image";
+import { CaretDownIcon, CaretUpIcon, SparkleIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 interface Stats {
@@ -53,140 +54,120 @@ export const PersonalizedMessageSection: React.FC<
     clearError,
   ]);
 
-  // Loading skeleton component
+  // Loading skeleton with green shimmer
   const LoadingSkeleton = () => (
-    <div className="animate-pulse">
-      <div className="flex items-start space-x-4">
-        <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center">
-          <div className="h-6 w-6 bg-muted-foreground/20 rounded"></div>
-        </div>
-        <div className="flex-1 bg-muted rounded-2xl p-4 relative">
-          <div className="space-y-2">
-            <div className="h-4 bg-muted-foreground/20 rounded w-3/4"></div>
-            <div className="h-4 bg-muted-foreground/20 rounded w-1/2"></div>
-            <div className="h-4 bg-muted-foreground/20 rounded w-2/3"></div>
-          </div>
-          {/* Loading indicator with gentle pulse */}
-          <div className="absolute -bottom-1 left-6 flex space-x-1">
-            <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"></div>
-            <div
-              className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"
-              style={{ animationDelay: "0.2s" }}
-            ></div>
-            <div
-              className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"
-              style={{ animationDelay: "0.4s" }}
-            ></div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-3">
+      <div className="h-4 bg-brand-primary/10 rounded-full w-full animate-pulse" />
+      <div className="h-4 bg-brand-primary/8 rounded-full w-5/6 animate-pulse delay-75" />
+      <div className="h-4 bg-brand-primary/6 rounded-full w-4/6 animate-pulse delay-150" />
     </div>
   );
 
   return (
-    <div className="bg-card border border-border rounded-lg h-full flex flex-col">
-      {/* Mobile: Collapsed header with expand button */}
-      <div className="md:hidden">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors rounded-lg"
-          aria-expanded={isExpanded}
-          aria-label={isExpanded ? "Collapse AI message" : "Expand AI message"}
-        >
-          <div className="flex items-center space-x-3">
-            <div className="h-8 w-8 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <div className="text-left">
-              <div className="text-sm font-medium text-foreground">
-                AI Reading Companion
+    <div className="relative group">
+      {/* Main card container */}
+      <div className="relative overflow-hidden rounded-xl border border-brand-primary/25 bg-gradient-to-br from-brand-primary/[0.03] via-card to-brand-accent/[0.05] shadow-[0_6px_20px_-6px_rgba(36,70,51,0.25)]">
+
+        {/* Decorative corner glow */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-primary/[0.08] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-brand-accent/[0.06] rounded-full blur-2xl pointer-events-none" />
+
+        {/* Mobile: Collapsed view */}
+        <div className="md:hidden relative">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full p-4 flex items-center justify-between hover:bg-brand-primary/[0.03] transition-colors"
+            aria-expanded={isExpanded}
+            aria-label={isExpanded ? "Collapse insight" : "Expand insight"}
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center justify-center h-9 w-9 rounded-lg bg-gradient-to-br from-brand-primary/15 to-brand-accent/10 border border-brand-primary/20">
+                <SparkleIcon
+                  className="h-4 w-4 text-brand-primary"
+                  weight="duotone"
+                />
               </div>
-              <div className="text-xs text-muted-foreground">
-                {isLoading
-                  ? "Generating message..."
-                  : "Tap to view personalized message"}
+              <div className="text-left">
+                <span className="text-sm font-medium text-foreground">
+                  Your Reading Companion
+                </span>
+                <p className="text-xs text-brand-primary/70">
+                  {isLoading ? "Thinking..." : "Tap to read insight"}
+                </p>
               </div>
             </div>
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center justify-center h-6 w-6 rounded-full bg-brand-primary/10">
+              {isExpanded ? (
+                <CaretUpIcon
+                  className="h-3.5 w-3.5 text-brand-primary"
+                  weight="bold"
+                />
+              ) : (
+                <CaretDownIcon
+                  className="h-3.5 w-3.5 text-brand-primary"
+                  weight="bold"
+                />
+              )}
+            </div>
+          </button>
+
+          {isExpanded && (
+            <div className="px-4 pb-4 pt-1">
+              {isLoading ? (
+                <LoadingSkeleton />
+              ) : (
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {currentMessage || "Loading your personalized insight..."}
+                </p>
+              )}
+            </div>
           )}
-        </button>
+        </div>
 
-        {/* Mobile: Expandable content */}
-        {isExpanded && (
-          <div className="px-4 pb-4">
-            {isLoading ? (
-              <div className="bg-muted/50 rounded-lg p-4 animate-pulse">
-                <div className="space-y-2">
-                  <div className="h-3 bg-muted-foreground/20 rounded w-3/4"></div>
-                  <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
-                  <div className="h-3 bg-muted-foreground/20 rounded w-2/3"></div>
-                </div>
+        {/* Desktop: Full view */}
+        <div className="hidden md:block relative p-6">
+          <div className="flex gap-5">
+            {/* AI Avatar/Icon */}
+            <div className="flex-shrink-0">
+              <div className="relative flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary shadow-md">
+                <SparkleIcon className="h-5 w-5 text-white" weight="fill" />
+                {/* Pulse ring on loading */}
+                {isLoading && (
+                  <div className="absolute inset-0 rounded-xl border-2 border-brand-primary/50 animate-ping" />
+                )}
               </div>
-            ) : (
-              <div className="bg-gradient-to-r from-brand-primary/5 to-brand-accent/5 border border-brand-primary/20 rounded-lg p-4">
-                <div className="text-sm leading-relaxed text-foreground">
-                  {currentMessage || "Loading your personalized message..."}
-                </div>
-              </div>
-            )}
-
-            {error && !isLoading && (
-              <div className="mt-2 text-xs text-status-warning">
-                Using fallback message - AI service temporarily unavailable
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Desktop: Original layout (hidden on mobile) */}
-      <div className="hidden md:flex md:flex-col md:p-6 md:h-full">
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : (
-          <div className="flex items-start space-x-4 flex-1">
-            {/* AI Avatar */}
-            <div className="h-12 w-12 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Image
-                src="/librarian.png"
-                alt="Personal Librarian"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain rounded-full"
-                priority
-              />
             </div>
 
-            {/* Chat bubble */}
-            <div className="flex-1 bg-muted/50 rounded-2xl p-4 relative flex flex-col justify-between min-h-full">
-              {/* Speech bubble tail */}
-              <div className="absolute left-0 top-4 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-muted/50 -ml-3"></div>
-
-              {/* Message content */}
-              <div className="text-sm leading-relaxed text-foreground flex-1 flex items-center">
-                {currentMessage || "Loading your personalized message..."}
-              </div>
-
-              {/* AI indicator */}
-              <div className="flex items-center mt-3 pt-2 border-t border-border/50 flex-shrink-0">
-                <Sparkles className="h-3 w-3 text-brand-primary mr-1" />
-                <span className="text-xs text-muted-foreground font-medium">
-                  AI Reading Companion
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-heading font-medium text-brand-primary">
+                  Librarium AI
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                  Reading Companion
                 </span>
               </div>
+
+              {/* Message */}
+              {isLoading ? (
+                <LoadingSkeleton />
+              ) : (
+                <blockquote className="text-[15px] leading-relaxed text-foreground/90">
+                  {currentMessage || "Loading your personalized insight..."}
+                </blockquote>
+              )}
+
+              {error && !isLoading && (
+                <p className="mt-3 text-xs text-status-warning flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-status-warning" />
+                  Using cached insight — AI service temporarily unavailable
+                </p>
+              )}
             </div>
           </div>
-        )}
-
-        {error && !isLoading && (
-          <div className="mt-2 text-xs text-status-warning">
-            Using fallback message - AI service temporarily unavailable
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

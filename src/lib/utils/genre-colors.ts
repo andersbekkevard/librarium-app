@@ -1,6 +1,8 @@
 /**
  * Shared utility for consistent genre color mapping across charts
  * Ensures identical colors between pie chart and reading activity chart
+ * 
+ * Color palette inspired by Eden theme - earthy, natural tones
  */
 
 export interface GenreColorMap {
@@ -8,28 +10,29 @@ export interface GenreColorMap {
 }
 
 /**
- * Brand-inspired color palette with better contrast - alternating between light and dark
- * Extracted from the existing pie chart implementation to maintain consistency
+ * Eden-inspired earthy color palette for genres
+ * Uses forest greens, sage, muted blues, and warm accents
+ * Colors from ui_inspo: #5C82B5, #789D72, #526D5E, #FEF3C7, #929291, #3C3B39, #576F63, #729D7E, #244633
  */
 const GENRE_COLOR_PALETTE = [
-	"oklch(0.55 0.25 240)", // Brand primary - vibrant blue (medium)
-	"oklch(0.35 0.12 225)", // Very dark blue-grey (dark)
-	"oklch(0.75 0.18 250)", // Light purple-blue (light)
-	"oklch(0.45 0.15 230)", // Deep blue (medium-dark)
-	"oklch(0.8 0.15 245)", // Very light blue (very light)
-	"oklch(0.4 0.05 220)", // Brand secondary - dark blue-grey (dark)
-	"oklch(0.7 0.2 240)", // Brand accent - light blue (light)
-	"oklch(0.3 0.08 220)", // Almost black blue-grey (very dark)
-	"oklch(0.85 0.1 240)", // Pale blue (very light)
-	"oklch(0.5 0.18 235)", // Darker medium blue (medium)
-	"oklch(0.6 0.08 220)", // Medium blue-grey (medium-dark)
-	"oklch(0.65 0.22 240)", // Medium blue (medium-light)
+	"#244633", // Deep forest green (primary)
+	"#789D72", // Sage green
+	"#5C82B5", // Muted blue
+	"#526D5E", // Dark teal/forest
+	"#729D7E", // Light sage
+	"#576F63", // Muted forest
+	"#8BA888", // Soft sage (derived)
+	"#6B8FA3", // Softer blue (derived)
+	"#3D5C4A", // Medium forest (derived)
+	"#9DB49A", // Pale sage (derived)
+	"#7A9BB0", // Light steel blue (derived)
+	"#4A6B5A", // Forest mid-tone (derived)
 ] as const;
 
 /**
- * Special color for "Unknown" genre - light grey
+ * Special color for "Unknown" genre - warm gray
  */
-const UNKNOWN_GENRE_COLOR = "oklch(0.85 0.01 240)";
+const UNKNOWN_GENRE_COLOR = "#929291";
 
 /**
  * Creates a consistent color mapping for genres

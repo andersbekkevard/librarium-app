@@ -6,7 +6,7 @@ import { Book } from "@/lib/models/models";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { useEventsContext } from "@/lib/providers/EventsProvider";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { useState } from "react";
 import { EditBookSheet } from "../books/EditBookSheet";
@@ -17,8 +17,8 @@ import { BookInfo } from "./BookInfo";
 import { ProgressTracker } from "./ProgressTracker";
 import { ReadingTimeline } from "./ReadingTimeline";
 import { CommentsSection } from "./comments/CommentsSection";
-import { ReviewSection } from "./reviews/ReviewSection";
 import { ReviewDialog } from "./reviews/ReviewDialog";
+import { ReviewSection } from "./reviews/ReviewSection";
 
 interface BookDetailPageProps {
   book: Book;
@@ -37,12 +37,8 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
     calculateBookProgress,
     error,
   } = useBooksContext();
-  const { 
-    addReview,
-    updateReview,
-    getBookReview,
-    reviewsLoading,
-  } = useEventsContext();
+  const { addReview, updateReview, getBookReview, reviewsLoading } =
+    useEventsContext();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isAddReviewDialogOpen, setIsAddReviewDialogOpen] = useState(false);
@@ -103,12 +99,12 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
   const handleAddReview = async (bookId: string, reviewText: string) => {
     await addReview(bookId, reviewText);
-    setReviewRefreshKey(prev => prev + 1);
+    setReviewRefreshKey((prev) => prev + 1);
   };
 
   const handleUpdateReview = async (bookId: string, reviewText: string) => {
     await updateReview(bookId, reviewText);
-    setReviewRefreshKey(prev => prev + 1);
+    setReviewRefreshKey((prev) => prev + 1);
   };
 
   const handleAddReviewClick = () => {
@@ -121,7 +117,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
 
   const handleReviewSaved = () => {
     setIsAddReviewDialogOpen(false);
-    setReviewRefreshKey(prev => prev + 1);
+    setReviewRefreshKey((prev) => prev + 1);
   };
 
   const progress = calculateBookProgress(book);
@@ -135,9 +131,9 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeftIcon className="h-4 w-4" weight="light" />
             Back to Library
           </Button>
         </div>
@@ -168,7 +164,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
               hasExistingReview={!!currentReview}
               isUpdating={isUpdating}
             />
-            
+
             <ReadingTimeline book={book} />
           </div>
 
@@ -190,7 +186,7 @@ export const BookDetailPage: React.FC<BookDetailPageProps> = ({
               review={currentReview}
               onAddReview={handleAddReview}
               onUpdateReview={handleUpdateReview}
-              onReviewUpdated={() => setReviewRefreshKey(prev => prev + 1)}
+              onReviewUpdated={() => setReviewRefreshKey((prev) => prev + 1)}
               isLoading={reviewsLoading}
               error={error?.userMessage || null}
             />

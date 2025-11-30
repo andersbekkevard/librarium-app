@@ -89,7 +89,7 @@ export const ServicesSection = () => {
           >
             <CardHeader className="pb-2">
               <div className="flex justify-between">
-                <CardTitle className="mb-2">{title}</CardTitle>
+                <CardTitle className="mb-2 text-lg">{title}</CardTitle>
                 {pro === ProService.YES && (
                   <Badge
                     variant="secondary"
@@ -109,7 +109,7 @@ export const ServicesSection = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="text-muted-foreground">
+            <CardContent className="text-muted-foreground text-sm">
               {description}
             </CardContent>
           </Card>

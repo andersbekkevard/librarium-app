@@ -1,8 +1,9 @@
+"use client";
+
 import BookCard from "@/components/app/books/BookCard";
 import { Button } from "@/components/ui/button";
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
-import { BookOpen } from "lucide-react";
+import { ArrowRightIcon, BookOpenIcon } from "@phosphor-icons/react";
 
 interface BookSectionProps {
   books: Book[];
@@ -25,27 +26,30 @@ export const BookSection: React.FC<BookSectionProps> = ({
   onViewAll,
   maxBooks,
   className = "",
-  gridClassName = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3",
+  gridClassName = "grid grid-cols-1 md:grid-cols-2 gap-4",
 }) => {
   const filteredBooks = books.filter(filterFunction).slice(0, maxBooks);
 
   return (
     <div className={className}>
-      <div className="bg-card border border-border rounded-lg p-6">
+      <div className="bg-card border border-border rounded-lg p-5 h-full">
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg text-foreground">{title}</h2>
-          {onViewAll && (
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+          {onViewAll && filteredBooks.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              className={`${BRAND_COLORS.primary.text} hover:${BRAND_COLORS.primary.text}`}
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1.5"
               onClick={onViewAll}
             >
               View All
+              <ArrowRightIcon className="h-3.5 w-3.5" weight="light" />
             </Button>
           )}
         </div>
 
+        {/* Content */}
         {filteredBooks.length > 0 ? (
           <div className={gridClassName}>
             {filteredBooks.map((book) => (
@@ -53,9 +57,14 @@ export const BookSection: React.FC<BookSectionProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">{emptyStateMessage}</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <BookOpenIcon
+                className="h-6 w-6 text-muted-foreground"
+                weight="light"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">{emptyStateMessage}</p>
           </div>
         )}
       </div>

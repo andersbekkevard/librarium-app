@@ -1,4 +1,9 @@
-import { BookOpen, Star, TrendingUp, Zap } from "lucide-react";
+import {
+  BookOpenIcon,
+  LightningIcon,
+  StarIcon,
+  TrendUpIcon,
+} from "@phosphor-icons/react";
 import ReadingStreakCard from "./ReadingStreakCard";
 import StatCard from "./StatCard";
 
@@ -24,7 +29,10 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
             {/* Total Books */}
             <div className="text-center p-3 bg-brand-primary/5 rounded-lg">
               <div className="h-10 w-10 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="h-5 w-5 text-brand-primary" />
+                <BookOpenIcon
+                  className="h-5 w-5 text-brand-primary"
+                  weight="light"
+                />
               </div>
               <p className="text-2xl font-bold text-foreground mb-1">
                 {stats.totalBooks}
@@ -37,7 +45,10 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
             {/* Read This Year */}
             <div className="text-center p-3 bg-status-success/5 rounded-lg">
               <div className="h-10 w-10 bg-status-success/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Star className="h-5 w-5 text-status-success fill-current" />
+                <StarIcon
+                  className="h-5 w-5 text-status-success"
+                  weight="fill"
+                />
               </div>
               <p className="text-2xl font-bold text-foreground mb-1">
                 {stats.finishedBooks}
@@ -50,7 +61,10 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
             {/* Pages This Month */}
             <div className="text-center p-3 bg-brand-accent/5 rounded-lg">
               <div className="h-10 w-10 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <TrendingUp className="h-5 w-5 text-brand-accent" />
+                <TrendUpIcon
+                  className="h-5 w-5 text-brand-accent"
+                  weight="light"
+                />
               </div>
               <p className="text-2xl font-bold text-foreground mb-1">
                 {stats.totalPagesRead}
@@ -63,7 +77,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
             {/* Reading Streak */}
             <div className="text-center p-3 bg-gradient-to-br from-brand-primary/10 to-brand-accent/10 rounded-lg">
               <div className="h-10 w-10 bg-gradient-to-br from-brand-primary to-brand-accent rounded-full flex items-center justify-center mx-auto mb-2">
-                <Zap className="h-5 w-5 text-white" />
+                <LightningIcon className="h-5 w-5 text-white" weight="fill" />
               </div>
               <p className="text-2xl font-bold text-foreground mb-1">
                 {stats.readingStreak}
@@ -84,7 +98,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           <StatCard
             title="Total Books"
             value={stats.totalBooks}
-            icon={BookOpen}
+            icon={BookOpenIcon}
             iconColor="text-brand-primary"
             iconBgColor="bg-brand-primary/10"
           />
@@ -92,15 +106,15 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           <StatCard
             title="Read This Year"
             value={stats.finishedBooks}
-            icon={Star}
-            iconColor="text-status-success fill-current"
+            icon={StarIcon}
+            iconColor="text-status-success"
             iconBgColor="bg-status-success/10"
           />
 
           <StatCard
             title="Pages This Month"
             value={stats.totalPagesRead}
-            icon={BookOpen}
+            icon={BookOpenIcon}
             iconColor="text-brand-accent"
             iconBgColor="bg-brand-accent/10"
           />

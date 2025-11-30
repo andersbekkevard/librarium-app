@@ -3,15 +3,15 @@
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useUserContext } from "@/lib/providers/UserProvider";
 import {
-  Activity,
-  ChevronRight,
-  Download,
-  HelpCircle,
-  LogOut,
-  Settings,
-  Shield,
-  User,
-} from "lucide-react";
+  CaretRightIcon,
+  ClockCounterClockwiseIcon,
+  DownloadSimpleIcon,
+  GearIcon,
+  QuestionIcon,
+  ShieldIcon,
+  SignOutIcon,
+  UserIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -67,7 +67,7 @@ export const UserProfileDropdown: React.FC = () => {
     {
       id: "activity",
       label: "Activity History",
-      icon: Activity,
+      icon: ClockCounterClockwiseIcon,
       action: () => handleMenuItemClick("/activity-history"),
       implemented: true,
     },
@@ -77,35 +77,35 @@ export const UserProfileDropdown: React.FC = () => {
     {
       id: "profile",
       label: "Profile Settings",
-      icon: User,
+      icon: UserIcon,
       action: () => handleMenuItemClick(),
       implemented: false,
     },
     {
       id: "account",
       label: "Account Settings",
-      icon: Settings,
+      icon: GearIcon,
       action: () => handleMenuItemClick(),
       implemented: false,
     },
     {
       id: "privacy",
       label: "Privacy Settings",
-      icon: Shield,
+      icon: ShieldIcon,
       action: () => handleMenuItemClick(),
       implemented: false,
     },
     {
       id: "export",
       label: "Export Data",
-      icon: Download,
+      icon: DownloadSimpleIcon,
       action: () => handleMenuItemClick(),
       implemented: false,
     },
     {
       id: "help",
       label: "Help & Support",
-      icon: HelpCircle,
+      icon: QuestionIcon,
       action: () => handleMenuItemClick(),
       implemented: false,
     },
@@ -163,7 +163,7 @@ export const UserProfileDropdown: React.FC = () => {
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            <User className="h-4 w-4 text-muted-foreground" />
+            <UserIcon className="h-4 w-4 text-muted-foreground" weight="light" />
           )}
         </button>
       </div>
@@ -184,7 +184,7 @@ export const UserProfileDropdown: React.FC = () => {
                 />
               ) : (
                 <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center">
-                  <User className="h-5 w-5 text-brand-primary" />
+                  <UserIcon className="h-5 w-5 text-brand-primary" weight="light" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -217,12 +217,18 @@ export const UserProfileDropdown: React.FC = () => {
                   className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-muted/50 transition-colors duration-150 group"
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <Icon
+                      className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors"
+                      weight="light"
+                    />
                     <span className="text-sm font-medium text-foreground">
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100" />
+                  <CaretRightIcon
+                    className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
+                    weight="light"
+                  />
                 </button>
               );
             })}
@@ -246,12 +252,18 @@ export const UserProfileDropdown: React.FC = () => {
                   className="w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 group cursor-default"
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    <Icon
+                      className="h-4 w-4 text-muted-foreground"
+                      weight="light"
+                    />
                     <span className="text-sm font-medium text-muted-foreground">
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0" />
+                  <CaretRightIcon
+                    className="h-3 w-3 text-muted-foreground opacity-0"
+                    weight="light"
+                  />
                 </button>
               );
             })}
@@ -276,7 +288,10 @@ export const UserProfileDropdown: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <LogOut className="h-4 w-4 text-status-error" />
+                  <SignOutIcon
+                    className="h-4 w-4 text-status-error"
+                    weight="light"
+                  />
                   <span className="text-sm font-medium text-status-error">
                     Sign Out
                   </span>

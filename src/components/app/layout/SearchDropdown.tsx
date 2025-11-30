@@ -13,7 +13,7 @@ import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpenIcon, PlusIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -44,16 +44,20 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  
+
   // Use controlled state if provided, otherwise use internal state
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
-  const setIsOpen = useCallback((open: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(open);
-    } else {
-      setInternalIsOpen(open);
-    }
-  }, [onOpenChange]);
+  const isOpen =
+    controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = useCallback(
+    (open: boolean) => {
+      if (onOpenChange) {
+        onOpenChange(open);
+      } else {
+        setInternalIsOpen(open);
+      }
+    },
+    [onOpenChange]
+  );
 
   // Search state management
   const [searchData, setSearchData] = useState<SearchData>({
@@ -155,9 +159,12 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
         // Update cache after state update
         setSearchCache((prev) => ({ ...prev, [trimmedQuery]: results }));
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Check if error is due to cancellation
-        if (error.name === "AbortError" || abortController.signal.aborted) {
+        if (
+          (error as Error).name === "AbortError" ||
+          abortController.signal.aborted
+        ) {
           return;
         }
 
@@ -304,22 +311,25 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     setSearchData({ state: "idle", query: "", results: [] });
   }, [router, searchQuery, setIsOpen]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      // Cancel any in-flight search
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Cancel any in-flight search
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+        if (searchTimeoutRef.current) {
+          clearTimeout(searchTimeoutRef.current);
+        }
+        setIsOpen(false);
+        setSearchQuery("");
+        setSearchData({ state: "idle", query: "", results: [] });
+        currentSearchRef.current = "";
       }
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-      setIsOpen(false);
-      setSearchQuery("");
-      setSearchData({ state: "idle", query: "", results: [] });
-      currentSearchRef.current = "";
-    }
-  }, [setIsOpen]);
+    },
+    [setIsOpen]
+  );
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
@@ -380,7 +390,10 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                             </div>
                           ) : (
                             <div className="w-9 h-12 bg-brand-accent/10 rounded-lg flex items-center justify-center">
-                              <BookOpen className="w-4 h-4 text-brand-accent" />
+                              <BookOpenIcon
+                                className="w-4 h-4 text-brand-accent"
+                                weight="light"
+                              />
                             </div>
                           )}
                         </div>
@@ -413,7 +426,10 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                       >
                         <div className="flex-shrink-0">
                           <div className="w-9 h-9 rounded-xl bg-brand-primary flex items-center justify-center">
-                            <Plus className="w-4 h-4 text-white" />
+                            <PlusIcon
+                              className="w-4 h-4 text-white"
+                              weight="bold"
+                            />
                           </div>
                         </div>
                         <div className="flex-1">

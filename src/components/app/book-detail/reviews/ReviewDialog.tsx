@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Book, BookReview, validateReview } from "@/lib/models/models";
 import { BRAND_COLORS, STATUS_COLORS } from "@/lib/design/colors";
-import { Loader2 } from "lucide-react";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 
 interface ReviewDialogProps {
   book: Book;
@@ -62,7 +62,7 @@ export const ReviewDialog: React.FC<ReviewDialogProps> = ({
       setTimeout(() => {
         onReviewSaved();
       }, 1000);
-    } catch (error) {
+    } catch {
       setLocalError("Failed to save review. Please try again.");
     } finally {
       setIsLoading(false);
@@ -166,7 +166,7 @@ export const ReviewDialog: React.FC<ReviewDialogProps> = ({
               className={`${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover}`}
             >
               {(isLoading || isSubmitting) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <CircleNotchIcon className="mr-2 h-4 w-4 animate-spin" weight="bold" />
               )}
               {isEditing ? "Update Review" : "Save Review"}
             </Button>

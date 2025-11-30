@@ -51,7 +51,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
       {/* Timeline blob */}
       <div className="relative z-10 flex-shrink-0">
-        <div className="w-8 h-8 bg-background border-2 border-border rounded-full flex items-center justify-center shadow-sm">
+        <div className="w-8 h-8 bg-input border-2 border-border rounded-full flex items-center justify-center dark:bg-input/30">
           <div className="w-3 h-3 bg-brand-primary rounded-full" />
         </div>
       </div>
@@ -59,28 +59,28 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       {/* Comment content */}
       <div className="flex-1 min-w-0 pb-6">
         {/* Comment text */}
-        <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+        <div className="bg-input border border-border rounded-xl p-4 dark:bg-input/30">
           <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
             {comment.text}
           </p>
         </div>
 
         {/* Comment metadata */}
-        <div className="flex items-center gap-3 mt-2">
+        <div className="flex flex-wrap items-center gap-3 mt-3 px-1">
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(comment.timestamp.toDate(), {
               addSuffix: true,
             })}
           </span>
 
-          <span className="text-xs text-muted-foreground/60">•</span>
+          <span className="text-xs text-muted-foreground/40">•</span>
 
           <span className="text-xs text-muted-foreground">
             {formatPageDisplay(comment.currentPage, comment.readingState)}
           </span>
 
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStateColor(
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStateColor(
               comment.readingState
             )}`}
           >

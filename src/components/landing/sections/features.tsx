@@ -112,10 +112,10 @@ export const FeaturesSection = () => {
                   <div className={BRAND_COLORS.primary.text}>{icon}</div>
                 </div>
 
-                <CardTitle className="text-center">{title}</CardTitle>
+                <CardTitle className="text-center text-lg">{title}</CardTitle>
               </CardHeader>
 
-              <CardContent className="text-muted-foreground text-center">
+              <CardContent className="text-muted-foreground text-center text-sm">
                 {description}
               </CardContent>
             </Card>
