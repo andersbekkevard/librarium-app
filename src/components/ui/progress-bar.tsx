@@ -5,13 +5,15 @@ import { cn } from "@/lib/utils/utils";
 interface ProgressBarProps {
   value: number;
   className?: string;
-  variant?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg";
+  color?: "primary" | "accent" | "success";
 }
 
 export const ProgressBar = ({
   value,
   className,
-  variant = "sm",
+  size = "sm",
+  color = "accent",
 }: ProgressBarProps) => {
   const heightClasses = {
     sm: "h-1.5", // 6px - original size used in BookCard and BookListItem
@@ -19,13 +21,27 @@ export const ProgressBar = ({
     lg: "h-3", // 12px - larger variant for future use
   };
 
-  const height = heightClasses[variant];
+  const colorClasses = {
+    primary: "bg-brand-primary",
+    accent: "bg-brand-accent",
+    success: "bg-status-success",
+  };
+
+  const height = heightClasses[size];
+  const barColor = colorClasses[color];
 
   return (
-    <div className={cn("w-full bg-muted rounded-full", height, className)}>
+    <div
+      className={cn(
+        "w-full bg-muted rounded-full overflow-hidden",
+        height,
+        className
+      )}
+    >
       <div
         className={cn(
-          "bg-brand-primary rounded-full transition-all duration-300",
+          "rounded-full transition-all duration-300 ease-out",
+          barColor,
           height
         )}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}

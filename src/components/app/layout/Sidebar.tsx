@@ -1,23 +1,32 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { BRAND_COLORS } from "@/lib/design/colors";
-import { BarChart3, BookOpen, Home, Plus, Target, Users } from "lucide-react";
+import {
+  BarChart3,
+  BookOpen,
+  Home,
+  Plus,
+  Settings,
+  Target,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   onAddBookClick?: () => void;
   onNavigate?: () => void;
-  customColors?: {
-    active: string;
-    hover: string;
-    text: string;
-    border: string;
-  };
 }
 
-const sidebarItems = [
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  href: string;
+  disabled?: boolean;
+}
+
+const sidebarItems: SidebarItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, href: "/dashboard" },
   { id: "library", label: "My Library", icon: BookOpen, href: "/library" },
   {
@@ -31,25 +40,21 @@ const sidebarItems = [
     label: "Reading Goals",
     icon: Target,
     href: "/progress",
-    customColors: {
-      inactive: "text-muted-foreground",
-      active: `${BRAND_COLORS.primary.bgLight} ${BRAND_COLORS.primary.bgLightDark} ${BRAND_COLORS.primary.text} ${BRAND_COLORS.primary.border} border-l-4`,
-    },
+    disabled: true,
   },
   {
     id: "shared",
     label: "Shared Books",
     icon: Users,
     href: "/shared",
-    customColors: {
-      inactive: "text-muted-foreground",
-      active: `${BRAND_COLORS.primary.bgLight} ${BRAND_COLORS.primary.bgLightDark} ${BRAND_COLORS.primary.text} ${BRAND_COLORS.primary.border} border-l-4`,
-    },
+    disabled: true,
   },
-  //   { id: "wishlist", label: "Wishlist", icon: Heart, href: "/wishlist" },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  onAddBookClick,
+  onNavigate,
+}) => {
   const pathname = usePathname();
 
   const handleAddBook = () => {
@@ -61,66 +66,65 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick, onNavigate }) 
     return pathname === href;
   };
 
-  const getItemColors = (item: any, isActive: boolean) => {
-    if (isActive) {
-      return (
-        item.customColors?.active ||
-        `${BRAND_COLORS.primary.bgLight} ${BRAND_COLORS.primary.bgLightDark} ${BRAND_COLORS.primary.text} ${BRAND_COLORS.primary.border} border-l-4`
-      );
-    }
-    return item.customColors?.inactive || "text-foreground hover:bg-muted";
-  };
-
   return (
-    <div className="w-64 h-full bg-background border-r border-border flex flex-col">
+    <div className="w-64 h-full bg-background border-r border-border/60 flex flex-col">
       {/* Add Book Button */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border/60">
         <Button
           onClick={handleAddBook}
-          className={`w-full ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-primary-foreground border-0`}
-          size="sm"
+          variant="eden"
+          className="w-full"
+          size="default"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4" />
           Add Book
         </Button>
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 px-4 py-4 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-1">
-          {sidebarItems.map((item, idx) => {
+          {sidebarItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActiveItem(item.href);
-
-            // Insert separator and label before 'progress' (Reading Goals)
             const isBeforeProgress = item.id === "progress";
 
             return (
               <div key={item.id}>
                 {isBeforeProgress && (
-                  <li
-                    aria-hidden="true"
-                    className="my-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-xs text-muted-foreground select-none uppercase tracking-wider">
+                  <li aria-hidden="true" className="my-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-px bg-border/60" />
+                      <span className="text-xs text-muted-foreground select-none uppercase tracking-wider font-medium">
                         Coming Soon
                       </span>
-                      <div className="flex-1 h-px bg-border" />
+                      <div className="flex-1 h-px bg-border/60" />
                     </div>
                   </li>
                 )}
                 <li>
                   <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${getItemColors(
-                      item,
-                      isActive
-                    )}`}
+                    href={item.disabled ? "#" : item.href}
+                    onClick={
+                      item.disabled ? (e) => e.preventDefault() : onNavigate
+                    }
+                    aria-disabled={item.disabled}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                      ${
+                        isActive
+                          ? "bg-brand-primary/10 text-brand-primary border-l-4 border-brand-primary -ml-0.5 pl-[10px]"
+                          : item.disabled
+                          ? "text-muted-foreground/60 cursor-not-allowed"
+                          : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                      }
+                    `}
                   >
-                    <Icon className="h-4 w-4 mr-3" />
+                    <Icon
+                      className={`h-4 w-4 ${
+                        isActive ? "text-brand-accent" : ""
+                      }`}
+                    />
                     {item.label}
                   </Link>
                 </li>
@@ -131,14 +135,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddBookClick, onNavigate }) 
       </nav>
 
       {/* Settings */}
-      <div className="p-4 border-t border-border mt-auto">
+      <div className="p-3 border-t border-border/60 mt-auto">
         <Link
           href="/settings"
           onClick={onNavigate}
-          className="w-full flex items-center px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-xl transition-all duration-200"
         >
-          <div className="w-6 h-6 bg-muted-foreground rounded-full flex items-center justify-center mr-3">
-            <span className="text-xs text-white font-medium">N</span>
+          <div className="w-7 h-7 bg-brand-secondary rounded-lg flex items-center justify-center">
+            <Settings className="h-4 w-4 text-white" />
           </div>
           Settings
         </Link>

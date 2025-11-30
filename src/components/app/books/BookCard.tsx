@@ -37,7 +37,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-border/80 bg-card/50 hover:bg-card border-border/40",
+        "overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-brand-accent/30 bg-card border-border/50",
         // Mobile/tablet responsive dimensions with increased height for better content fit
         "h-44 md:h-48 w-full max-w-sm md:max-w-md",
         // Desktop: restore original height but allow full width in grid
@@ -58,7 +58,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
       <CardContent className="px-4 h-full flex gap-4">
         {/* Book Cover - Responsive width, desktop uses original w-24 */}
         <div className="flex-shrink-0 w-20 md:w-24 lg:w-24">
-          <div className="w-full h-full rounded-md overflow-hidden bg-muted border border-border/20 shadow-sm relative">
+          <div className="w-full h-full rounded-xl overflow-hidden bg-muted border border-border/30 shadow-sm relative">
             {book.coverImage ? (
               <Image
                 src={book.coverImage}
@@ -68,8 +68,8 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
                 sizes="(max-width: 768px) 80px, 96px"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-muted-foreground" />
+              <div className="w-full h-full flex items-center justify-center bg-brand-accent/10">
+                <BookOpen className="h-8 w-8 text-brand-accent" />
               </div>
             )}
           </div>
@@ -79,7 +79,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
         <div className="flex-1 flex flex-col justify-between min-w-0">
           {/* Title and Author */}
           <div className="space-y-1.5">
-            <h3 className="font-semibold text-foreground text-sm md:text-base leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
+            <h3 className="font-semibold text-foreground text-sm md:text-base leading-tight line-clamp-2 transition-colors">
               {book.title}
             </h3>
             <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">
@@ -104,11 +104,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBookClick }) => {
                       {book.progress.currentPage} / {book.progress.totalPages}{" "}
                       pages
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs font-medium text-brand-primary">
                       {progress}%
                     </span>
                   </div>
-                  <ProgressBar value={progress} />
+                  <ProgressBar value={progress} color="accent" />
                 </div>
               )}
 

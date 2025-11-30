@@ -5,7 +5,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  "inline-flex items-center justify-center rounded-full border px-2.5 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-all duration-200 overflow-hidden",
   {
     variants: {
       variant: {
@@ -16,7 +16,16 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+          "text-foreground border-border [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // Eden-specific variants
+        eden: "border-transparent bg-brand-primary text-white",
+        "eden-soft":
+          "border-brand-accent/30 bg-brand-accent/10 text-brand-primary",
+        "coming-soon":
+          "border-brand-accent/40 bg-brand-accent/15 text-brand-secondary font-medium",
+        success: "border-transparent bg-status-success/15 text-status-success",
+        warning: "border-transparent bg-status-warning/15 text-status-warning",
+        info: "border-transparent bg-status-info/15 text-status-info",
       },
     },
     defaultVariants: {

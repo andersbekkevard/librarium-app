@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils/utils";
 import * as React from "react";
 
 interface GenreBadgeProps {
@@ -10,9 +11,10 @@ export const GenreBadge: React.FC<GenreBadgeProps> = ({ genre, className }) => {
   return (
     <Badge
       variant="outline"
-      className={`text-xs px-2 py-0.5 bg-muted/40 text-muted-foreground border ${
-        className || ""
-      } border-black/20	`}
+      className={cn(
+        "text-xs px-2.5 py-0.5 bg-muted/60 text-muted-foreground border-border/60",
+        className
+      )}
     >
       {genre}
     </Badge>

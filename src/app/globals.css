@@ -54,118 +54,149 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  
+  /* Eden Light Mode - Warm, elegant library aesthetic */
+  --background: oklch(0.995 0.002 100); /* Warm white */
+  --foreground: oklch(0.25 0.02 50); /* Warm dark charcoal #3C3B39 */
+  --card: oklch(0.995 0.002 100); /* Warm white */
+  --card-foreground: oklch(0.25 0.02 50);
+  --popover: oklch(1 0 0); /* Pure white for popovers */
+  --popover-foreground: oklch(0.25 0.02 50);
+  
+  /* Primary - Dark Forest Green #244633 */
+  --primary: oklch(0.32 0.06 155);
+  --primary-foreground: oklch(0.99 0 0);
+  
+  /* Secondary - Light sage surfaces */
+  --secondary: oklch(0.965 0.01 145); /* Very light sage */
+  --secondary-foreground: oklch(0.32 0.06 155);
+  
+  /* Muted - Warm off-white #F8F8F6 */
+  --muted: oklch(0.975 0.003 100);
+  --muted-foreground: oklch(0.55 0.01 50); /* Warm gray #929291 */
+  
+  /* Accent - Light sage for hover states */
+  --accent: oklch(0.955 0.015 145);
+  --accent-foreground: oklch(0.32 0.06 155);
+  
+  --destructive: oklch(0.577 0.2 25);
+  
+  /* Borders - Soft warm gray #E8E8E6 */
+  --border: oklch(0.925 0.003 100);
+  --input: oklch(0.965 0.005 100); /* Light cream input bg */
+  --ring: oklch(0.62 0.08 145); /* Sage green focus ring */
+  
+  /* Charts - Eden green palette */
+  --chart-1: oklch(0.32 0.06 155); /* Dark forest */
+  --chart-2: oklch(0.62 0.08 145); /* Sage green */
+  --chart-3: oklch(0.46 0.05 160); /* Forest green */
+  --chart-4: oklch(0.72 0.06 145); /* Light sage */
+  --chart-5: oklch(0.58 0.09 245); /* Muted blue accent */
+  
+  /* Sidebar */
+  --sidebar: oklch(0.995 0.002 100);
+  --sidebar-foreground: oklch(0.25 0.02 50);
+  --sidebar-primary: oklch(0.32 0.06 155);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.955 0.015 145);
+  --sidebar-accent-foreground: oklch(0.32 0.06 155);
+  --sidebar-border: oklch(0.925 0.003 100);
+  --sidebar-ring: oklch(0.62 0.08 145);
 
-  /* Brand Colors - Easily replaceable */
-  --brand-primary: oklch(0.55 0.25 240); /* Vibrant blue */
-  --brand-primary-hover: oklch(0.45 0.22 240); /* Darker vibrant blue */
-  --brand-secondary: oklch(0.4 0.05 220); /* Dark blue-grey */
-  --brand-secondary-hover: oklch(0.35 0.04 220); /* Darker blue-grey */
-  --brand-accent: oklch(0.7 0.2 240); /* Light vibrant blue accent */
-  --brand-accent-hover: oklch(0.6 0.18 240); /* Darker light blue */
+  /* Brand Colors - Eden Green Palette */
+  --brand-primary: oklch(0.32 0.06 155); /* Dark forest green #244633 */
+  --brand-primary-hover: oklch(0.28 0.05 155); /* Darker forest */
+  --brand-secondary: oklch(0.46 0.05 160); /* Forest green #526D5E */
+  --brand-secondary-hover: oklch(0.40 0.05 160); /* Darker forest green */
+  --brand-accent: oklch(0.62 0.08 145); /* Sage green #789D72 */
+  --brand-accent-hover: oklch(0.56 0.07 145); /* Darker sage */
 
   /* Status Colors */
-  --status-success: oklch(0.7 0.15 142.5); /* Green */
-  --status-warning: oklch(0.8 0.15 85); /* Yellow */
-  --status-error: oklch(0.65 0.2 25); /* Red */
-  --status-info: oklch(0.7 0.15 220); /* Blue */
+  --status-success: oklch(0.62 0.10 145); /* Sage green */
+  --status-warning: oklch(0.85 0.12 85); /* Warm amber */
+  --status-error: oklch(0.60 0.18 25); /* Muted red */
+  --status-info: oklch(0.58 0.09 245); /* Muted blue #5C82B5 */
   
-  /* Reading State Colors */
-  --reading-finished-bg: oklch(0.94 0.05 142.5);
-  --reading-finished-text: oklch(0.36 0.12 142.5);
-  --reading-finished-border: oklch(0.85 0.08 142.5);
-  --reading-in-progress-bg: oklch(0.55 0.25 240 / 0.1);
-  --reading-in-progress-text: oklch(0.55 0.25 240);
-  --reading-in-progress-border: oklch(0.55 0.25 240);
+  /* Reading State Colors - Green themed */
+  --reading-finished-bg: oklch(0.94 0.03 145);
+  --reading-finished-text: oklch(0.32 0.06 155);
+  --reading-finished-border: oklch(0.85 0.05 145);
+  --reading-in-progress-bg: oklch(0.32 0.06 155 / 0.1);
+  --reading-in-progress-text: oklch(0.32 0.06 155);
+  --reading-in-progress-border: oklch(0.32 0.06 155);
 }
 
 .dark {
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.15 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.15 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.15 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 20%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.15 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  /* Eden Dark Mode - Elegant dark library aesthetic */
+  --background: oklch(0.12 0.01 155); /* Very dark with green tint */
+  --foreground: oklch(0.95 0.005 100); /* Warm off-white text */
+  --card: oklch(0.16 0.01 155); /* Slightly lighter dark green */
+  --card-foreground: oklch(0.95 0.005 100);
+  --popover: oklch(0.14 0.01 155);
+  --popover-foreground: oklch(0.95 0.005 100);
+  
+  /* Primary - Lighter forest green for dark mode visibility */
+  --primary: oklch(0.62 0.08 145); /* Sage green as primary */
+  --primary-foreground: oklch(0.12 0.01 155);
+  
+  /* Secondary */
+  --secondary: oklch(0.20 0.015 155);
+  --secondary-foreground: oklch(0.92 0.005 100);
+  
+  /* Muted */
+  --muted: oklch(0.20 0.01 155);
+  --muted-foreground: oklch(0.65 0.01 100);
+  
+  /* Accent */
+  --accent: oklch(0.22 0.02 155);
+  --accent-foreground: oklch(0.92 0.005 100);
+  
+  --destructive: oklch(0.65 0.18 25);
+  
+  /* Borders */
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 8%);
+  --ring: oklch(0.62 0.08 145);
+  
+  /* Charts - Eden green palette for dark mode */
+  --chart-1: oklch(0.62 0.08 145); /* Sage green */
+  --chart-2: oklch(0.72 0.06 145); /* Light sage */
+  --chart-3: oklch(0.55 0.06 160); /* Forest green */
+  --chart-4: oklch(0.80 0.05 145); /* Very light sage */
+  --chart-5: oklch(0.68 0.08 245); /* Muted blue accent */
+  
+  /* Sidebar */
+  --sidebar: oklch(0.12 0.01 155);
+  --sidebar-foreground: oklch(0.95 0.005 100);
+  --sidebar-primary: oklch(0.62 0.08 145);
+  --sidebar-primary-foreground: oklch(0.12 0.01 155);
+  --sidebar-accent: oklch(0.22 0.02 155);
+  --sidebar-accent-foreground: oklch(0.92 0.005 100);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.62 0.08 145);
 
   /* Brand Colors - Dark mode variants */
-  --brand-primary: oklch(
-    0.7 0.25 240
-  ); /* Brighter vibrant blue for dark mode */
-  --brand-primary-hover: oklch(0.6 0.22 240); /* Darker blue */
-  --brand-secondary: oklch(0.6 0.05 220); /* Lighter blue-grey for dark mode */
-  --brand-secondary-hover: oklch(0.55 0.04 220); /* Darker blue-grey */
-  --brand-accent: oklch(0.8 0.2 240); /* Brighter light blue for dark mode */
-  --brand-accent-hover: oklch(0.75 0.18 240); /* Darker light blue */
+  --brand-primary: oklch(0.62 0.08 145); /* Sage green for visibility */
+  --brand-primary-hover: oklch(0.55 0.07 145);
+  --brand-secondary: oklch(0.55 0.06 160); /* Forest green */
+  --brand-secondary-hover: oklch(0.50 0.05 160);
+  --brand-accent: oklch(0.72 0.06 145); /* Light sage */
+  --brand-accent-hover: oklch(0.65 0.06 145);
 
   /* Status Colors - Dark mode variants */
-  --status-success: oklch(0.8 0.15 142.5); /* Brighter green */
-  --status-warning: oklch(0.85 0.15 85); /* Brighter yellow */
-  --status-error: oklch(0.75 0.2 25); /* Brighter red */
-  --status-info: oklch(0.8 0.15 220); /* Brighter blue */
+  --status-success: oklch(0.72 0.08 145); /* Brighter sage */
+  --status-warning: oklch(0.85 0.12 85); /* Warm amber */
+  --status-error: oklch(0.70 0.16 25); /* Softer red */
+  --status-info: oklch(0.68 0.08 245); /* Brighter muted blue */
 
   /* Reading State Colors - Dark mode variants */
-  --reading-finished-bg: oklch(0.2 0.08 142.5);
-  --reading-finished-text: oklch(0.85 0.1 142.5);
-  --reading-finished-border: oklch(0.3 0.1 142.5);
-  --reading-in-progress-bg: oklch(0.7 0.25 240 / 0.15);
-  --reading-in-progress-text: oklch(0.7 0.25 240);
-  --reading-in-progress-border: oklch(0.7 0.25 240);
+  --reading-finished-bg: oklch(0.25 0.04 145);
+  --reading-finished-text: oklch(0.80 0.06 145);
+  --reading-finished-border: oklch(0.35 0.05 145);
+  --reading-in-progress-bg: oklch(0.62 0.08 145 / 0.15);
+  --reading-in-progress-text: oklch(0.72 0.06 145);
+  --reading-in-progress-border: oklch(0.62 0.08 145);
 }
 
 @layer base {

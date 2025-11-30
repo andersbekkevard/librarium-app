@@ -10,7 +10,6 @@ import {
   CommandLoading,
 } from "@/components/ui/command";
 import { ReadingStateBadge } from "@/components/ui/reading-state-badge";
-import { BRAND_COLORS } from "@/lib/design/colors";
 import { Book } from "@/lib/models/models";
 import { useBooksContext } from "@/lib/providers/BooksProvider";
 import { cn } from "@/lib/utils/utils";
@@ -326,7 +325,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
     <div ref={rootRef} className={cn("relative w-full", className)}>
       <Command
         onKeyDown={handleKeyDown}
-        className="rounded-lg border border-border bg-popover shadow-md"
+        className="rounded-xl border border-border/60 bg-popover shadow-sm"
         shouldFilter={false}
       >
         <CommandInput
@@ -334,21 +333,16 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           placeholder={placeholder}
           value={searchQuery}
           onValueChange={handleInputChange}
-          className="h-10"
+          className="h-11"
         />
 
         {isOpen && (
-          <CommandList className="absolute top-full left-0 right-0 md:absolute md:left-0 md:right-0 max-md:fixed max-md:left-12 max-md:right-12 max-md:top-[3.5rem] max-h-[400px] overflow-y-auto border border-border bg-popover shadow-lg rounded-b-lg z-50">
+          <CommandList className="absolute top-full left-0 right-0 md:absolute md:left-0 md:right-0 max-md:fixed max-md:left-12 max-md:right-12 max-md:top-[3.5rem] max-h-[400px] overflow-y-auto border border-border/60 bg-popover shadow-xl rounded-b-2xl z-50">
             {/* Show CMDK loading state while searching */}
             {searchData.state === "searching" && (
               <CommandLoading>
                 <div className="flex items-center justify-center p-6">
-                  <div
-                    className={cn(
-                      "animate-spin rounded-full h-5 w-5 border-b-2",
-                      BRAND_COLORS.primary.border
-                    )}
-                  ></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-brand-accent border-t-transparent"></div>
                   <span className="ml-3 text-sm text-muted-foreground">
                     Searching your library...
                   </span>
@@ -375,18 +369,18 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                       >
                         <div className="flex-shrink-0">
                           {book.coverImage ? (
-                            <div className="w-8 h-10 bg-muted rounded relative overflow-hidden">
+                            <div className="w-9 h-12 bg-muted rounded-lg relative overflow-hidden">
                               <Image
                                 src={book.coverImage}
                                 alt={book.title}
                                 fill
                                 className="object-cover"
-                                sizes="32px"
+                                sizes="36px"
                               />
                             </div>
                           ) : (
-                            <div className="w-8 h-10 bg-muted rounded flex items-center justify-center">
-                              <BookOpen className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-9 h-12 bg-brand-accent/10 rounded-lg flex items-center justify-center">
+                              <BookOpen className="w-4 h-4 text-brand-accent" />
                             </div>
                           )}
                         </div>
@@ -415,15 +409,10 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                     <CommandGroup>
                       <CommandItem
                         onSelect={handleAddBookSelect}
-                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent"
+                        className="flex items-center gap-3 p-3 cursor-pointer"
                       >
                         <div className="flex-shrink-0">
-                          <div
-                            className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center",
-                              BRAND_COLORS.primary.bg
-                            )}
-                          >
+                          <div className="w-9 h-9 rounded-xl bg-brand-primary flex items-center justify-center">
                             <Plus className="w-4 h-4 text-white" />
                           </div>
                         </div>

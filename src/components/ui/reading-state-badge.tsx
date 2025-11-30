@@ -27,8 +27,7 @@ const READING_STATE_CONFIG: Record<
     classes: cn(
       READING_STATE_COLORS.not_started.bg,
       READING_STATE_COLORS.not_started.text,
-      READING_STATE_COLORS.not_started.border,
-      "border"
+      "border-transparent"
     ),
     testId: "clock-icon",
   },
@@ -38,8 +37,7 @@ const READING_STATE_CONFIG: Record<
     classes: cn(
       READING_STATE_COLORS.in_progress.bg,
       READING_STATE_COLORS.in_progress.text,
-      READING_STATE_COLORS.in_progress.border,
-      "border"
+      "border-transparent"
     ),
     testId: "play-icon",
   },
@@ -49,8 +47,7 @@ const READING_STATE_CONFIG: Record<
     classes: cn(
       READING_STATE_COLORS.finished.bg,
       READING_STATE_COLORS.finished.text,
-      READING_STATE_COLORS.finished.border,
-      "border"
+      "border-transparent"
     ),
     testId: "check-circle-icon",
   },
@@ -62,8 +59,7 @@ const UNKNOWN_STATE_CONFIG: BadgeConfig & { testId: string } = {
   classes: cn(
     READING_STATE_COLORS.not_started.bg,
     READING_STATE_COLORS.not_started.text,
-    READING_STATE_COLORS.not_started.border,
-    "border"
+    "border-transparent"
   ),
   testId: "unknown-icon",
 };

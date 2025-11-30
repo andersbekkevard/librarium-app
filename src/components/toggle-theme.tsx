@@ -7,18 +7,13 @@ export const ToggleTheme = () => {
   return (
     <Button
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      size="sm"
+      size="icon-sm"
       variant="ghost"
-      className="w-9 h-9 p-0"
+      className="text-muted-foreground hover:text-foreground hover:bg-accent"
+      aria-label="Toggle theme"
     >
-      <div className="flex gap-2 dark:hidden">
-        <Moon className="size-5" />
-      </div>
-
-      <div className="dark:flex gap-2 hidden">
-        <Sun className="size-5" />
-      </div>
-
+      <Moon className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Sun className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
